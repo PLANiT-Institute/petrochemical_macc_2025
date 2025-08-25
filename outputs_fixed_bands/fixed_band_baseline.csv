@@ -1,0 +1,10 @@
+Band_Key,TechGroup,Band,Baseline_Activity_kt,Baseline_Emission_Intensity_tCO2_per_t,Baseline_Emissions_tCO2,SEC_GJ_per_t,Process_Description,Primary_Energy_Source
+NCC_HT,NCC,HT,3500,2.85,9975000.0,28.5,Pyrolysis furnace (800°C+),Natural gas/fuel oil
+NCC_MT,NCC,MT,2800,1.23,3444000.0,12.3,Distillation/reboilers (150-400°C),Steam/fuel gas
+NCC_LT,NCC,LT,1200,0.65,780000.0,8.7,Compression/refrigeration,Electricity
+BTX_HT,BTX,HT,1200,1.52,1824000.0,15.2,Catalytic reforming furnace,Natural gas
+BTX_MT,BTX,MT,800,0.89,712000.0,8.9,Separation columns,Steam
+BTX_LT,BTX,LT,1100,0.48,528000.0,6.4,Product compression,Electricity
+C4_HT,C4,HT,450,2.21,994500.0,22.1,Butadiene extraction,Fuel gas
+C4_MT,C4,MT,350,0.98,343000.0,9.8,C4 fractionation,Steam
+C4_LT,C4,LT,200,0.54,108000.0,7.2,Product cooling,Electricity

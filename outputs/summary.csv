@@ -1,0 +1,5 @@
+﻿Year,Baseline_MtCO2e,Target_MtCO2e,Required_Abatement_MtCO2,Achieved_Abatement_MtCO2,Shortfall_MtCO2,Solver,Status
+2023,50.0,50.0,0.0,0.0,0.0,glpk,optimal
+2030,50.0,40.0,10.0,10.0,0.0,glpk,optimal
+2040,50.0,25.0,25.0,28.0,0.0,glpk,optimal
+2050,50.0,10.0,40.0,40.0,0.0,glpk,optimal

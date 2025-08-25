@@ -51,12 +51,12 @@ def build_model(years, baseline_mt, target_map, tech_ids, params, groups, depend
 
     # Constraints
     def stock_rule(m,i,t):
-        alive = [tau for tau in years if (tau <= t and (t - tau) < m.life[i])]
+        alive = [tau for tau in years if (tau <= t and (t - tau) < life_map[i])]
         return m.share[i,t] == sum(m.build[i,tau] for tau in alive)
     m.Stock = Constraint(m.TECHS, m.YEARS, rule=stock_rule)
 
     def start_rule(m,i,t):
-        if t < m.start[i]:
+        if t < start_map[i]:
             return m.build[i,t] == 0
         return Constraint.Skip
     m.Start = Constraint(m.TECHS, m.YEARS, rule=start_rule)

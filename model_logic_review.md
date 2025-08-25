@@ -1,0 +1,108 @@
+# MACC Model Logic Review and Corrections
+
+## Current Issues Identified
+
+### 1. Unit Inconsistencies
+- **Problem**: Mixed capacity vs throughput units
+- **Impact**: Incorrect cost calculations and constraint formulations
+
+### 2. Technology Implementation Logic
+- **Problem**: No clear distinction between capacity deployment and production throughput
+- **Impact**: Abatement calculations don't reflect actual technology implementation
+
+### 3. Scale Unit Confusion
+- **Problem**: CAPEX costs not properly scaled to deployment decisions
+- **Impact**: Unrealistic cost estimates
+
+## Proposed Corrected Model Structure
+
+### Core Principle: Separate Capacity and Production
+
+**Key Variables:**
+1. `capacity_installed[tech, year]` - New capacity installed (kt/year processing capacity)
+2. `capacity_total[tech, year]` - Total available capacity (kt/year) 
+3. `production[tech, year]` - Actual production using this technology (kt/year)
+
+### Technology Types and Units
+
+#### Transition Technologies (Band Upgrades)
+```
+CAPEX: Million USD per kt/year of capacity upgraded
+OPEX: USD per tonne of production using upgraded technology
+Abatement: tCO2 per tonne of production (compared to baseline band)
+Deployment Unit: kt/year capacity converted from FromBand to ToBand
+```
+
+#### Alternative Technologies (New Processes)
+```  
+CAPEX: Million USD per kt/year of new capacity built
+OPEX: USD per tonne of production using new technology
+Abatement: tCO2 per tonne of production (compared to baseline process)
+Deployment Unit: kt/year new capacity built
+```
+
+### Corrected Mathematical Formulation
+
+#### Decision Variables
+- `install[tech, year]` ∈ [0, +∞) - New capacity installed (kt/year)
+- `capacity[tech, year]` ∈ [0, +∞) - Total capacity available (kt/year)
+- `production[tech, year]` ∈ [0, +∞) - Production using this technology (kt/year)
+
+#### Key Constraints
+1. **Capacity Evolution**: 
+   ```
+   capacity[tech, year] = sum(install[tech, tau] for tau in active_years[tech, year])
+   ```
+   where active_years considers technology lifetime
+
+2. **Production Limits**:
+   ```
+   production[tech, year] <= capacity[tech, year]
+   ```
+
+3. **Process Mass Balance** (for transitions):
+   ```
+   sum(production[tech, year] for tech in process_techs) <= baseline_production[process]
+   ```
+
+4. **Abatement Calculation**:
+   ```
+   abatement[tech, year] = production[tech, year] * abatement_factor[tech] * 1000
+   ```
+
+5. **Cost Calculation**:
+   ```
+   annual_capex[tech, year] = install[tech, year] * capex_per_kt[tech] * CRF[tech]
+   annual_opex[tech, year] = production[tech, year] * opex_per_t[tech] * 1000
+   ```
+
+### Implementation Scale Units
+
+#### For Transition Technologies:
+- **Scale**: Capacity conversion from existing bands
+- **Base**: Existing production capacity in source band
+- **Constraint**: Cannot convert more capacity than exists in source band
+- **Cost**: Applied to capacity converted (install variable)
+- **Abatement**: Applied to production through converted capacity
+
+#### For Alternative Technologies:  
+- **Scale**: New capacity construction
+- **Base**: Market penetration limits vs total process production
+- **Constraint**: Cannot build more than market allows
+- **Cost**: Applied to new capacity built (install variable)
+- **Abatement**: Applied to production through new capacity
+
+## Benefits of Corrected Approach
+
+1. **Clear Unit Consistency**: All costs, capacities, and production in consistent units
+2. **Realistic Technology Implementation**: Separates investment decisions from operational decisions  
+3. **Proper Scale Representation**: Technology deployment reflects actual industrial implementation
+4. **Accurate Costing**: CAPEX applied to capacity decisions, OPEX to production decisions
+5. **Better Constraints**: Mass balance and capacity limits properly enforced
+
+## Next Steps
+
+1. Implement corrected model formulation
+2. Update data structure to support proper units
+3. Validate with simplified test case
+4. Verify unit consistency throughout model chain

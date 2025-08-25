@@ -50,9 +50,9 @@ def main(excel, years, allow_slack, no_slack, slack_penalty, discount_rate, ramp
                 "Build_share": float(m.build[i,y].value or 0.0),
                 "Share": float(m.share[i,y].value or 0.0),
                 "Abatement_tCO2": float(m.abate[i,y].value or 0.0),
-                "Activity": float(m.activity[i,y]),
-                "Cap": float(m.cap[i,y]),
-                "Abate_per_activity": float(m.abat[i,y])
+                "Activity": float(m.activity[i,y].value),
+                "Cap": float(m.cap[i,y].value),
+                "Abate_per_activity": float(m.abat[i,y].value)
             })
         df = pd.DataFrame(rows).sort_values(["Year","TechID"])
         df.to_csv(os.path.join("outputs", f"plan_{y}.csv"), index=False, encoding="utf-8-sig")

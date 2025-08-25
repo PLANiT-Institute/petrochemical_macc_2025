@@ -1,0 +1,279 @@
+Year,TechID,TechGroup,Band,Technology_Category,Commercial_Year,Years_Since_Commercial,Technology_Maturity,Annual_Install_Capacity_kt,Cumulative_Install_Capacity_kt,Total_Available_Capacity_kt,Annual_Production_kt,Capacity_Utilization_pct,Market_Penetration_pct,Band_Baseline_Capacity_kt,Max_Potential_Penetration_pct,Technical_Readiness_Level,Ramp_Rate_per_year,Investment_Phase,Deployment_Status
+2024,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,0,Emerging,264.0,264.0,264.0,0.0,0.0,0.0,1100,80.0,9,0.3,High Investment,Pre-Commercial
+2024,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,0,Emerging,39.2,39.2,39.2,0.0,0.0,0.0,200,70.0,9,0.28,Moderate Investment,Pre-Commercial
+2024,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,0,Emerging,288.0,288.0,288.0,0.0,0.0,0.0,1200,80.0,9,0.3,High Investment,Pre-Commercial
+2025,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,1,Emerging,264.0,528.0,528.0,0.0,0.0,0.0,1100,80.0,9,0.3,High Investment,Pre-Commercial
+2025,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,0,Emerging,140.0,140.0,140.0,0.0,0.0,0.0,800,70.0,9,0.25,High Investment,Pre-Commercial
+2025,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,1,Emerging,39.2,78.4,78.4,0.0,0.0,0.0,200,70.0,9,0.28,Moderate Investment,Pre-Commercial
+2025,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,1,Emerging,288.0,576.0,576.0,0.0,0.0,0.0,1200,80.0,9,0.3,High Investment,Pre-Commercial
+2025,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,0,Emerging,490.0,490.0,490.0,0.0,0.0,0.0,2800,70.0,9,0.25,High Investment,Pre-Commercial
+2026,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,2,Emerging,264.0,792.0,792.0,0.0,0.0,0.0,1100,80.0,9,0.3,High Investment,Pre-Commercial
+2026,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,1,Emerging,140.0,280.0,280.0,0.0,0.0,0.0,800,70.0,9,0.25,High Investment,Pre-Commercial
+2026,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,2,Emerging,39.2,117.60000000000001,117.6,0.0,0.0,0.0,200,70.0,9,0.28,Moderate Investment,Pre-Commercial
+2026,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,0,Emerging,46.2,46.2,46.2,0.0,0.0,0.0,350,60.0,8,0.22,Moderate Investment,Pre-Commercial
+2026,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,2,Emerging,288.0,864.0,864.0,0.0,0.0,0.0,1200,80.0,9,0.3,High Investment,Pre-Commercial
+2026,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,1,Emerging,490.0,980.0,980.0,0.0,0.0,0.0,2800,70.0,9,0.25,High Investment,Pre-Commercial
+2027,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,3,Emerging,264.0,1056.0,1056.0,0.0,0.0,0.0,1100,80.0,9,0.3,High Investment,Pre-Commercial
+2027,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,2,Emerging,140.0,420.0,420.0,0.0,0.0,0.0,800,70.0,9,0.25,High Investment,Pre-Commercial
+2027,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,3,Emerging,39.2,156.8,156.8,0.0,0.0,0.0,200,70.0,9,0.28,Moderate Investment,Pre-Commercial
+2027,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,1,Emerging,46.2,92.4,92.4,0.0,0.0,0.0,350,60.0,8,0.22,Moderate Investment,Pre-Commercial
+2027,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,3,Emerging,47.9999999999997,911.9999999999997,912.0,0.0,0.0,0.0,1200,80.0,9,0.3,Moderate Investment,Pre-Commercial
+2027,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,2,Emerging,490.0,1470.0,1470.0,0.0,0.0,0.0,2800,70.0,9,0.25,High Investment,Pre-Commercial
+2028,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,4,Emerging,44.0000000000003,1100.0000000000002,1100.0,0.0,0.0,0.0,1100,80.0,9,0.3,Moderate Investment,Pre-Commercial
+2028,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,3,Emerging,140.0,560.0,560.0,0.0,0.0,0.0,800,70.0,9,0.25,High Investment,Pre-Commercial
+2028,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,4,Emerging,33.5710526315782,190.3710526315782,190.371052631578,0.0,0.0,0.0,200,70.0,9,0.28,Moderate Investment,Pre-Commercial
+2028,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,2,Emerging,46.2,138.60000000000002,138.6,0.0,0.0,0.0,350,60.0,8,0.22,Moderate Investment,Pre-Commercial
+2028,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,0,Emerging,210.0,210.0,210.0,0.0,0.0,0.0,3500,40.0,6,0.15,High Investment,Pre-Commercial
+2028,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,4,Emerging,0.0,911.9999999999997,912.0,0.0,0.0,0.0,1200,80.0,9,0.3,Operational,Pre-Commercial
+2028,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,3,Emerging,350.0,1820.0,1820.0,0.0,0.0,0.0,2800,70.0,9,0.25,High Investment,Pre-Commercial
+2029,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,5,Mature,0.0,1100.0000000000002,1100.0,0.0,0.0,0.0,1100,80.0,9,0.3,Operational,Pre-Commercial
+2029,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,4,Emerging,140.0,700.0,700.0,0.0,0.0,0.0,800,70.0,9,0.25,High Investment,Pre-Commercial
+2029,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,5,Mature,0.0,190.3710526315782,190.371052631578,0.0,0.0,0.0,200,70.0,9,0.28,Operational,Pre-Commercial
+2029,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,3,Emerging,46.2,184.8,184.8,0.0,0.0,0.0,350,60.0,8,0.22,Moderate Investment,Pre-Commercial
+2029,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,1,Emerging,210.0,420.0,420.0,0.0,0.0,0.0,3500,40.0,6,0.15,High Investment,Pre-Commercial
+2029,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,5,Mature,0.0,911.9999999999997,912.0,0.0,0.0,0.0,1200,80.0,9,0.3,Operational,Pre-Commercial
+2029,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,4,Emerging,0.0,1820.0,1820.0,0.0,0.0,0.0,2800,70.0,9,0.25,Operational,Pre-Commercial
+2030,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,0,Emerging,43.2,43.2,43.2,0.0,0.0,0.0,1200,30.0,5,0.12,Moderate Investment,Pre-Commercial
+2030,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,6,Mature,0.0,1100.0000000000002,1100.0,1100.0,100.0,100.0,1100,80.0,9,0.3,Operational,Saturated
+2030,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,5,Mature,100.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Moderate Investment,Saturated
+2030,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,6,Mature,0.0,190.3710526315782,190.371052631578,0.0,0.0,0.0,200,70.0,9,0.28,Operational,Pre-Commercial
+2030,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,4,Emerging,46.2,231.0,231.0,231.0,100.0,66.0,350,60.0,8,0.22,Moderate Investment,Saturated
+2030,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,2,Emerging,210.0,630.0,630.0,0.0,0.0,0.0,3500,40.0,6,0.15,High Investment,Pre-Commercial
+2030,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,0,Emerging,210.0,210.0,210.0,0.0,0.0,0.0,3500,50.0,5,0.12,High Investment,Pre-Commercial
+2030,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,6,Mature,0.0,911.9999999999997,912.0,0.0,0.0,0.0,1200,80.0,9,0.3,Operational,Pre-Commercial
+2030,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,5,Mature,0.0,1820.0,1820.0,1385.52597402598,76.12780077065825,49.48307050092786,2800,70.0,9,0.25,Operational,Scaling
+2031,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,1,Emerging,43.2,86.4,86.4,0.0,0.0,0.0,1200,30.0,5,0.12,Moderate Investment,Pre-Commercial
+2031,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,7,Mature,0.0,1100.0000000000002,1100.0,1100.0,100.0,100.0,1100,80.0,9,0.3,Operational,Saturated
+2031,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,6,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2031,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,7,Mature,0.0,190.3710526315782,190.371052631578,0.0,0.0,0.0,200,70.0,9,0.28,Operational,Pre-Commercial
+2031,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,5,Mature,46.2,277.20000000000005,277.2,277.2,100.0,79.19999999999999,350,60.0,8,0.22,Moderate Investment,Saturated
+2031,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,3,Emerging,210.0,840.0,840.0,0.0,0.0,0.0,3500,40.0,6,0.15,High Investment,Pre-Commercial
+2031,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,1,Emerging,210.0,420.0,420.0,0.0,0.0,0.0,3500,50.0,5,0.12,High Investment,Pre-Commercial
+2031,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,7,Mature,0.0,911.9999999999997,912.0,0.0,0.0,0.0,1200,80.0,9,0.3,Operational,Pre-Commercial
+2031,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,6,Mature,490.0,2310.0,2310.0,2186.71233766234,94.66287176027446,78.09686920222643,2800,70.0,9,0.25,High Investment,Saturated
+2032,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,2,Emerging,43.2,129.60000000000002,129.6,0.0,0.0,0.0,1200,30.0,5,0.12,Moderate Investment,Pre-Commercial
+2032,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,0,Emerging,48.0,48.0,48.0,0.0,0.0,0.0,1200,40.0,4,0.1,Moderate Investment,Pre-Commercial
+2032,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,8,Mature,264.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,High Investment,Saturated
+2032,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,7,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2032,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,0,Emerging,13.5,13.5,13.5,0.0,0.0,0.0,450,30.0,4,0.1,Moderate Investment,Pre-Commercial
+2032,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,8,Mature,0.0,190.3710526315782,190.371052631578,190.371052631578,100.0,95.185526315789,200,70.0,9,0.28,Operational,Saturated
+2032,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,6,Mature,46.2,323.40000000000003,323.4,323.4,100.0,92.39999999999999,350,60.0,8,0.22,Moderate Investment,Saturated
+2032,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,4,Emerging,210.0,1050.0,1050.0,0.0,0.0,0.0,3500,40.0,6,0.15,High Investment,Pre-Commercial
+2032,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,2,Emerging,210.0,630.0,630.0,0.0,0.0,0.0,3500,50.0,5,0.12,High Investment,Pre-Commercial
+2032,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,8,Mature,0.0,911.9999999999997,912.0,0.0,0.0,0.0,1200,80.0,9,0.3,Operational,Pre-Commercial
+2032,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,7,Mature,490.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,High Investment,Saturated
+2033,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,3,Emerging,43.2,172.8,172.8,0.0,0.0,0.0,1200,30.0,5,0.12,Moderate Investment,Pre-Commercial
+2033,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,1,Emerging,48.0,96.0,96.0,0.0,0.0,0.0,1200,40.0,4,0.1,Moderate Investment,Pre-Commercial
+2033,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,9,Mature,0.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,Operational,Saturated
+2033,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,8,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2033,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,1,Emerging,13.5,27.0,27.0,0.0,0.0,0.0,450,30.0,4,0.1,Moderate Investment,Pre-Commercial
+2033,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,9,Mature,9.62894736842176,199.99999999999997,200.0,200.0,100.0,100.0,200,70.0,9,0.28,Initial Investment,Saturated
+2033,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,7,Mature,26.6000000000001,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Moderate Investment,Saturated
+2033,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,5,Mature,210.0,1260.0,1260.0,0.0,0.0,0.0,3500,40.0,6,0.15,High Investment,Pre-Commercial
+2033,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,3,Emerging,210.0,840.0,840.0,0.0,0.0,0.0,3500,50.0,5,0.12,High Investment,Pre-Commercial
+2033,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,9,Mature,0.0,911.9999999999997,912.0,834.223333333337,91.47185672514661,69.51861111111141,1200,80.0,9,0.3,Operational,Scaling
+2033,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,8,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2034,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,4,Emerging,43.2,216.0,216.0,216.0,100.0,18.0,1200,30.0,5,0.12,Moderate Investment,Scaling
+2034,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,2,Emerging,48.0,144.0,144.0,144.0,100.0,12.0,1200,40.0,4,0.1,Moderate Investment,Early Deployment
+2034,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,10,Mature,0.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,Operational,Saturated
+2034,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,9,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2034,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,2,Emerging,13.5,40.5,40.5,40.5,100.0,9.0,450,30.0,4,0.1,Moderate Investment,Early Deployment
+2034,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,10,Mature,0.0,199.99999999999997,200.0,200.0,100.0,100.0,200,70.0,9,0.28,Operational,Saturated
+2034,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,8,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2034,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,6,Mature,210.0,1470.0,1470.0,0.0,0.0,0.0,3500,40.0,6,0.15,High Investment,Pre-Commercial
+2034,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,4,Emerging,210.0,1050.0,1050.0,278.200000000004,26.495238095238477,7.948571428571544,3500,50.0,5,0.12,High Investment,Early Deployment
+2034,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,10,Mature,288.0,1199.9999999999998,1200.0,1200.0,100.0,100.0,1200,80.0,9,0.3,High Investment,Saturated
+2034,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,9,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2035,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,5,Mature,43.2,259.20000000000005,259.2,259.2,100.0,21.6,1200,30.0,5,0.12,Moderate Investment,Scaling
+2035,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,3,Emerging,48.0,192.0,192.0,192.0,100.0,16.0,1200,40.0,4,0.1,Moderate Investment,Early Deployment
+2035,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,11,Mature,0.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,Operational,Saturated
+2035,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,10,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2035,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,3,Emerging,13.5,54.0,54.0,54.0,100.0,12.0,450,30.0,4,0.1,Moderate Investment,Early Deployment
+2035,C4_HT_Hydrogen,C4,HT,C4 HT H2-process,2035,0,Emerging,14.4,14.4,14.4,14.4,100.0,3.2,450,40.0,3,0.08,Moderate Investment,Demonstration
+2035,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,11,Mature,39.2,239.19999999999996,239.2,200.0,83.61204013377926,100.0,200,70.0,9,0.28,Moderate Investment,Saturated
+2035,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,9,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2035,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,7,Mature,210.0,1680.0,1680.0,1509.66999999999,89.86130952380893,43.13342857142829,3500,40.0,6,0.15,High Investment,Saturated
+2035,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,5,Mature,210.0,1260.0,1260.0,1260.0,100.0,36.0,3500,50.0,5,0.12,High Investment,Scaling
+2035,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,11,Mature,0.0,1199.9999999999998,1200.0,1200.0,100.0,100.0,1200,80.0,9,0.3,Operational,Saturated
+2035,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,10,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2036,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,6,Mature,43.2,302.40000000000003,302.4,302.4,100.0,25.2,1200,30.0,5,0.12,Moderate Investment,Scaling
+2036,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,4,Emerging,48.0,240.0,240.0,240.0,100.0,20.0,1200,40.0,4,0.1,Moderate Investment,Scaling
+2036,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,12,Mature,0.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,Operational,Saturated
+2036,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,11,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2036,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,4,Emerging,13.5,67.5,67.5,67.5,100.0,15.0,450,30.0,4,0.1,Moderate Investment,Scaling
+2036,C4_HT_Hydrogen,C4,HT,C4 HT H2-process,2035,1,Emerging,14.4,28.8,28.8,28.8,100.0,6.4,450,40.0,3,0.08,Moderate Investment,Early Deployment
+2036,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,12,Mature,2.20027282525485e-14,239.2,239.2,200.0,83.61204013377926,100.0,200,70.0,9,0.28,Initial Investment,Saturated
+2036,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,10,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2036,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,8,Mature,210.0,1890.0,1890.0,1890.0,100.0,54.0,3500,40.0,6,0.15,High Investment,Saturated
+2036,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,6,Mature,210.0,1470.0,1470.0,1470.0,100.0,42.0,3500,50.0,5,0.12,High Investment,Scaling
+2036,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,12,Mature,288.0,1487.9999999999998,1488.0,1200.0,80.64516129032258,100.0,1200,80.0,9,0.3,High Investment,Saturated
+2036,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,11,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2037,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,7,Mature,43.2,345.6,345.6,345.6,100.0,28.800000000000004,1200,30.0,5,0.12,Moderate Investment,Saturated
+2037,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,5,Mature,48.0,288.0,288.0,288.0,100.0,24.0,1200,40.0,4,0.1,Moderate Investment,Scaling
+2037,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,13,Mature,0.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,Operational,Saturated
+2037,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,12,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2037,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,5,Mature,13.5,81.0,81.0,81.0,100.0,18.0,450,30.0,4,0.1,Moderate Investment,Scaling
+2037,C4_HT_Hydrogen,C4,HT,C4 HT H2-process,2035,2,Emerging,14.4,43.2,43.2,43.2,100.0,9.6,450,40.0,3,0.08,Moderate Investment,Early Deployment
+2037,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,13,Mature,0.0,239.2,239.2,200.0,83.61204013377926,100.0,200,70.0,9,0.28,Operational,Saturated
+2037,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,11,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2037,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,9,Mature,0.0,1890.0,1890.0,1820.0,96.29629629629629,52.0,3500,40.0,6,0.15,Operational,Saturated
+2037,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,7,Mature,210.0,1680.0,1680.0,1680.0,100.0,48.0,3500,50.0,5,0.12,High Investment,Saturated
+2037,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,13,Mature,8.38394157869022e-14,1487.9999999999998,1488.0,1200.0,80.64516129032258,100.0,1200,80.0,9,0.3,Initial Investment,Saturated
+2037,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,12,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2038,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,8,Mature,43.2,388.8,388.8,388.8,100.0,32.4,1200,30.0,5,0.12,Moderate Investment,Saturated
+2038,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,6,Mature,48.0,336.0,336.0,336.0,100.0,28.000000000000004,1200,40.0,4,0.1,Moderate Investment,Scaling
+2038,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,14,Mature,0.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,Operational,Saturated
+2038,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,13,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2038,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,6,Mature,13.5,94.5,94.5,94.5,100.0,21.0,450,30.0,4,0.1,Moderate Investment,Scaling
+2038,C4_HT_Hydrogen,C4,HT,C4 HT H2-process,2035,3,Emerging,14.4,57.6,57.6,57.6,100.0,12.8,450,40.0,3,0.08,Moderate Investment,Early Deployment
+2038,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,14,Mature,0.0,239.2,239.2,200.0,83.61204013377926,100.0,200,70.0,9,0.28,Operational,Saturated
+2038,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,12,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2038,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,10,Mature,0.0,1890.0,1890.0,1610.0,85.18518518518519,46.0,3500,40.0,6,0.15,Operational,Saturated
+2038,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,8,Mature,210.0,1890.0,1890.0,1890.0,100.0,54.0,3500,50.0,5,0.12,High Investment,Saturated
+2038,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,14,Mature,0.0,1487.9999999999998,1488.0,1200.0,80.64516129032258,100.0,1200,80.0,9,0.3,Operational,Saturated
+2038,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,13,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2039,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,9,Mature,43.2,432.0,432.0,432.0,100.0,36.0,1200,30.0,5,0.12,Moderate Investment,Saturated
+2039,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,7,Mature,48.0,384.0,384.0,384.0,100.0,32.0,1200,40.0,4,0.1,Moderate Investment,Scaling
+2039,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,15,Mature,0.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,Operational,Saturated
+2039,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,14,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2039,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,7,Mature,13.5,108.0,108.0,108.0,100.0,24.0,450,30.0,4,0.1,Moderate Investment,Scaling
+2039,C4_HT_Hydrogen,C4,HT,C4 HT H2-process,2035,4,Emerging,14.4,72.0,72.0,72.0,100.0,16.0,450,40.0,3,0.08,Moderate Investment,Early Deployment
+2039,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,15,Mature,0.0,239.2,239.2,200.0,83.61204013377926,100.0,200,70.0,9,0.28,Operational,Saturated
+2039,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,13,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2039,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,11,Mature,0.0,1890.0,1890.0,1400.0,74.07407407407408,40.0,3500,40.0,6,0.15,Operational,Saturated
+2039,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,9,Mature,210.0,2100.0,2100.0,2100.0,100.0,60.0,3500,50.0,5,0.12,High Investment,Saturated
+2039,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,15,Mature,0.0,1487.9999999999998,1488.0,1200.0,80.64516129032258,100.0,1200,80.0,9,0.3,Operational,Saturated
+2039,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,14,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2040,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,10,Mature,43.2,475.20000000000005,475.2,475.2,100.0,39.599999999999994,1200,30.0,5,0.12,Moderate Investment,Saturated
+2040,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,8,Mature,48.0,432.0,432.0,432.0,100.0,36.0,1200,40.0,4,0.1,Moderate Investment,Scaling
+2040,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,16,Mature,0.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,Operational,Saturated
+2040,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,15,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2040,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,8,Mature,13.5,121.5,121.5,121.5,100.0,27.0,450,30.0,4,0.1,Moderate Investment,Saturated
+2040,C4_HT_Hydrogen,C4,HT,C4 HT H2-process,2035,5,Mature,14.4,86.4,86.4,86.4,100.0,19.2,450,40.0,3,0.08,Moderate Investment,Early Deployment
+2040,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,16,Mature,0.0,239.2,239.2,200.0,83.61204013377926,100.0,200,70.0,9,0.28,Operational,Saturated
+2040,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,14,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2040,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,12,Mature,0.0,1890.0,1890.0,1190.0,62.96296296296296,34.0,3500,40.0,6,0.15,Operational,Scaling
+2040,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,10,Mature,210.0,2310.0,2310.0,2310.0,100.0,66.0,3500,50.0,5,0.12,High Investment,Saturated
+2040,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,16,Mature,0.0,1487.9999999999998,1488.0,1200.0,80.64516129032258,100.0,1200,80.0,9,0.3,Operational,Saturated
+2040,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,15,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2041,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,11,Mature,43.2,518.4000000000001,518.4,518.4,100.0,43.2,1200,30.0,5,0.12,Moderate Investment,Saturated
+2041,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,9,Mature,48.0,480.0,480.0,480.0,100.0,40.0,1200,40.0,4,0.1,Moderate Investment,Saturated
+2041,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,17,Mature,0.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,Operational,Saturated
+2041,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,16,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2041,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,9,Mature,13.5,135.0,135.0,135.0,100.0,30.0,450,30.0,4,0.1,Moderate Investment,Saturated
+2041,C4_HT_Hydrogen,C4,HT,C4 HT H2-process,2035,6,Mature,14.4,100.8,100.8,100.8,100.0,22.400000000000002,450,40.0,3,0.08,Moderate Investment,Scaling
+2041,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,17,Mature,0.0,239.2,239.2,200.0,83.61204013377926,100.0,200,70.0,9,0.28,Operational,Saturated
+2041,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,15,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2041,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,13,Mature,0.0,1890.0,1890.0,980.0,51.85185185185185,28.000000000000004,3500,40.0,6,0.15,Operational,Scaling
+2041,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,11,Mature,210.0,2520.0,2520.0,2520.0,100.0,72.0,3500,50.0,5,0.12,High Investment,Saturated
+2041,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,17,Mature,0.0,1487.9999999999998,1488.0,1200.0,80.64516129032258,100.0,1200,80.0,9,0.3,Operational,Saturated
+2041,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,16,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2042,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,12,Mature,43.2,561.6,561.6,561.6,100.0,46.800000000000004,1200,30.0,5,0.12,Moderate Investment,Saturated
+2042,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,10,Mature,48.0,528.0,528.0,528.0,100.0,44.0,1200,40.0,4,0.1,Moderate Investment,Saturated
+2042,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,18,Mature,0.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,Operational,Saturated
+2042,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,17,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2042,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,10,Mature,13.5,148.5,148.5,148.5,100.0,33.0,450,30.0,4,0.1,Moderate Investment,Saturated
+2042,C4_HT_Hydrogen,C4,HT,C4 HT H2-process,2035,7,Mature,14.4,115.2,115.2,115.2,100.0,25.6,450,40.0,3,0.08,Moderate Investment,Scaling
+2042,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,18,Mature,0.0,239.2,239.2,200.0,83.61204013377926,100.0,200,70.0,9,0.28,Operational,Saturated
+2042,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,16,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2042,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,14,Mature,0.0,1890.0,1890.0,770.0,40.74074074074074,22.0,3500,40.0,6,0.15,Operational,Scaling
+2042,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,12,Mature,210.0,2730.0,2730.0,2730.0,100.0,78.0,3500,50.0,5,0.12,High Investment,Saturated
+2042,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,18,Mature,0.0,1487.9999999999998,1488.0,1200.0,80.64516129032258,100.0,1200,80.0,9,0.3,Operational,Saturated
+2042,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,17,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2043,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,13,Mature,43.2,604.8000000000001,604.8,604.8,100.0,50.4,1200,30.0,5,0.12,Moderate Investment,Saturated
+2043,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,11,Mature,48.0,576.0,576.0,576.0,100.0,48.0,1200,40.0,4,0.1,Moderate Investment,Saturated
+2043,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,19,Mature,0.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,Operational,Saturated
+2043,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,18,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2043,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,11,Mature,13.5,162.0,162.0,162.0,100.0,36.0,450,30.0,4,0.1,Moderate Investment,Saturated
+2043,C4_HT_Hydrogen,C4,HT,C4 HT H2-process,2035,8,Mature,14.4,129.6,129.6,129.6,100.0,28.799999999999997,450,40.0,3,0.08,Moderate Investment,Scaling
+2043,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,19,Mature,0.0,239.2,239.2,200.0,83.61204013377926,100.0,200,70.0,9,0.28,Operational,Saturated
+2043,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,17,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2043,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,15,Mature,0.0,1890.0,1890.0,560.0,29.629629629629626,16.0,3500,40.0,6,0.15,Operational,Early Deployment
+2043,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,13,Mature,210.0,2940.0,2940.0,2940.0,100.0,84.0,3500,50.0,5,0.12,High Investment,Saturated
+2043,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,19,Mature,0.0,1487.9999999999998,1488.0,1200.0,80.64516129032258,100.0,1200,80.0,9,0.3,Operational,Saturated
+2043,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,18,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2044,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,14,Mature,0.0,604.8000000000001,604.8,576.0,95.23809523809524,48.0,1200,30.0,5,0.12,Operational,Saturated
+2044,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,12,Mature,48.0,624.0,624.0,624.0,100.0,52.0,1200,40.0,4,0.1,Moderate Investment,Saturated
+2044,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,20,Mature,0.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,Operational,Saturated
+2044,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,19,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2044,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,12,Mature,13.5,175.5,175.5,175.5,100.0,39.0,450,30.0,4,0.1,Moderate Investment,Saturated
+2044,C4_HT_Hydrogen,C4,HT,C4 HT H2-process,2035,9,Mature,14.4,144.0,144.0,144.0,100.0,32.0,450,40.0,3,0.08,Moderate Investment,Scaling
+2044,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,20,Mature,0.0,239.2,239.2,200.0,83.61204013377926,100.0,200,70.0,9,0.28,Operational,Saturated
+2044,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,18,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2044,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,16,Mature,0.0,1890.0,1890.0,350.0,18.51851851851852,10.0,3500,40.0,6,0.15,Operational,Early Deployment
+2044,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,14,Mature,210.0,3150.0,3150.0,3150.0,100.0,90.0,3500,50.0,5,0.12,High Investment,Saturated
+2044,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,20,Mature,0.0,1487.9999999999998,1488.0,1200.0,80.64516129032258,100.0,1200,80.0,9,0.3,Operational,Saturated
+2044,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,19,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2045,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,15,Mature,0.0,604.8000000000001,604.8,528.0,87.30158730158732,44.0,1200,30.0,5,0.12,Operational,Saturated
+2045,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,13,Mature,48.0,672.0,672.0,672.0,100.0,56.00000000000001,1200,40.0,4,0.1,Moderate Investment,Saturated
+2045,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,21,Mature,0.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,Operational,Saturated
+2045,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,20,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2045,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,13,Mature,13.5,189.0,189.0,189.0,100.0,42.0,450,30.0,4,0.1,Moderate Investment,Saturated
+2045,C4_HT_Hydrogen,C4,HT,C4 HT H2-process,2035,10,Mature,14.4,158.4,158.4,158.4,100.0,35.2,450,40.0,3,0.08,Moderate Investment,Scaling
+2045,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,21,Mature,0.0,239.2,239.2,200.0,83.61204013377926,100.0,200,70.0,9,0.28,Operational,Saturated
+2045,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,19,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2045,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,17,Mature,0.0,1890.0,1890.0,140.0,7.4074074074074066,4.0,3500,40.0,6,0.15,Operational,Demonstration
+2045,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,15,Mature,210.0,3360.0,3360.0,3360.0,100.0,96.0,3500,50.0,5,0.12,High Investment,Saturated
+2045,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,21,Mature,0.0,1487.9999999999998,1488.0,1200.0,80.64516129032258,100.0,1200,80.0,9,0.3,Operational,Saturated
+2045,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,20,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2046,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,16,Mature,0.0,604.8000000000001,604.8,480.0,79.36507936507937,40.0,1200,30.0,5,0.12,Operational,Saturated
+2046,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,14,Mature,48.0,720.0,720.0,720.0,100.0,60.0,1200,40.0,4,0.1,Moderate Investment,Saturated
+2046,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,22,Mature,0.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,Operational,Saturated
+2046,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,21,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2046,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,14,Mature,13.5,202.5,202.5,202.5,100.0,45.0,450,30.0,4,0.1,Moderate Investment,Saturated
+2046,C4_HT_Hydrogen,C4,HT,C4 HT H2-process,2035,11,Mature,14.4,172.8,172.8,172.8,100.0,38.4,450,40.0,3,0.08,Moderate Investment,Saturated
+2046,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,22,Mature,0.0,239.2,239.2,200.0,83.61204013377926,100.0,200,70.0,9,0.28,Operational,Saturated
+2046,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,20,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2046,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,18,Mature,0.0,1890.0,1890.0,0.0,0.0,0.0,3500,40.0,6,0.15,Operational,Pre-Commercial
+2046,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,16,Mature,140.0,3500.0,3500.0,3500.0,100.0,100.0,3500,50.0,5,0.12,High Investment,Saturated
+2046,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,22,Mature,0.0,1487.9999999999998,1488.0,1200.0,80.64516129032258,100.0,1200,80.0,9,0.3,Operational,Saturated
+2046,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,21,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2047,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,17,Mature,0.0,604.8000000000001,604.8,432.0,71.42857142857143,36.0,1200,30.0,5,0.12,Operational,Saturated
+2047,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,15,Mature,48.0,768.0,768.0,768.0,100.0,64.0,1200,40.0,4,0.1,Moderate Investment,Saturated
+2047,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,23,Mature,0.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,Operational,Saturated
+2047,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,22,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2047,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,15,Mature,13.5,216.0,216.0,216.0,100.0,48.0,450,30.0,4,0.1,Moderate Investment,Saturated
+2047,C4_HT_Hydrogen,C4,HT,C4 HT H2-process,2035,12,Mature,14.4,187.20000000000002,187.2,187.2,100.0,41.6,450,40.0,3,0.08,Moderate Investment,Saturated
+2047,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,23,Mature,0.0,239.2,239.2,200.0,83.61204013377926,100.0,200,70.0,9,0.28,Operational,Saturated
+2047,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,21,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2047,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,19,Mature,0.0,1890.0,1890.0,0.0,0.0,0.0,3500,40.0,6,0.15,Operational,Pre-Commercial
+2047,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,17,Mature,0.0,3500.0,3500.0,3500.0,100.0,100.0,3500,50.0,5,0.12,Operational,Saturated
+2047,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,23,Mature,0.0,1487.9999999999998,1488.0,1200.0,80.64516129032258,100.0,1200,80.0,9,0.3,Operational,Saturated
+2047,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,22,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2048,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,18,Mature,0.0,604.8000000000001,604.8,384.0,63.4920634920635,32.0,1200,30.0,5,0.12,Operational,Saturated
+2048,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,16,Mature,48.0,816.0,816.0,816.0,100.0,68.0,1200,40.0,4,0.1,Moderate Investment,Saturated
+2048,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,24,Mature,0.0,1364.0000000000002,1364.0,1100.0,80.64516129032258,100.0,1100,80.0,9,0.3,Operational,Saturated
+2048,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,23,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2048,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,16,Mature,13.5,229.5,229.5,229.5,100.0,51.0,450,30.0,4,0.1,Moderate Investment,Saturated
+2048,C4_HT_Hydrogen,C4,HT,C4 HT H2-process,2035,13,Mature,14.4,201.6,201.6,201.6,100.0,44.800000000000004,450,40.0,3,0.08,Moderate Investment,Saturated
+2048,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,24,Mature,0.0,239.2,239.2,200.0,83.61204013377926,100.0,200,70.0,9,0.28,Operational,Saturated
+2048,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,22,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2048,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,20,Mature,0.0,1890.0,1890.0,0.0,0.0,0.0,3500,40.0,6,0.15,Operational,Pre-Commercial
+2048,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,18,Mature,0.0,3500.0,3500.0,3500.0,100.0,100.0,3500,50.0,5,0.12,Operational,Saturated
+2048,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,24,Mature,0.0,1487.9999999999998,1488.0,1200.0,80.64516129032258,100.0,1200,80.0,9,0.3,Operational,Saturated
+2048,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,23,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2049,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,19,Mature,0.0,604.8000000000001,604.8,336.0,55.55555555555556,28.000000000000004,1200,30.0,5,0.12,Operational,Saturated
+2049,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,17,Mature,48.0,864.0,864.0,864.0,100.0,72.0,1200,40.0,4,0.1,Moderate Investment,Saturated
+2049,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,25,Mature,0.0,1364.0000000000002,1100.0,1100.0,100.0,100.0,1100,80.0,9,0.3,Operational,Saturated
+2049,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,24,Mature,0.0,800.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,Operational,Saturated
+2049,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,17,Mature,4.50000000000009,234.00000000000009,234.0,234.0,100.0,52.0,450,30.0,4,0.1,Initial Investment,Saturated
+2049,C4_HT_Hydrogen,C4,HT,C4 HT H2-process,2035,14,Mature,14.4,216.0,216.0,216.0,100.0,48.0,450,40.0,3,0.08,Moderate Investment,Saturated
+2049,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,25,Mature,0.0,239.2,200.0,200.0,100.0,100.0,200,70.0,9,0.28,Operational,Saturated
+2049,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,23,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2049,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,21,Mature,0.0,1890.0,1890.0,0.0,0.0,0.0,3500,40.0,6,0.15,Operational,Pre-Commercial
+2049,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,19,Mature,0.0,3500.0,3500.0,3500.0,100.0,100.0,3500,50.0,5,0.12,Operational,Saturated
+2049,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,25,Mature,0.0,1487.9999999999998,1200.0,1200.0,100.0,100.0,1200,80.0,9,0.3,Operational,Saturated
+2049,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,24,Mature,0.0,2800.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,Operational,Saturated
+2050,BTX_HT_Electric,BTX,HT,BTX HT Electric furnace,2030,20,Mature,0.0,604.8000000000001,604.8,288.0,47.61904761904762,24.0,1200,30.0,5,0.12,Operational,Scaling
+2050,BTX_HT_Hydrogen,BTX,HT,BTX HT H2-reformer,2032,18,Mature,48.0000000000001,912.0000000000001,912.0,912.0,100.0,76.0,1200,40.0,4,0.1,Moderate Investment,Saturated
+2050,BTX_LT_HeatPump,BTX,LT,BTX LT Heat pump,2024,26,Mature,264.0,1628.0000000000002,1100.0,1100.0,100.0,100.0,1100,80.0,9,0.3,High Investment,Saturated
+2050,BTX_MT_ElecHeater,BTX,MT,BTX MT Electric heater,2025,25,Mature,140.0,940.0,800.0,800.0,100.0,100.0,800,70.0,9,0.25,High Investment,Saturated
+2050,C4_HT_Electric,C4,HT,C4 HT Electric extraction,2032,18,Mature,0.0,234.00000000000009,234.0,219.6,93.84615384615384,48.8,450,30.0,4,0.1,Operational,Saturated
+2050,C4_HT_Hydrogen,C4,HT,C4 HT H2-process,2035,15,Mature,14.3999999999999,230.39999999999992,230.4,230.4,100.0,51.2,450,40.0,3,0.08,Moderate Investment,Saturated
+2050,C4_LT_ElecCompr,C4,LT,C4 LT Electric motor,2023,27,Mature,4.40054565050971e-14,4.40054565050971e-14,4.40054565050971e-14,4.40054565050971e-14,100.0,2.200272825254855e-14,200,80.0,9,0.33,Initial Investment,Demonstration
+2050,C4_LT_HeatPump,C4,LT,C4 LT Heat pump,2024,26,Mature,39.2,278.4,200.0,200.0,100.0,100.0,200,70.0,9,0.28,Moderate Investment,Saturated
+2050,C4_MT_ElecHeater,C4,MT,C4 MT Electric heater,2026,24,Mature,0.0,350.0000000000001,350.0,350.0,100.0,100.0,350,60.0,8,0.22,Operational,Saturated
+2050,NCC_HT_Electric,NCC,HT,NCC HT E-cracker,2028,22,Mature,0.0,1890.0,1890.0,0.0,0.0,0.0,3500,40.0,6,0.15,Operational,Pre-Commercial
+2050,NCC_HT_Hydrogen,NCC,HT,NCC HT H2-furnace,2030,20,Mature,0.0,3500.0,3500.0,3500.0,100.0,100.0,3500,50.0,5,0.12,Operational,Saturated
+2050,NCC_LT_HeatPump,NCC,LT,NCC LT Heat pump,2024,26,Mature,288.0,1775.9999999999998,1200.0,1200.0,100.0,100.0,1200,80.0,9,0.3,High Investment,Saturated
+2050,NCC_MT_ElecHeater,NCC,MT,NCC MT Electric heater,2025,25,Mature,490.0,3290.0,2800.0,2800.0,100.0,100.0,2800,70.0,9,0.25,High Investment,Saturated
