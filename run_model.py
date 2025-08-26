@@ -5,7 +5,6 @@ Regional facility-level deployment with alternative technologies only
 """
 
 import pandas as pd
-import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
 
@@ -125,16 +124,24 @@ def create_summary_analysis(deployment_df):
     
     return regional_summary, tech_summary, company_summary
 
+def calculate_baseline_emissions():
+    """Calculate baseline emissions from Excel data"""
+    data_file = Path("data/Korea_Petrochemical_MACC_Database.xlsx")
+    
+    with pd.ExcelFile(data_file) as xls:
+        bands_df = pd.read_excel(xls, sheet_name='TechBands_2023')
+    
+    # Calculate baseline emissions: Activity * EmissionIntensity
+    bands_df['Total_Emissions_tCO2'] = bands_df['Activity_kt_product'] * bands_df['EmissionIntensity_tCO2_per_t']
+    total_baseline = bands_df['Total_Emissions_tCO2'].sum() / 1000  # Convert to MtCO2
+    
+    return total_baseline, bands_df
+
 def simulate_technology_deployment(deployment_df, years=range(2023, 2051)):
     """Simulate technology deployment pathway from 2023 to 2050"""
     
-    # Calculate baseline emissions (2023)
-    baseline_emissions = {
-        'NCC': 3500 * 2.85 + 2800 * 1.23 + 1200 * 0.65,  # Activity * EmissionIntensity
-        'BTX': 1200 * 1.52 + 800 * 0.89 + 1100 * 0.48,
-        'C4': 450 * 2.21 + 350 * 0.98 + 200 * 0.54
-    }
-    total_baseline = sum(baseline_emissions.values()) / 1000  # Convert to MtCO2
+    # Calculate baseline emissions from Excel data
+    total_baseline, bands_df = calculate_baseline_emissions()
     
     # Simulate deployment pathway
     pathway_data = []
@@ -176,7 +183,6 @@ def simulate_technology_deployment(deployment_df, years=range(2023, 2051)):
                 cumulative_investment += max_deploy * tech['CAPEX_Million_USD'] / tech['MaxDeployment_kt']
                 
                 # Calculate production cost change
-                baseline_production = tech['BaselineCapacity_kt']
                 opex_change = max_deploy * tech['LCOA_USD_per_tCO2'] * tech['AbatementPotential_tCO2_per_t'] / 1000  # Million USD
                 production_cost_premium += opex_change
             
@@ -288,7 +294,6 @@ def plot_comprehensive_analysis(pathway_df, tech_shares_df, deployment_df):
     milestones = [1000, 2000, 3000, 4000]
     for milestone in milestones:
         if pathway_df['CumulativeInvestment_Billion_USD'].max() >= milestone:
-            milestone_year = pathway_df[pathway_df['CumulativeInvestment_Billion_USD'] >= milestone]['Year'].iloc[0]
             ax3.axhline(y=milestone, color='red', linestyle='--', alpha=0.5)
             ax3.annotate(f'${milestone}B', (2025, milestone), fontsize=8)
     

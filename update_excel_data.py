@@ -248,36 +248,6 @@ def create_corrected_database():
         ]
     }
 
-    # Regional constraints (Korea specific) - by Tech Group
-    regional_data = {
-        'Region': ['Korea'] * 3,
-        'TechGroup': ['NCC', 'BTX', 'C4'],
-        'ElectricityPrice_USD_per_MWh': [118, 118, 118],  # Korea industrial rate
-        'HydrogenPrice_USD_per_kg': [5.2, 5.2, 5.2],     # Current Korea H2 price
-        'NaturalGasPrice_USD_per_GJ': [12.5, 12.5, 12.5], # Korea NG price
-        'CarbonPrice_USD_per_tCO2': [28, 28, 28],         # Korea K-ETS price
-        'RegulatorySupport': ['High', 'Medium', 'Medium'], # NCC gets most support
-        'InfrastructureReadiness': ['High', 'High', 'Medium']  # NCC/BTX mature, C4 developing
-    }
-    
-    # Market constraints - by Tech Group
-    market_data = {
-        'TechGroup': ['NCC', 'BTX', 'C4'],
-        'DemandGrowth_pct_per_year': [2.0, 1.5, 1.2],     # NCC highest growth
-        'ProductPrice_USD_per_t': [1150, 975, 1600],      # Average prices
-        'MarketVolatility': ['High', 'Medium', 'Very High'], # C4 most volatile
-        'ImportDependency_pct': [20, 19, 35],             # C4 highest import dependency
-        'CapacityUtilization_pct': [88, 85, 82]           # Current utilization rates
-    }
-    
-    # Policy framework
-    policy_data = {
-        'Year': [2025, 2030, 2035, 2040, 2045, 2050],
-        'CarbonPrice_USD_per_tCO2': [30, 50, 80, 120, 150, 200],
-        'RenewableTarget_pct': [20, 30, 50, 70, 85, 100],
-        'HydrogenInfrastructure': ['Limited', 'Developing', 'Moderate', 'Good', 'Extensive', 'Complete'],
-        'TechSupport_Level': ['Medium', 'High', 'High', 'Medium', 'Medium', 'Low']
-    }
     
     # Calculate baseline emissions from bands
     baseline_emissions = sum(bands_data['Activity_kt_product'][i] * bands_data['EmissionIntensity_tCO2_per_t'][i] 
@@ -309,15 +279,6 @@ def create_corrected_database():
         
         # Regional facilities (detailed facility-level data)
         pd.DataFrame(regional_facilities_data).to_excel(writer, sheet_name='RegionalFacilities', index=False)
-        
-        # Regional constraints
-        pd.DataFrame(regional_data).to_excel(writer, sheet_name='RegionalConstraints', index=False)
-        
-        # Market constraints  
-        pd.DataFrame(market_data).to_excel(writer, sheet_name='MarketConstraints', index=False)
-        
-        # Policy framework
-        pd.DataFrame(policy_data).to_excel(writer, sheet_name='PolicyFramework', index=False)
         
         # Emissions targets
         pd.DataFrame(targets_data).to_excel(writer, sheet_name='EmissionsTargets', index=False)
