@@ -14,7 +14,7 @@
 - **Problem**: CAPEX costs not properly scaled to deployment decisions
 - **Impact**: Unrealistic cost estimates
 
-## Proposed Corrected Model Structure
+## Corrected Model Structure (Alternative Technologies Only)
 
 ### Core Principle: Separate Capacity and Production
 
@@ -25,15 +25,7 @@
 
 ### Technology Types and Units
 
-#### Transition Technologies (Band Upgrades)
-```
-CAPEX: Million USD per kt/year of capacity upgraded
-OPEX: USD per tonne of production using upgraded technology
-Abatement: tCO2 per tonne of production (compared to baseline band)
-Deployment Unit: kt/year capacity converted from FromBand to ToBand
-```
-
-#### Alternative Technologies (New Processes)
+#### Alternative Technologies (New Processes Only)
 ```  
 CAPEX: Million USD per kt/year of new capacity built
 OPEX: USD per tonne of production using new technology
@@ -60,9 +52,9 @@ Deployment Unit: kt/year new capacity built
    production[tech, year] <= capacity[tech, year]
    ```
 
-3. **Process Mass Balance** (for transitions):
+3. **Process Mass Balance**:
    ```
-   sum(production[tech, year] for tech in process_techs) <= baseline_production[process]
+   sum(production[tech, year] for tech in alternative_techs) + baseline_production[process] <= total_demand[process]
    ```
 
 4. **Abatement Calculation**:
@@ -78,27 +70,21 @@ Deployment Unit: kt/year new capacity built
 
 ### Implementation Scale Units
 
-#### For Transition Technologies:
-- **Scale**: Capacity conversion from existing bands
-- **Base**: Existing production capacity in source band
-- **Constraint**: Cannot convert more capacity than exists in source band
-- **Cost**: Applied to capacity converted (install variable)
-- **Abatement**: Applied to production through converted capacity
-
 #### For Alternative Technologies:  
-- **Scale**: New capacity construction
+- **Scale**: New capacity construction that displaces baseline production
 - **Base**: Market penetration limits vs total process production
-- **Constraint**: Cannot build more than market allows
+- **Constraint**: Cannot build more than market allows or baseline production capacity
 - **Cost**: Applied to new capacity built (install variable)
-- **Abatement**: Applied to production through new capacity
+- **Abatement**: Applied to production through new capacity vs displaced baseline
 
-## Benefits of Corrected Approach
+## Benefits of Simplified Alternative-Only Approach
 
 1. **Clear Unit Consistency**: All costs, capacities, and production in consistent units
 2. **Realistic Technology Implementation**: Separates investment decisions from operational decisions  
 3. **Proper Scale Representation**: Technology deployment reflects actual industrial implementation
 4. **Accurate Costing**: CAPEX applied to capacity decisions, OPEX to production decisions
 5. **Better Constraints**: Mass balance and capacity limits properly enforced
+6. **Simplified Logic**: No complex band transition logic, only alternative technology adoption
 
 ## Next Steps
 

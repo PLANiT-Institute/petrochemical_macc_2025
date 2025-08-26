@@ -1,16 +1,6 @@
 from dataclasses import dataclass
 from typing import Dict, Optional, List
-from enum import Enum
 import numpy as np
-
-class TechBand(Enum):
-    HT = "HT"  # High Temperature
-    MT = "MT"  # Medium Temperature  
-    LT = "LT"  # Low Temperature
-
-class TechType(Enum):
-    TRANSITION = "transition"    # Band-to-band improvements
-    ALTERNATIVE = "alternative"  # New breakthrough technologies
 
 @dataclass
 class CostStructure:
@@ -33,24 +23,20 @@ class Technology:
         tech_id: str,
         name: str,
         process_type: str,
-        tech_type: TechType,
         cost_structure: CostStructure,
         constraints: TechnologyConstraints,
         emission_factor: float,  # tCO2/t product
         abatement_potential: float = 0.0,  # tCO2/t reduction vs baseline
-        from_band: Optional[TechBand] = None,
-        to_band: Optional[TechBand] = None
+        baseline_displacement: List[str] = None
     ):
         self.tech_id = tech_id
         self.name = name
         self.process_type = process_type
-        self.tech_type = tech_type
         self.cost_structure = cost_structure
         self.constraints = constraints
         self.emission_factor = emission_factor
         self.abatement_potential = abatement_potential
-        self.from_band = from_band
-        self.to_band = to_band
+        self.baseline_displacement = baseline_displacement or []
         
     def calculate_lcoa(self, discount_rate: float = 0.05) -> float:
         """Calculate Levelized Cost of Abatement (USD/tCO2)"""
@@ -78,57 +64,7 @@ class Technology:
         
         return min(ramp_limited, technical_limited)
     
-    def is_applicable_to_band(self, current_band: TechBand) -> bool:
-        """Check if technology can be applied to current technology band"""
-        if self.tech_type == TechType.TRANSITION:
-            return self.from_band == current_band
-        else:  # ALTERNATIVE
-            return True  # Alternative techs can replace any band
-            
     def __repr__(self) -> str:
-        band_info = f"{self.from_band.value}→{self.to_band.value}" if self.from_band and self.to_band else "N/A"
-        return f"Technology({self.tech_id}, {self.process_type}, {band_info}, LCOA=${self.calculate_lcoa():.1f}/tCO2)"
+        return f"Technology({self.tech_id}, {self.process_type}, LCOA=${self.calculate_lcoa():.1f}/tCO2)"
 
-class TechnologyTransition(Technology):
-    """Technology representing efficiency improvement between bands"""
-    
-    def __init__(self, tech_id: str, process_type: str, from_band: TechBand, to_band: TechBand,
-                 abatement_per_t: float, cost_structure: CostStructure, constraints: TechnologyConstraints):
-        
-        name = f"{process_type}_{from_band.value}_to_{to_band.value}"
-        super().__init__(
-            tech_id=tech_id,
-            name=name,
-            process_type=process_type,
-            tech_type=TechType.TRANSITION,
-            cost_structure=cost_structure,
-            constraints=constraints,
-            emission_factor=0.0,  # Will be calculated relative to baseline
-            abatement_potential=abatement_per_t,
-            from_band=from_band,
-            to_band=to_band
-        )
 
-class AlternativeTechnology(Technology):
-    """Breakthrough technology that can replace existing processes"""
-    
-    def __init__(self, tech_id: str, name: str, process_type: str, emission_factor: float,
-                 cost_structure: CostStructure, constraints: TechnologyConstraints, 
-                 baseline_displacement: List[str] = None):
-        
-        # Calculate abatement potential vs displaced baseline
-        baseline_ef = 1.0  # Will be set based on baseline displacement
-        abatement_potential = max(0, baseline_ef - emission_factor)
-        
-        super().__init__(
-            tech_id=tech_id,
-            name=name,
-            process_type=process_type,
-            tech_type=TechType.ALTERNATIVE,
-            cost_structure=cost_structure,
-            constraints=constraints,
-            emission_factor=emission_factor,
-            abatement_potential=abatement_potential
-        )
-        
-        self.baseline_displacement = baseline_displacement or []

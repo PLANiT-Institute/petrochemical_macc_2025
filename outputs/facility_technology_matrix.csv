@@ -1,0 +1,145 @@
+DeploymentID,TechID,FacilityID,Region,Company,TechGroup,Technology,BaselineCapacity_kt,MaxDeployment_kt,AbatementPotential_tCO2_per_t,TotalAbatementPotential_ktCO2,LCOA_USD_per_tCO2,CAPEX_Million_USD,CommercialYear,TRL
+NCC_HT_Electric_Yeosu_LG_Chem,NCC_HT_Electric,Yeosu_LG_Chem,Yeosu,LG Chem,NCC,E-cracker,3380,1352.0,2.0,2704.0,15.438859178074598,378560.0,2028,6
+NCC_HT_Hydrogen_Yeosu_LG_Chem,NCC_HT_Hydrogen,Yeosu_LG_Chem,Yeosu,LG Chem,NCC,H2-furnace,3380,1690.0,2.2,3718.0000000000005,-3.7648216331692486,540800.0,2030,5
+NCC_MT_HeatPump_Yeosu_LG_Chem,NCC_MT_HeatPump,Yeosu_LG_Chem,Yeosu,LG Chem,NCC,Heat pump,3380,2028.0,0.8,1622.4,-22.900814872803856,162240.0,2026,8
+NCC_MT_ElecHeater_Yeosu_LG_Chem,NCC_MT_ElecHeater,Yeosu_LG_Chem,Yeosu,LG Chem,NCC,Electric heater,3380,2366.0,1.0,2366.0,11.259511076317684,141960.0,2025,9
+NCC_LT_HeatPump_Yeosu_LG_Chem,NCC_LT_HeatPump,Yeosu_LG_Chem,Yeosu,LG Chem,NCC,Heat pump,3380,2704.0,0.4,1081.6000000000001,-60.13841673190434,121680.0,2024,9
+NCC_LT_ElecCompr_Yeosu_LG_Chem,NCC_LT_ElecCompr,Yeosu_LG_Chem,Yeosu,LG Chem,NCC,Electric motor,3380,3042.0,0.3,912.6,-97.55095068493785,106470.0,2023,9
+BTX_HT_Electric_Yeosu_LG_Chem,BTX_HT_Electric,Yeosu_LG_Chem,Yeosu,LG Chem,BTX,Electric furnace,800,240.0,1.2,288.0,41.259938131073454,52800.0,2030,5
+BTX_HT_Hydrogen_Yeosu_LG_Chem,BTX_HT_Hydrogen,Yeosu_LG_Chem,Yeosu,LG Chem,BTX,H2-reformer,800,320.0,1.3,416.0,10.045806632499708,83200.0,2032,4
+BTX_MT_HeatPump_Yeosu_LG_Chem,BTX_MT_HeatPump,Yeosu_LG_Chem,Yeosu,LG Chem,BTX,Heat pump,800,480.0,0.6,288.0,-19.65276664386235,33600.0,2026,8
+BTX_MT_ElecHeater_Yeosu_LG_Chem,BTX_MT_ElecHeater,Yeosu_LG_Chem,Yeosu,LG Chem,BTX,Electric heater,800,560.0,0.7,392.0,18.397116341888623,30800.0,2025,9
+BTX_LT_HeatPump_Yeosu_LG_Chem,BTX_LT_HeatPump,Yeosu_LG_Chem,Yeosu,LG Chem,BTX,Heat pump,800,640.0,0.3,192.0,-61.50792378346174,25600.0,2024,9
+BTX_LT_ElecCompr_Yeosu_LG_Chem,BTX_LT_ElecCompr,Yeosu_LG_Chem,Yeosu,LG Chem,BTX,Electric motor,800,720.0,0.2,144.0,-125.80950854015407,23040.0,2023,9
+C4_HT_Electric_Yeosu_LG_Chem,C4_HT_Electric,Yeosu_LG_Chem,Yeosu,LG Chem,C4,Electric extraction,300,90.0,1.8,162.0,68.20992602727844,31500.0,2032,4
+C4_HT_Hydrogen_Yeosu_LG_Chem,C4_HT_Hydrogen,Yeosu_LG_Chem,Yeosu,LG Chem,C4,H2-process,300,120.0,1.9,228.0,44.67005925211799,45600.0,2035,3
+C4_MT_HeatPump_Yeosu_LG_Chem,C4_MT_HeatPump,Yeosu_LG_Chem,Yeosu,LG Chem,C4,Heat pump,300,150.0,0.7,105.0,7.290280335402458,12750.0,2027,7
+C4_MT_ElecHeater_Yeosu_LG_Chem,C4_MT_ElecHeater,Yeosu_LG_Chem,Yeosu,LG Chem,C4,Electric heater,300,180.0,0.8,144.0,34.21629051854135,11700.0,2026,8
+C4_LT_HeatPump_Yeosu_LG_Chem,C4_LT_HeatPump,Yeosu_LG_Chem,Yeosu,LG Chem,C4,Heat pump,300,210.0,0.3,63.0,-27.248634833761336,10500.0,2024,9
+C4_LT_ElecCompr_Yeosu_LG_Chem,C4_LT_ElecCompr,Yeosu_LG_Chem,Yeosu,LG Chem,C4,Electric motor,300,240.0,0.3,72.0,-53.375629140325294,9120.0,2023,9
+NCC_HT_Electric_Yeosu_GS_Caltex,NCC_HT_Electric,Yeosu_GS_Caltex,Yeosu,GS Caltex,NCC,E-cracker,900,360.0,2.0,720.0,23.537048913213493,100800.0,2028,6
+NCC_HT_Hydrogen_Yeosu_GS_Caltex,NCC_HT_Hydrogen,Yeosu_GS_Caltex,Yeosu,GS Caltex,NCC,H2-furnace,900,450.0,2.2,990.0000000000001,4.648881987754278,144000.0,2030,5
+NCC_MT_HeatPump_Yeosu_GS_Caltex,NCC_MT_HeatPump,Yeosu_GS_Caltex,Yeosu,GS Caltex,NCC,Heat pump,900,540.0,0.8,432.0,-17.116393633418934,43200.0,2026,8
+NCC_MT_ElecHeater_Yeosu_GS_Caltex,NCC_MT_ElecHeater,Yeosu_GS_Caltex,Yeosu,GS Caltex,NCC,Electric heater,900,630.0,1.0,630.0,14.73016381994864,37800.0,2025,9
+NCC_LT_HeatPump_Yeosu_GS_Caltex,NCC_LT_HeatPump,Yeosu_GS_Caltex,Yeosu,GS Caltex,NCC,Heat pump,900,720.0,0.4,288.0,-53.6309428375963,32400.0,2024,9
+NCC_LT_ElecCompr_Yeosu_GS_Caltex,NCC_LT_ElecCompr,Yeosu_GS_Caltex,Yeosu,GS Caltex,NCC,Electric motor,900,810.0,0.3,243.0,-90.80245923898876,28350.0,2023,9
+BTX_HT_Electric_Yeosu_GS_Caltex,BTX_HT_Electric,Yeosu_GS_Caltex,Yeosu,GS Caltex,BTX,Electric furnace,600,180.0,1.2,216.0,46.67991750809793,39600.0,2030,5
+BTX_HT_Hydrogen_Yeosu_GS_Caltex,BTX_HT_Hydrogen,Yeosu_GS_Caltex,Yeosu,GS Caltex,BTX,H2-reformer,600,240.0,1.3,312.0,15.958511407435507,62400.0,2032,4
+BTX_MT_HeatPump_Yeosu_GS_Caltex,BTX_MT_HeatPump,Yeosu_GS_Caltex,Yeosu,GS Caltex,BTX,Heat pump,600,360.0,0.6,216.0,-16.203688858483137,25200.0,2026,8
+BTX_MT_ElecHeater_Yeosu_GS_Caltex,BTX_MT_ElecHeater,Yeosu_GS_Caltex,Yeosu,GS Caltex,BTX,Electric heater,600,420.0,0.7,294.0,20.719964646327686,23100.0,2025,9
+BTX_LT_HeatPump_Yeosu_GS_Caltex,BTX_LT_HeatPump,Yeosu_GS_Caltex,Yeosu,GS Caltex,BTX,Heat pump,600,480.0,0.3,144.0,-57.5661206001712,19200.0,2024,9
+BTX_LT_ElecCompr_Yeosu_GS_Caltex,BTX_LT_ElecCompr,Yeosu_GS_Caltex,Yeosu,GS Caltex,BTX,Electric motor,600,540.0,0.2,108.0,-121.07934472020543,17280.0,2023,9
+C4_HT_Electric_Yeosu_GS_Caltex,C4_HT_Electric,Yeosu_GS_Caltex,Yeosu,GS Caltex,C4,Electric extraction,200,60.0,1.8,108.0,91.20377792980655,21000.0,2032,4
+C4_HT_Hydrogen_Yeosu_GS_Caltex,C4_HT_Hydrogen,Yeosu_GS_Caltex,Yeosu,GS Caltex,C4,H2-process,200,80.0,1.9,152.0,68.32087835186118,30400.0,2035,3
+C4_MT_HeatPump_Yeosu_GS_Caltex,C4_MT_HeatPump,Yeosu_GS_Caltex,Yeosu,GS Caltex,C4,Heat pump,200,100.0,0.7,70.0,21.6497062173894,8500.0,2027,7
+C4_MT_ElecHeater_Yeosu_GS_Caltex,C4_MT_ElecHeater,Yeosu_GS_Caltex,Yeosu,GS Caltex,C4,Electric heater,200,120.0,0.8,96.0,43.82443577781203,7800.0,2026,8
+C4_LT_HeatPump_Yeosu_GS_Caltex,C4_LT_HeatPump,Yeosu_GS_Caltex,Yeosu,GS Caltex,C4,Heat pump,200,140.0,0.3,42.0,-7.5396189173086725,7000.0,2024,9
+C4_LT_ElecCompr_Yeosu_GS_Caltex,C4_LT_ElecCompr,Yeosu_GS_Caltex,Yeosu,GS Caltex,C4,Electric motor,200,160.0,0.3,48.0,-38.39677704382126,6080.0,2023,9
+NCC_HT_Electric_Yeosu_Lotte_Chemical,NCC_HT_Electric,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,NCC,E-cracker,1000,400.0,2.0,800.0,22.433344021892143,112000.0,2028,6
+NCC_HT_Hydrogen_Yeosu_Lotte_Chemical,NCC_HT_Hydrogen,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,NCC,H2-furnace,1000,500.0,2.2,1100.0,3.5021756071606687,160000.0,2030,5
+NCC_MT_HeatPump_Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,NCC,Heat pump,1000,600.0,0.8,480.0,-17.90475427007704,48000.0,2026,8
+NCC_MT_ElecHeater_Yeosu_Lotte_Chemical,NCC_MT_ElecHeater,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,NCC,Electric heater,1000,700.0,1.0,700.0,14.257147437953776,42000.0,2025,9
+NCC_LT_HeatPump_Yeosu_Lotte_Chemical,NCC_LT_HeatPump,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,NCC,Heat pump,1000,800.0,0.4,320.0,-54.517848553836664,36000.0,2024,9
+NCC_LT_ElecCompr_Yeosu_Lotte_Chemical,NCC_LT_ElecCompr,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,NCC,Electric motor,1000,900.0,0.3,270.0,-91.72221331508989,31500.0,2023,9
+BTX_HT_Electric_Yeosu_Lotte_Chemical,BTX_HT_Electric,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,BTX,Electric furnace,700,210.0,1.2,252.0,43.58278643551252,46200.0,2030,5
+BTX_HT_Hydrogen_Yeosu_Lotte_Chemical,BTX_HT_Hydrogen,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,BTX,H2-reformer,700,280.0,1.3,364.0,12.579822964615051,72800.0,2032,4
+BTX_MT_HeatPump_Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,BTX,Heat pump,700,420.0,0.6,252.0,-18.174590450128402,29400.0,2026,8
+BTX_MT_ElecHeater_Yeosu_Lotte_Chemical,BTX_MT_ElecHeater,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,BTX,Electric heater,700,489.99999999999994,0.7,342.99999999999994,19.392622758076794,26949.999999999996,2025,9
+BTX_LT_HeatPump_Yeosu_Lotte_Chemical,BTX_LT_HeatPump,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,BTX,Heat pump,700,560.0,0.3,168.0,-59.818579562051504,22400.0,2024,9
+BTX_LT_ElecCompr_Yeosu_Lotte_Chemical,BTX_LT_ElecCompr,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,BTX,Electric motor,700,630.0,0.2,126.0,-123.78229547446179,20160.0,2023,9
+C4_HT_Electric_Yeosu_Lotte_Chemical,C4_HT_Electric,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,C4,Electric extraction,250,75.0,1.8,135.0,77.4074667882897,26250.0,2032,4
+C4_HT_Hydrogen_Yeosu_Lotte_Chemical,C4_HT_Hydrogen,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,C4,H2-process,250,100.0,1.9,190.0,54.13038689201526,38000.0,2035,3
+C4_MT_HeatPump_Yeosu_Lotte_Chemical,C4_MT_HeatPump,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,C4,Heat pump,250,125.0,0.7,87.5,13.034050688197238,10625.0,2027,7
+C4_MT_ElecHeater_Yeosu_Lotte_Chemical,C4_MT_ElecHeater,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,C4,Electric heater,250,150.0,0.8,120.0,38.059548622249615,9750.0,2026,8
+C4_LT_HeatPump_Yeosu_Lotte_Chemical,C4_LT_HeatPump,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,C4,Heat pump,250,175.0,0.3,52.5,-19.36502846718027,8750.0,2024,9
+C4_LT_ElecCompr_Yeosu_Lotte_Chemical,C4_LT_ElecCompr,Yeosu_Lotte_Chemical,Yeosu,Lotte Chemical,C4,Electric motor,250,200.0,0.3,60.0,-47.38408830172367,7600.0,2023,9
+NCC_HT_Electric_Yeosu_Hanwha_Chemical,NCC_HT_Electric,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,NCC,E-cracker,850,340.0,2.0,680.0,24.186287084578993,95200.0,2028,6
+NCC_HT_Hydrogen_Yeosu_Hanwha_Chemical,NCC_HT_Hydrogen,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,NCC,H2-furnace,850,425.0,2.2,935.0000000000001,5.323415152809343,136000.0,2030,5
+NCC_MT_HeatPump_Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,NCC,Heat pump,850,510.0,0.8,408.0,-16.652652082443574,40800.0,2026,8
+NCC_MT_ElecHeater_Yeosu_Hanwha_Chemical,NCC_MT_ElecHeater,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,NCC,Electric heater,850,595.0,1.0,595.0,15.008408750533853,35700.0,2025,9
+NCC_LT_HeatPump_Yeosu_Hanwha_Chemical,NCC_LT_HeatPump,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,NCC,Heat pump,850,680.0,0.4,272.0,-53.10923359274902,30600.0,2024,9
+NCC_LT_ElecCompr_Yeosu_Hanwha_Chemical,NCC_LT_ElecCompr,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,NCC,Electric motor,850,765.0,0.3,229.5,-90.26142742951751,26775.0,2023,9
+BTX_HT_Electric_Yeosu_Hanwha_Chemical,BTX_HT_Electric,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,BTX,Electric furnace,400,120.0,1.2,144.0,57.5198762621469,26400.0,2030,5
+BTX_HT_Hydrogen_Yeosu_Hanwha_Chemical,BTX_HT_Hydrogen,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,BTX,H2-reformer,400,160.0,1.3,208.0,27.78392095730711,41600.0,2032,4
+BTX_MT_HeatPump_Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,BTX,Heat pump,400,240.0,0.6,144.0,-9.305533287724701,16800.0,2026,8
+BTX_MT_ElecHeater_Yeosu_Hanwha_Chemical,BTX_MT_ElecHeater,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,BTX,Electric heater,400,280.0,0.7,196.0,25.365661255205815,15400.0,2025,9
+BTX_LT_HeatPump_Yeosu_Hanwha_Chemical,BTX_LT_HeatPump,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,BTX,Heat pump,400,320.0,0.3,96.0,-49.68251423359013,12800.0,2024,9
+BTX_LT_ElecCompr_Yeosu_Hanwha_Chemical,BTX_LT_ElecCompr,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,BTX,Electric motor,400,360.0,0.2,72.0,-111.61901708030815,11520.0,2023,9
+C4_HT_Electric_Yeosu_Hanwha_Chemical,C4_HT_Electric,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,C4,Electric extraction,150,45.0,1.8,81.0,114.19762983233467,15750.0,2032,4
+C4_HT_Hydrogen_Yeosu_Hanwha_Chemical,C4_HT_Hydrogen,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,C4,H2-process,150,60.0,1.9,114.0,91.97169745160438,22800.0,2035,3
+C4_MT_HeatPump_Yeosu_Hanwha_Chemical,C4_MT_HeatPump,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,C4,Heat pump,150,75.0,0.7,52.5,36.009132099376345,6375.0,2027,7
+C4_MT_ElecHeater_Yeosu_Hanwha_Chemical,C4_MT_ElecHeater,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,C4,Electric heater,150,90.0,0.8,72.0,53.4325810370827,5850.0,2026,8
+C4_LT_HeatPump_Yeosu_Hanwha_Chemical,C4_LT_HeatPump,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,C4,Heat pump,150,105.0,0.3,31.5,12.169396999143997,5250.0,2024,9
+C4_LT_ElecCompr_Yeosu_Hanwha_Chemical,C4_LT_ElecCompr,Yeosu_Hanwha_Chemical,Yeosu,Hanwha Chemical,C4,Electric motor,150,120.0,0.3,36.0,-23.41792494731724,4560.0,2023,9
+NCC_HT_Electric_Daesan_HD_Hyundai,NCC_HT_Electric,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,NCC,E-cracker,850,340.0,2.0,680.0,23.284176120180554,90440.0,2028,6
+NCC_HT_Hydrogen_Daesan_HD_Hyundai,NCC_HT_Hydrogen,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,NCC,H2-furnace,850,425.0,2.2,935.0000000000001,4.889678909806779,129200.0,2030,5
+NCC_MT_HeatPump_Daesan_HD_Hyundai,NCC_MT_HeatPump,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,NCC,Heat pump,850,510.0,0.8,408.0,-16.434426257982413,38760.0,2026,8
+NCC_MT_ElecHeater_Daesan_HD_Hyundai,NCC_MT_ElecHeater,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,NCC,Electric heater,850,595.0,1.0,595.0,14.503751024871569,33915.0,2025,9
+NCC_LT_HeatPump_Daesan_HD_Hyundai,NCC_LT_HeatPump,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,NCC,Heat pump,850,680.0,0.4,272.0,-51.98978886226411,29070.0,2024,9
+NCC_LT_ElecCompr_Daesan_HD_Hyundai,NCC_LT_ElecCompr,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,NCC,Electric motor,850,765.0,0.3,229.5,-88.20598317668569,25436.25,2023,9
+BTX_HT_Electric_Daesan_HD_Hyundai,BTX_HT_Electric,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,BTX,Electric furnace,500,150.0,1.2,180.0,49.07951273889266,31350.0,2030,5
+BTX_HT_Hydrogen_Daesan_HD_Hyundai,BTX_HT_Hydrogen,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,BTX,H2-reformer,500,200.0,1.3,260.0,19.46519322611924,49400.0,2032,4
+BTX_MT_HeatPump_Daesan_HD_Hyundai,BTX_MT_HeatPump,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,BTX,Heat pump,500,300.0,0.6,180.0,-13.509493434263991,19950.0,2026,8
+BTX_MT_ElecHeater_Daesan_HD_Hyundai,BTX_MT_ElecHeater,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,BTX,Electric heater,500,350.0,0.7,244.99999999999997,21.73020279608717,18287.5,2025,9
+BTX_LT_HeatPump_Daesan_HD_Hyundai,BTX_LT_HeatPump,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,BTX,Heat pump,500,400.0,0.3,120.0,-53.494304037867494,15200.0,2024,9
+BTX_LT_ElecCompr_Daesan_HD_Hyundai,BTX_LT_ElecCompr,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,BTX,Electric motor,500,450.0,0.2,90.0,-114.87113094713588,13680.0,2023,9
+C4_HT_Electric_Daesan_HD_Hyundai,C4_HT_Electric,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,C4,Electric extraction,200,60.0,1.8,108.0,87.1897283930149,19950.0,2032,4
+C4_HT_Hydrogen_Daesan_HD_Hyundai,C4_HT_Hydrogen,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,C4,H2-process,200,80.0,1.9,152.0,64.84016003640906,28880.0,2035,3
+C4_MT_HeatPump_Daesan_HD_Hyundai,C4_MT_HeatPump,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,C4,Heat pump,200,100.0,0.7,70.0,20.040586523953348,8075.0,2027,7
+C4_MT_ElecHeater_Daesan_HD_Hyundai,C4_MT_ElecHeater,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,C4,Electric heater,200,120.0,0.8,96.0,42.00185805671803,7410.0,2026,8
+C4_LT_HeatPump_Daesan_HD_Hyundai,C4_LT_HeatPump,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,C4,Heat pump,200,140.0,0.3,42.0,-8.801056050539273,6650.0,2024,9
+C4_LT_ElecCompr_Daesan_HD_Hyundai,C4_LT_ElecCompr,Daesan_HD_Hyundai,Daesan,HD Hyundai Chemical,C4,Electric motor,200,160.0,0.3,48.0,-38.52496079050025,5776.0,2023,9
+NCC_HT_Electric_Daesan_LG_Chem,NCC_HT_Electric,Daesan_LG_Chem,Daesan,LG Chem,NCC,E-cracker,600,240.0,2.0,480.0,27.909998091159736,63840.0,2028,6
+NCC_HT_Hydrogen_Daesan_LG_Chem,NCC_HT_Hydrogen,Daesan_LG_Chem,Daesan,LG Chem,NCC,H2-furnace,600,300.0,2.2,660.0,9.695727710824112,91200.0,2030,5
+NCC_MT_HeatPump_Daesan_LG_Chem,NCC_MT_HeatPump,Daesan_LG_Chem,Daesan,LG Chem,NCC,Heat pump,600,360.0,0.8,288.0,-13.130267707282998,27360.0,2026,8
+NCC_MT_ElecHeater_Daesan_LG_Chem,NCC_MT_ElecHeater,Daesan_LG_Chem,Daesan,LG Chem,NCC,Electric heater,600,420.0,1.0,420.0,16.48624615529122,23940.0,2025,9
+NCC_LT_HeatPump_Daesan_LG_Chem,NCC_LT_HeatPump,Daesan_LG_Chem,Daesan,LG Chem,NCC,Heat pump,600,480.0,0.4,192.0,-48.27261049272727,20520.0,2024,9
+NCC_LT_ElecCompr_Daesan_LG_Chem,NCC_LT_ElecCompr,Daesan_LG_Chem,Daesan,LG Chem,NCC,Electric motor,600,540.0,0.3,162.0,-84.35113153420303,17955.0,2023,9
+BTX_HT_Electric_Daesan_LG_Chem,BTX_HT_Electric,Daesan_LG_Chem,Daesan,LG Chem,BTX,Electric furnace,300,90.0,1.2,108.0,65.5562500450471,18810.0,2030,5
+BTX_HT_Hydrogen_Daesan_LG_Chem,BTX_HT_Hydrogen,Daesan_LG_Chem,Daesan,LG Chem,BTX,H2-reformer,300,120.0,1.3,156.0,37.43981574192407,29640.0,2032,4
+BTX_MT_HeatPump_Daesan_LG_Chem,BTX_MT_HeatPump,Daesan_LG_Chem,Daesan,LG Chem,BTX,Heat pump,300,180.0,0.6,108.0,-3.024296966711173,11970.0,2026,8
+BTX_MT_ElecHeater_Daesan_LG_Chem,BTX_MT_ElecHeater,Daesan_LG_Chem,Daesan,LG Chem,BTX,Electric heater,300,210.0,0.7,147.0,28.79166164158193,10972.5,2025,9
+BTX_LT_HeatPump_Daesan_LG_Chem,BTX_LT_HeatPump,Daesan_LG_Chem,Daesan,LG Chem,BTX,Heat pump,300,240.0,0.3,72.0,-41.51122236066427,9120.0,2024,9
+BTX_LT_ElecCompr_Daesan_LG_Chem,BTX_LT_ElecCompr,Daesan_LG_Chem,Daesan,LG Chem,BTX,Electric motor,300,270.0,0.2,54.0,-100.49143293449202,8208.0,2023,9
+C4_HT_Electric_Daesan_LG_Chem,C4_HT_Electric,Daesan_LG_Chem,Daesan,LG Chem,C4,Electric extraction,100,30.0,1.8,54.0,152.72220631522,9975.0,2032,4
+C4_HT_Hydrogen_Daesan_LG_Chem,C4_HT_Hydrogen,Daesan_LG_Chem,Daesan,LG Chem,C4,H2-process,100,40.0,1.9,76.0,132.2449944706772,14440.0,2035,3
+C4_MT_HeatPump_Daesan_LG_Chem,C4_MT_HeatPump,Daesan_LG_Chem,Daesan,LG Chem,C4,Heat pump,100,50.0,0.7,35.0,60.96495028761613,4037.5,2027,7
+C4_MT_ElecHeater_Daesan_LG_Chem,C4_MT_ElecHeater,Daesan_LG_Chem,Daesan,LG Chem,C4,Electric heater,100,60.0,0.8,48.0,69.38507204563945,3705.0,2026,8
+C4_LT_HeatPump_Daesan_LG_Chem,C4_LT_HeatPump,Daesan_LG_Chem,Daesan,LG Chem,C4,Heat pump,100,70.0,0.3,21.0,47.36963931135083,3325.0,2024,9
+C4_LT_ElecCompr_Daesan_LG_Chem,C4_LT_ElecCompr,Daesan_LG_Chem,Daesan,LG Chem,C4,Electric motor,100,80.0,0.3,24.0,4.164767684536225,2888.0,2023,9
+NCC_HT_Electric_Ulsan_KPIC,NCC_HT_Electric,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,NCC,E-cracker,900,360.0,2.0,720.0,21.79775080155316,90720.0,2028,6
+NCC_HT_Hydrogen_Ulsan_KPIC,NCC_HT_Hydrogen,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,NCC,H2-furnace,900,450.0,2.2,990.0000000000001,3.8488628182546587,129600.0,2030,5
+NCC_MT_HeatPump_Ulsan_KPIC,NCC_MT_HeatPump,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,NCC,Heat pump,900,540.0,0.8,432.0,-16.633567829399073,38880.0,2026,8
+NCC_MT_ElecHeater_Ulsan_KPIC,NCC_MT_ElecHeater,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,NCC,Electric heater,900,630.0,1.0,630.0,13.74867286168259,34020.0,2025,9
+NCC_LT_HeatPump_Ulsan_KPIC,NCC_LT_HeatPump,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,NCC,Heat pump,900,720.0,0.4,288.0,-51.33988245214175,29160.0,2024,9
+NCC_LT_ElecCompr_Ulsan_KPIC,NCC_LT_ElecCompr,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,NCC,Electric motor,900,810.0,0.3,243.0,-86.63746755237803,25515.0,2023,9
+BTX_HT_Electric_Ulsan_KPIC,BTX_HT_Electric,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,BTX,Electric furnace,400,120.0,1.2,144.0,52.996702195254244,23760.0,2030,5
+BTX_HT_Hydrogen_Ulsan_KPIC,BTX_HT_Hydrogen,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,BTX,H2-reformer,400,160.0,1.3,208.0,24.627432381784995,37440.0,2032,4
+BTX_MT_HeatPump_Ulsan_KPIC,BTX_MT_HeatPump,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,BTX,Heat pump,400,240.0,0.6,144.0,-9.849556230138672,15120.0,2026,8
+BTX_MT_ElecHeater_Ulsan_KPIC,BTX_MT_ElecHeater,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,BTX,Electric heater,400,280.0,0.7,196.0,23.39083847108959,13860.0,2025,9
+BTX_LT_HeatPump_Ulsan_KPIC,BTX_LT_HeatPump,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,BTX,Heat pump,400,320.0,0.3,96.0,-48.31878258424243,11520.0,2024,9
+BTX_LT_ElecCompr_Ulsan_KPIC,BTX_LT_ElecCompr,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,BTX,Electric motor,400,360.0,0.2,72.0,-107.33847130448072,10368.0,2023,9
+C4_HT_Electric_Ulsan_KPIC,C4_HT_Electric,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,C4,Electric extraction,150,45.0,1.8,81.0,103.87014556849856,14175.0,2032,4
+C4_HT_Hydrogen_Ulsan_KPIC,C4_HT_Hydrogen,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,C4,H2-process,150,60.0,1.9,114.0,82.64517891072583,20520.0,2035,3
+C4_MT_HeatPump_Ulsan_KPIC,C4_MT_HeatPump,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,C4,Heat pump,150,75.0,0.7,52.5,31.35495012430554,5737.5,2027,7
+C4_MT_ElecHeater_Ulsan_KPIC,C4_MT_ElecHeater,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,C4,Electric heater,150,90.0,0.8,72.0,48.826611068967644,5265.0,2026,8
+C4_LT_HeatPump_Ulsan_KPIC,C4_LT_HeatPump,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,C4,Heat pump,150,105.0,0.3,31.5,7.675621141037503,4725.0,2024,9
+C4_LT_ElecCompr_Ulsan_KPIC,C4_LT_ElecCompr,Ulsan_KPIC,Ulsan,Korea Petrochemical Ind. Co.,C4,Electric motor,150,120.0,0.3,36.0,-25.172177650325622,4104.0,2023,9
+NCC_HT_Electric_Ulsan_SK_Innovation,NCC_HT_Electric,Ulsan_SK_Innovation,Ulsan,SK Innovation,NCC,E-cracker,500,200.0,2.0,400.0,29.744426019066875,50400.0,2028,6
+NCC_HT_Hydrogen_Ulsan_SK_Innovation,NCC_HT_Hydrogen,Ulsan_SK_Innovation,Ulsan,SK Innovation,NCC,H2-furnace,500,250.0,2.2,550.0,12.105148758528648,72000.0,2030,5
+NCC_MT_HeatPump_Ulsan_SK_Innovation,NCC_MT_HeatPump,Ulsan_SK_Innovation,Ulsan,SK Innovation,NCC,Heat pump,500,300.0,0.8,240.0,-10.957371245460704,21600.0,2026,8
+NCC_MT_ElecHeater_Ulsan_SK_Innovation,NCC_MT_ElecHeater,Ulsan_SK_Innovation,Ulsan,SK Innovation,NCC,Electric heater,500,350.0,1.0,350.0,17.15439081204561,18900.0,2025,9
+NCC_LT_HeatPump_Ulsan_SK_Innovation,NCC_LT_HeatPump,Ulsan_SK_Innovation,Ulsan,SK Innovation,NCC,Heat pump,500,400.0,0.4,160.0,-44.95416129521109,16200.0,2024,9
+NCC_LT_ElecCompr_Ulsan_SK_Innovation,NCC_LT_ElecCompr,Ulsan_SK_Innovation,Ulsan,SK Innovation,NCC,Electric motor,500,450.0,0.3,135.0,-80.01523820444993,14175.0,2023,9
+BTX_HT_Electric_Ulsan_SK_Innovation,BTX_HT_Electric,Ulsan_SK_Innovation,Ulsan,SK Innovation,BTX,Electric furnace,300,90.0,1.2,108.0,62.752665073898314,17820.0,2030,5
+BTX_HT_Hydrogen_Ulsan_SK_Innovation,BTX_HT_Hydrogen,Ulsan_SK_Innovation,Ulsan,SK Innovation,BTX,H2-reformer,300,120.0,1.3,156.0,35.27030097666944,28080.0,2032,4
+BTX_MT_HeatPump_Ulsan_SK_Innovation,BTX_MT_HeatPump,Ulsan_SK_Innovation,Ulsan,SK Innovation,BTX,Heat pump,300,180.0,0.6,108.0,-3.641216216456081,11340.0,2026,8
+BTX_MT_ElecHeater_Ulsan_SK_Innovation,BTX_MT_ElecHeater,Ulsan_SK_Innovation,Ulsan,SK Innovation,BTX,Electric heater,300,210.0,0.7,147.0,27.571965419079906,10395.0,2025,9
+BTX_LT_HeatPump_Ulsan_SK_Innovation,BTX_LT_HeatPump,Ulsan_SK_Innovation,Ulsan,SK Innovation,BTX,Heat pump,300,240.0,0.3,72.0,-41.22353685431946,8640.0,2024,9
+BTX_LT_ElecCompr_Ulsan_SK_Innovation,BTX_LT_ElecCompr,Ulsan_SK_Innovation,Ulsan,SK Innovation,BTX,Electric motor,300,270.0,0.2,54.0,-98.82417642857317,7776.0,2023,9
+C4_HT_Electric_Ulsan_SK_Innovation,C4_HT_Electric,Ulsan_SK_Innovation,Ulsan,SK Innovation,C4,Electric extraction,100,30.0,1.8,54.0,145.25907899304914,9450.0,2032,4
+C4_HT_Hydrogen_Ulsan_SK_Innovation,C4_HT_Hydrogen,Ulsan_SK_Innovation,Ulsan,SK Innovation,C4,H2-process,100,40.0,1.9,76.0,125.2166532902636,13680.0,2035,3
+C4_MT_HeatPump_Ulsan_SK_Innovation,C4_MT_HeatPump,Ulsan_SK_Innovation,Ulsan,SK Innovation,C4,Heat pump,100,50.0,0.7,35.0,57.20191671188204,3825.0,2027,7
+C4_MT_ElecHeater_Ulsan_SK_Innovation,C4_MT_ElecHeater,Ulsan_SK_Innovation,Ulsan,SK Innovation,C4,Electric heater,100,60.0,0.8,48.0,66.12127253565485,3510.0,2026,8
+C4_LT_HeatPump_Ulsan_SK_Innovation,C4_LT_HeatPump,Ulsan_SK_Innovation,Ulsan,SK Innovation,C4,Heat pump,100,70.0,0.3,21.0,43.15184979065231,3150.0,2024,9
+C4_LT_ElecCompr_Ulsan_SK_Innovation,C4_LT_ElecCompr,Ulsan_SK_Innovation,Ulsan,SK Innovation,C4,Electric motor,100,80.0,0.3,24.0,1.7897561233816244,2736.0,2023,9

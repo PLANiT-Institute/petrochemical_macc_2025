@@ -171,6 +171,83 @@ def create_corrected_database():
         ]
     }
     
+    # Regional Facilities data (detailed facility-level information)
+    regional_facilities_data = {
+        'FacilityID': [
+            # Yeosu facilities (largest region)
+            'Yeosu_LG_Chem', 'Yeosu_GS_Caltex', 'Yeosu_Lotte_Chemical', 'Yeosu_Hanwha_Chemical',
+            # Daesan facilities (second largest)  
+            'Daesan_HD_Hyundai', 'Daesan_LG_Chem',
+            # Ulsan facilities (smallest)
+            'Ulsan_KPIC', 'Ulsan_SK_Innovation'
+        ],
+        'Region': [
+            'Yeosu', 'Yeosu', 'Yeosu', 'Yeosu',
+            'Daesan', 'Daesan', 
+            'Ulsan', 'Ulsan'
+        ],
+        'Company': [
+            'LG Chem', 'GS Caltex', 'Lotte Chemical', 'Hanwha Chemical',
+            'HD Hyundai Chemical', 'LG Chem',
+            'Korea Petrochemical Ind. Co.', 'SK Innovation'
+        ],
+        'NCC_Capacity_kt_per_year': [
+            3380, 900, 1000, 850,  # Yeosu: LG Chem largest
+            850, 600,              # Daesan
+            900, 500               # Ulsan
+        ],
+        'BTX_Capacity_kt_per_year': [
+            800, 600, 700, 400,    # Yeosu
+            500, 300,              # Daesan  
+            400, 300               # Ulsan
+        ],
+        'C4_Capacity_kt_per_year': [
+            300, 200, 250, 150,    # Yeosu
+            200, 100,              # Daesan
+            150, 100               # Ulsan
+        ],
+        'Propylene_Capacity_kt_per_year': [
+            1980, 970, 800, 450,   # Yeosu: LG Chem largest
+            451, 300,              # Daesan
+            560, 250               # Ulsan
+        ],
+        'TechnicalReadiness_Level': [
+            9, 8, 9, 8,             # Yeosu: mature facilities
+            8, 9,                  # Daesan
+            8, 7                   # Ulsan: KPIC mature, SK newer
+        ],
+        'Infrastructure_Score': [
+            95, 90, 95, 85,         # Yeosu: excellent infrastructure
+            90, 88,                # Daesan: good
+            85, 80                 # Ulsan: good but smaller
+        ],
+        'Labor_Cost_Index': [
+            100, 100, 100, 100,    # Yeosu: baseline
+            95, 95,                # Daesan: slightly lower
+            90, 90                 # Ulsan: lower labor costs
+        ],
+        'Electricity_Price_USD_per_MWh': [
+            118, 118, 118, 118,    # Yeosu: standard rate
+            115, 115,              # Daesan: slightly lower
+            112, 112               # Ulsan: lower industrial rate
+        ],
+        'Hydrogen_Access_Score': [
+            80, 75, 85, 70,        # Yeosu: good access planned
+            85, 80,                # Daesan: good access
+            70, 65                 # Ulsan: moderate access
+        ],
+        'Year_Established': [
+            1991, 1967, 1976, 1986, # Yeosu
+            1980, 1995,             # Daesan
+            1972, 1995              # Ulsan
+        ],
+        'Environmental_Compliance': [
+            'High', 'High', 'High', 'Medium',  # Yeosu
+            'High', 'High',                    # Daesan
+            'High', 'Medium'                   # Ulsan
+        ]
+    }
+
     # Regional constraints (Korea specific) - by Tech Group
     regional_data = {
         'Region': ['Korea'] * 3,
@@ -229,6 +306,9 @@ def create_corrected_database():
         
         # Technology costs
         pd.DataFrame(alt_costs_data).to_excel(writer, sheet_name='AlternativeCosts', index=False)
+        
+        # Regional facilities (detailed facility-level data)
+        pd.DataFrame(regional_facilities_data).to_excel(writer, sheet_name='RegionalFacilities', index=False)
         
         # Regional constraints
         pd.DataFrame(regional_data).to_excel(writer, sheet_name='RegionalConstraints', index=False)

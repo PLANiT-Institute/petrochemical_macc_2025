@@ -1,24 +1,22 @@
 from typing import Dict, List, Optional, Tuple
-from .technology import Technology, TechBand, TechType, TechnologyTransition, AlternativeTechnology
+from .technology import Technology
 from .scenario import EmissionsScenario
 import pandas as pd
 
 class TechnologyPortfolio:
-    """Manages collection of technologies and their interactions"""
+    """Manages collection of alternative technologies at facility level"""
     
     def __init__(self):
         self.technologies: Dict[str, Technology] = {}
-        self.transitions: Dict[str, TechnologyTransition] = {}
-        self.alternatives: Dict[str, AlternativeTechnology] = {}
+        self.facilities: Dict[str, Dict] = {}  # Facility-level data
         
     def add_technology(self, tech: Technology):
         """Add a technology to the portfolio"""
         self.technologies[tech.tech_id] = tech
-        
-        if isinstance(tech, TechnologyTransition):
-            self.transitions[tech.tech_id] = tech
-        elif isinstance(tech, AlternativeTechnology):
-            self.alternatives[tech.tech_id] = tech
+    
+    def add_facility(self, facility_id: str, facility_data: Dict):
+        """Add facility data to the portfolio"""
+        self.facilities[facility_id] = facility_data
     
     def get_technologies_for_process(self, process_type: str) -> List[Technology]:
         """Get all technologies applicable to a process"""

@@ -29,49 +29,6 @@ class DataValidationResult:
 class DataSchema:
     """Defines expected data schemas for validation"""
     
-    TRANSITION_POTENTIALS_SCHEMA = {
-        'required_columns': [
-            'TechID', 'ProcessType', 'FromBand', 'ToBand', 'TransitionID',
-            'MaxApplicability', 'TechnicalReadiness', 'CommercialYear'
-        ],
-        'data_types': {
-            'TechID': str,
-            'ProcessType': str,
-            'FromBand': str,
-            'ToBand': str,
-            'TransitionID': str,
-            'MaxApplicability': float,
-            'TechnicalReadiness': int,
-            'CommercialYear': int
-        },
-        'constraints': {
-            'MaxApplicability': (0.0, 1.0),
-            'TechnicalReadiness': (1, 9),
-            'CommercialYear': (2020, 2060)
-        }
-    }
-    
-    ABATEMENT_POTENTIALS_SCHEMA = {
-        'required_columns': [
-            'TransitionID', 'EmissionReduction_tCO2_per_t', 'EnergyReduction_GJ_per_t',
-            'PrimaryFuelShift', 'SecondaryBenefit', 'Lifetime_years', 'RampRate_per_year'
-        ],
-        'data_types': {
-            'TransitionID': str,
-            'EmissionReduction_tCO2_per_t': float,
-            'EnergyReduction_GJ_per_t': float,
-            'PrimaryFuelShift': str,
-            'SecondaryBenefit': str,
-            'Lifetime_years': int,
-            'RampRate_per_year': float
-        },
-        'constraints': {
-            'EmissionReduction_tCO2_per_t': (0.0, 10.0),
-            'EnergyReduction_GJ_per_t': (0.0, 100.0),
-            'Lifetime_years': (5, 50),
-            'RampRate_per_year': (0.01, 1.0)
-        }
-    }
     
     ALTERNATIVE_TECHNOLOGIES_SCHEMA = {
         'required_columns': [

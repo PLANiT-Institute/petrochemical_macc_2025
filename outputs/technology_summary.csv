@@ -1,0 +1,10 @@
+Technology,MaxDeployment_kt,TotalAbatementPotential_ktCO2,CAPEX_Million_USD,LCOA_USD_per_tCO2
+E-cracker,3592.0,7184.0,981960.0,23.54
+Electric extraction,435.0,783.0,148050.0,105.01
+Electric furnace,1200.0,1440.0,256740.0,52.43
+Electric heater,9956.0,8942.0,572990.0,29.1
+Electric motor,12842.0,3492.6,431072.25,-76.4
+H2-furnace,4490.0,9878.0,1402800.0,5.03
+H2-process,580.0,1102.0,214320.0,83.01
+H2-reformer,1600.0,2080.0,404560.0,22.9
+Heat pump,19912.0,10396.0,1133605.0,-15.86

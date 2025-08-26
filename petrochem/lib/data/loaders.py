@@ -3,8 +3,7 @@ from pathlib import Path
 from typing import Dict, List, Any, Optional
 
 from ..core.technology import (
-    TechnologyTransition, AlternativeTechnology,
-    TechBand, TechType, CostStructure, TechnologyConstraints
+    Technology, CostStructure, TechnologyConstraints
 )
 from ..core.scenario import EmissionsScenario, EmissionsBaseline, EmissionsTarget, ProcessBaseline
 from ..core.portfolio import TechnologyPortfolio
@@ -91,50 +90,8 @@ class DataLoader:
             process_baselines=process_baselines
         )
     
-    def load_transition_technologies(self, filename: str = "Korea_Petrochemical_MACC_Database.xlsx") -> List[TechnologyTransition]:
-        """Load technology transition data"""
-        filepath = self.data_dir / filename
-        
-        with pd.ExcelFile(filepath) as xls:
-            transitions_df = pd.read_excel(xls, sheet_name='TransitionPotentials')
-            abatement_df = pd.read_excel(xls, sheet_name='AbatementPotentials')
-            costs_df = pd.read_excel(xls, sheet_name='TransitionCosts')
-        
-        # Merge dataframes
-        merged_df = transitions_df.merge(abatement_df, on='TransitionID')
-        merged_df = merged_df.merge(costs_df, on='TransitionID')
-        
-        technologies = []
-        for _, row in merged_df.iterrows():
-            cost_structure = CostStructure(
-                capex_usd_per_kt=row['CAPEX_Million_USD_per_kt_capacity'] * 1e6,  # Convert to USD
-                opex_delta_usd_per_t=row['OPEX_Delta_USD_per_t'],
-                maintenance_pct=row['MaintenanceCost_Pct']
-            )
-            
-            constraints = TechnologyConstraints(
-                lifetime_years=int(row['Lifetime_years']),
-                start_year=int(row['CommercialYear']),
-                ramp_rate_per_year=float(row['RampRate_per_year']),
-                max_applicability=row['MaxApplicability'],
-                technical_readiness_level=int(row['TechnicalReadiness'])
-            )
-            
-            tech = TechnologyTransition(
-                tech_id=row['TechID'],
-                process_type=row['ProcessType'],
-                from_band=TechBand(row['FromBand']),
-                to_band=TechBand(row['ToBand']),
-                abatement_per_t=row['EmissionReduction_tCO2_per_t'],
-                cost_structure=cost_structure,
-                constraints=constraints
-            )
-            
-            technologies.append(tech)
-        
-        return technologies
     
-    def load_alternative_technologies(self, filename: str = "Korea_Petrochemical_MACC_Database.xlsx") -> List[AlternativeTechnology]:
+    def load_alternative_technologies(self, filename: str = "Korea_Petrochemical_MACC_Database.xlsx") -> List[Technology]:
         """Load alternative technology data"""
         filepath = self.data_dir / filename
         
@@ -164,13 +121,14 @@ class DataLoader:
             
             baseline_displacement = row['BaselineDisplacement'].split('+') if '+' in str(row['BaselineDisplacement']) else [row['BaselineDisplacement']]
             
-            tech = AlternativeTechnology(
+            tech = Technology(
                 tech_id=row['TechID'],
                 name=row['TechName'],
                 process_type=row['ProcessType'],
-                emission_factor=row['EmissionFactor_tCO2_per_t'],
                 cost_structure=cost_structure,
                 constraints=constraints,
+                emission_factor=row['EmissionFactor_tCO2_per_t'],
+                abatement_potential=row.get('EmissionReduction_tCO2_per_t', 0.0),
                 baseline_displacement=baseline_displacement
             )
             
@@ -182,12 +140,7 @@ class DataLoader:
         """Load complete technology portfolio"""
         portfolio = TechnologyPortfolio()
         
-        # Load transitions
-        transitions = self.load_transition_technologies()
-        for tech in transitions:
-            portfolio.add_technology(tech)
-        
-        # Load alternatives
+        # Load only alternative technologies
         alternatives = self.load_alternative_technologies()
         for tech in alternatives:
             portfolio.add_technology(tech)
