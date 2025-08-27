@@ -9,8 +9,8 @@ import numpy as np
 def create_corrected_database():
     """Create corrected petrochemical MACC database with band-based structure"""
     
-    # Technology bands baseline data (2023 BAU structure)
-    bands_data = {
+    # Baseline fuel and feedstock consumption data (2023 BAU structure)
+    baseline_consumption_data = {
         'TechGroup': ['NCC'] * 3 + ['BTX'] * 3 + ['C4'] * 3,
         'Band': ['HT', 'MT', 'LT'] * 3,
         'TechKey': [
@@ -28,24 +28,126 @@ def create_corrected_database():
             1200, 800, 1100,   # BTX bands  
             450, 350, 200      # C4 bands
         ],
-        'SEC_GJ_per_t': [
-            28.5, 12.3, 8.7,   # NCC: HT high energy, MT medium, LT low
-            15.2, 8.9, 6.4,    # BTX: HT furnace energy
-            22.1, 9.8, 7.2     # C4: extraction energy
+        # Fuel consumption (GJ/t product)
+        'NaturalGas_GJ_per_t': [
+            22.0, 8.5, 2.1,    # NCC: HT high gas use, MT medium, LT low
+            11.2, 5.8, 1.9,    # BTX: reforming gas consumption
+            16.8, 7.2, 2.4     # C4: extraction heating
         ],
-        'EmissionIntensity_tCO2_per_t': [
-            2.85, 1.23, 0.65,  # NCC emissions by band
-            1.52, 0.89, 0.48,  # BTX emissions by band
-            2.21, 0.98, 0.54   # C4 emissions by band
+        'FuelOil_GJ_per_t': [
+            4.5, 2.1, 0.0,     # NCC: some fuel oil in HT/MT, none in LT
+            2.8, 1.5, 0.0,     # BTX: fuel oil backup
+            3.2, 1.8, 0.0      # C4: fuel oil heating
         ],
-        'Primary_Energy_Source': [
-            'Natural gas/fuel oil', 'Steam/fuel gas', 'Electricity',  # NCC
-            'Natural gas', 'Steam', 'Electricity',                   # BTX
-            'Fuel gas', 'Steam', 'Electricity'                       # C4
+        'Electricity_GJ_per_t': [
+            2.0, 1.7, 6.6,     # NCC: LT is electricity-intensive (compression)
+            1.2, 1.6, 4.5,     # BTX: LT compression
+            2.1, 0.8, 4.8      # C4: LT cooling
+        ],
+        # Feedstock consumption (t feedstock/t product)
+        'Naphtha_t_per_t': [
+            1.45, 1.42, 1.38,  # NCC: cracking efficiency improves HT→LT
+            0.0, 0.0, 0.0,     # BTX: no direct naphtha
+            0.0, 0.0, 0.0      # C4: no direct naphtha
+        ],
+        'LPG_t_per_t': [
+            0.0, 0.0, 0.0,     # NCC: no LPG feedstock
+            0.0, 0.0, 0.0,     # BTX: no LPG feedstock  
+            0.85, 0.82, 0.78   # C4: LPG cracking efficiency improves
+        ],
+        'Reformate_t_per_t': [
+            0.0, 0.0, 0.0,     # NCC: no reformate
+            1.25, 1.22, 1.18,  # BTX: reformate processing efficiency
+            0.0, 0.0, 0.0      # C4: no reformate
         ]
     }
     
-    # Alternative technologies - Band-specific options (NO CCUS)
+    # Time-varying emission factors (2023-2050)
+    years = list(range(2023, 2051))
+    emission_factors_timeseries = []
+    
+    for year in years:
+        # Electricity emission factor declines due to renewable energy deployment
+        # Korea targets: 2030: 30% renewable, 2040: 60%, 2050: 80%
+        if year <= 2030:
+            elec_ef = 0.1389 - (year - 2023) * (0.1389 - 0.090) / (2030 - 2023)  # Linear decline to 0.090
+        elif year <= 2040:
+            elec_ef = 0.090 - (year - 2030) * (0.090 - 0.045) / (2040 - 2030)     # Decline to 0.045
+        else:
+            elec_ef = 0.045 - (year - 2040) * (0.045 - 0.020) / (2050 - 2040)     # Decline to 0.020 by 2050
+        
+        # Green hydrogen (zero emissions) used throughout
+        green_h2_ef = 0.0
+        
+        # Fossil fuel emission factors remain constant
+        emission_factors_timeseries.append({
+            'Year': year,
+            'Natural_Gas_tCO2_per_GJ': 0.0561,
+            'Fuel_Oil_tCO2_per_GJ': 0.0774,
+            'Electricity_tCO2_per_GJ': elec_ef,
+            'Green_Hydrogen_tCO2_per_GJ': green_h2_ef,
+            'Naphtha_tCO2_per_t': 0.73,
+            'LPG_tCO2_per_t': 0.68,
+            'Reformate_tCO2_per_t': 0.71
+        })
+    
+    # Time-varying fuel costs (2023-2050, USD)
+    fuel_costs_timeseries = []
+    
+    for year in years:
+        # Green hydrogen cost decline based on IEA projections
+        if year <= 2030:
+            green_h2_cost = 6.5 - (year - 2023) * (6.5 - 4.2) / (2030 - 2023)    # $6.5/kg to $4.2/kg by 2030
+        elif year <= 2040:
+            green_h2_cost = 4.2 - (year - 2030) * (4.2 - 2.8) / (2040 - 2030)    # $4.2/kg to $2.8/kg by 2040
+        else:
+            green_h2_cost = 2.8 - (year - 2040) * (2.8 - 2.0) / (2050 - 2040)    # $2.8/kg to $2.0/kg by 2050
+        
+        # Electricity cost decline due to renewables (USD/MWh)
+        if year <= 2030:
+            elec_cost = 118 - (year - 2023) * (118 - 95) / (2030 - 2023)          # $118 to $95/MWh by 2030
+        elif year <= 2040:
+            elec_cost = 95 - (year - 2030) * (95 - 75) / (2040 - 2030)            # $95 to $75/MWh by 2040
+        else:
+            elec_cost = 75 - (year - 2040) * (75 - 60) / (2050 - 2040)            # $75 to $60/MWh by 2050
+        
+        # Convert H2 cost from $/kg to $/GJ (1 kg H2 = 120 MJ = 0.12 GJ)
+        green_h2_cost_per_gj = green_h2_cost / 0.12
+        
+        # Convert electricity cost from $/MWh to $/GJ (1 MWh = 3.6 GJ)
+        elec_cost_per_gj = elec_cost / 3.6
+        
+        # Fossil fuel costs with moderate inflation
+        inflation_factor = 1.02 ** (year - 2023)  # 2% annual inflation
+        
+        fuel_costs_timeseries.append({
+            'Year': year,
+            'Natural_Gas_USD_per_GJ': 12.5 * inflation_factor,
+            'Fuel_Oil_USD_per_GJ': 16.8 * inflation_factor,
+            'Electricity_USD_per_GJ': elec_cost_per_gj,
+            'Green_Hydrogen_USD_per_GJ': green_h2_cost_per_gj,
+            'Naphtha_USD_per_t': 650 * inflation_factor,
+            'LPG_USD_per_t': 580 * inflation_factor,
+            'Reformate_USD_per_t': 620 * inflation_factor
+        })
+    
+    # Static emission factors for 2023 baseline (for backward compatibility)
+    emission_factors_static = {
+        'Fuel_Feedstock': ['Natural_Gas', 'Fuel_Oil', 'Electricity', 'Green_Hydrogen', 'Naphtha', 'LPG', 'Reformate'],
+        'EmissionFactor_tCO2_per_GJ': [0.0561, 0.0774, 0.1389, 0.0, 0.0, 0.0, 0.0],  # Green H2: zero emissions
+        'EmissionFactor_tCO2_per_t': [0.0, 0.0, 0.0, 0.0, 0.73, 0.68, 0.71],  # Feedstock combustion factors
+        'Description': [
+            'Natural gas combustion', 
+            'Heavy fuel oil combustion',
+            'Korean electricity grid (2023 baseline)',
+            'Green hydrogen from renewable electrolysis',
+            'Naphtha feedstock carbon content',
+            'LPG feedstock carbon content', 
+            'Reformate feedstock carbon content'
+        ]
+    }
+    
+    # Alternative technologies with fuel/feedstock consumption profiles
     alternatives_data = {
         'TechID': [
             # NCC HT band alternatives (Pyrolysis furnace)
@@ -84,35 +186,59 @@ def create_corrected_database():
             'Electric furnace', 'H2-reformer', 'Heat pump', 'Electric heater', 'Heat pump', 'Electric motor',
             'Electric extraction', 'H2-process', 'Heat pump', 'Electric heater', 'Heat pump', 'Electric motor'
         ],
-        'EmissionReduction_tCO2_per_t': [
-            # NCC: HT(high reduction), MT(medium), LT(low but some reduction)
-            2.0, 2.2, 0.8, 1.0, 0.4, 0.3,
-            # BTX: Similar pattern but lower absolute values
-            1.2, 1.3, 0.6, 0.7, 0.3, 0.2,
-            # C4: Medium reduction potential
-            1.8, 1.9, 0.7, 0.8, 0.3, 0.3
+        # New fuel consumption profiles (GJ/t product)
+        'NaturalGas_GJ_per_t': [
+            # NCC alternatives: E-cracker eliminates gas, H2 reduces gas
+            0.0, 12.0, 3.5, 5.0, 1.8, 1.8,  # NCC: E-cracker=0, H2-furnace reduced
+            0.0, 8.5, 2.8, 3.2, 1.5, 1.5,   # BTX: Electric furnace=0
+            0.0, 10.2, 3.6, 4.1, 2.0, 2.0   # C4: Electric extraction=0
         ],
-        'MaxApplicability': [
-            # HT bands: 30-50% (major technology shift possible)
-            0.4, 0.5, 0.6, 0.7, 0.8, 0.9,  # NCC: MT/LT higher applicability
-            0.3, 0.4, 0.6, 0.7, 0.8, 0.9,  # BTX
-            0.3, 0.4, 0.5, 0.6, 0.7, 0.8   # C4
+        'FuelOil_GJ_per_t': [
+            # Most alternatives eliminate fuel oil
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0,    # NCC: all alternatives eliminate fuel oil
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0,    # BTX: all alternatives eliminate fuel oil
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0     # C4: all alternatives eliminate fuel oil
+        ],
+        'Electricity_GJ_per_t': [
+            # Alternative technologies increase electricity consumption
+            28.0, 3.2, 6.5, 12.0, 9.2, 8.8,  # NCC: E-cracker very high electricity
+            18.5, 2.8, 4.2, 8.5, 6.8, 6.2,  # BTX: Electric furnace high electricity
+            22.0, 3.5, 5.8, 9.2, 7.5, 7.0   # C4: Electric extraction high electricity
+        ],
+        # Feedstock consumption (same as baseline - no change in feedstock efficiency)
+        'Naphtha_t_per_t': [
+            1.45, 1.45, 1.42, 1.42, 1.38, 1.38,  # NCC: same as baseline
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0,        # BTX: no naphtha
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0         # C4: no naphtha
+        ],
+        'LPG_t_per_t': [
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0,        # NCC: no LPG
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0,        # BTX: no LPG
+            0.85, 0.85, 0.82, 0.82, 0.78, 0.78   # C4: same as baseline
+        ],
+        'Reformate_t_per_t': [
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0,        # NCC: no reformate
+            1.25, 1.25, 1.22, 1.22, 1.18, 1.18, # BTX: same as baseline
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0         # C4: no reformate
+        ],
+        # Hydrogen consumption (GJ/t product) - only for H2-based technologies
+        'Hydrogen_GJ_per_t': [
+            0.0, 18.5, 0.0, 0.0, 0.0, 0.0,      # NCC: H2-furnace consumes H2
+            0.0, 15.2, 0.0, 0.0, 0.0, 0.0,      # BTX: H2-reformer consumes H2
+            0.0, 16.8, 0.0, 0.0, 0.0, 0.0       # C4: H2-process consumes H2
         ],
         'CommercialYear': [
-            # Realistic commercialization timeline by technology type
             2028, 2030, 2026, 2025, 2024, 2023,  # NCC: E-cracker 2028, heat pumps earlier
             2030, 2032, 2026, 2025, 2024, 2023,  # BTX: Similar but later for HT
             2032, 2035, 2027, 2026, 2024, 2023   # C4: Later for novel processes
         ],
         'TechnicalReadiness': [
-            # TRL by technology maturity
             6, 5, 8, 9, 9, 9,  # NCC: Electric/H2 lower TRL, heat pumps mature
             5, 4, 8, 9, 9, 9,  # BTX: HT alternatives less mature
             4, 3, 7, 8, 9, 9   # C4: Novel processes lowest TRL
         ],
         'Lifetime_years': [25] * 18,  # Standard industrial equipment lifetime
         'RampRate_per_year': [
-            # Ramp rates based on technology maturity and scale
             0.15, 0.12, 0.20, 0.25, 0.30, 0.35,  # NCC: Mature techs faster
             0.12, 0.10, 0.20, 0.25, 0.30, 0.35,  # BTX
             0.10, 0.08, 0.18, 0.22, 0.28, 0.33   # C4
@@ -249,9 +375,32 @@ def create_corrected_database():
     }
 
     
-    # Calculate baseline emissions from bands
-    baseline_emissions = sum(bands_data['Activity_kt_product'][i] * bands_data['EmissionIntensity_tCO2_per_t'][i] 
-                           for i in range(len(bands_data['TechKey']))) / 1000  # Convert to Mt
+    # Calculate baseline emissions from fuel and feedstock consumption
+    baseline_emissions = 0.0
+    emission_factors = {
+        'Natural_Gas': 0.0561,    # tCO2/GJ
+        'Fuel_Oil': 0.0774,      # tCO2/GJ  
+        'Electricity': 0.1389,   # tCO2/GJ
+        'Naphtha': 0.73,         # tCO2/t feedstock
+        'LPG': 0.68,             # tCO2/t feedstock
+        'Reformate': 0.71        # tCO2/t feedstock
+    }
+    
+    for i in range(len(baseline_consumption_data['TechKey'])):
+        activity = baseline_consumption_data['Activity_kt_product'][i]
+        
+        # Fuel emissions
+        ng_emissions = activity * baseline_consumption_data['NaturalGas_GJ_per_t'][i] * emission_factors['Natural_Gas'] / 1000
+        oil_emissions = activity * baseline_consumption_data['FuelOil_GJ_per_t'][i] * emission_factors['Fuel_Oil'] / 1000
+        elec_emissions = activity * baseline_consumption_data['Electricity_GJ_per_t'][i] * emission_factors['Electricity'] / 1000
+        
+        # Feedstock emissions
+        naphtha_emissions = activity * baseline_consumption_data['Naphtha_t_per_t'][i] * emission_factors['Naphtha'] / 1000
+        lpg_emissions = activity * baseline_consumption_data['LPG_t_per_t'][i] * emission_factors['LPG'] / 1000
+        reformate_emissions = activity * baseline_consumption_data['Reformate_t_per_t'][i] * emission_factors['Reformate'] / 1000
+        
+        total_process_emissions = ng_emissions + oil_emissions + elec_emissions + naphtha_emissions + lpg_emissions + reformate_emissions
+        baseline_emissions += total_process_emissions
     
     targets_data = {
         'Year': [2030, 2035, 2040, 2045, 2050],
@@ -266,12 +415,21 @@ def create_corrected_database():
         'Sector': ['Petrochemicals'] * 5
     }
     
-    # Create Excel file with corrected band-based structure
+    # Create Excel file with fuel/feedstock-based structure and time-varying parameters
     with pd.ExcelWriter('data/Korea_Petrochemical_MACC_Database.xlsx', engine='openpyxl') as writer:
-        # Technology bands baseline (2023 BAU structure)
-        pd.DataFrame(bands_data).to_excel(writer, sheet_name='TechBands_2023', index=False)
+        # Baseline fuel and feedstock consumption (2023 BAU structure)
+        pd.DataFrame(baseline_consumption_data).to_excel(writer, sheet_name='BaselineConsumption_2023', index=False)
         
-        # Alternative technologies (band-specific, NO CCUS, NO transitions between bands)
+        # Static emission factors for 2023 baseline (for backward compatibility)
+        pd.DataFrame(emission_factors_static).to_excel(writer, sheet_name='EmissionFactors', index=False)
+        
+        # Time-varying emission factors (2023-2050)
+        pd.DataFrame(emission_factors_timeseries).to_excel(writer, sheet_name='EmissionFactors_TimeSeries', index=False)
+        
+        # Time-varying fuel costs (2023-2050)
+        pd.DataFrame(fuel_costs_timeseries).to_excel(writer, sheet_name='FuelCosts_TimeSeries', index=False)
+        
+        # Alternative technologies with fuel/feedstock consumption profiles
         pd.DataFrame(alternatives_data).to_excel(writer, sheet_name='AlternativeTechnologies', index=False)
         
         # Technology costs
@@ -284,14 +442,14 @@ def create_corrected_database():
         pd.DataFrame(targets_data).to_excel(writer, sheet_name='EmissionsTargets', index=False)
     
     print("✅ Updated Korea_Petrochemical_MACC_Database.xlsx")
-    print(f"   - Baseline emissions: {baseline_emissions:.1f} MtCO2")
+    print(f"   - Baseline emissions: {baseline_emissions:.1f} MtCO2 (calculated from fuel/feedstock consumption)")
     print(f"   - Technology groups: NCC, BTX, C4")
-    print(f"   - Bands per group: HT (high temp), MT (medium temp), LT (low temp)")
-    print(f"   - Alternative technologies: {len(alternatives_data['TechID'])} (NO CCUS, NO band transitions)")
+    print(f"   - Emission calculation: Based on fuel and feedstock consumption × emission factors")
+    print(f"   - Alternative technologies: {len(alternatives_data['TechID'])} with fuel/feedstock profiles")
     print(f"   - Commercialization years: {min(alternatives_data['CommercialYear'])}-{max(alternatives_data['CommercialYear'])}")
     print("   - Technology types: E-cracker, H2-furnace, Heat pump, Electric heater, Electric motor")
-    print("   - Band-specific alternatives only (no HT→MT→LT transitions)")
-    print("   - Fixed Activity × SEC structure per band")
+    print("   - MaxApplicability removed: No artificial capacity constraints")
+    print("   - Fuel/feedstock consumption profiles for each technology")
 
 if __name__ == "__main__":
     create_corrected_database()

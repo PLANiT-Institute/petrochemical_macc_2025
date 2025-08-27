@@ -1,0 +1,19 @@
+DeploymentID,Technology,Region,Company,TechGroup,DeploymentFraction,DeployedCapacity_kt,AbatementContribution_MtCO2,Investment_Million_USD,LCOA_USD_per_tCO2
+NCC_MT_HeatPump_Yeosu_LG_Chem,Heat pump,Yeosu,LG Chem,NCC,1.0,3380.0,0.03731520000000054,270400.0,-359.82516434083914
+BTX_MT_HeatPump_Yeosu_LG_Chem,Heat pump,Yeosu,LG Chem,BTX,1.0,800.0,0.04032,56000.0,-301.64960787333547
+BTX_MT_HeatPump_Yeosu_Lotte_Chemical,Heat pump,Yeosu,Lotte Chemical,BTX,1.0,700.0,0.03528,49000.0,-284.0522722336456
+BTX_MT_HeatPump_Yeosu_GS_Caltex,Heat pump,Yeosu,GS Caltex,BTX,1.0,600.0,0.030240000000000003,42000.0,-260.58915804739246
+BTX_MT_HeatPump_Daesan_HD_Hyundai,Heat pump,Daesan,HD Hyundai Chemical,BTX,1.0,500.0,0.0252,33250.0,-228.51540299716453
+BTX_MT_HeatPump_Ulsan_KPIC,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,1.0,400.0,0.02016,25200.0,-184.94472199567264
+BTX_MT_HeatPump_Yeosu_Hanwha_Chemical,Heat pump,Yeosu,Hanwha Chemical,BTX,1.0,400.0,0.02016,28000.0,-178.46825839550633
+BTX_MT_HeatPump_Ulsan_SK_Innovation,Heat pump,Ulsan,SK Innovation,BTX,1.0,300.0,0.015120000000000001,18900.0,-111.03591230897514
+BTX_MT_HeatPump_Daesan_LG_Chem,Heat pump,Daesan,LG Chem,BTX,1.0,300.0,0.015120000000000001,19950.0,-103.69163552629766
+NCC_MT_HeatPump_Yeosu_Lotte_Chemical,Heat pump,Yeosu,Lotte Chemical,NCC,1.0,1000.0,0.01104000000000016,80000.0,2.208212668345302
+NCC_MT_HeatPump_Yeosu_GS_Caltex,Heat pump,Yeosu,GS Caltex,NCC,1.0,900.0,0.009936000000000146,72000.0,59.33579503487392
+NCC_MT_HeatPump_Yeosu_Hanwha_Chemical,Heat pump,Yeosu,Hanwha Chemical,NCC,1.0,850.0,0.009384000000000137,68000.0,92.94025525047903
+NCC_MT_HeatPump_Ulsan_KPIC,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,1.0,900.0,0.009936000000000146,64800.0,94.32317213776187
+NCC_MT_HeatPump_Daesan_HD_Hyundai,Heat pump,Daesan,HD Hyundai Chemical,NCC,1.0,850.0,0.009384000000000137,64600.0,108.75372079114265
+NCC_MT_HeatPump_Daesan_LG_Chem,Heat pump,Daesan,LG Chem,NCC,1.0,600.0,0.006624000000000097,45600.0,348.1854998273288
+NCC_MT_HeatPump_Ulsan_SK_Innovation,Heat pump,Ulsan,SK Innovation,NCC,1.0,500.0,0.00552000000000008,36000.0,505.64176517676805
+NCC_HT_Hydrogen_Yeosu_LG_Chem,H2-furnace,Yeosu,LG Chem,NCC,1.0,3380.0,2.708393999999998,1081600.0,549.6789144430911
+NCC_HT_Hydrogen_Yeosu_Lotte_Chemical,H2-furnace,Yeosu,Lotte Chemical,NCC,0.899671,899.671,0.7209063722999995,287894.72,569.6307351453572

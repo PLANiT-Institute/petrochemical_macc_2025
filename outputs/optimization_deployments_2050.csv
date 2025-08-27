@@ -1,0 +1,39 @@
+DeploymentID,Technology,Region,Company,TechGroup,DeploymentFraction,DeployedCapacity_kt,AbatementContribution_MtCO2,Investment_Million_USD,LCOA_USD_per_tCO2
+BTX_MT_HeatPump_Yeosu_LG_Chem,Heat pump,Yeosu,LG Chem,BTX,1.0,800.0,0.18592000000000014,56000.0,-324.7853215937236
+BTX_MT_HeatPump_Yeosu_Lotte_Chemical,Heat pump,Yeosu,Lotte Chemical,BTX,1.0,700.0,0.16268000000000013,49000.0,-320.96903193692333
+BTX_MT_HeatPump_Yeosu_GS_Caltex,Heat pump,Yeosu,GS Caltex,BTX,1.0,600.0,0.13944000000000012,42000.0,-315.8806457278564
+BTX_MT_HeatPump_Daesan_HD_Hyundai,Heat pump,Daesan,HD Hyundai Chemical,BTX,1.0,500.0,0.11620000000000007,33250.0,-308.9248916205781
+NCC_MT_HeatPump_Yeosu_LG_Chem,Heat pump,Yeosu,LG Chem,NCC,1.0,3380.0,1.1729951999999995,270400.0,-303.19274891715776
+BTX_MT_HeatPump_Ulsan_KPIC,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,1.0,400.0,0.09296000000000007,25200.0,-299.475828270857
+BTX_MT_HeatPump_Yeosu_Hanwha_Chemical,Heat pump,Yeosu,Hanwha Chemical,BTX,1.0,400.0,0.09296000000000007,28000.0,-298.0712939961221
+NCC_MT_HeatPump_Yeosu_Lotte_Chemical,Heat pump,Yeosu,Lotte Chemical,NCC,1.0,1000.0,0.3470399999999998,80000.0,-291.67578118380874
+NCC_MT_HeatPump_Yeosu_GS_Caltex,Heat pump,Yeosu,GS Caltex,NCC,1.0,900.0,0.3123359999999998,72000.0,-289.8584445386771
+NCC_MT_HeatPump_Yeosu_Hanwha_Chemical,Heat pump,Yeosu,Hanwha Chemical,NCC,1.0,850.0,0.2949839999999998,68000.0,-288.78942298271727
+NCC_MT_HeatPump_Ulsan_KPIC,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,1.0,900.0,0.3123359999999998,64800.0,-288.7454297760679
+NCC_MT_HeatPump_Daesan_HD_Hyundai,Heat pump,Daesan,HD Hyundai Chemical,NCC,1.0,850.0,0.2949839999999998,64600.0,-288.2863666792107
+BTX_MT_HeatPump_Ulsan_SK_Innovation,Heat pump,Ulsan,SK Innovation,BTX,1.0,300.0,0.06972000000000006,18900.0,-283.4474117122961
+BTX_MT_HeatPump_Daesan_LG_Chem,Heat pump,Daesan,LG Chem,BTX,1.0,300.0,0.06972000000000006,19950.0,-281.8546769883419
+NCC_MT_HeatPump_Daesan_LG_Chem,Heat pump,Daesan,LG Chem,NCC,1.0,600.0,0.20822399999999988,45600.0,-280.6695880929972
+NCC_MT_HeatPump_Ulsan_SK_Innovation,Heat pump,Ulsan,SK Innovation,NCC,1.0,500.0,0.1735199999999999,36000.0,-275.6606059311201
+C4_MT_HeatPump_Yeosu_LG_Chem,Heat pump,Yeosu,LG Chem,C4,1.0,300.0,0.07238399999999995,25500.0,-165.73942694944338
+C4_MT_HeatPump_Yeosu_Lotte_Chemical,Heat pump,Yeosu,Lotte Chemical,C4,1.0,250.0,0.06031999999999996,21250.0,-149.07563696703144
+C4_MT_HeatPump_Daesan_HD_Hyundai,Heat pump,Daesan,HD Hyundai Chemical,C4,1.0,200.0,0.048255999999999966,16150.0,-128.7483198042775
+NCC_HT_Electric_Yeosu_LG_Chem,E-cracker,Yeosu,LG Chem,NCC,1.0,3380.0,3.59125,946400.0,-126.32785601966019
+C4_MT_HeatPump_Yeosu_GS_Caltex,Heat pump,Yeosu,GS Caltex,C4,1.0,200.0,0.048255999999999966,17000.0,-124.07995199341359
+NCC_HT_Electric_Ulsan_KPIC,E-cracker,Ulsan,Korea Petrochemical Ind. Co.,NCC,1.0,900.0,0.95625,226800.0,-114.35817766958291
+NCC_HT_Electric_Yeosu_Lotte_Chemical,E-cracker,Yeosu,Lotte Chemical,NCC,1.0,1000.0,1.0625,280000.0,-113.16176690188598
+NCC_HT_Electric_Daesan_HD_Hyundai,E-cracker,Daesan,HD Hyundai Chemical,NCC,1.0,850.0,0.903125,226100.0,-111.56020059922545
+NCC_HT_Electric_Yeosu_GS_Caltex,E-cracker,Yeosu,GS Caltex,NCC,1.0,900.0,0.95625,252000.0,-111.08420475351637
+NCC_HT_Electric_Yeosu_Hanwha_Chemical,E-cracker,Yeosu,Hanwha Chemical,NCC,1.0,850.0,0.903125,238000.0,-109.8621093721225
+NCC_HT_Electric_Daesan_LG_Chem,E-cracker,Daesan,LG Chem,NCC,1.0,600.0,0.6375,159600.0,-102.85277100679404
+NCC_HT_Electric_Ulsan_SK_Innovation,E-cracker,Ulsan,SK Innovation,NCC,1.0,500.0,0.53125,126000.0,-99.3997302013218
+C4_MT_HeatPump_Ulsan_KPIC,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,C4,1.0,150.0,0.036191999999999974,11475.0,-95.92316015471455
+C4_MT_HeatPump_Yeosu_Hanwha_Chemical,Heat pump,Yeosu,Hanwha Chemical,C4,1.0,150.0,0.036191999999999974,12750.0,-82.4204770373838
+NCC_HT_Hydrogen_Yeosu_LG_Chem,H2-furnace,Yeosu,LG Chem,NCC,1.0,3380.0,2.992314,1081600.0,-25.246471787918964
+C4_MT_HeatPump_Ulsan_SK_Innovation,Heat pump,Ulsan,SK Innovation,C4,1.0,100.0,0.024127999999999983,7650.0,-20.936105233860943
+C4_MT_HeatPump_Daesan_LG_Chem,Heat pump,Daesan,LG Chem,C4,1.0,100.0,0.024127999999999983,8075.0,-10.018816179592585
+NCC_HT_Hydrogen_Yeosu_Lotte_Chemical,H2-furnace,Yeosu,Lotte Chemical,NCC,1.0,1000.0,0.8853,320000.0,-7.1877414945429114
+NCC_HT_Hydrogen_Ulsan_KPIC,H2-furnace,Ulsan,Korea Petrochemical Ind. Co.,NCC,1.0,900.0,0.79677,259200.0,-6.326212222650018
+NCC_HT_Hydrogen_Yeosu_GS_Caltex,H2-furnace,Yeosu,GS Caltex,NCC,1.0,900.0,0.79677,288000.0,-4.3381379281745165
+NCC_HT_Hydrogen_Daesan_HD_Hyundai,H2-furnace,Daesan,HD Hyundai Chemical,NCC,1.0,850.0,0.752505,258400.0,-3.739749553029929
+NCC_HT_Hydrogen_Yeosu_Hanwha_Chemical,H2-furnace,Yeosu,Hanwha Chemical,NCC,1.0,850.0,0.752505,272000.0,-2.661900536193105

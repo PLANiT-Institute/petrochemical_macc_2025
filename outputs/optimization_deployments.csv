@@ -1,0 +1,467 @@
+Year,FacilityID,TechID,Technology,Region,Company,TechGroup,DeploymentCapacity_kt,BaselineCapacity_kt
+2049,Yeosu_LG_Chem,NCC_HT_Electric,E-cracker,Yeosu,LG Chem,NCC,3380.0,3380
+2050,Yeosu_LG_Chem,NCC_HT_Electric,E-cracker,Yeosu,LG Chem,NCC,3380.0,3380
+2031,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2032,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2033,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2034,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2035,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2036,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2037,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2038,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2039,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2040,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2041,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2042,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2043,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2044,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2045,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2046,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2047,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2048,Yeosu_LG_Chem,NCC_MT_HeatPump,Heat pump,Yeosu,LG Chem,NCC,3380.0,3380
+2026,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2027,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2028,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2029,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2030,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2031,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2032,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2033,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2034,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2035,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2036,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2037,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2038,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2039,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2040,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2041,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2042,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2043,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2044,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2045,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2046,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2047,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2048,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2049,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2050,Yeosu_LG_Chem,BTX_MT_HeatPump,Heat pump,Yeosu,LG Chem,BTX,800.0,800
+2038,Yeosu_LG_Chem,C4_MT_HeatPump,Heat pump,Yeosu,LG Chem,C4,300.0,300
+2039,Yeosu_LG_Chem,C4_MT_HeatPump,Heat pump,Yeosu,LG Chem,C4,300.0,300
+2040,Yeosu_LG_Chem,C4_MT_HeatPump,Heat pump,Yeosu,LG Chem,C4,300.0,300
+2041,Yeosu_LG_Chem,C4_MT_HeatPump,Heat pump,Yeosu,LG Chem,C4,300.0,300
+2042,Yeosu_LG_Chem,C4_MT_HeatPump,Heat pump,Yeosu,LG Chem,C4,300.0,300
+2043,Yeosu_LG_Chem,C4_MT_HeatPump,Heat pump,Yeosu,LG Chem,C4,300.0,300
+2044,Yeosu_LG_Chem,C4_MT_HeatPump,Heat pump,Yeosu,LG Chem,C4,300.0,300
+2045,Yeosu_LG_Chem,C4_MT_HeatPump,Heat pump,Yeosu,LG Chem,C4,300.0,300
+2046,Yeosu_LG_Chem,C4_MT_HeatPump,Heat pump,Yeosu,LG Chem,C4,300.0,300
+2047,Yeosu_LG_Chem,C4_MT_HeatPump,Heat pump,Yeosu,LG Chem,C4,300.0,300
+2048,Yeosu_LG_Chem,C4_MT_HeatPump,Heat pump,Yeosu,LG Chem,C4,300.0,300
+2049,Yeosu_LG_Chem,C4_MT_HeatPump,Heat pump,Yeosu,LG Chem,C4,300.0,300
+2050,Yeosu_LG_Chem,C4_MT_HeatPump,Heat pump,Yeosu,LG Chem,C4,300.0,300
+2049,Yeosu_GS_Caltex,NCC_HT_Electric,E-cracker,Yeosu,GS Caltex,NCC,900.0,900
+2050,Yeosu_GS_Caltex,NCC_HT_Electric,E-cracker,Yeosu,GS Caltex,NCC,900.0,900
+2030,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2031,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2032,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2033,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2034,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2035,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2036,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2037,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2038,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2039,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2040,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2041,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2042,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2043,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2044,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2045,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2046,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2047,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2048,Yeosu_GS_Caltex,NCC_MT_HeatPump,Heat pump,Yeosu,GS Caltex,NCC,900.0,900
+2026,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2027,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2028,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2029,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2030,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2031,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2032,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2033,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2034,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2035,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2036,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2037,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2038,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2039,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2040,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2041,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2042,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2043,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2044,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2045,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2046,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2047,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2048,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2049,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2050,Yeosu_GS_Caltex,BTX_MT_HeatPump,Heat pump,Yeosu,GS Caltex,BTX,600.0,600
+2038,Yeosu_GS_Caltex,C4_MT_HeatPump,Heat pump,Yeosu,GS Caltex,C4,200.0,200
+2039,Yeosu_GS_Caltex,C4_MT_HeatPump,Heat pump,Yeosu,GS Caltex,C4,200.0,200
+2040,Yeosu_GS_Caltex,C4_MT_HeatPump,Heat pump,Yeosu,GS Caltex,C4,200.0,200
+2041,Yeosu_GS_Caltex,C4_MT_HeatPump,Heat pump,Yeosu,GS Caltex,C4,200.0,200
+2042,Yeosu_GS_Caltex,C4_MT_HeatPump,Heat pump,Yeosu,GS Caltex,C4,200.0,200
+2043,Yeosu_GS_Caltex,C4_MT_HeatPump,Heat pump,Yeosu,GS Caltex,C4,200.0,200
+2044,Yeosu_GS_Caltex,C4_MT_HeatPump,Heat pump,Yeosu,GS Caltex,C4,200.0,200
+2045,Yeosu_GS_Caltex,C4_MT_HeatPump,Heat pump,Yeosu,GS Caltex,C4,200.0,200
+2046,Yeosu_GS_Caltex,C4_MT_HeatPump,Heat pump,Yeosu,GS Caltex,C4,200.0,200
+2047,Yeosu_GS_Caltex,C4_MT_HeatPump,Heat pump,Yeosu,GS Caltex,C4,200.0,200
+2048,Yeosu_GS_Caltex,C4_MT_HeatPump,Heat pump,Yeosu,GS Caltex,C4,200.0,200
+2049,Yeosu_GS_Caltex,C4_MT_HeatPump,Heat pump,Yeosu,GS Caltex,C4,200.0,200
+2050,Yeosu_GS_Caltex,C4_MT_HeatPump,Heat pump,Yeosu,GS Caltex,C4,200.0,200
+2049,Yeosu_Lotte_Chemical,NCC_HT_Electric,E-cracker,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2050,Yeosu_Lotte_Chemical,NCC_HT_Electric,E-cracker,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2031,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2032,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2033,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2034,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2035,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2036,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2037,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2038,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2039,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2040,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2041,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2042,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2043,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2044,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2045,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2046,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2047,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2048,Yeosu_Lotte_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,NCC,1000.0,1000
+2026,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2027,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2028,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2029,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2030,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2031,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2032,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2033,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2034,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2035,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2036,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2037,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2038,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2039,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2040,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2041,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2042,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2043,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2044,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2045,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2046,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2047,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2048,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2049,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2050,Yeosu_Lotte_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,BTX,700.0,700
+2038,Yeosu_Lotte_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,C4,250.0,250
+2039,Yeosu_Lotte_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,C4,250.0,250
+2040,Yeosu_Lotte_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,C4,250.0,250
+2041,Yeosu_Lotte_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,C4,250.0,250
+2042,Yeosu_Lotte_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,C4,250.0,250
+2043,Yeosu_Lotte_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,C4,250.0,250
+2044,Yeosu_Lotte_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,C4,250.0,250
+2045,Yeosu_Lotte_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,C4,250.0,250
+2046,Yeosu_Lotte_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,C4,250.0,250
+2047,Yeosu_Lotte_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,C4,250.0,250
+2048,Yeosu_Lotte_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,C4,250.0,250
+2049,Yeosu_Lotte_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,C4,250.0,250
+2050,Yeosu_Lotte_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Lotte Chemical,C4,250.0,250
+2049,Yeosu_Hanwha_Chemical,NCC_HT_Electric,E-cracker,Yeosu,Hanwha Chemical,NCC,850.0,850
+2050,Yeosu_Hanwha_Chemical,NCC_HT_Electric,E-cracker,Yeosu,Hanwha Chemical,NCC,850.0,850
+2030,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,19.3868,850
+2031,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2032,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2033,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2034,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2035,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2036,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2037,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2038,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2039,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2040,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2041,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2042,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2043,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2044,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2045,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2046,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2047,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2048,Yeosu_Hanwha_Chemical,NCC_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,NCC,850.0,850
+2026,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2027,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2028,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2029,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2030,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2031,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2032,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2033,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2034,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2035,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2036,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2037,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2038,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2039,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2040,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2041,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2042,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2043,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2044,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2045,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2046,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2047,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2048,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2049,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2050,Yeosu_Hanwha_Chemical,BTX_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,BTX,400.0,400
+2038,Yeosu_Hanwha_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,C4,150.0,150
+2039,Yeosu_Hanwha_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,C4,150.0,150
+2040,Yeosu_Hanwha_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,C4,150.0,150
+2041,Yeosu_Hanwha_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,C4,150.0,150
+2042,Yeosu_Hanwha_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,C4,150.0,150
+2043,Yeosu_Hanwha_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,C4,150.0,150
+2044,Yeosu_Hanwha_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,C4,150.0,150
+2045,Yeosu_Hanwha_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,C4,150.0,150
+2046,Yeosu_Hanwha_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,C4,150.0,150
+2047,Yeosu_Hanwha_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,C4,150.0,150
+2048,Yeosu_Hanwha_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,C4,150.0,150
+2049,Yeosu_Hanwha_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,C4,150.0,150
+2050,Yeosu_Hanwha_Chemical,C4_MT_HeatPump,Heat pump,Yeosu,Hanwha Chemical,C4,150.0,150
+2049,Daesan_HD_Hyundai,NCC_HT_Electric,E-cracker,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2050,Daesan_HD_Hyundai,NCC_HT_Electric,E-cracker,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2031,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2032,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2033,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2034,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2035,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2036,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2037,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2038,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2039,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2040,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2041,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2042,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2043,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2044,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2045,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2046,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2047,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2048,Daesan_HD_Hyundai,NCC_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,NCC,850.0,850
+2026,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2027,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2028,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2029,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2030,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2031,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2032,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2033,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2034,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2035,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2036,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2037,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2038,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2039,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2040,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2041,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2042,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2043,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2044,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2045,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2046,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2047,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2048,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2049,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2050,Daesan_HD_Hyundai,BTX_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,BTX,500.0,500
+2050,Daesan_HD_Hyundai,C4_HT_Electric,Electric extraction,Daesan,HD Hyundai Chemical,C4,200.0,200
+2038,Daesan_HD_Hyundai,C4_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,C4,200.0,200
+2039,Daesan_HD_Hyundai,C4_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,C4,200.0,200
+2040,Daesan_HD_Hyundai,C4_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,C4,200.0,200
+2041,Daesan_HD_Hyundai,C4_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,C4,200.0,200
+2042,Daesan_HD_Hyundai,C4_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,C4,200.0,200
+2043,Daesan_HD_Hyundai,C4_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,C4,200.0,200
+2044,Daesan_HD_Hyundai,C4_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,C4,200.0,200
+2045,Daesan_HD_Hyundai,C4_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,C4,200.0,200
+2046,Daesan_HD_Hyundai,C4_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,C4,200.0,200
+2047,Daesan_HD_Hyundai,C4_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,C4,200.0,200
+2048,Daesan_HD_Hyundai,C4_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,C4,200.0,200
+2049,Daesan_HD_Hyundai,C4_MT_HeatPump,Heat pump,Daesan,HD Hyundai Chemical,C4,200.0,200
+2049,Daesan_LG_Chem,NCC_HT_Electric,E-cracker,Daesan,LG Chem,NCC,600.0,600
+2050,Daesan_LG_Chem,NCC_HT_Electric,E-cracker,Daesan,LG Chem,NCC,600.0,600
+2031,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2032,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2033,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2034,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2035,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2036,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2037,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2038,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2039,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2040,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2041,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2042,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2043,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2044,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2045,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2046,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2047,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2048,Daesan_LG_Chem,NCC_MT_HeatPump,Heat pump,Daesan,LG Chem,NCC,600.0,600
+2026,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2027,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2028,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2029,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2030,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2031,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2032,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2033,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2034,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2035,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2036,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2037,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2038,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2039,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2040,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2041,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2042,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2043,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2044,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2045,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2046,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2047,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2048,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2049,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2050,Daesan_LG_Chem,BTX_MT_HeatPump,Heat pump,Daesan,LG Chem,BTX,300.0,300
+2050,Daesan_LG_Chem,C4_HT_Electric,Electric extraction,Daesan,LG Chem,C4,100.0,100
+2038,Daesan_LG_Chem,C4_MT_HeatPump,Heat pump,Daesan,LG Chem,C4,100.0,100
+2039,Daesan_LG_Chem,C4_MT_HeatPump,Heat pump,Daesan,LG Chem,C4,100.0,100
+2040,Daesan_LG_Chem,C4_MT_HeatPump,Heat pump,Daesan,LG Chem,C4,100.0,100
+2041,Daesan_LG_Chem,C4_MT_HeatPump,Heat pump,Daesan,LG Chem,C4,100.0,100
+2042,Daesan_LG_Chem,C4_MT_HeatPump,Heat pump,Daesan,LG Chem,C4,100.0,100
+2043,Daesan_LG_Chem,C4_MT_HeatPump,Heat pump,Daesan,LG Chem,C4,100.0,100
+2044,Daesan_LG_Chem,C4_MT_HeatPump,Heat pump,Daesan,LG Chem,C4,100.0,100
+2045,Daesan_LG_Chem,C4_MT_HeatPump,Heat pump,Daesan,LG Chem,C4,100.0,100
+2046,Daesan_LG_Chem,C4_MT_HeatPump,Heat pump,Daesan,LG Chem,C4,100.0,100
+2047,Daesan_LG_Chem,C4_MT_HeatPump,Heat pump,Daesan,LG Chem,C4,100.0,100
+2048,Daesan_LG_Chem,C4_MT_HeatPump,Heat pump,Daesan,LG Chem,C4,100.0,100
+2049,Daesan_LG_Chem,C4_MT_HeatPump,Heat pump,Daesan,LG Chem,C4,100.0,100
+2049,Ulsan_KPIC,NCC_HT_Electric,E-cracker,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2050,Ulsan_KPIC,NCC_HT_Electric,E-cracker,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2031,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2032,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2033,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2034,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2035,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2036,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2037,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2038,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2039,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2040,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2041,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2042,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2043,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2044,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2045,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2046,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2047,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2048,Ulsan_KPIC,NCC_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,NCC,900.0,900
+2026,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2027,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2028,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2029,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2030,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2031,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2032,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2033,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2034,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2035,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2036,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2037,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2038,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2039,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2040,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2041,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2042,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2043,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2044,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2045,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2046,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2047,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2048,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2049,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2050,Ulsan_KPIC,BTX_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,BTX,400.0,400
+2050,Ulsan_KPIC,C4_HT_Electric,Electric extraction,Ulsan,Korea Petrochemical Ind. Co.,C4,150.0,150
+2038,Ulsan_KPIC,C4_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,C4,150.0,150
+2039,Ulsan_KPIC,C4_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,C4,150.0,150
+2040,Ulsan_KPIC,C4_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,C4,150.0,150
+2041,Ulsan_KPIC,C4_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,C4,150.0,150
+2042,Ulsan_KPIC,C4_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,C4,150.0,150
+2043,Ulsan_KPIC,C4_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,C4,150.0,150
+2044,Ulsan_KPIC,C4_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,C4,150.0,150
+2045,Ulsan_KPIC,C4_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,C4,150.0,150
+2046,Ulsan_KPIC,C4_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,C4,150.0,150
+2047,Ulsan_KPIC,C4_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,C4,150.0,150
+2048,Ulsan_KPIC,C4_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,C4,150.0,150
+2049,Ulsan_KPIC,C4_MT_HeatPump,Heat pump,Ulsan,Korea Petrochemical Ind. Co.,C4,150.0,150
+2049,Ulsan_SK_Innovation,NCC_HT_Electric,E-cracker,Ulsan,SK Innovation,NCC,500.0,500
+2050,Ulsan_SK_Innovation,NCC_HT_Electric,E-cracker,Ulsan,SK Innovation,NCC,500.0,500
+2031,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2032,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2033,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2034,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2035,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2036,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2037,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2038,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2039,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2040,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2041,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2042,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2043,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2044,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2045,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2046,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2047,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2048,Ulsan_SK_Innovation,NCC_MT_HeatPump,Heat pump,Ulsan,SK Innovation,NCC,500.0,500
+2026,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2027,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2028,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2029,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2030,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2031,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2032,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2033,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2034,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2035,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2036,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2037,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2038,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2039,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2040,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2041,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2042,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2043,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2044,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2045,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2046,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2047,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2048,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2049,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2050,Ulsan_SK_Innovation,BTX_MT_HeatPump,Heat pump,Ulsan,SK Innovation,BTX,300.0,300
+2050,Ulsan_SK_Innovation,C4_HT_Electric,Electric extraction,Ulsan,SK Innovation,C4,100.0,100
+2038,Ulsan_SK_Innovation,C4_MT_HeatPump,Heat pump,Ulsan,SK Innovation,C4,100.0,100
+2039,Ulsan_SK_Innovation,C4_MT_HeatPump,Heat pump,Ulsan,SK Innovation,C4,100.0,100
+2040,Ulsan_SK_Innovation,C4_MT_HeatPump,Heat pump,Ulsan,SK Innovation,C4,100.0,100
+2041,Ulsan_SK_Innovation,C4_MT_HeatPump,Heat pump,Ulsan,SK Innovation,C4,100.0,100
+2042,Ulsan_SK_Innovation,C4_MT_HeatPump,Heat pump,Ulsan,SK Innovation,C4,100.0,100
+2043,Ulsan_SK_Innovation,C4_MT_HeatPump,Heat pump,Ulsan,SK Innovation,C4,100.0,100
+2044,Ulsan_SK_Innovation,C4_MT_HeatPump,Heat pump,Ulsan,SK Innovation,C4,100.0,100
+2045,Ulsan_SK_Innovation,C4_MT_HeatPump,Heat pump,Ulsan,SK Innovation,C4,100.0,100
+2046,Ulsan_SK_Innovation,C4_MT_HeatPump,Heat pump,Ulsan,SK Innovation,C4,100.0,100
+2047,Ulsan_SK_Innovation,C4_MT_HeatPump,Heat pump,Ulsan,SK Innovation,C4,100.0,100
+2048,Ulsan_SK_Innovation,C4_MT_HeatPump,Heat pump,Ulsan,SK Innovation,C4,100.0,100
+2049,Ulsan_SK_Innovation,C4_MT_HeatPump,Heat pump,Ulsan,SK Innovation,C4,100.0,100

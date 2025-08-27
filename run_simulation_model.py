@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Korean Petrochemical MACC Model - Main execution script
+Korean Petrochemical MACC Simulation Model
+Heuristic-based technology deployment simulation with time-varying parameters
 Regional facility-level deployment with alternative technologies only
 """
 
@@ -483,7 +484,7 @@ def plot_macc_curve(macc_df, year=2030):
 def main():
     """Main execution function"""
     
-    print("🏭 Korean Petrochemical MACC Model (Main)")
+    print("🏭 Korean Petrochemical MACC Simulation Model")
     print("=" * 50)
     
     # Load data
@@ -577,7 +578,7 @@ def main():
         cost = tech_ranking.loc[tech, 'LCOA_USD_per_tCO2']
         print(f"   - {tech}: {abatement:.1f} MtCO2/year at ${cost:.0f}/tCO2")
     
-    print(f"\n✅ Model completed successfully! Check {output_dir}/ for detailed results.")
+    print(f"\n✅ Simulation Model completed successfully! Check {output_dir}/ for detailed results.")
 
 if __name__ == "__main__":
     main()
