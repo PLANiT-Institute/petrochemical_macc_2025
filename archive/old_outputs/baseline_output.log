@@ -1,0 +1,166 @@
+COMPREHENSIVE BASELINE ANALYSIS FOR KOREAN PETROCHEMICAL MACC MODEL
+======================================================================
+LOADING UPDATED DATABASE
+==================================================
+Path: data/Korea_Petrochemical_MACC_Database.xlsx
+
+Sheets loaded:
+  • RegionalFacilities: 8 rows × 12 columns
+  • FacilityBaselineConsumption_2023: 24 rows × 12 columns
+  • EmissionFactors_TimeSeries: 28 rows × 8 columns
+  • FuelCosts_TimeSeries: 28 rows × 8 columns
+  • EmissionsTargets: 5 rows × 4 columns
+  • AlternativeTechnologies: 18 rows × 15 columns
+  • AlternativeCosts: 18 rows × 4 columns
+  • EmissionFactors: 7 rows × 4 columns
+  • BaselineConsumption_2023_Legacy: 9 rows × 11 columns
+
+==================================================
+DETAILED BASELINE EMISSIONS CALCULATION
+==================================================
+
+1. OVERALL BASELINE EMISSIONS:
+------------------------------
+  Total Emissions:        14,756.4 ktCO2/year
+  Total Capacity:         17,300 kt/year
+  Average Emission Intensity: 852.97 tCO2/t product
+
+2. EMISSION SHARES ANALYSIS:
+------------------------------
+
+By Technology:
+  BTX: 4085.9 ktCO2/year (27.7%) - 785.75 tCO2/t
+  C4 :  980.6 ktCO2/year ( 6.6%) - 544.76 tCO2/t
+  NCC: 9689.9 ktCO2/year (65.7%) - 940.77 tCO2/t
+
+By Region:
+  Daesan: 2881.1 ktCO2/year (19.5%) - 944.62 tCO2/t
+  Ulsan : 2514.8 ktCO2/year (17.0%) - 898.13 tCO2/t
+  Yeosu : 9360.5 ktCO2/year (63.4%) - 817.51 tCO2/t
+
+By Company (Top 5):
+  1. LG Chem: 3116.5 ktCO2/year (21.1%)
+  2. GS Caltex: 2529.6 ktCO2/year (17.1%)
+  3. Lotte Chemical: 2065.6 ktCO2/year (14.0%)
+  4. 여천NCC: 1648.9 ktCO2/year (11.2%)
+  5. 한화 토탈: 1597.0 ktCO2/year (10.8%)
+
+==================================================
+ALTERNATIVE TECHNOLOGIES ANALYSIS
+==================================================
+
+1. TECHNOLOGY PORTFOLIO OVERVIEW:
+------------------------------
+  Total Technologies: 18
+  Technology Categories: 9
+  Process Applications: 3
+
+  Technology Readiness Level (TRL) Distribution:
+    TRL 3: 1 technologies
+    TRL 4: 2 technologies
+    TRL 5: 2 technologies
+    TRL 6: 1 technologies
+    TRL 7: 1 technologies
+    TRL 8: 3 technologies
+    TRL 9: 8 technologies
+
+  Commercialization Timeline:
+    2023: 3 technologies
+    2024: 3 technologies
+    2025: 2 technologies
+    2026: 3 technologies
+    2027: 1 technologies
+    2028: 1 technologies
+    2030: 2 technologies
+    2032: 2 technologies
+    2035: 1 technologies
+
+2. TECHNOLOGY PRICE PROJECTIONS:
+------------------------------
+
+  E-cracker:
+    Technologies: 1
+    Avg CAPEX: $280.0M per kt capacity
+    Avg OPEX Delta: $25.0 per tonne
+    Avg Lifetime: 25 years
+      2023: $11290.6/t (CAPEX: $11200.0, OPEX: $25.0, Fuel: $65.6)
+      2030: $11277.8/t (CAPEX: $11200.0, OPEX: $25.0, Fuel: $52.8)
+      2040: $11266.7/t (CAPEX: $11200.0, OPEX: $25.0, Fuel: $41.7)
+      2050: $11258.3/t (CAPEX: $11200.0, OPEX: $25.0, Fuel: $33.3)
+
+  H2-furnace:
+    Technologies: 1
+    Avg CAPEX: $320.0M per kt capacity
+    Avg OPEX Delta: $-15.0 per tonne
+    Avg Lifetime: 25 years
+      2023: $12947.5/t (CAPEX: $12800.0, OPEX: $-15.0, Fuel: $162.5)
+      2030: $12890.0/t (CAPEX: $12800.0, OPEX: $-15.0, Fuel: $105.0)
+      2040: $12855.0/t (CAPEX: $12800.0, OPEX: $-15.0, Fuel: $70.0)
+      2050: $12835.0/t (CAPEX: $12800.0, OPEX: $-15.0, Fuel: $50.0)
+
+  Heat pump:
+    Technologies: 6
+    Avg CAPEX: $61.7M per kt capacity
+    Avg OPEX Delta: $-20.0 per tonne
+    Avg Lifetime: 25 years
+      2023: $2446.7/t (CAPEX: $2466.7, OPEX: $-20.0, Fuel: $0.0)
+      2030: $2446.7/t (CAPEX: $2466.7, OPEX: $-20.0, Fuel: $0.0)
+      2040: $2446.7/t (CAPEX: $2466.7, OPEX: $-20.0, Fuel: $0.0)
+      2050: $2446.7/t (CAPEX: $2466.7, OPEX: $-20.0, Fuel: $0.0)
+
+  Electric heater:
+    Technologies: 3
+    Avg CAPEX: $60.0M per kt capacity
+    Avg OPEX Delta: $10.0 per tonne
+    Avg Lifetime: 25 years
+      2023: $2475.6/t (CAPEX: $2400.0, OPEX: $10.0, Fuel: $65.6)
+      2030: $2462.8/t (CAPEX: $2400.0, OPEX: $10.0, Fuel: $52.8)
+      2040: $2451.7/t (CAPEX: $2400.0, OPEX: $10.0, Fuel: $41.7)
+      2050: $2443.3/t (CAPEX: $2400.0, OPEX: $10.0, Fuel: $33.3)
+
+  Electric motor:
+    Technologies: 3
+    Avg CAPEX: $35.0M per kt capacity
+    Avg OPEX Delta: $-27.7 per tonne
+    Avg Lifetime: 25 years
+      2023: $1437.9/t (CAPEX: $1400.0, OPEX: $-27.7, Fuel: $65.6)
+      2030: $1425.1/t (CAPEX: $1400.0, OPEX: $-27.7, Fuel: $52.8)
+      2040: $1414.0/t (CAPEX: $1400.0, OPEX: $-27.7, Fuel: $41.7)
+      2050: $1405.7/t (CAPEX: $1400.0, OPEX: $-27.7, Fuel: $33.3)
+
+==================================================
+CREATING COMPREHENSIVE VISUALIZATIONS
+==================================================
+Traceback (most recent call last):
+  File "/Users/jinsupark/jinsu-coding/petrochemical_macc_2025/baseline_comprehensive_analysis.py", line 656, in <module>
+    main()
+  File "/Users/jinsupark/jinsu-coding/petrochemical_macc_2025/baseline_comprehensive_analysis.py", line 633, in main
+    create_comprehensive_visualizations(emissions_df, tech_emissions, regional_emissions, 
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jinsupark/jinsu-coding/petrochemical_macc_2025/baseline_comprehensive_analysis.py", line 412, in create_comprehensive_visualizations
+    regional_tech.plot(kind='bar', stacked=True, ax=ax12, 
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jinsupark/miniforge3/lib/python3.12/site-packages/pandas/plotting/_core.py", line 1030, in __call__
+    return plot_backend.plot(data, kind=kind, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jinsupark/miniforge3/lib/python3.12/site-packages/pandas/plotting/_matplotlib/__init__.py", line 71, in plot
+    plot_obj.generate()
+  File "/Users/jinsupark/miniforge3/lib/python3.12/site-packages/pandas/plotting/_matplotlib/core.py", line 501, in generate
+    self._make_plot(fig)
+  File "/Users/jinsupark/miniforge3/lib/python3.12/site-packages/pandas/plotting/_matplotlib/core.py", line 1940, in _make_plot
+    rect = self._plot(
+           ^^^^^^^^^^^
+  File "/Users/jinsupark/miniforge3/lib/python3.12/site-packages/pandas/plotting/_matplotlib/core.py", line 1884, in _plot
+    return ax.bar(x, y, w, bottom=start, log=log, **kwds)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jinsupark/miniforge3/lib/python3.12/site-packages/matplotlib/__init__.py", line 1521, in inner
+    return func(
+           ^^^^^
+  File "/Users/jinsupark/miniforge3/lib/python3.12/site-packages/matplotlib/axes/_axes.py", line 2654, in bar
+    r._internal_update(kwargs)
+  File "/Users/jinsupark/miniforge3/lib/python3.12/site-packages/matplotlib/artist.py", line 1233, in _internal_update
+    return self._update_props(
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Users/jinsupark/miniforge3/lib/python3.12/site-packages/matplotlib/artist.py", line 1206, in _update_props
+    raise AttributeError(
+AttributeError: Rectangle.set() got an unexpected keyword argument 'colors'

@@ -1,0 +1,9 @@
+FacilityID,Company,Region,NCC_Capacity_kt_per_year,BTX_Capacity_kt_per_year,C4_Capacity_kt_per_year,Labor_Cost_Index,Electricity_Price_USD_per_MWh,Infrastructure_Score,TechnicalReadiness_Level,Established_Year,Primary_Products
+F001,LG Chem,Yeosu,2200,1200,400,100,85,9,8,1995,"Ethylene, Propylene"
+F002,GS Caltex,Yeosu,1800,900,300,105,88,8,7,1998,"BTX, C4 Olefins"
+F003,Lotte Chemical,Yeosu,1600,800,250,98,84,8,8,2000,"Ethylene, BTX"
+F004,여천NCC,Yeosu,1200,600,200,102,86,7,6,2005,Naphtha Cracking
+F005,한화 토탈,Daesan,1000,500,200,110,92,8,7,1987,"BTX, Aromatics"
+F006,현대케미칼,Daesan,800,400,150,115,95,7,6,1991,"Ethylene, Polymers"
+F007,SK Chemicals,Ulsan,900,450,180,95,78,9,8,1993,Specialty Chemicals
+F008,대한유화,Ulsan,800,350,120,92,76,8,7,1985,Petrochemicals
