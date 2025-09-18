@@ -1,0 +1,17 @@
+TechID,TechName,Cost_USD_per_tCO2,Abatement_Potential_MtCO2_per_year,Cumulative_Abatement_MtCO2_per_year,TRL,Commercial_Year,Notes
+EE_001,Energy Efficiency Package,-69,15.6,15.6,9,2025,"Heat integration, motor efficiency, controls"
+HP_001,Industrial Heat Pump Systems,10,7.81563126252505,23.41563126252505,8,2025,High-temperature heat pumps for process heating up to 200°C
+TPA_001,Process Intensification,171,1.04,24.45563126252505,8,2027,Intensified oxidation process
+PE_002,Heat Integration & Recovery,209,2.6,27.05563126252505,9,2025,Heat recovery and process integration
+ETH_003,Bio-ethylene (Ethanol dehydration),254,7.8,34.85563126252505,9,2025,Sustainable ethanol feedstock
+PROP_002,Bio-propylene (Renewable propane),264,6.239999999999999,41.09563126252505,7,2029,Renewable propane feedstock
+ETH_004,Methanol-to-Olefins (MTO),359,7.8,48.89563126252505,9,2025,Alternative route via methanol
+PE_001,Advanced Catalyst (Lower Temperature),361,2.6,51.49563126252505,8,2026,Lower temperature polymerization
+PROP_001,Electric Propane Dehydrogenation (ePDH),388,6.239999999999999,57.735631262525054,6,2028,Electric heating for endothermic PDH reaction
+PP_001,Electric Heating Polymerization,405,2.08,59.81563126252505,6,2029,Electric heating replaces steam
+H2_001,Green Hydrogen Boilers,503,13.0,72.81563126252505,6,2030,H2 combustion for process heating
+PX_001,Bio-based p-Xylene,520,1.56,74.37563126252505,4,2037,Biosynthetic p-xylene pathway
+ETH_001,Electric Steam Cracking,579,7.8,82.17563126252504,7,2027,Electric heating replaces fuel gas in cracker furnace
+ETH_002,Green H2 Steam Cracking,795,7.8,89.97563126252504,6,2030,Hydrogen combustion replaces natural gas in furnaces
+BTX_001,Electric Reforming,1167,4.16,94.13563126252504,5,2032,Electric heating for reforming reactions
+BTX_002,Bio-aromatics (Lignin),1594,4.16,98.29563126252503,4,2035,Lignin-to-aromatics conversion
