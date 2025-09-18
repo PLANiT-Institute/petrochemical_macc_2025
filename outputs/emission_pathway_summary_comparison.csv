@@ -1,0 +1,5 @@
+Scenario,Baseline_2023_Mt,Emissions_2030_Mt,Emissions_2040_Mt,Emissions_2050_Mt,Reduction_2030_%,Reduction_2040_%,Reduction_2050_%,Facilities_2030,Facilities_2040,Facilities_2050,Cumulative_2023_2050_Mt
+25yr lifetime,60.0,20.1,16.8,0.0,66.5%,71.9%,100.0%,62,29,0,519
+30yr lifetime,60.0,20.2,19.1,10.4,66.4%,68.1%,82.7%,73,49,16,621
+40yr lifetime,60.0,47.6,20.2,19.1,20.7%,66.4%,68.1%,147,73,49,856
+50yr lifetime,60.0,51.8,47.6,20.2,13.7%,20.7%,66.4%,194,147,73,1199
