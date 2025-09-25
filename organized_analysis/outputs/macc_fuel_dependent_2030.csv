@@ -1,0 +1,7 @@
+technology,year,description,abatement_potential_mtco2,capex_usd_per_tco2,opex_usd_per_tco2,fuel_cost_usd_per_tco2,fuel_savings_usd_per_tco2,carbon_benefit_usd_per_tco2,net_cost_usd_per_tco2,total_capex_musd,total_fuel_cost_musd,total_carbon_benefit_musd,technology_maturity,cumulative_abatement_mtco2,cumulative_cost_musd
+Fuel_Switch_Biomass,2030,Switch from fossil fuels to biomass for thermal processes,8.0,120,25,96.0,144.0,85.0,12.0,960.0,768.0,680.0,Commercial,8.0,96.0
+Early_Retirement,2030,Early retirement of oldest/least efficient facilities,5.2,0,50,0.0,0.0,0.0,50.0,0.0,0.0,0.0,Commercial,13.2,356.0
+Bio_Naphtha,2030,Replace fossil naphtha with bio-naphtha feedstock,10.0,80,20,450.0,270.0,72.25,207.75,800.0,4500.0,722.5,Demonstration,23.2,2433.5
+Electrification_Renewable,2030,Electrification with renewable electricity,12.5,180,30,336.0,144.0,85.0,317.0,2250.0,4200.0,1062.5,Demonstration,35.7,6396.0
+Process_Replacement_Electric,2030,Replace thermal processes with electric alternatives,6.0,300,50,504.0,300.0,85.0,469.0,1800.0,3024.0,510.0,Research,41.7,9210.0
+Green_Hydrogen_Thermal,2030,Green hydrogen for high-temperature thermal processes,7.5,200,40,2700.0,180.0,85.0,2675.0,1500.0,20250.0,637.5,Pre-commercial,49.2,29272.5

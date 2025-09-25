@@ -1,0 +1,6 @@
+scenario,target_reduction_pct,achieved_reduction_mtco2,total_cost_musd,marginal_cost_usd_per_tco2,technologies_deployed
+10pct,10.0,5.2,260.0,50.0,1
+25pct,25.0,13.0,1040.0,80.0,2
+50pct,50.0,26.0,3640.0,140.0,3
+75pct,75.0,39.0,6760.0,173.33333333333334,4
+90pct,89.99999999999999,46.8,8881.6,189.77777777777777,5

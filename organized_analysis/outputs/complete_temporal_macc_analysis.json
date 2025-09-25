@@ -1,0 +1,299 @@
+{
+  "analysis_date": "2025-09-22T20:23:23.371447",
+  "base_year": 2025,
+  "projection_years": [
+    2030,
+    2040,
+    2050
+  ],
+  "learning_rates": {
+    "Early_Retirement": 0.02,
+    "Efficiency_Upgrade": 0.03,
+    "Fuel_Switch": 0.05,
+    "Process_Replacement": 0.07,
+    "Bio_Naphtha": 0.06,
+    "Green_Hydrogen": 0.08,
+    "CCUS": 0.04,
+    "Electrification": 0.05
+  },
+  "carbon_price_trajectory": {
+    "2025": 50,
+    "2030": 100,
+    "2040": 200,
+    "2050": 350
+  },
+  "results_by_year": {
+    "2025": {
+      "year": 2025,
+      "baseline_emissions": 110000000.0,
+      "target_reduction": 55000000.0,
+      "achieved_reduction": 55000000.0,
+      "total_cost": 7700000000.0,
+      "marginal_cost": 140.0,
+      "carbon_price": 50,
+      "macc_curve": [
+        {
+          "technology": "Early_Retirement",
+          "cost_per_tco2": 50,
+          "abatement_deployed": 11000000.0,
+          "total_cost": 550000000.0,
+          "cumulative_abatement": 11000000.0,
+          "cumulative_cost": 550000000.0
+        },
+        {
+          "technology": "Efficiency_Upgrade",
+          "cost_per_tco2": 100,
+          "abatement_deployed": 16500000.0,
+          "total_cost": 1650000000.0,
+          "cumulative_abatement": 27500000.0,
+          "cumulative_cost": 2200000000.0
+        },
+        {
+          "technology": "Fuel_Switch",
+          "cost_per_tco2": 200,
+          "abatement_deployed": 27500000.0,
+          "total_cost": 5500000000.0,
+          "cumulative_abatement": 55000000.0,
+          "cumulative_cost": 7700000000.0
+        }
+      ]
+    },
+    "2030": {
+      "year": 2030,
+      "baseline_emissions": 169859453.74277183,
+      "target_reduction": 84929726.87138592,
+      "achieved_reduction": 84929726.87138592,
+      "total_cost": 9427716603.676107,
+      "marginal_cost": 111.00608645489999,
+      "carbon_price": 100,
+      "macc_curve": [
+        {
+          "technology": "Early_Retirement",
+          "cost_per_tco2": 45.19603984,
+          "abatement_deployed": 16985945.374277186,
+          "total_cost": 767697463.8558954,
+          "cumulative_abatement": 16985945.374277186,
+          "cumulative_cost": 767697463.8558954
+        },
+        {
+          "technology": "Efficiency_Upgrade",
+          "cost_per_tco2": 85.87340257,
+          "abatement_deployed": 25478918.061415773,
+          "total_cost": 2187961387.7360005,
+          "cumulative_abatement": 42464863.43569296,
+          "cumulative_cost": 2955658851.591896
+        },
+        {
+          "technology": "CCUS",
+          "cost_per_tco2": 122.30590463999998,
+          "abatement_deployed": 5095783.612283155,
+          "total_cost": 623244424.5499783,
+          "cumulative_abatement": 47560647.047976114,
+          "cumulative_cost": 3578903276.1418743
+        },
+        {
+          "technology": "Fuel_Switch",
+          "cost_per_tco2": 154.75618749999995,
+          "abatement_deployed": 35670485.28598208,
+          "total_cost": 5520228309.133432,
+          "cumulative_abatement": 83231132.3339582,
+          "cumulative_cost": 9099131585.275307
+        },
+        {
+          "technology": "Electrification",
+          "cost_per_tco2": 193.44523437499993,
+          "abatement_deployed": 1698594.5374277234,
+          "total_cost": 328585018.4008005,
+          "cumulative_abatement": 84929726.87138592,
+          "cumulative_cost": 9427716603.676107
+        }
+      ],
+      "technology_costs": {
+        "Early_Retirement": 45.19603984,
+        "Efficiency_Upgrade": 85.87340257,
+        "Fuel_Switch": 154.75618749999995,
+        "Process_Replacement": 278.2753477199999,
+        "Bio_Naphtha": 199.62189409279992,
+        "Green_Hydrogen": 197.72445696000003,
+        "CCUS": 122.30590463999998,
+        "Electrification": 193.44523437499993
+      },
+      "baseline_projection": {
+        "total_emissions": 169859453.74277183,
+        "active_emissions": 60214853.742771834,
+        "new_facility_emissions": 109644600.0,
+        "facility_projections": {
+          "active_facilities": "     products          process upstream  ... age_2025 age_2030  retired\n0    Ethylene  Naphtha Cracker        -  ...       34       39    False\n1    Ethylene  Naphtha Cracker        -  ...        4        9    False\n2    Ethylene  Naphtha Cracker        -  ...       34       39    False\n3    Ethylene  Naphtha Cracker        -  ...       34       39    False\n4    Ethylene  Naphtha Cracker        -  ...       33       38    False\n..        ...              ...      ...  ...      ...      ...      ...\n236      PMMA          Utility      MMA  ...       17       22    False\n240  \uce74\ubcf8\ube14\ub799(CB)          Utility        -  ...        7       12    False\n244      \uc11d\uc720\uc218\uc9c0          Utility        -  ...       11       16    False\n245      \uc11d\uc720\uc218\uc9c0          Utility        -  ...       21       26    False\n246      \uc11d\uc720\uc218\uc9c0          Utility        -  ...        6       11    False\n\n[104 rows x 10 columns]",
+          "retired_facilities": "      products          process upstream  ... age_2025 age_2030  retired\n6     Ethylene  Naphtha Cracker        -  ...       46       51     True\n10    Ethylene  Naphtha Cracker        -  ...       36       41     True\n18   Propylene  Naphtha Cracker        -  ...       46       51     True\n24   Propylene  Naphtha Cracker        -  ...       36       41     True\n36   Butadiene  Naphtha Cracker        -  ...       46       51     True\n..         ...              ...      ...  ...      ...      ...      ...\n239   \uce74\ubcf8\ube14\ub799(CB)          Utility        -  ...       33       38     True\n241   \uce74\ubcf8\ube14\ub799(CB)          Utility        -  ...       29       34     True\n242   \uce74\ubcf8\ube14\ub799(CB)          Utility        -  ...       46       51     True\n243   \uce74\ubcf8\ube14\ub799(CB)          Utility        -  ...       44       49     True\n247       \uc11d\uc720\uc218\uc9c0          Utility        -  ...       47       52     True\n\n[144 rows x 10 columns]",
+          "retired_capacity_kt": "49819",
+          "new_capacity_kt": 54822.3,
+          "new_facility_efficiency": 0.8
+        }
+      }
+    },
+    "2040": {
+      "year": 2040,
+      "baseline_emissions": 204513242.3244642,
+      "target_reduction": 102256621.1622321,
+      "achieved_reduction": 102256621.1622321,
+      "total_cost": 7053646278.364354,
+      "marginal_cost": 68.97984891534415,
+      "carbon_price": 200,
+      "macc_curve": [
+        {
+          "technology": "Early_Retirement",
+          "cost_per_tco2": 36.92845513227019,
+          "abatement_deployed": 20451324.23244642,
+          "total_cost": 755235809.3134077,
+          "cumulative_abatement": 20451324.23244642,
+          "cumulative_cost": 755235809.3134077
+        },
+        {
+          "technology": "Efficiency_Upgrade",
+          "cost_per_tco2": 63.325118913678914,
+          "abatement_deployed": 30676986.34866963,
+          "total_cost": 1942623808.442809,
+          "cumulative_abatement": 51128310.58111605,
+          "cumulative_cost": 2697859617.756217
+        },
+        {
+          "technology": "CCUS",
+          "cost_per_tco2": 81.31295697913632,
+          "abatement_deployed": 15338493.174334815,
+          "total_cost": 1247218235.6094627,
+          "cumulative_abatement": 66466803.75545087,
+          "cumulative_cost": 3945077853.3656797
+        },
+        {
+          "technology": "Green_Hydrogen",
+          "cost_per_tco2": 85.88922122106155,
+          "abatement_deployed": 30676986.34866963,
+          "total_cost": 2634822466.896371,
+          "cumulative_abatement": 97143790.1041205,
+          "cumulative_cost": 6579900320.262051
+        },
+        {
+          "technology": "Fuel_Switch",
+          "cost_per_tco2": 92.65824603195061,
+          "abatement_deployed": 5112831.058111608,
+          "total_cost": 473745958.10230374,
+          "cumulative_abatement": 102256621.1622321,
+          "cumulative_cost": 7053646278.364354
+        }
+      ],
+      "technology_costs": {
+        "Early_Retirement": 36.92845513227019,
+        "Efficiency_Upgrade": 63.325118913678914,
+        "Fuel_Switch": 92.65824603195061,
+        "Process_Replacement": 134.68034482064553,
+        "Bio_Naphtha": 107.51936926263338,
+        "Green_Hydrogen": 85.88922122106155,
+        "CCUS": 81.31295697913632,
+        "Electrification": 115.82280753993827
+      },
+      "baseline_projection": {
+        "total_emissions": 204513242.3244642,
+        "active_emissions": 23715442.324464187,
+        "new_facility_emissions": 180797800.0,
+        "facility_projections": {
+          "active_facilities": "        products          process  ... age_2040 retired\n1       Ethylene  Naphtha Cracker  ...       19   False\n5       Ethylene  Naphtha Cracker  ...       19   False\n7       Ethylene  Naphtha Cracker  ...       19   False\n9       Ethylene  Naphtha Cracker  ...       22   False\n12     Propylene  Naphtha Cracker  ...       29   False\n13     Propylene  Naphtha Cracker  ...       19   False\n17     Propylene  Naphtha Cracker  ...       19   False\n19     Propylene  Naphtha Cracker  ...       19   False\n21     Propylene  Naphtha Cracker  ...       22   False\n22     Propylene  Naphtha Cracker  ...       24   False\n28     Butadiene  Naphtha Cracker  ...       19   False\n32     Butadiene  Naphtha Cracker  ...       18   False\n33     Butadiene  Naphtha Cracker  ...       29   False\n37     Butadiene  Naphtha Cracker  ...       17   False\n40            \ubca4\uc820        BTX Plant  ...       29   False\n41            \ubca4\uc820        BTX Plant  ...       24   False\n49            \ubca4\uc820        BTX Plant  ...       32   False\n53            \ubca4\uc820        BTX Plant  ...       26   False\n54            \ubca4\uc820        BTX Plant  ...       34   False\n56           \ud1a8\ub8e8\uc5d4        BTX Plant  ...       29   False\n57           \ud1a8\ub8e8\uc5d4        BTX Plant  ...       29   False\n62           \ud1a8\ub8e8\uc5d4        BTX Plant  ...       32   False\n64           \ud1a8\ub8e8\uc5d4        BTX Plant  ...      -30   False\n65           \uc790\uc77c\ub80c        BTX Plant  ...       29   False\n66           \uc790\uc77c\ub80c        BTX Plant  ...       24   False\n67           \uc790\uc77c\ub80c        BTX Plant  ...       29   False\n72           \uc790\uc77c\ub80c        BTX Plant  ...       32   False\n74           \uc790\uc77c\ub80c        BTX Plant  ...      -30   False\n84           P-X        BTX Plant  ...       26   False\n85           P-X        BTX Plant  ...       26   False\n103         LDPE          Utility  ...       19   False\n113       L-LDPE          Utility  ...       21   False\n114       L-LDPE          Utility  ...       19   False\n116       L-LDPE          Utility  ...       25   False\n118         HDPE          Utility  ...       19   False\n123         HDPE          Utility  ...       19   False\n127           PP          Utility  ...       19   False\n133           PP          Utility  ...       22   False\n136           PP          Utility  ...       19   False\n155          PVC          Utility  ...      -26   False\n169           EG          Utility  ...       26   False\n174        S-SBR          Utility  ...       28   False\n175        S-SBR          Utility  ...       28   False\n176        S-SBR          Utility  ...       22   False\n186     NB-Latex          Utility  ...       28   False\n187     NB-Latex          Utility  ...       19   False\n189         EPDM          Utility  ...       22   False\n206          MDI          Utility  ...       22   False\n209           \ud398\ub180          Utility  ...       27   False\n212          \uc544\uc138\ud1a4          Utility  ...       27   False\n215          BPA          Utility  ...       28   False\n216          BPA          Utility  ...       27   False\n222  Epoxy Resin          Utility  ...       21   False\n234          MMA          Utility  ...       27   False\n240     \uce74\ubcf8\ube14\ub799(CB)          Utility  ...       22   False\n244         \uc11d\uc720\uc218\uc9c0          Utility  ...       26   False\n246         \uc11d\uc720\uc218\uc9c0          Utility  ...       21   False\n\n[57 rows x 10 columns]",
+          "retired_facilities": "     products          process upstream  ... age_2025 age_2040  retired\n0    Ethylene  Naphtha Cracker        -  ...       34       49     True\n2    Ethylene  Naphtha Cracker        -  ...       34       49     True\n3    Ethylene  Naphtha Cracker        -  ...       34       49     True\n4    Ethylene  Naphtha Cracker        -  ...       33       48     True\n6    Ethylene  Naphtha Cracker        -  ...       46       61     True\n..        ...              ...      ...  ...      ...      ...      ...\n241  \uce74\ubcf8\ube14\ub799(CB)          Utility        -  ...       29       44     True\n242  \uce74\ubcf8\ube14\ub799(CB)          Utility        -  ...       46       61     True\n243  \uce74\ubcf8\ube14\ub799(CB)          Utility        -  ...       44       59     True\n245      \uc11d\uc720\uc218\uc9c0          Utility        -  ...       21       36     True\n247      \uc11d\uc720\uc218\uc9c0          Utility        -  ...       47       62     True\n\n[191 rows x 10 columns]",
+          "retired_capacity_kt": "75389",
+          "new_capacity_kt": 90398.9,
+          "new_facility_efficiency": 0.8
+        }
+      }
+    },
+    "2050": {
+      "year": 2050,
+      "baseline_emissions": 242700442.3244642,
+      "target_reduction": 121350221.1622321,
+      "achieved_reduction": 121350221.1622321,
+      "total_cost": 4696075353.237607,
+      "marginal_cost": 38.698531475764376,
+      "carbon_price": 350,
+      "macc_curve": [
+        {
+          "technology": "Early_Retirement",
+          "cost_per_tco2": 30.17323648894483,
+          "abatement_deployed": 24270044.23244642,
+          "total_cost": 732305784.2227573,
+          "cumulative_abatement": 24270044.23244642,
+          "cumulative_cost": 732305784.2227573
+        },
+        {
+          "technology": "Green_Hydrogen",
+          "cost_per_tco2": 37.30928604068852,
+          "abatement_deployed": 60675110.58111605,
+          "total_cost": 2263745056.2212653,
+          "cumulative_abatement": 84945154.81356247,
+          "cumulative_cost": 2996050840.4440227
+        },
+        {
+          "technology": "Efficiency_Upgrade",
+          "cost_per_tco2": 46.69747052543717,
+          "abatement_deployed": 36405066.348669626,
+          "total_cost": 1700024512.7935843,
+          "cumulative_abatement": 121350221.1622321,
+          "cumulative_cost": 4696075353.237607
+        }
+      ],
+      "technology_costs": {
+        "Early_Retirement": 30.17323648894483,
+        "Efficiency_Upgrade": 46.69747052543717,
+        "Fuel_Switch": 55.477914624366754,
+        "Process_Replacement": 65.18290401799874,
+        "Bio_Naphtha": 57.91155734280489,
+        "Green_Hydrogen": 37.30928604068852,
+        "CCUS": 54.059507528702696,
+        "Electrification": 69.34739328045845
+      },
+      "baseline_projection": {
+        "total_emissions": 242700442.3244642,
+        "active_emissions": 23715442.324464187,
+        "new_facility_emissions": 218985000.0,
+        "facility_projections": {
+          "active_facilities": "      products          process   upstream  ... age_2025 age_2050  retired\n1     Ethylene  Naphtha Cracker          -  ...        4       29    False\n5     Ethylene  Naphtha Cracker          -  ...        4       29    False\n7     Ethylene  Naphtha Cracker          -  ...        4       29    False\n9     Ethylene  Naphtha Cracker          -  ...        7       32    False\n12   Propylene  Naphtha Cracker          -  ...       14       39    False\n13   Propylene  Naphtha Cracker          -  ...        4       29    False\n17   Propylene  Naphtha Cracker          -  ...        4       29    False\n19   Propylene  Naphtha Cracker          -  ...        4       29    False\n21   Propylene  Naphtha Cracker          -  ...        7       32    False\n22   Propylene  Naphtha Cracker          -  ...        9       34    False\n28   Butadiene  Naphtha Cracker          -  ...        4       29    False\n32   Butadiene  Naphtha Cracker          -  ...        3       28    False\n33   Butadiene  Naphtha Cracker          -  ...       14       39    False\n37   Butadiene  Naphtha Cracker          -  ...        2       27    False\n41          \ubca4\uc820        BTX Plant          -  ...        9       34    False\n64         \ud1a8\ub8e8\uc5d4        BTX Plant          -  ...      -45      -20    False\n66         \uc790\uc77c\ub80c        BTX Plant          -  ...        9       34    False\n74         \uc790\uc77c\ub80c        BTX Plant          -  ...      -45      -20    False\n103       LDPE          Utility   Ethylene  ...        4       29    False\n114     L-LDPE          Utility   Ethylene  ...        4       29    False\n118       HDPE          Utility   Ethylene  ...        4       29    False\n123       HDPE          Utility   Ethylene  ...        4       29    False\n127         PP          Utility  Propylene  ...        4       29    False\n136         PP          Utility  Propylene  ...        4       29    False\n155        PVC          Utility        VCM  ...      -41      -16    False\n187   NB-Latex          Utility        NBR  ...        4       29    False\n\n[26 rows x 10 columns]",
+          "retired_facilities": "     products          process upstream  ... age_2025 age_2050  retired\n0    Ethylene  Naphtha Cracker        -  ...       34       59     True\n2    Ethylene  Naphtha Cracker        -  ...       34       59     True\n3    Ethylene  Naphtha Cracker        -  ...       34       59     True\n4    Ethylene  Naphtha Cracker        -  ...       33       58     True\n6    Ethylene  Naphtha Cracker        -  ...       46       71     True\n..        ...              ...      ...  ...      ...      ...      ...\n243  \uce74\ubcf8\ube14\ub799(CB)          Utility        -  ...       44       69     True\n244      \uc11d\uc720\uc218\uc9c0          Utility        -  ...       11       36     True\n245      \uc11d\uc720\uc218\uc9c0          Utility        -  ...       21       46     True\n246      \uc11d\uc720\uc218\uc9c0          Utility        -  ...        6       31     True\n247      \uc11d\uc720\uc218\uc9c0          Utility        -  ...       47       72     True\n\n[222 rows x 10 columns]",
+          "retired_capacity_kt": "84476",
+          "new_capacity_kt": 109492.5,
+          "new_facility_efficiency": 0.8
+        }
+      }
+    }
+  },
+  "comparison_summary": [
+    {
+      "year": 2025,
+      "baseline_emissions_mt": 110.0,
+      "marginal_cost_usd_per_tco2": 140.0,
+      "total_investment_busd": 7.7,
+      "carbon_price_usd_per_tco2": 50,
+      "technologies_deployed": 3
+    },
+    {
+      "year": 2030,
+      "baseline_emissions_mt": 169.85945374277185,
+      "marginal_cost_usd_per_tco2": 111.00608645489999,
+      "total_investment_busd": 9.427716603676107,
+      "carbon_price_usd_per_tco2": 100,
+      "technologies_deployed": 5
+    },
+    {
+      "year": 2040,
+      "baseline_emissions_mt": 204.51324232446422,
+      "marginal_cost_usd_per_tco2": 68.97984891534415,
+      "total_investment_busd": 7.053646278364354,
+      "carbon_price_usd_per_tco2": 200,
+      "technologies_deployed": 5
+    },
+    {
+      "year": 2050,
+      "baseline_emissions_mt": 242.7004423244642,
+      "marginal_cost_usd_per_tco2": 38.698531475764376,
+      "total_investment_busd": 4.696075353237607,
+      "carbon_price_usd_per_tco2": 350,
+      "technologies_deployed": 3
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+technology,cost_per_tco2,abatement_deployed,total_cost,cumulative_abatement,cumulative_cost
+Early_Retirement,50,11000000.0,550000000.0,11000000.0,550000000.0
+Efficiency_Upgrade,100,16500000.0,1650000000.0,27500000.0,2200000000.0
+Fuel_Switch,200,27500000.0,5500000000.0,55000000.0,7700000000.0

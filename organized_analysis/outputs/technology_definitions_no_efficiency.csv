@@ -1,0 +1,7 @@
+technology,description,abatement_potential_mtco2,base_capex_usd_per_tco2,base_opex_usd_per_tco2,has_fuel_dependency,carbon_price_benefit,technology_maturity
+Early_Retirement,Early retirement of oldest/least efficient facilities,5.2,0,50,False,0.0,Commercial
+Fuel_Switch_Biomass,Switch from fossil fuels to biomass for thermal processes,8.0,120,25,True,1.0,Commercial
+Electrification_Renewable,Electrification with renewable electricity,12.5,180,30,True,1.0,Demonstration
+Bio_Naphtha,Replace fossil naphtha with bio-naphtha feedstock,10.0,80,20,True,0.85,Demonstration
+Green_Hydrogen_Thermal,Green hydrogen for high-temperature thermal processes,7.5,200,40,True,1.0,Pre-commercial
+Process_Replacement_Electric,Replace thermal processes with electric alternatives,6.0,300,50,True,1.0,Research

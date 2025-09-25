@@ -1,0 +1,232 @@
+{
+  "analysis_date": "2025-09-22T21:09:02.184837",
+  "corrected_baseline_mtco2": 52.0,
+  "static_technology_costs": {
+    "Early_Retirement": 50,
+    "Efficiency_Upgrade": 100,
+    "Fuel_Switch": 200,
+    "Process_Replacement": 400,
+    "Bio_Naphtha": 272,
+    "Green_Hydrogen": 300,
+    "Electrification": 250
+  },
+  "scenario_results": {
+    "10pct": {
+      "baseline_emissions_mtco2": 52.0,
+      "target_reduction_mtco2": 5.2,
+      "achieved_reduction_mtco2": 5.2,
+      "achievement_pct": 100.0,
+      "total_cost_musd": 260.0,
+      "marginal_cost_usd_per_tco2": 50.0,
+      "technologies_deployed": 1,
+      "macc_curve": [
+        {
+          "technology": "Early_Retirement",
+          "cost_per_tco2": 50,
+          "abatement_deployed_tco2": 5200000.0,
+          "total_cost_usd": 260000000.0,
+          "cumulative_abatement_tco2": 5200000.0,
+          "cumulative_cost_usd": 260000000.0
+        }
+      ]
+    },
+    "25pct": {
+      "baseline_emissions_mtco2": 52.0,
+      "target_reduction_mtco2": 13.0,
+      "achieved_reduction_mtco2": 13.0,
+      "achievement_pct": 100.0,
+      "total_cost_musd": 1040.0,
+      "marginal_cost_usd_per_tco2": 80.0,
+      "technologies_deployed": 2,
+      "macc_curve": [
+        {
+          "technology": "Early_Retirement",
+          "cost_per_tco2": 50,
+          "abatement_deployed_tco2": 5200000.0,
+          "total_cost_usd": 260000000.0,
+          "cumulative_abatement_tco2": 5200000.0,
+          "cumulative_cost_usd": 260000000.0
+        },
+        {
+          "technology": "Efficiency_Upgrade",
+          "cost_per_tco2": 100,
+          "abatement_deployed_tco2": 7800000.0,
+          "total_cost_usd": 780000000.0,
+          "cumulative_abatement_tco2": 13000000.0,
+          "cumulative_cost_usd": 1040000000.0
+        }
+      ]
+    },
+    "50pct": {
+      "baseline_emissions_mtco2": 52.0,
+      "target_reduction_mtco2": 26.0,
+      "achieved_reduction_mtco2": 26.0,
+      "achievement_pct": 100.0,
+      "total_cost_musd": 3640.0,
+      "marginal_cost_usd_per_tco2": 140.0,
+      "technologies_deployed": 3,
+      "macc_curve": [
+        {
+          "technology": "Early_Retirement",
+          "cost_per_tco2": 50,
+          "abatement_deployed_tco2": 5200000.0,
+          "total_cost_usd": 260000000.0,
+          "cumulative_abatement_tco2": 5200000.0,
+          "cumulative_cost_usd": 260000000.0
+        },
+        {
+          "technology": "Efficiency_Upgrade",
+          "cost_per_tco2": 100,
+          "abatement_deployed_tco2": 7800000.0,
+          "total_cost_usd": 780000000.0,
+          "cumulative_abatement_tco2": 13000000.0,
+          "cumulative_cost_usd": 1040000000.0
+        },
+        {
+          "technology": "Fuel_Switch",
+          "cost_per_tco2": 200,
+          "abatement_deployed_tco2": 13000000.0,
+          "total_cost_usd": 2600000000.0,
+          "cumulative_abatement_tco2": 26000000.0,
+          "cumulative_cost_usd": 3640000000.0
+        }
+      ]
+    },
+    "75pct": {
+      "baseline_emissions_mtco2": 52.0,
+      "target_reduction_mtco2": 39.0,
+      "achieved_reduction_mtco2": 39.0,
+      "achievement_pct": 100.0,
+      "total_cost_musd": 6760.0,
+      "marginal_cost_usd_per_tco2": 173.33333333333334,
+      "technologies_deployed": 4,
+      "macc_curve": [
+        {
+          "technology": "Early_Retirement",
+          "cost_per_tco2": 50,
+          "abatement_deployed_tco2": 5200000.0,
+          "total_cost_usd": 260000000.0,
+          "cumulative_abatement_tco2": 5200000.0,
+          "cumulative_cost_usd": 260000000.0
+        },
+        {
+          "technology": "Efficiency_Upgrade",
+          "cost_per_tco2": 100,
+          "abatement_deployed_tco2": 7800000.0,
+          "total_cost_usd": 780000000.0,
+          "cumulative_abatement_tco2": 13000000.0,
+          "cumulative_cost_usd": 1040000000.0
+        },
+        {
+          "technology": "Fuel_Switch",
+          "cost_per_tco2": 200,
+          "abatement_deployed_tco2": 15600000.0,
+          "total_cost_usd": 3120000000.0,
+          "cumulative_abatement_tco2": 28600000.0,
+          "cumulative_cost_usd": 4160000000.0
+        },
+        {
+          "technology": "Electrification",
+          "cost_per_tco2": 250,
+          "abatement_deployed_tco2": 10400000.0,
+          "total_cost_usd": 2600000000.0,
+          "cumulative_abatement_tco2": 39000000.0,
+          "cumulative_cost_usd": 6760000000.0
+        }
+      ]
+    },
+    "90pct": {
+      "baseline_emissions_mtco2": 52.0,
+      "target_reduction_mtco2": 46.8,
+      "achieved_reduction_mtco2": 46.8,
+      "achievement_pct": 100.0,
+      "total_cost_musd": 8881.6,
+      "marginal_cost_usd_per_tco2": 189.77777777777777,
+      "technologies_deployed": 5,
+      "macc_curve": [
+        {
+          "technology": "Early_Retirement",
+          "cost_per_tco2": 50,
+          "abatement_deployed_tco2": 5200000.0,
+          "total_cost_usd": 260000000.0,
+          "cumulative_abatement_tco2": 5200000.0,
+          "cumulative_cost_usd": 260000000.0
+        },
+        {
+          "technology": "Efficiency_Upgrade",
+          "cost_per_tco2": 100,
+          "abatement_deployed_tco2": 7800000.0,
+          "total_cost_usd": 780000000.0,
+          "cumulative_abatement_tco2": 13000000.0,
+          "cumulative_cost_usd": 1040000000.0
+        },
+        {
+          "technology": "Fuel_Switch",
+          "cost_per_tco2": 200,
+          "abatement_deployed_tco2": 15600000.0,
+          "total_cost_usd": 3120000000.0,
+          "cumulative_abatement_tco2": 28600000.0,
+          "cumulative_cost_usd": 4160000000.0
+        },
+        {
+          "technology": "Electrification",
+          "cost_per_tco2": 250,
+          "abatement_deployed_tco2": 10400000.0,
+          "total_cost_usd": 2600000000.0,
+          "cumulative_abatement_tco2": 39000000.0,
+          "cumulative_cost_usd": 6760000000.0
+        },
+        {
+          "technology": "Bio_Naphtha",
+          "cost_per_tco2": 272,
+          "abatement_deployed_tco2": 7800000.0,
+          "total_cost_usd": 2121600000.0,
+          "cumulative_abatement_tco2": 46800000.0,
+          "cumulative_cost_usd": 8881600000.0
+        }
+      ]
+    }
+  },
+  "comparison_summary": [
+    {
+      "scenario": "10pct",
+      "target_reduction_pct": 10.0,
+      "achieved_reduction_mtco2": 5.2,
+      "total_cost_musd": 260.0,
+      "marginal_cost_usd_per_tco2": 50.0,
+      "technologies_deployed": 1
+    },
+    {
+      "scenario": "25pct",
+      "target_reduction_pct": 25.0,
+      "achieved_reduction_mtco2": 13.0,
+      "total_cost_musd": 1040.0,
+      "marginal_cost_usd_per_tco2": 80.0,
+      "technologies_deployed": 2
+    },
+    {
+      "scenario": "50pct",
+      "target_reduction_pct": 50.0,
+      "achieved_reduction_mtco2": 26.0,
+      "total_cost_musd": 3640.0,
+      "marginal_cost_usd_per_tco2": 140.0,
+      "technologies_deployed": 3
+    },
+    {
+      "scenario": "75pct",
+      "target_reduction_pct": 75.0,
+      "achieved_reduction_mtco2": 39.0,
+      "total_cost_musd": 6760.0,
+      "marginal_cost_usd_per_tco2": 173.33333333333334,
+      "technologies_deployed": 4
+    },
+    {
+      "scenario": "90pct",
+      "target_reduction_pct": 89.99999999999999,
+      "achieved_reduction_mtco2": 46.8,
+      "total_cost_musd": 8881.6,
+      "marginal_cost_usd_per_tco2": 189.77777777777777,
+      "technologies_deployed": 5
+    }
+  ]
+}
