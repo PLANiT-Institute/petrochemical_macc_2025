@@ -1,6 +1,0 @@
-scenario,year,source_carrier,intermediate_carrier,sink_process,energy_gj,emission_intensity_kgco2_gj
-baseline,2025,Naphtha (Feedstock),,Naphtha Cracker,2930322632.559471,4.312077294685991
-baseline,2025,Naphtha (Thermal),,Naphtha Cracker,402009408.2487966,74.1896551724138
-baseline,2025,Grid Electricity,,Naphtha Cracker,2133550.3236108692,1250.0
-baseline,2025,Naphtha (Feedstock),,BTX Plant,1327857167.0478256,4.312077294685991
-baseline,2025,Grid Electricity,,BTX Plant,917217.8326919251,1250.0000000000002

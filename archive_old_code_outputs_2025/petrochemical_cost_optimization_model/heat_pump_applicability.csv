@@ -1,7 +1,0 @@
-Product_Group,Heat_Pump_Applicable_%,Reason
-"Olefins (Ethylene, Propylene, Butadiene)",10,Only preheating; crackers need >800°C
-"Aromatics (Benzene, Toluene, Xylene)",60,Most distillation in 80-140°C range
-"Polymers (HDPE, LDPE, PP, PS, PVC)",45,Many polymerization steps 60-200°C
-"Intermediates (EG, TPA, Alcohols)",50,Significant distillation/separation
-"Rubber (SBR, BR, etc.)",40,Polymerization 40-80°C range
-Specialty Chemicals,55,Various medium-temp processes

@@ -155,12 +155,10 @@ streamlit run app.py
 
 ## Documentation
 
-- [README.md](README.md) - This file
-- [FINAL_MODEL_SUMMARY.md](FINAL_MODEL_SUMMARY.md) - Complete model overview
-- [DATA_FLOW_EXPLANATION.md](DATA_FLOW_EXPLANATION.md) - How data flows through model
-- [VALIDATION_RESULTS_REAL_DATA.md](VALIDATION_RESULTS_REAL_DATA.md) - Validation results
-- [BEFORE_AFTER_COMPARISON.md](BEFORE_AFTER_COMPARISON.md) - Improvement from real data
-- [WHY_COMPANY_PROBLEM_HAPPENED.md](WHY_COMPANY_PROBLEM_HAPPENED.md) - Root cause analysis
+- [README.md](README.md) - Quick start guide (this file)
+- [FINAL_MODEL_SUMMARY.md](FINAL_MODEL_SUMMARY.md) - Complete model methodology
+- [EMISSION_SCENARIOS_GUIDE.md](EMISSION_SCENARIOS_GUIDE.md) - How to create custom scenarios
+- [STREAMLIT_GUIDE.md](STREAMLIT_GUIDE.md) - Interactive dashboard guide
 
 ## Requirements
 

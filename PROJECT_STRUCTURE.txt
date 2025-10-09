@@ -1,0 +1,71 @@
+Korean Petrochemical MACC Model v2.0 - Clean Project Structure
+================================================================
+
+Root Directory:
+├── README.md                           # Quick start guide
+├── FINAL_MODEL_SUMMARY.md             # Complete methodology
+├── EMISSION_SCENARIOS_GUIDE.md        # Scenario customization guide
+├── STREAMLIT_GUIDE.md                 # Dashboard user guide
+├── requirements.txt                    # Python dependencies
+├── app.py                             # Streamlit dashboard (850 lines)
+├── run_all.py                         # Run complete analysis
+├── run_module_01.py                   # Run baseline only
+├── run_module_02.py                   # Run MACC only
+├── run_module_03.py                   # Run optimization only
+└── run_module_04.py                   # Run financial only
+
+data/                                   # Input data (11 CSV files)
+├── facility_database.csv              # 248 real facilities
+├── energy_intensities.csv             # 55 products
+├── emission_factors.csv               # By fuel type
+├── emission_scenarios_template.csv    # 6 pre-loaded scenarios
+├── fuel_costs_baseline.csv
+├── fuel_price_trajectory.csv
+├── grid_emission_trajectory.csv
+├── h2_price_trajectory.csv
+├── heat_pump_applicability.csv
+├── re_price_trajectory.csv
+└── technology_parameters.csv
+
+modules/                                # Python calculation modules
+├── __init__.py
+├── utils.py                           # Shared utilities
+├── baseline.py                        # Module 1: Baseline analysis
+├── macc.py                            # Module 2: MACC curves
+├── optimization.py                    # Module 3: Cost optimization
+└── financial.py                       # Module 4: Financial analysis
+
+outputs/                                # All results (auto-generated)
+├── module_01/                         # Baseline outputs (8 files)
+│   ├── baseline_2025_detailed.csv
+│   ├── bau_trajectory_2025_2050.csv
+│   ├── emissions_by_company.csv
+│   ├── emissions_by_product.csv
+│   ├── emissions_by_location.csv
+│   └── *.png (3 charts)
+├── module_02/                         # MACC outputs (6 files)
+│   ├── macc_annual_2025_2050.csv
+│   └── *.png (5 MACC curves)
+├── module_03/                         # Optimization outputs (18+ files)
+│   ├── scenario_comparison.csv
+│   ├── *_deployment.csv (6 scenarios)
+│   └── *.png (12+ charts)
+└── module_04/                         # Financial outputs (2 files)
+    ├── financial_summary.csv
+    └── cash_flow_linear.csv
+
+Total Files: ~60 files
+- 4 Documentation (MD)
+- 11 Input data (CSV)
+- 9 Python code files
+- 40+ Output files (CSV + PNG)
+
+Key Features:
+✅ 100% Python (no Excel dependencies)
+✅ 248 real facilities from 60 companies
+✅ 6 emission scenarios (easily customizable)
+✅ 3 decarbonization technologies
+✅ Interactive Streamlit dashboard
+✅ ~10-15 second runtime
+✅ Validated against ESG reports
+

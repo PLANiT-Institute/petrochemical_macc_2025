@@ -1,4 +1,0 @@
-scenario,total_npv_musd,total_capex_musd,total_abatement_mtco2,final_emissions_2050,target_met,feasible
-Scenario_A_Budget,0,0,0.0,51.99999999999998,True,True
-Scenario_B_Point_Targets,0,0,0.0,51.99999999999998,True,True
-Scenario_C_Linear,0,0,0.0,51.99999999999998,True,True

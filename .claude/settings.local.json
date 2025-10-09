@@ -17,7 +17,8 @@
       "Bash(xargs -I {} mv {} archive_development_scripts_2025/output_files/)",
       "Bash(find:*)",
       "Bash(xargs:*)",
-      "Read(//Users/jinsupark/jinsu-coding/**)"
+      "Read(//Users/jinsupark/jinsu-coding/**)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

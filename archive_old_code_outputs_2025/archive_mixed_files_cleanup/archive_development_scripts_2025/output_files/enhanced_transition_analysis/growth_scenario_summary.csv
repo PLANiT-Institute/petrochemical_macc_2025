@@ -1,5 +1,0 @@
-Scenario,Description,Annual_Growth_Rate,Base_Capacity_2025_kt,Final_Capacity_2050_kt,Total_Growth_Factor,CAGR_2025_2050,Baseline_Emissions_2050_Mt,Abatement_Potential_2050_Mt,Investment_Required_2050_M_USD,Abatement_Cost_USD_per_tCO2,Key_Drivers
-Conservative Growth,Slow growth due to environmental constraints and market maturity,+0.5%,"100,066","113,423",1.13x,+0.5%,1607.9,1529.0,123,-11,Environmental regulations; Market saturation; Energy transition pressure
-Moderate Growth,Balanced growth with green technology integration,+1.5%,"100,066","150,055",1.50x,+1.6%,2064.5,1959.9,159,-13,Steady chemical demand; Green product premium; Export competitiveness
-High Growth,Aggressive expansion driven by green chemicals demand,+2.5%,"100,066","243,983",2.44x,+3.6%,3338.3,3160.1,251,-17,Strong export demand; Green chemical premiums; Government incentives
-Industry Decline,Contraction due to global competition and regulation,-1.0%,"100,066","80,011",0.80x,-0.9%,1216.0,1157.5,91,-9,Import competition; Strict carbon regulations; High energy costs
