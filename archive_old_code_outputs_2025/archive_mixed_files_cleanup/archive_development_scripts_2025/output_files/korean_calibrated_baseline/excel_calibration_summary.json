@@ -1,0 +1,45 @@
+{
+  "Korean Industry Benchmarks Applied": {
+    "total_energy_toe": 67700000,
+    "total_energy_gj": 2834463600.0,
+    "naphtha_share": 0.829,
+    "fuel_gas_share": 0.111,
+    "electricity_share": 0.059,
+    "ncc_ghg_share": 0.46,
+    "btx_ghg_share": 0.32,
+    "utility_ghg_share": 0.18,
+    "direct_emission_share": 0.64,
+    "indirect_emission_share": 0.34,
+    "total_ghg_target": 261.5
+  },
+  "Energy Calibration": {
+    "Naphtha": {
+      "gj": 2349770324.4,
+      "toe": 56123300.0
+    },
+    "Fuel_Gas": {
+      "gj": 314625459.6,
+      "toe": 7514700.0
+    },
+    "Electricity": {
+      "gj": 167233352.4,
+      "toe": 3994300.0
+    }
+  },
+  "Process Calibration": {
+    "Naphtha Cracker": {
+      "emissions_mt": 120.29,
+      "share": 0.46
+    },
+    "BTX Plant": {
+      "emissions_mt": 83.68,
+      "share": 0.32
+    },
+    "Utility": {
+      "emissions_mt": 47.07,
+      "share": 0.18
+    }
+  },
+  "Updated File": "/Users/jinsupark/jinsu-coding/petrochemical_macc_2025/organized_analysis/data/Korean_Petrochemical_MACC_Model_English_Calibrated.xlsx",
+  "Calibration Status": "Success"
+}

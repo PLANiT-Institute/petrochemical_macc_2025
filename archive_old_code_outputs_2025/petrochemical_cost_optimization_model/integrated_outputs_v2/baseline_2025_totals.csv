@@ -1,0 +1,9 @@
+metric,value,unit,target,status
+total_emissions,51.99999999999998,MtCO₂,52.0,PASS
+scope1_emissions,50.24603993268034,MtCO₂,,INFO
+scope2_emissions,1.753960067319644,MtCO₂,,INFO
+direct_share,96.62699987053915,%,64.0,INFO
+indirect_share,3.3730001294608556,%,34.0,INFO
+total_energy,62.82456616777057,Mtoe,67.7,INFO
+total_facilities,87.0,count,,INFO
+calibration_factor,0.3893945438043721,ratio,1.0,INFO

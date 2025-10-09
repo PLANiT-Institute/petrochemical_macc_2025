@@ -1,0 +1,27 @@
+KOREAN PETROCHEMICAL BAU ANALYSIS REPORT
+==================================================
+
+🎯 MODEL CORRECTIONS APPLIED:
+   Original emissions: 261.5 MtCO₂
+   Correction factor: 0.242
+   Energy intensities: Corrected to industry standards
+
+📊 BAU PATHWAY RESULTS:
+------------------------------
+2023: 63.3 MtCO₂, 67.7M toe
+2030: 67.7 MtCO₂, 67.7M toe
+2040: 74.6 MtCO₂, 67.7M toe
+2050: 82.2 MtCO₂, 67.7M toe
+
+🇰🇷 KOREAN BENCHMARK ALIGNMENT (2023):
+----------------------------------------
+Model Emissions: 63.3 MtCO₂
+Korean Target: 52.0 MtCO₂
+Accuracy Ratio: 1.22
+Naphtha Share: 82.9% (target: 82.9%)
+
+🏭 PROCESS BREAKDOWN (2023):
+------------------------------
+Naphtha Cracker: 32.0 MtCO₂ (50.5%)
+BTX Plant: 20.1 MtCO₂ (31.8%)
+Utility: 11.2 MtCO₂ (17.6%)

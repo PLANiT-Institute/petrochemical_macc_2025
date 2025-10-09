@@ -1,0 +1,82 @@
+scenario_name,constraint_type,year,target_mt,description
+Linear_2050,annual_path,2025,52.00,Baseline year
+Linear_2050,annual_path,2026,50.00,Linear reduction
+Linear_2050,annual_path,2027,48.00,Linear reduction
+Linear_2050,annual_path,2028,46.00,Linear reduction
+Linear_2050,annual_path,2029,44.00,Linear reduction
+Linear_2050,annual_path,2030,42.00,Linear reduction
+Linear_2050,annual_path,2031,40.00,Linear reduction
+Linear_2050,annual_path,2032,38.00,Linear reduction
+Linear_2050,annual_path,2033,36.00,Linear reduction
+Linear_2050,annual_path,2034,34.00,Linear reduction
+Linear_2050,annual_path,2035,32.00,Linear reduction
+Linear_2050,annual_path,2036,30.00,Linear reduction
+Linear_2050,annual_path,2037,28.00,Linear reduction
+Linear_2050,annual_path,2038,26.00,Linear reduction
+Linear_2050,annual_path,2039,24.00,Linear reduction
+Linear_2050,annual_path,2040,22.00,Linear reduction
+Linear_2050,annual_path,2041,20.00,Linear reduction
+Linear_2050,annual_path,2042,18.00,Linear reduction
+Linear_2050,annual_path,2043,16.00,Linear reduction
+Linear_2050,annual_path,2044,14.00,Linear reduction
+Linear_2050,annual_path,2045,12.00,Linear reduction
+Linear_2050,annual_path,2046,10.00,Linear reduction
+Linear_2050,annual_path,2047,8.00,Linear reduction
+Linear_2050,annual_path,2048,6.00,Linear reduction
+Linear_2050,annual_path,2049,4.00,Linear reduction
+Linear_2050,annual_path,2050,2.00,Net-zero target (96% reduction)
+Korea_NDC,annual_path,2025,52.00,Baseline year
+Korea_NDC,annual_path,2026,50.40,Gradual reduction
+Korea_NDC,annual_path,2027,48.80,Gradual reduction
+Korea_NDC,annual_path,2028,47.20,Gradual reduction
+Korea_NDC,annual_path,2029,43.60,Steeper reduction starts
+Korea_NDC,annual_path,2030,41.47,20.2% reduction from baseline (Korea NDC target)
+Korea_NDC,annual_path,2031,39.50,Continued reduction
+Korea_NDC,annual_path,2032,37.50,Continued reduction
+Korea_NDC,annual_path,2033,35.50,Continued reduction
+Korea_NDC,annual_path,2034,33.50,Continued reduction
+Korea_NDC,annual_path,2035,31.50,Continued reduction
+Korea_NDC,annual_path,2036,29.00,Accelerated reduction
+Korea_NDC,annual_path,2037,26.50,Accelerated reduction
+Korea_NDC,annual_path,2038,24.00,Accelerated reduction
+Korea_NDC,annual_path,2039,21.50,Accelerated reduction
+Korea_NDC,annual_path,2040,19.00,Accelerated reduction
+Korea_NDC,annual_path,2041,16.50,Accelerated reduction
+Korea_NDC,annual_path,2042,14.00,Accelerated reduction
+Korea_NDC,annual_path,2043,11.50,Accelerated reduction
+Korea_NDC,annual_path,2044,9.00,Accelerated reduction
+Korea_NDC,annual_path,2045,7.00,Near-zero approach
+Korea_NDC,annual_path,2046,5.50,Near-zero approach
+Korea_NDC,annual_path,2047,4.00,Near-zero approach
+Korea_NDC,annual_path,2048,2.50,Near-zero approach
+Korea_NDC,annual_path,2049,1.50,Near-zero approach
+Korea_NDC,annual_path,2050,0.50,Carbon neutrality (99% reduction)
+Early_Action,annual_path,2025,52.00,Baseline year
+Early_Action,annual_path,2026,48.00,Aggressive early reduction
+Early_Action,annual_path,2027,44.00,Aggressive early reduction
+Early_Action,annual_path,2028,40.00,Aggressive early reduction
+Early_Action,annual_path,2029,36.00,Aggressive early reduction
+Early_Action,annual_path,2030,32.00,38% reduction by 2030
+Early_Action,annual_path,2031,29.00,Slower after initial push
+Early_Action,annual_path,2032,27.00,Slower after initial push
+Early_Action,annual_path,2033,25.00,Slower after initial push
+Early_Action,annual_path,2034,23.00,Slower after initial push
+Early_Action,annual_path,2035,21.00,Slower after initial push
+Early_Action,annual_path,2036,19.00,Slower after initial push
+Early_Action,annual_path,2037,17.50,Slower after initial push
+Early_Action,annual_path,2038,16.00,Slower after initial push
+Early_Action,annual_path,2039,14.50,Slower after initial push
+Early_Action,annual_path,2040,13.00,Slower after initial push
+Early_Action,annual_path,2041,11.50,Final push to zero
+Early_Action,annual_path,2042,10.00,Final push to zero
+Early_Action,annual_path,2043,8.50,Final push to zero
+Early_Action,annual_path,2044,7.00,Final push to zero
+Early_Action,annual_path,2045,5.50,Final push to zero
+Early_Action,annual_path,2046,4.00,Final push to zero
+Early_Action,annual_path,2047,3.00,Final push to zero
+Early_Action,annual_path,2048,2.00,Final push to zero
+Early_Action,annual_path,2049,1.00,Final push to zero
+Early_Action,annual_path,2050,0.50,Carbon neutrality
+Budget_800Mt,carbon_budget,2025,800.00,Total cumulative emissions budget 2025-2050 (MtCO2)
+Budget_1000Mt,carbon_budget,2025,1000.00,Total cumulative emissions budget 2025-2050 (MtCO2)
+Budget_600Mt,carbon_budget,2025,600.00,Aggressive cumulative emissions budget 2025-2050 (MtCO2)

@@ -1,0 +1,4 @@
+target_year,wedge_id,technology,capacity_mt,abatement_mtco2,marginal_cost_usd_tco2,cumulative_abatement_mtco2,prerequisite_wedges,interaction_factor
+2030,Bio_Naphtha_2030,Bio_Naphtha,25.667,32.871373756878846,79.94577522058594,32.871373756878846,,1.0
+2040,Bio_Naphtha_2040,Bio_Naphtha,25.667,32.871373756878846,61.84761237862066,32.871373756878846,,1.0
+2050,Bio_Naphtha_2050,Bio_Naphtha,25.667,32.871373756878846,43.74944953665537,32.871373756878846,,1.0

@@ -1,0 +1,269 @@
+================================================================================
+EXCEL SHEET LOGIC ANALYSIS FOR KOREAN CALIBRATION
+================================================================================
+
+🎯 KOREAN INDUSTRY BENCHMARKS TO ACHIEVE:
+   total_energy_toe: 67700000
+   naphtha_share: 0.829
+   ncc_ghg_share: 0.46
+   direct_emission_share: 0.64
+   indirect_emission_share: 0.34
+
+📊 SHEET-BY-SHEET ANALYSIS:
+--------------------------------------------------
+
+🔍 SHEET: CI_Corrected
+   Purpose: emission_factors_base_data
+   Dimensions: (55, 14)
+   Calibration Approach: do_not_modify_emission_factors
+   Column Types:
+     energy_intensities: 7 columns
+
+
+🔍 SHEET: CI2_Corrected
+   Purpose: emission_factors_base_data
+   Dimensions: (9, 10)
+   Calibration Approach: do_not_modify_emission_factors
+   Column Types:
+     emission_factors: 9 columns
+     emission_totals: 1 columns
+
+
+🔍 SHEET: MACC_Template_Corrected
+   Purpose: macc_calculation_template
+   Dimensions: (24, 8)
+   Calibration Approach: do_not_modify_templates
+   Column Types:
+     technology_data: 2 columns
+     emission_factors: 1 columns
+     emission_totals: 2 columns
+
+
+🔍 SHEET: TechOptions_Corrected
+   Purpose: technology_options_template
+   Dimensions: (24, 9)
+   Calibration Approach: do_not_modify_templates
+   Column Types:
+     technology_data: 2 columns
+     energy_consumption: 1 columns
+
+
+🔍 SHEET: Naphtha_Emission_Breakdown
+   Purpose: naphtha_emission_breakdown
+   Dimensions: (5, 6)
+   Calibration Approach: analyze_dependencies_first
+   Column Types:
+     emission_totals: 1 columns
+     emission_factors: 1 columns
+
+
+🔍 SHEET: source_Original
+   Purpose: facility_capacity_base_data
+   Dimensions: (248, 7)
+   Calibration Approach: calibrate_capacity_to_match_korean_totals
+   Column Types:
+     capacity_data: 1 columns
+
+
+🔍 SHEET: utilities_Original
+   Purpose: utility_process_base_data
+   Dimensions: (49, 7)
+   Calibration Approach: do_not_modify_process_intensities
+   Column Types:
+     energy_consumption: 2 columns
+
+
+🔍 SHEET: Emissions_Target_Original
+   Purpose: emission_targets
+   Dimensions: (6, 3)
+   Calibration Approach: adjust_to_korean_policy_targets
+   Column Types:
+     emission_totals: 1 columns
+
+
+🔍 SHEET: Baseline_Assumptions_Original
+   Purpose: baseline_parameters
+   Dimensions: (6, 4)
+   Calibration Approach: calibrate_baseline_assumptions
+
+
+🔍 SHEET: TechLinks_Original
+   Purpose: technology_linkages
+   Dimensions: (8, 4)
+   Calibration Approach: do_not_modify_technology_costs
+   Column Types:
+     technology_data: 2 columns
+
+
+🔍 SHEET: MACC_Template_2030
+   Purpose: macc_calculation_template
+   Dimensions: (7, 9)
+   Calibration Approach: do_not_modify_templates
+   Column Types:
+     technology_data: 2 columns
+     emission_factors: 1 columns
+     emission_totals: 2 columns
+
+
+🔍 SHEET: MACC_Template_2040
+   Purpose: macc_calculation_template
+   Dimensions: (7, 9)
+   Calibration Approach: do_not_modify_templates
+   Column Types:
+     technology_data: 2 columns
+     emission_factors: 1 columns
+     emission_totals: 2 columns
+
+
+🔍 SHEET: MACC_Template_2050
+   Purpose: macc_calculation_template
+   Dimensions: (7, 9)
+   Calibration Approach: do_not_modify_templates
+   Column Types:
+     technology_data: 2 columns
+     emission_factors: 1 columns
+     emission_totals: 2 columns
+
+
+🔍 SHEET: Facility_Projections_2030
+   Purpose: facility_capacity_projection
+   Dimensions: (248, 10)
+   Calibration Approach: scale_proportionally_from_base_year
+   Column Types:
+     capacity_data: 1 columns
+
+
+🔍 SHEET: Facility_Projections_2040
+   Purpose: facility_capacity_projection
+   Dimensions: (248, 10)
+   Calibration Approach: scale_proportionally_from_base_year
+   Column Types:
+     capacity_data: 1 columns
+
+
+🔍 SHEET: Facility_Projections_2050
+   Purpose: facility_capacity_projection
+   Dimensions: (248, 10)
+   Calibration Approach: scale_proportionally_from_base_year
+   Column Types:
+     capacity_data: 1 columns
+
+
+🔍 SHEET: Retirement_Summary
+   Purpose: results_summary
+   Dimensions: (3, 8)
+   Calibration Approach: recalculate_from_base_data
+   Column Types:
+     capacity_data: 3 columns
+
+
+🔍 SHEET: Temporal_Comparison
+   Purpose: comparative_analysis
+   Dimensions: (4, 6)
+   Calibration Approach: analyze_dependencies_first
+   Column Types:
+     emission_totals: 1 columns
+     emission_factors: 2 columns
+     economic_data: 1 columns
+     technology_data: 1 columns
+
+
+🔍 SHEET: Technology_Availability
+   Purpose: technology_availability
+   Dimensions: (21, 5)
+   Calibration Approach: do_not_modify_technology_costs
+   Column Types:
+     technology_data: 1 columns
+     emission_factors: 1 columns
+
+
+🔍 SHEET: MACC_2030
+   Purpose: macc_results_by_year
+   Dimensions: (7, 18)
+   Calibration Approach: recalculate_from_base_data
+   Column Types:
+     technology_data: 2 columns
+     emission_totals: 2 columns
+     emission_factors: 4 columns
+     economic_data: 6 columns
+     energy_consumption: 1 columns
+
+
+🔍 SHEET: MACC_2040
+   Purpose: macc_results_by_year
+   Dimensions: (7, 18)
+   Calibration Approach: recalculate_from_base_data
+   Column Types:
+     technology_data: 2 columns
+     emission_totals: 2 columns
+     emission_factors: 4 columns
+     economic_data: 6 columns
+     energy_consumption: 1 columns
+
+
+🔍 SHEET: MACC_2050
+   Purpose: macc_results_by_year
+   Dimensions: (7, 18)
+   Calibration Approach: recalculate_from_base_data
+   Column Types:
+     technology_data: 2 columns
+     emission_totals: 2 columns
+     emission_factors: 4 columns
+     economic_data: 6 columns
+     energy_consumption: 1 columns
+
+
+🔍 SHEET: MACC_Summary
+   Purpose: results_summary
+   Dimensions: (3, 6)
+   Calibration Approach: recalculate_from_base_data
+   Column Types:
+     emission_totals: 1 columns
+     economic_data: 1 columns
+     emission_factors: 2 columns
+     technology_data: 1 columns
+
+
+🔍 SHEET: Technology_Master
+   Purpose: master_technology_database
+   Dimensions: (7, 9)
+   Calibration Approach: do_not_modify_technology_costs
+   Column Types:
+     technology_data: 2 columns
+     emission_factors: 3 columns
+     emission_totals: 1 columns
+
+🚀 RECOMMENDED CALIBRATION STRATEGY:
+--------------------------------------------------
+
+📋 CALIBRATION SEQUENCE:
+1. Calibrate base facility capacities (source_Original sheet)
+2. Update baseline assumptions to Korean benchmarks
+3. Recalculate all derived values (emissions, energy consumption)
+4. Verify results match Korean industry statistics
+5. Do NOT modify emission factors or technology costs
+
+✅ PHASE 1 - BASE DATA CALIBRATION (1 sheets):
+   source_Original: calibrate_capacity_to_match_korean_totals
+
+🔄 PHASE 2 - RECALCULATE (5 sheets):
+   Retirement_Summary: recalculate_from_base_data
+   MACC_2030: recalculate_from_base_data
+   MACC_2040: recalculate_from_base_data
+   MACC_2050: recalculate_from_base_data
+   MACC_Summary: recalculate_from_base_data
+
+🚫 DO NOT MODIFY (11 sheets):
+   CI_Corrected: do_not_modify_emission_factors
+   CI2_Corrected: do_not_modify_emission_factors
+   MACC_Template_Corrected: do_not_modify_templates
+   TechOptions_Corrected: do_not_modify_templates
+   utilities_Original: do_not_modify_process_intensities
+   TechLinks_Original: do_not_modify_technology_costs
+   MACC_Template_2030: do_not_modify_templates
+   MACC_Template_2040: do_not_modify_templates
+   MACC_Template_2050: do_not_modify_templates
+   Technology_Availability: do_not_modify_technology_costs
+   Technology_Master: do_not_modify_technology_costs
+
+✔️  PHASE 3 - VERIFICATION (0 sheets):

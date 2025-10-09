@@ -1,0 +1,369 @@
+"""
+MODULE 1: BASELINE ANALYSIS
+Calculate baseline emissions and BAU trajectory
+All facilities operate forever (no retirement)
+"""
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from pathlib import Path
+from .utils import (DataLoader, EmissionCalculator, PriceCalculator,
+                    save_csv_output, save_plot, identify_product_group)
+
+
+class BaselineAnalyzer:
+    """
+    Baseline emissions analysis
+    - Calculate 2025 baseline: 52 MtCO2
+    - Project BAU trajectory 2025-2050 with grid decarbonization
+    - NO facility retirement (all facilities exist forever)
+    - Track energy consumption by fuel type
+    """
+
+    def __init__(self, data_dir='data', output_dir='outputs/module_01'):
+        """Initialize with data directory"""
+        self.data_dir = Path(data_dir)
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+
+        print("="*80)
+        print("MODULE 1: BASELINE ANALYSIS")
+        print("="*80)
+
+        # Load data
+        print("\n📁 Loading data...")
+        loader = DataLoader(data_dir)
+
+        self.df_facilities = loader.load_facilities()
+        self.df_intensities = loader.load_energy_intensities()
+        self.df_emission_factors = loader.load_emission_factors()
+        self.df_grid_emissions = loader.load_grid_emissions()
+        self.df_fuel_prices = pd.read_csv(self.data_dir / 'fuel_price_trajectory.csv')
+
+        print(f"   ✓ Loaded {len(self.df_facilities)} facilities")
+        print(f"   ✓ Loaded {len(self.df_intensities)} energy intensities")
+
+        # Initialize calculators
+        self.emission_calc = EmissionCalculator(self.df_emission_factors)
+
+    def calculate_baseline_2025(self):
+        """
+        Calculate 2025 baseline emissions for all facilities
+        Returns DataFrame with facility-level details and energy consumption
+        """
+        print("\n📊 Calculating 2025 baseline...")
+
+        baseline = []
+
+        for idx, facility in self.df_facilities.iterrows():
+            # Get energy intensities for this product
+            intensity_row = self.df_intensities.iloc[idx]
+
+            capacity = facility['capacity_kt']  # kt/year
+
+            # Calculate energy consumption (total for facility per year)
+            energy_consumption = {
+                'naphtha_gj': intensity_row['Naphtha_GJ_per_tonne'] * capacity * 1000,  # GJ/year
+                'electricity_kwh': intensity_row['Electricity_kWh_per_tonne'] * capacity * 1000,  # kWh/year
+                'lng_gj': intensity_row['LNG_GJ_per_tonne'] * capacity * 1000,
+                'fuel_gas_gj': intensity_row['Fuel_Gas_GJ_per_tonne'] * capacity * 1000,
+                'byproduct_gas_gj': intensity_row['Byproduct_Gas_GJ_per_tonne'] * capacity * 1000,
+                'lpg_gj': intensity_row['LPG_GJ_per_tonne'] * capacity * 1000,
+                'fuel_oil_gj': intensity_row['Fuel_Oil_GJ_per_tonne'] * capacity * 1000,
+                'diesel_gj': intensity_row['Diesel_GJ_per_tonne'] * capacity * 1000,
+            }
+
+            # Calculate emissions by fuel (kt CO2/year)
+            emissions = self.emission_calc.calculate_total_emissions(facility, intensity_row)
+
+            # Add product group
+            product_group = identify_product_group(facility['product'])
+
+            # Compile baseline row
+            baseline.append({
+                'product': facility['product'],
+                'product_group': product_group,
+                'process': facility['process'],
+                'company': facility['company'],
+                'location': facility['location'],
+                'capacity_kt': capacity,
+                'year_built': facility['year_built'],
+                # Energy consumption
+                'naphtha_gj_per_year': energy_consumption['naphtha_gj'],
+                'electricity_kwh_per_year': energy_consumption['electricity_kwh'],
+                'lng_gj_per_year': energy_consumption['lng_gj'],
+                'fuel_gas_gj_per_year': energy_consumption['fuel_gas_gj'],
+                'byproduct_gas_gj_per_year': energy_consumption['byproduct_gas_gj'],
+                'lpg_gj_per_year': energy_consumption['lpg_gj'],
+                'fuel_oil_gj_per_year': energy_consumption['fuel_oil_gj'],
+                'diesel_gj_per_year': energy_consumption['diesel_gj'],
+                # Emissions
+                'emissions_naphtha_kt': emissions.get('naphtha', 0),
+                'emissions_electricity_kt': emissions.get('electricity', 0),
+                'emissions_lng_kt': emissions.get('lng', 0),
+                'emissions_fuel_gas_kt': emissions.get('fuel_gas', 0),
+                'emissions_byproduct_gas_kt': emissions.get('byproduct_gas', 0),
+                'emissions_lpg_kt': emissions.get('lpg', 0),
+                'emissions_fuel_oil_kt': emissions.get('fuel_oil', 0),
+                'emissions_diesel_kt': emissions.get('diesel', 0),
+                'total_emissions_kt': emissions['total'],
+            })
+
+        df_baseline = pd.DataFrame(baseline)
+
+        total_emissions = df_baseline['total_emissions_kt'].sum() / 1000  # MtCO2
+
+        print(f"   ✓ Total baseline emissions: {total_emissions:.2f} MtCO2")
+        print(f"   ✓ Facilities: {len(df_baseline)}")
+
+        # Calculate shares
+        naphtha_share = df_baseline['emissions_naphtha_kt'].sum() / df_baseline['total_emissions_kt'].sum() * 100
+        elec_share = df_baseline['emissions_electricity_kt'].sum() / df_baseline['total_emissions_kt'].sum() * 100
+        other_share = 100 - naphtha_share - elec_share
+
+        print(f"   ✓ Naphtha: {naphtha_share:.1f}%")
+        print(f"   ✓ Electricity: {elec_share:.1f}%")
+        print(f"   ✓ Other: {other_share:.1f}%")
+
+        self.df_baseline = df_baseline
+        return df_baseline
+
+    def project_bau_trajectory(self, start_year=2025, end_year=2050):
+        """
+        Project BAU emissions trajectory
+        - All facilities continue operating forever (no retirement)
+        - Only change is grid decarbonization
+        """
+        print(f"\n📈 Projecting BAU trajectory ({start_year}-{end_year})...")
+
+        years = range(start_year, end_year + 1)
+        trajectory = []
+
+        # Get baseline 2025 energy consumption
+        baseline_2025 = self.df_baseline
+
+        # Get grid emission factor baseline
+        grid_ef_2025 = self.df_grid_emissions[self.df_grid_emissions['year'] == 2025]['grid_ef_tco2_per_mwh'].iloc[0]
+
+        for year in years:
+            # Get grid emission factor for this year
+            grid_ef = self.df_grid_emissions[self.df_grid_emissions['year'] == year]['grid_ef_tco2_per_mwh'].iloc[0]
+
+            # All facilities continue operating (no retirement)
+            # Only electricity emissions change due to grid decarbonization
+
+            # Fossil fuel emissions stay constant
+            fossil_emissions = (
+                baseline_2025['emissions_naphtha_kt'].sum() +
+                baseline_2025['emissions_lng_kt'].sum() +
+                baseline_2025['emissions_fuel_gas_kt'].sum() +
+                baseline_2025['emissions_byproduct_gas_kt'].sum() +
+                baseline_2025['emissions_lpg_kt'].sum() +
+                baseline_2025['emissions_fuel_oil_kt'].sum() +
+                baseline_2025['emissions_diesel_kt'].sum()
+            )
+
+            # Electricity emissions scale with grid decarbonization
+            elec_emissions_2025 = baseline_2025['emissions_electricity_kt'].sum()
+            grid_scaling = grid_ef / grid_ef_2025
+            elec_emissions = elec_emissions_2025 * grid_scaling
+
+            total_emissions = fossil_emissions + elec_emissions
+
+            trajectory.append({
+                'year': year,
+                'fossil_emissions_mt': fossil_emissions / 1000,
+                'electricity_emissions_mt': elec_emissions / 1000,
+                'total_emissions_mt': total_emissions / 1000,
+                'grid_ef_tco2_per_mwh': grid_ef,
+                'n_facilities': len(baseline_2025),
+            })
+
+        df_trajectory = pd.DataFrame(trajectory)
+
+        print(f"   ✓ {start_year} emissions: {df_trajectory.iloc[0]['total_emissions_mt']:.2f} MtCO2")
+        print(f"   ✓ {end_year} emissions: {df_trajectory.iloc[-1]['total_emissions_mt']:.2f} MtCO2")
+        print(f"   ✓ All {len(baseline_2025)} facilities operate forever")
+
+        self.df_trajectory = df_trajectory
+        return df_trajectory
+
+    def calculate_aggregations(self):
+        """Calculate emissions by product, company, location"""
+        print("\n📊 Calculating aggregations...")
+
+        # By product group
+        by_product = self.df_baseline.groupby('product_group').agg({
+            'total_emissions_kt': 'sum',
+            'capacity_kt': 'sum',
+            'product': 'count'
+        }).reset_index()
+        by_product.columns = ['product_group', 'emissions_kt', 'capacity_kt', 'n_facilities']
+        by_product['emissions_mt'] = by_product['emissions_kt'] / 1000
+        by_product['share_pct'] = 100 * by_product['emissions_mt'] / by_product['emissions_mt'].sum()
+        by_product = by_product.sort_values('emissions_mt', ascending=False)
+
+        # By company
+        by_company = self.df_baseline.groupby('company').agg({
+            'total_emissions_kt': 'sum',
+            'capacity_kt': 'sum',
+            'product': 'count'
+        }).reset_index()
+        by_company.columns = ['company', 'emissions_kt', 'capacity_kt', 'n_facilities']
+        by_company['emissions_mt'] = by_company['emissions_kt'] / 1000
+        by_company['share_pct'] = 100 * by_company['emissions_mt'] / by_company['emissions_mt'].sum()
+        by_company = by_company.sort_values('emissions_mt', ascending=False)
+
+        # By location
+        by_location = self.df_baseline.groupby('location').agg({
+            'total_emissions_kt': 'sum',
+            'capacity_kt': 'sum',
+            'product': 'count'
+        }).reset_index()
+        by_location.columns = ['location', 'emissions_kt', 'capacity_kt', 'n_facilities']
+        by_location['emissions_mt'] = by_location['emissions_kt'] / 1000
+        by_location['share_pct'] = 100 * by_location['emissions_mt'] / by_location['emissions_mt'].sum()
+        by_location = by_location.sort_values('emissions_mt', ascending=False)
+
+        print(f"   ✓ Aggregated by {len(by_product)} product groups")
+        print(f"   ✓ Aggregated by {len(by_company)} companies")
+        print(f"   ✓ Aggregated by {len(by_location)} locations")
+
+        self.df_by_product = by_product
+        self.df_by_company = by_company
+        self.df_by_location = by_location
+
+        return by_product, by_company, by_location
+
+    def calculate_fuel_costs(self):
+        """Calculate annual fuel costs for baseline"""
+        print("\n💰 Calculating fuel costs...")
+
+        # Get 2025 fuel prices
+        prices_2025 = self.df_fuel_prices[self.df_fuel_prices['year'] == 2025].iloc[0]
+
+        total_cost = 0
+
+        # Calculate cost for each fuel
+        costs = {}
+
+        # Naphtha
+        naphtha_gj = self.df_baseline['naphtha_gj_per_year'].sum()
+        costs['naphtha'] = naphtha_gj * prices_2025['naphtha_usd_per_gj'] / 1e6  # Million USD
+
+        # Electricity
+        electricity_kwh = self.df_baseline['electricity_kwh_per_year'].sum()
+        costs['electricity'] = electricity_kwh * prices_2025['electricity_usd_per_kwh'] / 1e6
+
+        # LNG
+        lng_gj = self.df_baseline['lng_gj_per_year'].sum()
+        costs['lng'] = lng_gj * prices_2025['lng_usd_per_gj'] / 1e6
+
+        # Fuel Gas
+        fuel_gas_gj = self.df_baseline['fuel_gas_gj_per_year'].sum()
+        costs['fuel_gas'] = fuel_gas_gj * prices_2025['fuel_gas_usd_per_gj'] / 1e6
+
+        # LPG
+        lpg_gj = self.df_baseline['lpg_gj_per_year'].sum()
+        costs['lpg'] = lpg_gj * prices_2025['lpg_usd_per_gj'] / 1e6
+
+        # Fuel Oil
+        fuel_oil_gj = self.df_baseline['fuel_oil_gj_per_year'].sum()
+        costs['fuel_oil'] = fuel_oil_gj * prices_2025['fuel_oil_usd_per_gj'] / 1e6
+
+        # Diesel
+        diesel_gj = self.df_baseline['diesel_gj_per_year'].sum()
+        costs['diesel'] = diesel_gj * prices_2025['diesel_usd_per_gj'] / 1e6
+
+        total_cost = sum(costs.values())
+
+        print(f"   ✓ Total annual fuel cost (2025): ${total_cost:.1f} Million")
+        print(f"      - Naphtha: ${costs['naphtha']:.1f}M ({costs['naphtha']/total_cost*100:.1f}%)")
+        print(f"      - Electricity: ${costs['electricity']:.1f}M ({costs['electricity']/total_cost*100:.1f}%)")
+
+        self.fuel_costs = costs
+        return costs
+
+    def create_visualizations(self):
+        """Create all visualizations"""
+        print("\n🎨 Creating visualizations...")
+
+        # 1. Baseline by product group
+        fig, ax = plt.subplots(figsize=(10, 10))
+        colors = sns.color_palette("Set2", len(self.df_by_product))
+        ax.pie(self.df_by_product['emissions_mt'],
+               labels=self.df_by_product['product_group'],
+               autopct='%1.1f%%',
+               colors=colors,
+               startangle=90)
+        ax.set_title('2025 Baseline Emissions by Product Group\\n52 MtCO2 Total',
+                    fontsize=14, fontweight='bold')
+        save_plot(fig, self.output_dir / 'baseline_2025_by_product.png')
+
+        # 2. BAU trajectory
+        fig, ax = plt.subplots(figsize=(14, 8))
+        ax.plot(self.df_trajectory['year'], self.df_trajectory['total_emissions_mt'],
+               linewidth=3, color='#E74C3C', label='Total Emissions')
+        ax.plot(self.df_trajectory['year'], self.df_trajectory['fossil_emissions_mt'],
+               linewidth=2, color='#8B4513', linestyle='--', label='Fossil Fuels')
+        ax.plot(self.df_trajectory['year'], self.df_trajectory['electricity_emissions_mt'],
+               linewidth=2, color='#3498DB', linestyle='--', label='Electricity (Grid)')
+        ax.set_xlabel('Year', fontsize=12, fontweight='bold')
+        ax.set_ylabel('Emissions (MtCO2/year)', fontsize=12, fontweight='bold')
+        ax.set_title('BAU Emissions Trajectory (2025-2050)\\nAll Facilities Operate Forever',
+                    fontsize=14, fontweight='bold')
+        ax.legend(loc='upper right')
+        ax.grid(True, alpha=0.3)
+        save_plot(fig, self.output_dir / 'bau_trajectory.png')
+
+        # 3. Top 10 companies
+        fig, ax = plt.subplots(figsize=(12, 8))
+        top_10 = self.df_by_company.head(10)
+        ax.barh(range(len(top_10)), top_10['emissions_mt'], color='#3498DB')
+        ax.set_yticks(range(len(top_10)))
+        ax.set_yticklabels(top_10['company'])
+        ax.set_xlabel('Emissions (MtCO2/year)', fontsize=12, fontweight='bold')
+        ax.set_title('Top 10 Companies by Emissions (2025)', fontsize=14, fontweight='bold')
+        ax.grid(True, alpha=0.3, axis='x')
+        save_plot(fig, self.output_dir / 'baseline_2025_top_companies.png')
+
+    def save_outputs(self):
+        """Save all output files"""
+        print("\n💾 Saving outputs...")
+
+        # CSVs
+        save_csv_output(self.df_baseline, self.output_dir / 'baseline_2025_detailed.csv',
+                       f"({len(self.df_baseline)} facilities)")
+        save_csv_output(self.df_trajectory, self.output_dir / 'bau_trajectory_2025_2050.csv',
+                       f"({len(self.df_trajectory)} years)")
+        save_csv_output(self.df_by_product, self.output_dir / 'emissions_by_product.csv')
+        save_csv_output(self.df_by_company, self.output_dir / 'emissions_by_company.csv')
+        save_csv_output(self.df_by_location, self.output_dir / 'emissions_by_location.csv')
+
+    def run_complete_analysis(self):
+        """Run complete baseline analysis"""
+        print("\n" + "="*80)
+        print("RUNNING COMPLETE BASELINE ANALYSIS")
+        print("="*80)
+
+        self.calculate_baseline_2025()
+        self.project_bau_trajectory()
+        self.calculate_aggregations()
+        self.calculate_fuel_costs()
+        self.create_visualizations()
+        self.save_outputs()
+
+        print("\n" + "="*80)
+        print("✓ MODULE 1 COMPLETE")
+        print("="*80)
+        print(f"\nOutputs saved to: {self.output_dir}")
+
+        return {
+            'baseline': self.df_baseline,
+            'trajectory': self.df_trajectory,
+            'by_product': self.df_by_product,
+            'by_company': self.df_by_company,
+            'by_location': self.df_by_location,
+        }

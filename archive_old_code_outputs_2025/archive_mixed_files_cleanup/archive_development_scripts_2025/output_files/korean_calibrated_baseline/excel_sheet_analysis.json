@@ -1,0 +1,705 @@
+{
+  "sheet_analysis": {
+    "CI_Corrected": {
+      "sheet_name": "CI_Corrected",
+      "dimensions": [
+        55,
+        14
+      ],
+      "column_types": {
+        "energy_intensities": [
+          "Fuel_Gas_Mix_GJ_per_t",
+          "Fuel_Oil_GJ_per_t",
+          "Electricity_kWh_per_t",
+          "Naphtha_Feedstock_GJ_per_t",
+          "Naphtha_Thermal_GJ_per_t",
+          "Bio_Naphtha_Feedstock_GJ_per_t",
+          "Bio_Naphtha_Thermal_GJ_per_t"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "emission_factors_base_data",
+      "calibration_approach": "do_not_modify_emission_factors",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "CI2_Corrected": {
+      "sheet_name": "CI2_Corrected",
+      "dimensions": [
+        9,
+        10
+      ],
+      "column_types": {
+        "emission_factors": [
+          "LPG_Propane_tCO2_per_GJ",
+          "LPG_Butane_tCO2_per_GJ",
+          "Fuel_Gas_Mix_tCO2_per_GJ",
+          "Fuel_Oil_tCO2_per_GJ",
+          "Diesel_tCO2_per_GJ",
+          "Naphtha_Feedstock_tCO2_per_GJ",
+          "Naphtha_Thermal_tCO2_per_GJ",
+          "Bio_Naphtha_Feedstock_tCO2_per_GJ",
+          "Bio_Naphtha_Thermal_tCO2_per_GJ"
+        ],
+        "emission_totals": [
+          "Electricity_tCO2_per_kWh"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "emission_factors_base_data",
+      "calibration_approach": "do_not_modify_emission_factors",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "MACC_Template_Corrected": {
+      "sheet_name": "MACC_Template_Corrected",
+      "dimensions": [
+        24,
+        8
+      ],
+      "column_types": {
+        "technology_data": [
+          "TechID",
+          "TechName"
+        ],
+        "emission_factors": [
+          "Cost_USD_per_tCO2"
+        ],
+        "emission_totals": [
+          "Abatement_Potential_MtCO2_per_year",
+          "Cumulative_Abatement_MtCO2_per_year"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "macc_calculation_template",
+      "calibration_approach": "do_not_modify_templates",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "TechOptions_Corrected": {
+      "sheet_name": "TechOptions_Corrected",
+      "dimensions": [
+        24,
+        9
+      ],
+      "column_types": {
+        "technology_data": [
+          "TechID",
+          "TechName"
+        ],
+        "energy_consumption": [
+          "EnergyCarrier"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "technology_options_template",
+      "calibration_approach": "do_not_modify_templates",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "Naphtha_Emission_Breakdown": {
+      "sheet_name": "Naphtha_Emission_Breakdown",
+      "dimensions": [
+        5,
+        6
+      ],
+      "column_types": {
+        "emission_totals": [
+          "Emission_Source"
+        ],
+        "emission_factors": [
+          "Emission_Factor_tCO2_per_tonne"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "naphtha_emission_breakdown",
+      "calibration_approach": "analyze_dependencies_first",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "source_Original": {
+      "sheet_name": "source_Original",
+      "dimensions": [
+        248,
+        7
+      ],
+      "column_types": {
+        "capacity_data": [
+          "capacity_1000_t"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "facility_capacity_base_data",
+      "calibration_approach": "calibrate_capacity_to_match_korean_totals",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "utilities_Original": {
+      "sheet_name": "utilities_Original",
+      "dimensions": [
+        49,
+        7
+      ],
+      "column_types": {
+        "energy_consumption": [
+          "Process energy (GJ/t)",
+          "Estimated electricity (kWh/t)"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "utility_process_base_data",
+      "calibration_approach": "do_not_modify_process_intensities",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "Emissions_Target_Original": {
+      "sheet_name": "Emissions_Target_Original",
+      "dimensions": [
+        6,
+        3
+      ],
+      "column_types": {
+        "emission_totals": [
+          "Target_MtCO2e"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "emission_targets",
+      "calibration_approach": "adjust_to_korean_policy_targets",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "Baseline_Assumptions_Original": {
+      "sheet_name": "Baseline_Assumptions_Original",
+      "dimensions": [
+        6,
+        4
+      ],
+      "column_types": {},
+      "data_patterns": {},
+      "likely_purpose": "baseline_parameters",
+      "calibration_approach": "calibrate_baseline_assumptions",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "TechLinks_Original": {
+      "sheet_name": "TechLinks_Original",
+      "dimensions": [
+        8,
+        4
+      ],
+      "column_types": {
+        "technology_data": [
+          "PrimaryTech",
+          "SecondaryTech"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "technology_linkages",
+      "calibration_approach": "do_not_modify_technology_costs",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "MACC_Template_2030": {
+      "sheet_name": "MACC_Template_2030",
+      "dimensions": [
+        7,
+        9
+      ],
+      "column_types": {
+        "technology_data": [
+          "TechID",
+          "TechName"
+        ],
+        "emission_factors": [
+          "Cost_USD_per_tCO2"
+        ],
+        "emission_totals": [
+          "Max_Abatement_Potential_MtCO2_per_year",
+          "Cumulative_Abatement_MtCO2_per_year"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "macc_calculation_template",
+      "calibration_approach": "do_not_modify_templates",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "MACC_Template_2040": {
+      "sheet_name": "MACC_Template_2040",
+      "dimensions": [
+        7,
+        9
+      ],
+      "column_types": {
+        "technology_data": [
+          "TechID",
+          "TechName"
+        ],
+        "emission_factors": [
+          "Cost_USD_per_tCO2"
+        ],
+        "emission_totals": [
+          "Max_Abatement_Potential_MtCO2_per_year",
+          "Cumulative_Abatement_MtCO2_per_year"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "macc_calculation_template",
+      "calibration_approach": "do_not_modify_templates",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "MACC_Template_2050": {
+      "sheet_name": "MACC_Template_2050",
+      "dimensions": [
+        7,
+        9
+      ],
+      "column_types": {
+        "technology_data": [
+          "TechID",
+          "TechName"
+        ],
+        "emission_factors": [
+          "Cost_USD_per_tCO2"
+        ],
+        "emission_totals": [
+          "Max_Abatement_Potential_MtCO2_per_year",
+          "Cumulative_Abatement_MtCO2_per_year"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "macc_calculation_template",
+      "calibration_approach": "do_not_modify_templates",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "Facility_Projections_2030": {
+      "sheet_name": "Facility_Projections_2030",
+      "dimensions": [
+        248,
+        10
+      ],
+      "column_types": {
+        "capacity_data": [
+          "capacity_1000_t"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "facility_capacity_projection",
+      "calibration_approach": "scale_proportionally_from_base_year",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "Facility_Projections_2040": {
+      "sheet_name": "Facility_Projections_2040",
+      "dimensions": [
+        248,
+        10
+      ],
+      "column_types": {
+        "capacity_data": [
+          "capacity_1000_t"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "facility_capacity_projection",
+      "calibration_approach": "scale_proportionally_from_base_year",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "Facility_Projections_2050": {
+      "sheet_name": "Facility_Projections_2050",
+      "dimensions": [
+        248,
+        10
+      ],
+      "column_types": {
+        "capacity_data": [
+          "capacity_1000_t"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "facility_capacity_projection",
+      "calibration_approach": "scale_proportionally_from_base_year",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "Retirement_Summary": {
+      "sheet_name": "Retirement_Summary",
+      "dimensions": [
+        3,
+        8
+      ],
+      "column_types": {
+        "capacity_data": [
+          "active_capacity_kt",
+          "retired_capacity_kt",
+          "capacity_retirement_rate_pct"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "results_summary",
+      "calibration_approach": "recalculate_from_base_data",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "Temporal_Comparison": {
+      "sheet_name": "Temporal_Comparison",
+      "dimensions": [
+        4,
+        6
+      ],
+      "column_types": {
+        "emission_totals": [
+          "baseline_emissions_mt"
+        ],
+        "emission_factors": [
+          "marginal_cost_usd_per_tco2",
+          "carbon_price_usd_per_tco2"
+        ],
+        "economic_data": [
+          "total_investment_busd"
+        ],
+        "technology_data": [
+          "technologies_deployed"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "comparative_analysis",
+      "calibration_approach": "analyze_dependencies_first",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "Technology_Availability": {
+      "sheet_name": "Technology_Availability",
+      "dimensions": [
+        21,
+        5
+      ],
+      "column_types": {
+        "technology_data": [
+          "technology"
+        ],
+        "emission_factors": [
+          "cost_usd_per_tco2"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "technology_availability",
+      "calibration_approach": "do_not_modify_technology_costs",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "MACC_2030": {
+      "sheet_name": "MACC_2030",
+      "dimensions": [
+        7,
+        18
+      ],
+      "column_types": {
+        "technology_data": [
+          "technology",
+          "technology_readiness"
+        ],
+        "emission_totals": [
+          "abatement_potential_mtco2",
+          "cumulative_abatement_mtco2"
+        ],
+        "emission_factors": [
+          "capex_usd_per_tco2",
+          "opex_usd_per_tco2",
+          "fuel_savings_usd_per_tco2",
+          "net_cost_usd_per_tco2"
+        ],
+        "economic_data": [
+          "total_capex_musd",
+          "total_opex_musd",
+          "total_investment_musd",
+          "capex_multiplier",
+          "opex_multiplier",
+          "cumulative_investment_musd"
+        ],
+        "energy_consumption": [
+          "total_fuel_savings_musd"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "macc_results_by_year",
+      "calibration_approach": "recalculate_from_base_data",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "MACC_2040": {
+      "sheet_name": "MACC_2040",
+      "dimensions": [
+        7,
+        18
+      ],
+      "column_types": {
+        "technology_data": [
+          "technology",
+          "technology_readiness"
+        ],
+        "emission_totals": [
+          "abatement_potential_mtco2",
+          "cumulative_abatement_mtco2"
+        ],
+        "emission_factors": [
+          "capex_usd_per_tco2",
+          "opex_usd_per_tco2",
+          "fuel_savings_usd_per_tco2",
+          "net_cost_usd_per_tco2"
+        ],
+        "economic_data": [
+          "total_capex_musd",
+          "total_opex_musd",
+          "total_investment_musd",
+          "capex_multiplier",
+          "opex_multiplier",
+          "cumulative_investment_musd"
+        ],
+        "energy_consumption": [
+          "total_fuel_savings_musd"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "macc_results_by_year",
+      "calibration_approach": "recalculate_from_base_data",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "MACC_2050": {
+      "sheet_name": "MACC_2050",
+      "dimensions": [
+        7,
+        18
+      ],
+      "column_types": {
+        "technology_data": [
+          "technology",
+          "technology_readiness"
+        ],
+        "emission_totals": [
+          "abatement_potential_mtco2",
+          "cumulative_abatement_mtco2"
+        ],
+        "emission_factors": [
+          "capex_usd_per_tco2",
+          "opex_usd_per_tco2",
+          "fuel_savings_usd_per_tco2",
+          "net_cost_usd_per_tco2"
+        ],
+        "economic_data": [
+          "total_capex_musd",
+          "total_opex_musd",
+          "total_investment_musd",
+          "capex_multiplier",
+          "opex_multiplier",
+          "cumulative_investment_musd"
+        ],
+        "energy_consumption": [
+          "total_fuel_savings_musd"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "macc_results_by_year",
+      "calibration_approach": "recalculate_from_base_data",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "MACC_Summary": {
+      "sheet_name": "MACC_Summary",
+      "dimensions": [
+        3,
+        6
+      ],
+      "column_types": {
+        "emission_totals": [
+          "total_abatement_potential_mtco2"
+        ],
+        "economic_data": [
+          "total_investment_musd"
+        ],
+        "emission_factors": [
+          "lowest_cost_usd_per_tco2",
+          "highest_cost_usd_per_tco2"
+        ],
+        "technology_data": [
+          "technologies_count"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "results_summary",
+      "calibration_approach": "recalculate_from_base_data",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    },
+    "Technology_Master": {
+      "sheet_name": "Technology_Master",
+      "dimensions": [
+        7,
+        9
+      ],
+      "column_types": {
+        "technology_data": [
+          "technology",
+          "technology_readiness"
+        ],
+        "emission_factors": [
+          "base_capex_usd_per_tco2",
+          "base_opex_usd_per_tco2",
+          "fuel_savings_usd_per_tco2"
+        ],
+        "emission_totals": [
+          "abatement_potential_mtco2"
+        ]
+      },
+      "data_patterns": {},
+      "likely_purpose": "master_technology_database",
+      "calibration_approach": "do_not_modify_technology_costs",
+      "dependencies": [],
+      "should_modify": false,
+      "modification_type": "none"
+    }
+  },
+  "calibration_strategy": {
+    "phase_1_base_data": [
+      {
+        "sheet": "source_Original",
+        "approach": "calibrate_capacity_to_match_korean_totals",
+        "purpose": "facility_capacity_base_data"
+      }
+    ],
+    "phase_2_recalculate": [
+      {
+        "sheet": "Retirement_Summary",
+        "approach": "recalculate_from_base_data",
+        "purpose": "results_summary"
+      },
+      {
+        "sheet": "MACC_2030",
+        "approach": "recalculate_from_base_data",
+        "purpose": "macc_results_by_year"
+      },
+      {
+        "sheet": "MACC_2040",
+        "approach": "recalculate_from_base_data",
+        "purpose": "macc_results_by_year"
+      },
+      {
+        "sheet": "MACC_2050",
+        "approach": "recalculate_from_base_data",
+        "purpose": "macc_results_by_year"
+      },
+      {
+        "sheet": "MACC_Summary",
+        "approach": "recalculate_from_base_data",
+        "purpose": "results_summary"
+      }
+    ],
+    "phase_3_verify": [],
+    "do_not_modify": [
+      {
+        "sheet": "CI_Corrected",
+        "reason": "do_not_modify_emission_factors",
+        "purpose": "emission_factors_base_data"
+      },
+      {
+        "sheet": "CI2_Corrected",
+        "reason": "do_not_modify_emission_factors",
+        "purpose": "emission_factors_base_data"
+      },
+      {
+        "sheet": "MACC_Template_Corrected",
+        "reason": "do_not_modify_templates",
+        "purpose": "macc_calculation_template"
+      },
+      {
+        "sheet": "TechOptions_Corrected",
+        "reason": "do_not_modify_templates",
+        "purpose": "technology_options_template"
+      },
+      {
+        "sheet": "utilities_Original",
+        "reason": "do_not_modify_process_intensities",
+        "purpose": "utility_process_base_data"
+      },
+      {
+        "sheet": "TechLinks_Original",
+        "reason": "do_not_modify_technology_costs",
+        "purpose": "technology_linkages"
+      },
+      {
+        "sheet": "MACC_Template_2030",
+        "reason": "do_not_modify_templates",
+        "purpose": "macc_calculation_template"
+      },
+      {
+        "sheet": "MACC_Template_2040",
+        "reason": "do_not_modify_templates",
+        "purpose": "macc_calculation_template"
+      },
+      {
+        "sheet": "MACC_Template_2050",
+        "reason": "do_not_modify_templates",
+        "purpose": "macc_calculation_template"
+      },
+      {
+        "sheet": "Technology_Availability",
+        "reason": "do_not_modify_technology_costs",
+        "purpose": "technology_availability"
+      },
+      {
+        "sheet": "Technology_Master",
+        "reason": "do_not_modify_technology_costs",
+        "purpose": "master_technology_database"
+      }
+    ],
+    "korean_benchmarks_target": {
+      "total_energy_toe": 67700000,
+      "naphtha_share": 0.829,
+      "ncc_ghg_share": 0.46,
+      "direct_emission_share": 0.64,
+      "indirect_emission_share": 0.34
+    },
+    "calibration_sequence": [
+      "1. Calibrate base facility capacities (source_Original sheet)",
+      "2. Update baseline assumptions to Korean benchmarks",
+      "3. Recalculate all derived values (emissions, energy consumption)",
+      "4. Verify results match Korean industry statistics",
+      "5. Do NOT modify emission factors or technology costs"
+    ]
+  },
+  "korean_benchmarks": {
+    "total_energy_toe": 67700000,
+    "naphtha_share": 0.829,
+    "ncc_ghg_share": 0.46,
+    "direct_emission_share": 0.64,
+    "indirect_emission_share": 0.34
+  }
+}

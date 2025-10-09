@@ -1,0 +1,9 @@
+fuel,cost_2025_usd_per_gj,cost_2025_usd_per_kwh
+Naphtha,15.0,
+LNG,12.0,
+Fuel_Gas,10.0,
+Byproduct_Gas,5.0,
+LPG,14.0,
+Fuel_Oil,13.0,
+Diesel,16.0,
+Electricity,,0.1

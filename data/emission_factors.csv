@@ -1,0 +1,10 @@
+fuel,tCO2_per_GJ,tCO2_per_kWh,tCO2_per_kg
+Naphtha,0.0149,,
+Electricity,,0.0045,
+LNG,0.0149,,
+Fuel_Gas,0.0149,,
+Byproduct_Gas,0.0149,,
+LPG,0.0149,,
+Fuel_Oil,0.0149,,
+Diesel,0.0149,,
+H2,,,0.0
