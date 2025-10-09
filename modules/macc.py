@@ -43,9 +43,11 @@ class MACCAnalyzer:
         self.df_hp_applicability = loader.load_heat_pump_applicability()
         self.df_fuel_prices = pd.read_csv(self.data_dir / 'fuel_price_trajectory.csv')
         self.df_grid_emission = pd.read_csv(self.data_dir / 'grid_emission_trajectory.csv')
+        self.df_ncc_lcoe = pd.read_csv(self.data_dir / 'ncc_lcoe_trajectory.csv')
 
         print(f"   ✓ Loaded baseline: {len(self.df_baseline)} facilities")
         print(f"   ✓ Loaded {len(self.df_tech_params)} technologies")
+        print(f"   ✓ Loaded LCOE trajectory for NCC technologies")
 
         # Initialize calculators
         self.tech_cost_calc = TechnologyCostCalculator(self.df_tech_params)
@@ -138,7 +140,15 @@ class MACCAnalyzer:
         }
 
     def _calculate_ncc_h2_macc(self, year, h2_price, naphtha_price):
-        """Calculate NCC-H2 MACC"""
+        """
+        Calculate NCC-H2 MACC using LCOE-based methodology
+
+        This method uses Levelized Cost of Ethylene (LCOE) premium approach
+        instead of traditional CAPEX+OPEX+Fuel methodology, as NCC-H2
+        represents a fundamental process transformation, not just fuel switching.
+
+        Reference: MACC_METHODOLOGY_ACADEMIC.md Section 2.4.2
+        """
         tech_costs = self.tech_cost_calc.get_technology_costs('NCC-H2', year)
 
         # Abatement potential (NCC emissions only)
@@ -146,39 +156,62 @@ class MACCAnalyzer:
             self.df_baseline['product'].apply(is_ncc_facility)
         ]['emissions_naphtha_kt'].sum() / 1000  # MtCO2
 
-        # Costs
+        # Get LCOE data for this year
+        lcoe_data = self.df_ncc_lcoe[self.df_ncc_lcoe['year'] == year].iloc[0]
+
+        # LCOE Premium Method
+        lcoe_baseline = lcoe_data['baseline_steam_cracker_usd_per_ton']  # $/ton ethylene
+        lcoe_h2 = lcoe_data['ncc_h2_usd_per_ton']  # $/ton ethylene
+        lcoe_premium = lcoe_h2 - lcoe_baseline
+
+        # Emission intensities
+        emission_intensity_baseline = lcoe_data['baseline_emission_intensity_tco2_per_ton']  # tCO2/ton ethylene
+        emission_intensity_h2 = lcoe_data['ncc_h2_emission_intensity_tco2_per_ton']  # tCO2/ton ethylene
+        abatement_per_ton_ethylene = emission_intensity_baseline - emission_intensity_h2
+
+        # Calculate MACC cost
+        if abatement_per_ton_ethylene > 0:
+            macc_cost = lcoe_premium / abatement_per_ton_ethylene  # $/tCO2
+        else:
+            macc_cost = 1e9  # Very high if no abatement
+
+        # For transparency, show components (even though not used in total calculation)
+        # These are estimates for reporting purposes only
         capex_musd_per_mtco2 = tech_costs['capex_musd_per_mtco2']
         lifetime = tech_costs['lifetime_years']
         crf = self.price_calc.calculate_capital_recovery_factor(self.discount_rate, lifetime)
-        capex_ann = capex_musd_per_mtco2 * crf  # MUSD/MtCO2 * CRF = USD/tCO2
-
-        opex_ann = capex_ann * (tech_costs['opex_pct_capex'] / 100)
-
-        # Fuel cost differential (H2 vs naphtha)
-        # 1 GJ naphtha = 0.033 kg H2 (energy equivalent, roughly 120 MJ/kg)
-        gj_per_tco2 = 1 / self.ef_naphtha
-        kg_h2_per_tco2 = gj_per_tco2 / 120 * 1000  # Rough conversion
-        h2_cost_per_tco2 = kg_h2_per_tco2 * h2_price
-        naphtha_cost_per_tco2 = gj_per_tco2 * naphtha_price
-        fuel_cost_diff = h2_cost_per_tco2 - naphtha_cost_per_tco2
-
-        total_cost = capex_ann + opex_ann + fuel_cost_diff
+        capex_ann_estimate = capex_musd_per_mtco2 * crf
+        opex_ann_estimate = capex_ann_estimate * (tech_costs['opex_pct_capex'] / 100)
 
         return {
             'year': year,
             'technology': 'NCC-H2',
             'available': tech_costs['available'],
             'abatement_potential_mtco2': ncc_emissions,
-            'capex_ann_usd_per_tco2': capex_ann,
-            'opex_ann_usd_per_tco2': opex_ann,
-            'fuel_cost_diff_usd_per_tco2': fuel_cost_diff,
-            'total_cost_usd_per_tco2': total_cost,
+            'capex_ann_usd_per_tco2': capex_ann_estimate,  # Estimate only
+            'opex_ann_usd_per_tco2': opex_ann_estimate,  # Estimate only
+            'fuel_cost_diff_usd_per_tco2': 0.0,  # Not applicable (LCOE method)
+            'total_cost_usd_per_tco2': macc_cost,  # LCOE-based
             're_price_usd_per_mwh': np.nan,
             'h2_price_usd_per_kg': h2_price,
+            'lcoe_baseline_usd_per_ton': lcoe_baseline,
+            'lcoe_technology_usd_per_ton': lcoe_h2,
+            'lcoe_premium_usd_per_ton': lcoe_premium,
+            'emission_intensity_baseline': emission_intensity_baseline,
+            'emission_intensity_technology': emission_intensity_h2,
+            'methodology': 'LCOE-based'
         }
 
     def _calculate_ncc_electricity_macc(self, year, re_price, naphtha_price):
-        """Calculate NCC-Electricity MACC"""
+        """
+        Calculate NCC-Electricity MACC using LCOE-based methodology
+
+        This method uses Levelized Cost of Ethylene (LCOE) premium approach
+        instead of traditional CAPEX+OPEX+Fuel methodology, as electric crackers
+        represent a fundamental process transformation with complete redesign.
+
+        Reference: MACC_METHODOLOGY_ACADEMIC.md Section 2.4.1
+        """
         tech_costs = self.tech_cost_calc.get_technology_costs('NCC-Electricity', year)
 
         # Abatement potential
@@ -186,33 +219,49 @@ class MACCAnalyzer:
             self.df_baseline['product'].apply(is_ncc_facility)
         ]['emissions_naphtha_kt'].sum() / 1000
 
-        # Costs
+        # Get LCOE data for this year
+        lcoe_data = self.df_ncc_lcoe[self.df_ncc_lcoe['year'] == year].iloc[0]
+
+        # LCOE Premium Method
+        lcoe_baseline = lcoe_data['baseline_steam_cracker_usd_per_ton']  # $/ton ethylene
+        lcoe_elec = lcoe_data['ncc_electricity_usd_per_ton']  # $/ton ethylene
+        lcoe_premium = lcoe_elec - lcoe_baseline
+
+        # Emission intensities
+        emission_intensity_baseline = lcoe_data['baseline_emission_intensity_tco2_per_ton']  # tCO2/ton ethylene
+        emission_intensity_elec = lcoe_data['ncc_electricity_emission_intensity_tco2_per_ton']  # tCO2/ton ethylene
+        abatement_per_ton_ethylene = emission_intensity_baseline - emission_intensity_elec
+
+        # Calculate MACC cost
+        if abatement_per_ton_ethylene > 0:
+            macc_cost = lcoe_premium / abatement_per_ton_ethylene  # $/tCO2
+        else:
+            macc_cost = 1e9  # Very high if no abatement
+
+        # For transparency, show components (even though not used in total calculation)
         capex_musd_per_mtco2 = tech_costs['capex_musd_per_mtco2']
         lifetime = tech_costs['lifetime_years']
         crf = self.price_calc.calculate_capital_recovery_factor(self.discount_rate, lifetime)
-        capex_ann = capex_musd_per_mtco2 * crf  # MUSD/MtCO2 * CRF = USD/tCO2
-
-        opex_ann = capex_ann * (tech_costs['opex_pct_capex'] / 100)
-
-        # Fuel cost differential (RE electricity vs naphtha)
-        gj_per_tco2 = 1 / self.ef_naphtha
-        electricity_cost_per_tco2 = (re_price / 3.6) * gj_per_tco2  # 1 GJ = 277.8 kWh
-        naphtha_cost_per_tco2 = gj_per_tco2 * naphtha_price
-        fuel_cost_diff = electricity_cost_per_tco2 - naphtha_cost_per_tco2
-
-        total_cost = capex_ann + opex_ann + fuel_cost_diff
+        capex_ann_estimate = capex_musd_per_mtco2 * crf
+        opex_ann_estimate = capex_ann_estimate * (tech_costs['opex_pct_capex'] / 100)
 
         return {
             'year': year,
             'technology': 'NCC-Electricity',
             'available': tech_costs['available'],
             'abatement_potential_mtco2': ncc_emissions,
-            'capex_ann_usd_per_tco2': capex_ann,
-            'opex_ann_usd_per_tco2': opex_ann,
-            'fuel_cost_diff_usd_per_tco2': fuel_cost_diff,
-            'total_cost_usd_per_tco2': total_cost,
+            'capex_ann_usd_per_tco2': capex_ann_estimate,  # Estimate only
+            'opex_ann_usd_per_tco2': opex_ann_estimate,  # Estimate only
+            'fuel_cost_diff_usd_per_tco2': 0.0,  # Not applicable (LCOE method)
+            'total_cost_usd_per_tco2': macc_cost,  # LCOE-based
             're_price_usd_per_mwh': re_price,
             'h2_price_usd_per_kg': np.nan,
+            'lcoe_baseline_usd_per_ton': lcoe_baseline,
+            'lcoe_technology_usd_per_ton': lcoe_elec,
+            'lcoe_premium_usd_per_ton': lcoe_premium,
+            'emission_intensity_baseline': emission_intensity_baseline,
+            'emission_intensity_technology': emission_intensity_elec,
+            'methodology': 'LCOE-based'
         }
 
     def _calculate_re_ppa_macc(self, year, re_price, grid_ef):

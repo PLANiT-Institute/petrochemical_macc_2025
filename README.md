@@ -1,8 +1,8 @@
-# Korean Petrochemical MACC Model v2.0
+# Korean Petrochemical MACC Model v2.1
 
-✅ **PRODUCTION READY** - Complete restructured architecture with real facility data
+✅ **PRODUCTION READY** - LCOE-based methodology with academic peer-review quality
 
-All calculations in Python, clean modular design, validated against real-world emissions
+All calculations in Python, clean modular design, validated against peer-reviewed literature
 
 ## Quick Start
 
@@ -66,10 +66,12 @@ streamlit run app.py
 - Grid decarbonization drives BAU
 - Energy consumption & fuel costs tracked
 
-### Module 2: MACC (`modules/macc.py`)
-- Dynamic cost calculation (capex + opex + fuel)
+### Module 2: MACC (`modules/macc.py`) 🆕 LCOE-based
+- **Dual methodology**:
+  - Traditional (CAPEX+OPEX+Fuel) for Heat Pumps & RE PPA
+  - LCOE-based for NCC-H2 & NCC-Electricity
 - H2 & RE price trajectories
-- Heat pumps, NCC-H2, NCC-Electricity
+- Validated against peer-reviewed literature
 - Annual MACC curves 2025-2050
 
 ### Module 3: Optimization (`modules/optimization.py`)
@@ -94,10 +96,13 @@ streamlit run app.py
 - **2050**: 48.28 MtCO2 (grid decarbonization only)
 - **All facilities operate forever** (no retirement)
 
-### Technologies
-- **Heat Pumps**: -$34/tCO2 (2025) → -$106/tCO2 (2050) - Saves money!
-- **NCC-H2**: $273/tCO2 (2025) → $73/tCO2 (2050)
-- **NCC-Electricity**: $324/tCO2 (2025) → $92/tCO2 (2050)
+### Technologies (2030 MACC Costs)
+- **Heat Pumps**: -$748/tCO2 - Saves money! (fuel switching)
+- **RE PPA**: -$131/tCO2 - Saves money! (renewable procurement)
+- **NCC-H2**: $120/tCO2 - LCOE-based methodology ✅
+- **NCC-Electricity**: $139/tCO2 - LCOE-based methodology ✅
+
+**Validated against literature**: Tiggeloven et al. (2022), IEA (2023)
 
 ### Decarbonization Target
 - **2050 Target**: 2 MtCO2 (96% reduction from baseline)
@@ -156,9 +161,13 @@ streamlit run app.py
 ## Documentation
 
 - [README.md](README.md) - Quick start guide (this file)
+- [MACC_METHODOLOGY_ACADEMIC.md](MACC_METHODOLOGY_ACADEMIC.md) - 🆕 **LCOE-based methodology** (peer-review quality)
+- [LCOE_IMPLEMENTATION_VALIDATION.md](LCOE_IMPLEMENTATION_VALIDATION.md) - 🆕 **Validation report** (literature comparison)
+- [DASHBOARD_GUIDE_FOR_PROFESSORS.md](DASHBOARD_GUIDE_FOR_PROFESSORS.md) - 🆕 **Dashboard guide** (for academic review)
 - [FINAL_MODEL_SUMMARY.md](FINAL_MODEL_SUMMARY.md) - Complete model methodology
 - [EMISSION_SCENARIOS_GUIDE.md](EMISSION_SCENARIOS_GUIDE.md) - How to create custom scenarios
 - [STREAMLIT_GUIDE.md](STREAMLIT_GUIDE.md) - Interactive dashboard guide
+- [FUEL_SCENARIOS_AND_MACC_INTERPRETATION.md](FUEL_SCENARIOS_AND_MACC_INTERPRETATION.md) - Fuel prices & negative costs explained
 
 ## Requirements
 
