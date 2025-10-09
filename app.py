@@ -89,8 +89,21 @@ def load_data():
         for file in scenario_files:
             scenario_name = file.stem.replace('_deployment', '')
             data['scenarios'][scenario_name] = pd.read_csv(file)
+
+        # Load facility allocations
+        facility_files = list(Path('outputs/module_03').glob('*_facility_allocation_2050.csv'))
+        data['facility_allocations'] = {}
+        for file in facility_files:
+            scenario_name = file.stem.replace('_facility_allocation_2050', '')
+            data['facility_allocations'][scenario_name] = pd.read_csv(file)
     except:
         st.warning("Module 3 outputs not found.")
+
+    # Fuel price scenarios
+    try:
+        data['fuel_prices'] = pd.read_csv('outputs/fuel_price_scenarios.csv')
+    except:
+        pass
 
     # Module 4: Financial
     try:
@@ -515,44 +528,91 @@ def show_scenarios(data):
 
     fig = go.Figure()
 
+    # Stack plot with all 4 technologies
     fig.add_trace(go.Scatter(
         x=df_scenario['year'],
         y=df_scenario['heat_pump_mt'],
         mode='lines',
         name='Heat Pumps',
-        fill='tonexty',
+        fill='tozeroy',
         line=dict(width=0.5, color='#2ECC71'),
-        fillcolor='rgba(46, 204, 113, 0.7)'
+        fillcolor='rgba(46, 204, 113, 0.7)',
+        stackgroup='one'
     ))
 
     fig.add_trace(go.Scatter(
         x=df_scenario['year'],
-        y=df_scenario['heat_pump_mt'] + df_scenario['ncc_h2_mt'],
+        y=df_scenario['ncc_h2_mt'],
         mode='lines',
         name='NCC-H2',
         fill='tonexty',
         line=dict(width=0.5, color='#3498DB'),
-        fillcolor='rgba(52, 152, 219, 0.7)'
+        fillcolor='rgba(52, 152, 219, 0.7)',
+        stackgroup='one'
     ))
 
     fig.add_trace(go.Scatter(
         x=df_scenario['year'],
-        y=df_scenario['heat_pump_mt'] + df_scenario['ncc_h2_mt'] + df_scenario['ncc_elec_mt'],
+        y=df_scenario['ncc_elec_mt'],
         mode='lines',
         name='NCC-Electricity',
         fill='tonexty',
         line=dict(width=0.5, color='#E74C3C'),
-        fillcolor='rgba(231, 76, 60, 0.7)'
+        fillcolor='rgba(231, 76, 60, 0.7)',
+        stackgroup='one'
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=df_scenario['year'],
+        y=df_scenario['re_ppa_mt'],
+        mode='lines',
+        name='RE PPA',
+        fill='tonexty',
+        line=dict(width=0.5, color='#F39C12'),
+        fillcolor='rgba(243, 156, 18, 0.7)',
+        stackgroup='one'
     ))
 
     fig.update_layout(
         xaxis_title="Year",
         yaxis_title="Abatement (MtCO2/year)",
         height=400,
-        hovermode='x unified'
+        hovermode='x unified',
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
+    # H2 Consumption tracking
+    if 'h2_consumption_kt' in df_scenario.columns and df_scenario['h2_consumption_kt'].sum() > 0:
+        st.markdown("---")
+        st.markdown("### ⚡ Hydrogen Consumption")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            h2_2050 = df_scenario[df_scenario['year'] == 2050]['h2_consumption_kt'].iloc[0]
+            h2_total = df_scenario['h2_consumption_kt'].sum()
+            st.metric("H2 Demand (2050)", f"{h2_2050:.1f} kt H2/year")
+            st.metric("Cumulative H2 (2025-2050)", f"{h2_total:.0f} kt H2")
+
+        with col2:
+            fig_h2 = go.Figure()
+            fig_h2.add_trace(go.Scatter(
+                x=df_scenario['year'],
+                y=df_scenario['h2_consumption_kt'],
+                mode='lines+markers',
+                name='H2 Consumption',
+                line=dict(width=3, color='purple'),
+                marker=dict(size=6)
+            ))
+            fig_h2.update_layout(
+                xaxis_title="Year",
+                yaxis_title="H2 Consumption (kt/year)",
+                height=300,
+                showlegend=False
+            )
+            st.plotly_chart(fig_h2, use_container_width=True)
 
     # Cumulative emissions (for budget scenarios)
     if 'cumulative_emissions_mt' in df_scenario.columns:
@@ -583,9 +643,94 @@ def show_scenarios(data):
 
         st.plotly_chart(fig, use_container_width=True)
 
-    # Detailed data table
+    # Facility-level allocation (if available)
+    if 'facility_allocations' in data and selected in data['facility_allocations']:
+        st.markdown("---")
+        st.markdown("### 🏭 Facility-Level Technology Allocation (2050)")
+
+        df_facilities = data['facility_allocations'][selected]
+
+        # Summary statistics
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Total Facilities", len(df_facilities))
+        with col2:
+            facilities_with_tech = (df_facilities['abatement_mt'] > 0).sum()
+            st.metric("Facilities with Technology", facilities_with_tech)
+        with col3:
+            total_abatement = df_facilities['abatement_mt'].sum()
+            st.metric("Total Abatement", f"{total_abatement:.1f} Mt")
+        with col4:
+            emissions_2050 = df_facilities['emissions_2050_kt'].sum() / 1000
+            st.metric("2050 Emissions", f"{emissions_2050:.1f} Mt")
+
+        # Filter to show only facilities with technology
+        df_tech = df_facilities[df_facilities['abatement_mt'] > 0].copy()
+        df_tech = df_tech.sort_values('abatement_mt', ascending=False)
+
+        # Technology distribution
+        st.markdown("#### Technology Distribution")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            tech_counts = {
+                'Heat Pump': (df_tech['tech_heat_pump_pct'] > 0).sum(),
+                'NCC-H2': (df_tech['tech_ncc_h2_pct'] > 0).sum(),
+                'NCC-Electricity': (df_tech['tech_ncc_elec_pct'] > 0).sum(),
+                'RE PPA': (df_tech['tech_re_ppa_pct'] > 0).sum()
+            }
+
+            fig_tech = go.Figure(data=[
+                go.Bar(x=list(tech_counts.keys()), y=list(tech_counts.values()),
+                      marker_color=['#2ECC71', '#3498DB', '#E74C3C', '#F39C12'])
+            ])
+            fig_tech.update_layout(
+                title="Number of Facilities per Technology",
+                xaxis_title="Technology",
+                yaxis_title="Number of Facilities",
+                height=300
+            )
+            st.plotly_chart(fig_tech, use_container_width=True)
+
+        with col2:
+            # Top 10 facilities by abatement
+            st.markdown("**Top 10 Facilities by Abatement:**")
+            top10 = df_tech.head(10)[['company', 'product', 'abatement_mt']].copy()
+            top10['abatement_mt'] = top10['abatement_mt'].round(2)
+            st.dataframe(top10, use_container_width=True, hide_index=True)
+
+        # Detailed facility table
+        st.markdown("#### Detailed Facility Allocation")
+        display_cols = ['facility_id', 'company', 'location', 'product',
+                       'total_emissions_kt', 'tech_heat_pump_pct', 'tech_ncc_h2_pct',
+                       'tech_ncc_elec_pct', 'tech_re_ppa_pct', 'abatement_mt', 'emissions_2050_kt']
+
+        # Format the data
+        df_display = df_tech[display_cols].copy()
+        df_display = df_display.rename(columns={
+            'facility_id': 'ID',
+            'company': 'Company',
+            'location': 'Location',
+            'product': 'Product',
+            'total_emissions_kt': 'Baseline (kt)',
+            'tech_heat_pump_pct': 'Heat Pump (%)',
+            'tech_ncc_h2_pct': 'NCC-H2 (%)',
+            'tech_ncc_elec_pct': 'NCC-Elec (%)',
+            'tech_re_ppa_pct': 'RE PPA (%)',
+            'abatement_mt': 'Abatement (Mt)',
+            'emissions_2050_kt': '2050 Emissions (kt)'
+        })
+
+        # Round numeric columns
+        for col in df_display.columns:
+            if df_display[col].dtype in ['float64', 'float32']:
+                df_display[col] = df_display[col].round(2)
+
+        st.dataframe(df_display, use_container_width=True, height=400)
+
+    # Detailed deployment data table
     st.markdown("---")
-    with st.expander("📋 View Detailed Data"):
+    with st.expander("📋 View Detailed Deployment Data"):
         st.dataframe(df_scenario, use_container_width=True)
 
 def show_companies(data):

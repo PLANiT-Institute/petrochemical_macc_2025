@@ -279,6 +279,114 @@ class CostOptimizer:
                 ax.grid(True, alpha=0.3)
                 save_plot(fig, self.output_dir / f'budget_{scenario.lower().replace(" ", "_")}.png')
 
+    def create_facility_level_allocation(self, scenario_name, deployment_df):
+        """
+        Allocate technologies to specific facilities
+
+        Shows which of the 248 facilities get which technology mix
+        """
+        print(f"\n📍 Creating facility-level allocation for {scenario_name}...")
+
+        # Get 2050 deployment (final state)
+        deploy_2050 = deployment_df[deployment_df['year'] == 2050].iloc[0]
+
+        # Load baseline facility data
+        df_facilities = self.df_baseline.copy()
+
+        # Initialize technology allocation columns
+        df_facilities['tech_heat_pump_pct'] = 0.0
+        df_facilities['tech_ncc_h2_pct'] = 0.0
+        df_facilities['tech_ncc_elec_pct'] = 0.0
+        df_facilities['tech_re_ppa_pct'] = 0.0
+        df_facilities['abatement_mt'] = 0.0
+
+        # Allocate Heat Pump (proportional to low-temp heat potential)
+        if deploy_2050['heat_pump_mt'] > 0:
+            # Heat pump applies to all facilities proportionally
+            total_emissions = df_facilities['emissions_naphtha_kt'].sum() / 1000
+
+            if total_emissions > 0:
+                # Allocate proportionally to naphtha emissions
+                df_facilities['hp_abatement_mt'] = (
+                    df_facilities['emissions_naphtha_kt'] / 1000 / total_emissions * deploy_2050['heat_pump_mt']
+                )
+                df_facilities['tech_heat_pump_pct'] = (
+                    df_facilities['hp_abatement_mt'] / (df_facilities['emissions_naphtha_kt'] / 1000) * 100
+                ).fillna(0)
+                df_facilities['abatement_mt'] += df_facilities['hp_abatement_mt']
+
+        # Allocate NCC-H2 (only NCC facilities)
+        if deploy_2050['ncc_h2_mt'] > 0:
+            from .utils import is_ncc_facility
+            df_facilities['is_ncc'] = df_facilities['product'].apply(is_ncc_facility)
+            ncc_emissions = df_facilities[df_facilities['is_ncc']]['emissions_naphtha_kt'].sum() / 1000
+
+            if ncc_emissions > 0:
+                df_facilities['ncc_h2_abatement_mt'] = 0.0
+                df_facilities.loc[df_facilities['is_ncc'], 'ncc_h2_abatement_mt'] = (
+                    df_facilities.loc[df_facilities['is_ncc'], 'emissions_naphtha_kt'] / 1000 / ncc_emissions * deploy_2050['ncc_h2_mt']
+                )
+                df_facilities['tech_ncc_h2_pct'] = (
+                    df_facilities['ncc_h2_abatement_mt'] / (df_facilities['emissions_naphtha_kt'] / 1000) * 100
+                ).fillna(0)
+                df_facilities['abatement_mt'] += df_facilities['ncc_h2_abatement_mt']
+
+        # Allocate NCC-Electricity (only NCC facilities)
+        if deploy_2050['ncc_elec_mt'] > 0:
+            from .utils import is_ncc_facility
+            df_facilities['is_ncc'] = df_facilities['product'].apply(is_ncc_facility)
+            ncc_emissions = df_facilities[df_facilities['is_ncc']]['emissions_naphtha_kt'].sum() / 1000
+
+            if ncc_emissions > 0:
+                df_facilities['ncc_elec_abatement_mt'] = 0.0
+                df_facilities.loc[df_facilities['is_ncc'], 'ncc_elec_abatement_mt'] = (
+                    df_facilities.loc[df_facilities['is_ncc'], 'emissions_naphtha_kt'] / 1000 / ncc_emissions * deploy_2050['ncc_elec_mt']
+                )
+                df_facilities['tech_ncc_elec_pct'] = (
+                    df_facilities['ncc_elec_abatement_mt'] / (df_facilities['emissions_naphtha_kt'] / 1000) * 100
+                ).fillna(0)
+                df_facilities['abatement_mt'] += df_facilities['ncc_elec_abatement_mt']
+
+        # Allocate RE PPA (only NCC facilities with electricity consumption)
+        if deploy_2050['re_ppa_mt'] > 0:
+            from .utils import is_ncc_facility
+            df_facilities['is_ncc'] = df_facilities['product'].apply(is_ncc_facility)
+            ncc_elec_emissions = df_facilities[df_facilities['is_ncc']]['emissions_electricity_kt'].sum() / 1000
+
+            if ncc_elec_emissions > 0:
+                df_facilities['re_ppa_abatement_mt'] = 0.0
+                df_facilities.loc[df_facilities['is_ncc'], 're_ppa_abatement_mt'] = (
+                    df_facilities.loc[df_facilities['is_ncc'], 'emissions_electricity_kt'] / 1000 / ncc_elec_emissions * deploy_2050['re_ppa_mt']
+                )
+                df_facilities['tech_re_ppa_pct'] = (
+                    df_facilities['re_ppa_abatement_mt'] / (df_facilities['emissions_electricity_kt'] / 1000) * 100
+                ).fillna(0)
+                df_facilities['abatement_mt'] += df_facilities['re_ppa_abatement_mt']
+
+        # Add facility ID
+        df_facilities['facility_id'] = range(1, len(df_facilities) + 1)
+
+        # Select relevant columns
+        output_cols = [
+            'facility_id', 'company', 'location', 'product', 'process',
+            'total_emissions_kt', 'tech_heat_pump_pct', 'tech_ncc_h2_pct',
+            'tech_ncc_elec_pct', 'tech_re_ppa_pct', 'abatement_mt'
+        ]
+
+        df_allocation = df_facilities[output_cols].copy()
+        df_allocation['emissions_2050_kt'] = (
+            df_allocation['total_emissions_kt'] - df_allocation['abatement_mt'] * 1000
+        )
+
+        # Save output
+        filename = f'{scenario_name.lower()}_facility_allocation_2050.csv'
+        save_csv_output(df_allocation, self.output_dir / filename)
+
+        print(f"   ✓ Allocated technologies to {len(df_allocation)} facilities")
+        print(f"   ✓ {(df_allocation['abatement_mt'] > 0).sum()} facilities have technology deployment")
+
+        return df_allocation
+
     def run_complete_analysis(self):
         """Run complete optimization"""
         print("\n" + "="*80)
@@ -296,6 +404,11 @@ class CostOptimizer:
 
         # Create comparison summary
         self._create_scenario_comparison(results)
+
+        # Create facility-level allocations for each scenario
+        print("\n📍 Creating facility-level technology allocations...")
+        for scenario_name, deployment_df in results.items():
+            self.create_facility_level_allocation(scenario_name, deployment_df)
 
         print("\n✓ MODULE 3 COMPLETE")
         print(f"Outputs saved to: {self.output_dir}")
