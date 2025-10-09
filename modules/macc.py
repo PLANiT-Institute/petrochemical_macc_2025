@@ -42,6 +42,7 @@ class MACCAnalyzer:
         self.df_re_prices = loader.load_re_prices()
         self.df_hp_applicability = loader.load_heat_pump_applicability()
         self.df_fuel_prices = pd.read_csv(self.data_dir / 'fuel_price_trajectory.csv')
+        self.df_grid_emission = pd.read_csv(self.data_dir / 'grid_emission_trajectory.csv')
 
         print(f"   ✓ Loaded baseline: {len(self.df_baseline)} facilities")
         print(f"   ✓ Loaded {len(self.df_tech_params)} technologies")
@@ -78,6 +79,11 @@ class MACCAnalyzer:
             ncc_elec_macc = self._calculate_ncc_electricity_macc(year, re_price, naphtha_price)
             macc_data.append(ncc_elec_macc)
 
+            # 4. RE PPA (NCC facilities only)
+            grid_ef = self.df_grid_emission[self.df_grid_emission['year'] == year]['grid_ef_tco2_per_mwh'].iloc[0]
+            re_ppa_macc = self._calculate_re_ppa_macc(year, re_price, grid_ef)
+            macc_data.append(re_ppa_macc)
+
         df_macc = pd.DataFrame(macc_data)
 
         print(f"   ✓ Calculated {len(df_macc)} technology-year combinations")
@@ -106,7 +112,7 @@ class MACCAnalyzer:
         capex_musd_per_mtco2 = tech_costs['capex_musd_per_mtco2']
         lifetime = tech_costs['lifetime_years']
         crf = self.price_calc.calculate_capital_recovery_factor(self.discount_rate, lifetime)
-        capex_ann = capex_musd_per_mtco2 * crf * 1e6  # $/tCO2
+        capex_ann = capex_musd_per_mtco2 * crf  # MUSD/MtCO2 * CRF = USD/tCO2 (Million cancels)
 
         opex_ann = capex_ann * (tech_costs['opex_pct_capex'] / 100)
 
@@ -144,7 +150,7 @@ class MACCAnalyzer:
         capex_musd_per_mtco2 = tech_costs['capex_musd_per_mtco2']
         lifetime = tech_costs['lifetime_years']
         crf = self.price_calc.calculate_capital_recovery_factor(self.discount_rate, lifetime)
-        capex_ann = capex_musd_per_mtco2 * crf * 1e6
+        capex_ann = capex_musd_per_mtco2 * crf  # MUSD/MtCO2 * CRF = USD/tCO2
 
         opex_ann = capex_ann * (tech_costs['opex_pct_capex'] / 100)
 
@@ -184,7 +190,7 @@ class MACCAnalyzer:
         capex_musd_per_mtco2 = tech_costs['capex_musd_per_mtco2']
         lifetime = tech_costs['lifetime_years']
         crf = self.price_calc.calculate_capital_recovery_factor(self.discount_rate, lifetime)
-        capex_ann = capex_musd_per_mtco2 * crf * 1e6
+        capex_ann = capex_musd_per_mtco2 * crf  # MUSD/MtCO2 * CRF = USD/tCO2
 
         opex_ann = capex_ann * (tech_costs['opex_pct_capex'] / 100)
 
@@ -209,6 +215,65 @@ class MACCAnalyzer:
             'h2_price_usd_per_kg': np.nan,
         }
 
+    def _calculate_re_ppa_macc(self, year, re_price, grid_ef):
+        """Calculate RE PPA MACC (NCC facilities only)
+
+        RE PPA = Renewable Power Purchase Agreement
+        Simply switching from grid electricity to RE electricity for NCC facilities
+        No infrastructure needed - just procurement contract
+
+        User specified: "RE is only applied to NCC"
+        """
+        tech_costs = self.tech_cost_calc.get_technology_costs('Renewable_Energy', year)
+
+        # Get grid electricity price (convert from $/kWh to $/MWh)
+        grid_price_per_kwh = self.df_fuel_prices[
+            self.df_fuel_prices['year'] == year
+        ]['electricity_usd_per_kwh'].iloc[0]
+        grid_price = grid_price_per_kwh * 1000  # $/MWh
+
+        # Filter NCC facilities only (user constraint)
+        ncc_facilities = self.df_baseline[
+            self.df_baseline['product'].apply(is_ncc_facility)
+        ]
+
+        # Calculate total electricity emissions for NCC facilities
+        total_elec_emissions_mt = ncc_facilities['emissions_electricity_kt'].sum() / 1000  # MtCO2
+
+        # Emission factors
+        re_ef = 0.05  # tCO2/MWh (lifecycle emissions for renewable energy)
+        grid_ef_tco2_per_mwh = grid_ef  # tCO2/MWh (from trajectory)
+
+        # Abatement per MWh
+        abatement_per_mwh = grid_ef_tco2_per_mwh - re_ef
+
+        # Abatement potential: all NCC electricity could switch to RE
+        abatement_potential_mt = total_elec_emissions_mt * (1 - re_ef / grid_ef_tco2_per_mwh)
+
+        # Cost per MWh difference
+        price_diff_per_mwh = re_price - grid_price
+
+        # Cost per tCO2 abated
+        if abatement_per_mwh > 0:
+            cost_per_tco2 = price_diff_per_mwh / abatement_per_mwh
+        else:
+            cost_per_tco2 = 1e9  # Very high if no abatement
+
+        return {
+            'year': year,
+            'technology': 'RE_PPA',
+            'available': tech_costs['available'],
+            'abatement_potential_mtco2': abatement_potential_mt,
+            'capex_ann_usd_per_tco2': 0,  # No capital investment for PPA
+            'opex_ann_usd_per_tco2': 0,   # Operating cost included in PPA price
+            'fuel_cost_diff_usd_per_tco2': cost_per_tco2,
+            'total_cost_usd_per_tco2': cost_per_tco2,
+            're_price_usd_per_mwh': re_price,
+            'h2_price_usd_per_kg': np.nan,
+            'grid_price_usd_per_mwh': grid_price,
+            'grid_ef_tco2_per_mwh': grid_ef_tco2_per_mwh,
+        }
+
     def create_visualizations(self):
         """Create MACC curve visualizations"""
         print("\n🎨 Creating visualizations...")
@@ -229,7 +294,7 @@ class MACCAnalyzer:
 
             # Create MACC bars
             x_pos = 0
-            colors = {'Heat_Pump': '#2ECC71', 'NCC-H2': '#3498DB', 'NCC-Electricity': '#E74C3C'}
+            colors = {'Heat_Pump': '#2ECC71', 'NCC-H2': '#3498DB', 'NCC-Electricity': '#E74C3C', 'RE_PPA': '#F39C12'}
 
             for _, row in df_year.iterrows():
                 width = row['abatement_potential_mtco2']
@@ -256,7 +321,7 @@ class MACCAnalyzer:
 
         # Cost evolution
         fig, ax = plt.subplots(figsize=(14, 8))
-        for tech in ['Heat_Pump', 'NCC-H2', 'NCC-Electricity']:
+        for tech in ['Heat_Pump', 'NCC-H2', 'NCC-Electricity', 'RE_PPA']:
             df_tech = self.df_macc[self.df_macc['technology'] == tech]
             ax.plot(df_tech['year'], df_tech['total_cost_usd_per_tco2'],
                    linewidth=2.5, label=tech, marker='o', markersize=4)

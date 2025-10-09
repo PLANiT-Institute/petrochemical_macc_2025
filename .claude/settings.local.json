@@ -18,7 +18,8 @@
       "Bash(find:*)",
       "Bash(xargs:*)",
       "Read(//Users/jinsupark/jinsu-coding/**)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(cat SIMPLE_RE_IMPLEMENTATION.md)"
     ],
     "deny": [],
     "ask": []

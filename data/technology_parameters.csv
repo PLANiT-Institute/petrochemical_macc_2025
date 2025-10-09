@@ -2,3 +2,4 @@ technology,applies_to,cop,trl,available_year,capex_2025_musd_per_mtco2,capex_203
 Heat_Pump,All processes <165°C,4.0,9,2025,150,120,90,75,3.0,20
 NCC-H2,Naphtha crackers only,,7,2030,300,250,180,150,2.5,25
 NCC-Electricity,Naphtha crackers only,,6,2030,350,300,220,180,2.0,25
+Renewable_Energy,All electricity consumers,,9,2025,180,140,100,80,1.5,25

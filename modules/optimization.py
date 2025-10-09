@@ -109,7 +109,7 @@ class CostOptimizer:
             ].sort_values('total_cost_usd_per_tco2')
 
             # Deploy technologies in cost order
-            deployed = {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0}
+            deployed = {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0}
             remaining = required
 
             for _, tech in tech_year.iterrows():
@@ -119,6 +119,11 @@ class CostOptimizer:
                 deployed[tech['technology']] += deploy
                 remaining -= deploy
 
+            # Calculate H2 consumption for NCC-H2 deployment
+            # Conversion: ~0.56 kg H2 per tCO2 abated (from 1 GJ naphtha = 67 GJ/tCO2 = 0.56 kg H2 at 120 MJ/kg H2)
+            kg_h2_per_tco2 = (1 / 0.0149) / 120 * 1000  # ~559 kg H2 per tCO2
+            h2_consumption_kt = deployed['NCC-H2'] * kg_h2_per_tco2 / 1000  # kt H2
+
             deployment.append({
                 'year': year,
                 'target_mt': target,
@@ -126,6 +131,8 @@ class CostOptimizer:
                 'heat_pump_mt': deployed['Heat_Pump'],
                 'ncc_h2_mt': deployed['NCC-H2'],
                 'ncc_elec_mt': deployed['NCC-Electricity'],
+                're_ppa_mt': deployed['RE_PPA'],
+                'h2_consumption_kt': h2_consumption_kt,
                 'total_deployed_mt': sum(deployed.values()),
                 'actual_emissions_mt': bau - sum(deployed.values()),
                 'shortfall_mt': max(0, bau - sum(deployed.values()) - target),
@@ -167,7 +174,7 @@ class CostOptimizer:
         tech_options_df = pd.DataFrame(tech_options).sort_values('cost')
 
         # Deploy technologies until budget constraint met
-        deployment_dict = {year: {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0}
+        deployment_dict = {year: {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0}
                           for year in years}
 
         cumulative = 0
@@ -200,6 +207,10 @@ class CostOptimizer:
             actual = bau - sum(deployment_dict[year].values())
             cumulative += actual
 
+            # Calculate H2 consumption
+            kg_h2_per_tco2 = (1 / 0.0149) / 120 * 1000
+            h2_consumption_kt = deployment_dict[year]['NCC-H2'] * kg_h2_per_tco2 / 1000
+
             deployment.append({
                 'year': year,
                 'target_mt': None,  # No annual target, only budget
@@ -207,6 +218,8 @@ class CostOptimizer:
                 'heat_pump_mt': deployment_dict[year]['Heat_Pump'],
                 'ncc_h2_mt': deployment_dict[year]['NCC-H2'],
                 'ncc_elec_mt': deployment_dict[year]['NCC-Electricity'],
+                're_ppa_mt': deployment_dict[year]['RE_PPA'],
+                'h2_consumption_kt': h2_consumption_kt,
                 'total_deployed_mt': sum(deployment_dict[year].values()),
                 'actual_emissions_mt': actual,
                 'cumulative_emissions_mt': cumulative,
@@ -227,9 +240,9 @@ class CostOptimizer:
             fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 10))
 
             # Top: Technology deployment
-            ax1.stackplot(df['year'], df['heat_pump_mt'], df['ncc_h2_mt'], df['ncc_elec_mt'],
-                        labels=['Heat Pump', 'NCC-H2', 'NCC-Electricity'],
-                        colors=['#2ECC71', '#3498DB', '#E74C3C'], alpha=0.8)
+            ax1.stackplot(df['year'], df['heat_pump_mt'], df['ncc_h2_mt'], df['ncc_elec_mt'], df['re_ppa_mt'],
+                        labels=['Heat Pump', 'NCC-H2', 'NCC-Electricity', 'RE PPA'],
+                        colors=['#2ECC71', '#3498DB', '#E74C3C', '#F39C12'], alpha=0.8)
             ax1.set_ylabel('Abatement (MtCO2/year)', fontweight='bold')
             ax1.set_title(f'Technology Deployment: {scenario}', fontweight='bold', fontsize=14)
             ax1.legend(loc='upper left')
@@ -306,6 +319,7 @@ class CostOptimizer:
                 'total_heat_pump_2050_mt': df[df['year'] == 2050]['heat_pump_mt'].iloc[0],
                 'total_ncc_h2_2050_mt': df[df['year'] == 2050]['ncc_h2_mt'].iloc[0],
                 'total_ncc_elec_2050_mt': df[df['year'] == 2050]['ncc_elec_mt'].iloc[0],
+                'total_re_ppa_2050_mt': df[df['year'] == 2050]['re_ppa_mt'].iloc[0],
                 'reduction_2030_pct': ((52 - df[df['year'] == 2030]['actual_emissions_mt'].iloc[0]) / 52) * 100,
                 'reduction_2050_pct': ((52 - df[df['year'] == 2050]['actual_emissions_mt'].iloc[0]) / 52) * 100,
             })
