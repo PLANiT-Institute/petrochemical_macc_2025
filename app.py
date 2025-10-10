@@ -341,44 +341,80 @@ def show_macc(data):
     # Filter data
     df_year = data['macc'][data['macc']['year'] == year].copy()
 
-    # MACC curve
+    # MACC curve - Standard waterfall format
     st.markdown(f"### 💰 MACC Curve - {year}")
 
+    # Sort technologies by cost (MACC standard)
+    df_sorted = df_year.sort_values('total_cost_usd_per_tco2').reset_index(drop=True)
+
+    # Create cumulative x positions
+    cumulative_x = [0]
+    for i, row in df_sorted.iterrows():
+        cumulative_x.append(cumulative_x[-1] + row['abatement_potential_mtco2'])
+
+    # Create MACC waterfall chart
     fig = go.Figure()
 
     colors = {'Heat_Pump': '#2ECC71', 'RE_PPA': '#F39C12', 'NCC-H2': '#3498DB', 'NCC-Electricity': '#E74C3C'}
+    tech_labels = {
+        'Heat_Pump': 'Heat Pump',
+        'RE_PPA': 'RE PPA',
+        'NCC-H2': 'NCC-H2 (LCOE)',
+        'NCC-Electricity': 'NCC-Electricity (LCOE)'
+    }
 
-    for tech in df_year['technology'].unique():
-        df_tech = df_year[df_year['technology'] == tech]
-
-        # Determine methodology
-        methodology = df_tech.get('methodology', pd.Series(['Traditional'])).iloc[0] if 'methodology' in df_tech.columns else 'Traditional'
+    for i, row in df_sorted.iterrows():
+        tech = row['technology']
+        methodology = row.get('methodology', 'Traditional')
+        label = tech_labels.get(tech, tech)
 
         fig.add_trace(go.Bar(
-            x=[df_tech['abatement_potential_mtco2'].iloc[0]],
-            y=[df_tech['total_cost_usd_per_tco2'].iloc[0]],
-            name=f"{tech} ({methodology})",
+            x=[cumulative_x[i] + row['abatement_potential_mtco2']/2],
+            y=[row['total_cost_usd_per_tco2']],
+            width=[row['abatement_potential_mtco2']],
+            name=label,
             marker_color=colors.get(tech, 'gray'),
-            text=tech,
-            textposition='auto',
-            hovertemplate=f"<b>{tech}</b><br>" +
-                         "Abatement: %{x:.1f} MtCO2<br>" +
-                         "Cost: $%{y:.0f}/tCO2<br>" +
+            marker_line_color='black',
+            marker_line_width=1.5,
+            hovertemplate=f"<b>{label}</b><br>" +
+                         f"Cost: ${row['total_cost_usd_per_tco2']:.0f}/tCO2<br>" +
+                         f"Abatement: {row['abatement_potential_mtco2']:.1f} MtCO2/year<br>" +
                          f"Method: {methodology}<br>" +
                          "<extra></extra>"
         ))
 
     fig.update_layout(
         xaxis_title="Cumulative Abatement Potential (MtCO2/year)",
-        yaxis_title="Abatement Cost (USD/tCO2)",
-        barmode='stack',
+        yaxis_title="Marginal Abatement Cost ($/tCO2)",
+        barmode='overlay',
         height=500,
-        showlegend=True
+        showlegend=True,
+        legend=dict(orientation="v", yanchor="top", y=0.99, xanchor="right", x=0.99),
+        xaxis=dict(range=[0, cumulative_x[-1] * 1.02])
     )
 
-    fig.add_hline(y=0, line_dash="dash", line_color="black", opacity=0.5)
+    # Add zero line
+    fig.add_hline(y=0, line_dash="solid", line_color="black", line_width=2, opacity=0.7)
+
+    # Add cost-saving region shading
+    y_min = df_sorted['total_cost_usd_per_tco2'].min()
+    if y_min < 0:
+        fig.add_hrect(y0=y_min * 1.1, y1=0, fillcolor="green", opacity=0.1, line_width=0)
 
     st.plotly_chart(fig, use_container_width=True)
+
+    # Key insights box
+    st.markdown('<div class="info-box">', unsafe_allow_html=True)
+    negative_cost_techs = df_year[df_year['total_cost_usd_per_tco2'] < 0]['technology'].tolist()
+    total_abatement = df_year['abatement_potential_mtco2'].sum()
+
+    st.markdown(f"""
+    **MACC Interpretation ({year}):**
+    - **Total Abatement Potential**: {total_abatement:.1f} MtCO2/year
+    - **Cost-Saving Technologies**: {', '.join([tech_labels.get(t, t) for t in negative_cost_techs]) if negative_cost_techs else 'None'}
+    - **Interpretation**: Technologies below the zero line save money while reducing emissions
+    """)
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # Technology details
     st.markdown("---")
@@ -441,6 +477,29 @@ def show_macc(data):
     fig.add_hline(y=0, line_dash="dash", line_color="black", opacity=0.3)
 
     st.plotly_chart(fig, use_container_width=True)
+
+    # Technology applicability matrix
+    st.markdown("---")
+    st.markdown("### 🏭 Technology Applicability by Facility Type")
+
+    st.markdown('<div class="info-box">', unsafe_allow_html=True)
+    st.markdown("""
+    **Which facilities can use which technologies?**
+
+    | Facility Type | Heat Pump | RE PPA | NCC-Electricity | NCC-H2 |
+    |--------------|-----------|--------|-----------------|---------|
+    | **Naphtha Cracker** (Ethylene/Propylene) | ✅ | ✅ | ✅ | ✅ |
+    | **Aromatics** (BTX, PX) | ✅ | ✅ | ❌ | ❌ |
+    | **Polymerization** (PE, PP, PVC) | ✅ | ✅ | ❌ | ❌ |
+    | **Other Processes** | ✅ | ✅ | ❌ | ❌ |
+
+    **Technology Constraints:**
+    - **Heat Pump**: Available for all facilities with combustion heat <300°C
+    - **RE PPA**: Available for all facilities (electricity procurement)
+    - **NCC-Electricity/H2**: Only for naphtha crackers (process transformation)
+    - **Deployment**: Technologies applied based on cost-effectiveness
+    """)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def show_lcoe_methodology(data):
     """LCOE methodology explanation page for professors"""
@@ -987,29 +1046,61 @@ def show_scenarios(data):
         df_tech = df_facilities[df_facilities['abatement_mt'] > 0].copy()
         df_tech = df_tech.sort_values('abatement_mt', ascending=False)
 
-        # Technology distribution
-        st.markdown("#### Technology Distribution")
+        # Technology distribution and product matching
+        st.markdown("#### Technology Distribution by Product Type")
+
+        # Create product type categories
+        df_viz = df_facilities.copy()
+        df_viz['product_category'] = df_viz['product'].apply(lambda x:
+            'Naphtha Cracker' if x in ['Ethylene', 'Propylene'] else
+            'Aromatics' if x in ['BTX', 'PX', 'Benzene', 'Toluene', 'Xylene'] else
+            'Polymerization' if x in ['PE', 'PP', 'PVC', 'PS'] else
+            'Other'
+        )
+
+        # Calculate technology deployment by product category
+        product_tech_matrix = []
+        for cat in ['Naphtha Cracker', 'Aromatics', 'Polymerization', 'Other']:
+            df_cat = df_viz[df_viz['product_category'] == cat]
+            if len(df_cat) > 0:
+                product_tech_matrix.append({
+                    'Product Type': cat,
+                    'Facilities': len(df_cat),
+                    'Heat Pump': (df_cat['tech_heat_pump_pct'] > 0).sum(),
+                    'RE PPA': (df_cat['tech_re_ppa_pct'] > 0).sum(),
+                    'NCC-H2': (df_cat['tech_ncc_h2_pct'] > 0).sum(),
+                    'NCC-Electricity': (df_cat['tech_ncc_elec_pct'] > 0).sum()
+                })
+
+        df_matrix = pd.DataFrame(product_tech_matrix)
+
         col1, col2 = st.columns(2)
 
         with col1:
-            tech_counts = {
-                'Heat Pump': (df_tech['tech_heat_pump_pct'] > 0).sum(),
-                'NCC-H2': (df_tech['tech_ncc_h2_pct'] > 0).sum(),
-                'NCC-Electricity': (df_tech['tech_ncc_elec_pct'] > 0).sum(),
-                'RE PPA': (df_tech['tech_re_ppa_pct'] > 0).sum()
-            }
+            # Stacked bar chart showing technology deployment by product type
+            fig_stacked = go.Figure()
 
-            fig_tech = go.Figure(data=[
-                go.Bar(x=list(tech_counts.keys()), y=list(tech_counts.values()),
-                      marker_color=['#2ECC71', '#3498DB', '#E74C3C', '#F39C12'])
-            ])
-            fig_tech.update_layout(
-                title="Number of Facilities per Technology",
-                xaxis_title="Technology",
+            for tech, color in [('Heat Pump', '#2ECC71'), ('RE PPA', '#F39C12'),
+                               ('NCC-H2', '#3498DB'), ('NCC-Electricity', '#E74C3C')]:
+                fig_stacked.add_trace(go.Bar(
+                    name=tech,
+                    x=df_matrix['Product Type'],
+                    y=df_matrix[tech],
+                    marker_color=color
+                ))
+
+            fig_stacked.update_layout(
+                title="Technology Deployment by Product Type",
+                xaxis_title="Product Type",
                 yaxis_title="Number of Facilities",
-                height=300
+                barmode='group',
+                height=350
             )
-            st.plotly_chart(fig_tech, use_container_width=True)
+            st.plotly_chart(fig_stacked, use_container_width=True)
+
+            # Summary table
+            st.markdown("**Technology Applicability Matrix:**")
+            st.dataframe(df_matrix, use_container_width=True, hide_index=True)
 
         with col2:
             # Top 10 facilities by abatement
