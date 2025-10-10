@@ -124,6 +124,26 @@ class CostOptimizer:
             kg_h2_per_tco2 = (1 / 0.0149) / 120 * 1000  # ~559 kg H2 per tCO2
             h2_consumption_kt = deployed['NCC-H2'] * kg_h2_per_tco2 / 1000  # kt H2
 
+            # Calculate electricity consumption increase
+            # NCC-Electricity: ~10 MWh per ton ethylene (from literature)
+            # Heat Pump: Displaces naphtha with electricity at COP=4, so 1/4 of heat energy as electricity
+            # RE_PPA: No additional consumption, just switches source
+
+            # For NCC-Electricity: assume 1.9 tCO2/ton ethylene baseline emission
+            # So each MtCO2 abated = ~0.53 Mt ethylene produced
+            # At 10 MWh/ton ethylene = 5.3 TWh per MtCO2 abated
+            mwh_per_tco2_ncc_elec = 5300  # MWh per tCO2 abated
+
+            # For Heat Pump: Replace 1 GJ thermal with 0.25 GJ electricity (COP=4)
+            # 1 tCO2 from naphtha = 67 GJ thermal = 16.75 GJ electricity = 4.65 MWh
+            mwh_per_tco2_heat_pump = 4.65  # MWh per tCO2 abated
+
+            # deployed is in MtCO2, convert to tCO2 (*1e6), then MWh to TWh (/1e6) = no conversion needed
+            electricity_consumption_increase_twh = (
+                deployed['NCC-Electricity'] * mwh_per_tco2_ncc_elec / 1e3 +  # MtCO2 * MWh/tCO2 / 1000 = TWh
+                deployed['Heat_Pump'] * mwh_per_tco2_heat_pump / 1e3  # MtCO2 * MWh/tCO2 / 1000 = TWh
+            )
+
             deployment.append({
                 'year': year,
                 'target_mt': target,
@@ -133,6 +153,7 @@ class CostOptimizer:
                 'ncc_elec_mt': deployed['NCC-Electricity'],
                 're_ppa_mt': deployed['RE_PPA'],
                 'h2_consumption_kt': h2_consumption_kt,
+                'electricity_consumption_increase_twh': electricity_consumption_increase_twh,
                 'total_deployed_mt': sum(deployed.values()),
                 'actual_emissions_mt': bau - sum(deployed.values()),
                 'shortfall_mt': max(0, bau - sum(deployed.values()) - target),
@@ -211,6 +232,14 @@ class CostOptimizer:
             kg_h2_per_tco2 = (1 / 0.0149) / 120 * 1000
             h2_consumption_kt = deployment_dict[year]['NCC-H2'] * kg_h2_per_tco2 / 1000
 
+            # Calculate electricity consumption increase
+            mwh_per_tco2_ncc_elec = 5300
+            mwh_per_tco2_heat_pump = 4.65
+            electricity_consumption_increase_twh = (
+                deployment_dict[year]['NCC-Electricity'] * mwh_per_tco2_ncc_elec / 1e3 +  # MtCO2 * MWh/tCO2 / 1000 = TWh
+                deployment_dict[year]['Heat_Pump'] * mwh_per_tco2_heat_pump / 1e3  # MtCO2 * MWh/tCO2 / 1000 = TWh
+            )
+
             deployment.append({
                 'year': year,
                 'target_mt': None,  # No annual target, only budget
@@ -220,6 +249,7 @@ class CostOptimizer:
                 'ncc_elec_mt': deployment_dict[year]['NCC-Electricity'],
                 're_ppa_mt': deployment_dict[year]['RE_PPA'],
                 'h2_consumption_kt': h2_consumption_kt,
+                'electricity_consumption_increase_twh': electricity_consumption_increase_twh,
                 'total_deployed_mt': sum(deployment_dict[year].values()),
                 'actual_emissions_mt': actual,
                 'cumulative_emissions_mt': cumulative,

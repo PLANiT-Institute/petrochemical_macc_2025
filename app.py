@@ -885,6 +885,54 @@ def show_scenarios(data):
             )
             st.plotly_chart(fig_h2, use_container_width=True)
 
+    # Electricity Consumption tracking
+    if 'electricity_consumption_increase_twh' in df_scenario.columns:
+        st.markdown("---")
+        st.markdown("### ⚡ Electricity Consumption Increase")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            elec_2050 = df_scenario[df_scenario['year'] == 2050]['electricity_consumption_increase_twh'].iloc[0]
+            elec_total = df_scenario['electricity_consumption_increase_twh'].sum()
+            st.metric("Electricity Increase (2050)", f"{elec_2050:.2f} TWh/year")
+            st.metric("Cumulative Electricity (2025-2050)", f"{elec_total:.1f} TWh")
+
+            # Context metrics
+            korea_total_elec = 550  # TWh/year (approximate)
+            pct_increase = (elec_2050 / korea_total_elec) * 100
+            st.caption(f"Korea total electricity: ~{korea_total_elec} TWh/year (2023)")
+            st.caption(f"Petrochemical increase: {pct_increase:.2f}% of national total")
+
+        with col2:
+            fig_elec = go.Figure()
+            fig_elec.add_trace(go.Scatter(
+                x=df_scenario['year'],
+                y=df_scenario['electricity_consumption_increase_twh'],
+                mode='lines+markers',
+                name='Electricity Increase',
+                line=dict(width=3, color='#F39C12'),
+                marker=dict(size=6),
+                fill='tozeroy',
+                fillcolor='rgba(243, 156, 18, 0.2)'
+            ))
+            fig_elec.update_layout(
+                xaxis_title="Year",
+                yaxis_title="Electricity Increase (TWh/year)",
+                height=300,
+                showlegend=False
+            )
+            st.plotly_chart(fig_elec, use_container_width=True)
+
+        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+        st.markdown("""
+        **Sources of Electricity Increase:**
+        - **Heat Pump**: Replaces naphtha combustion with electric heat pump (COP=4)
+        - **NCC-Electricity**: Electric steam cracker replaces naphtha-fired cracker
+        - **RE PPA**: No additional consumption, just switches electricity source
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+
     # Cumulative emissions (for budget scenarios)
     if 'cumulative_emissions_mt' in df_scenario.columns:
         st.markdown("---")
