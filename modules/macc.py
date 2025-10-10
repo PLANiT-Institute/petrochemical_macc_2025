@@ -33,7 +33,7 @@ class MACCAnalyzer:
         print("="*80)
 
         # Load data
-        print("\n📁 Loading data...")
+        print("\nLoading Loading data...")
         loader = DataLoader(data_dir)
 
         self.df_baseline = pd.read_csv(self.baseline_dir / 'baseline_2025_detailed.csv')
@@ -45,9 +45,9 @@ class MACCAnalyzer:
         self.df_grid_emission = pd.read_csv(self.data_dir / 'grid_emission_trajectory.csv')
         self.df_ncc_lcoe = pd.read_csv(self.data_dir / 'ncc_lcoe_trajectory.csv')
 
-        print(f"   ✓ Loaded baseline: {len(self.df_baseline)} facilities")
-        print(f"   ✓ Loaded {len(self.df_tech_params)} technologies")
-        print(f"   ✓ Loaded LCOE trajectory for NCC technologies")
+        print(f"   - Loaded baseline: {len(self.df_baseline)} facilities")
+        print(f"   - Loaded {len(self.df_tech_params)} technologies")
+        print(f"   - Loaded LCOE trajectory for NCC technologies")
 
         # Initialize calculators
         self.tech_cost_calc = TechnologyCostCalculator(self.df_tech_params)
@@ -59,7 +59,7 @@ class MACCAnalyzer:
 
     def calculate_macc_annual(self, years=range(2025, 2051)):
         """Calculate MACC for all technologies and years"""
-        print(f"\n📊 Calculating dynamic MACC ({min(years)}-{max(years)})...")
+        print(f"\nCalculating Calculating dynamic MACC ({min(years)}-{max(years)})...")
 
         macc_data = []
 
@@ -88,7 +88,7 @@ class MACCAnalyzer:
 
         df_macc = pd.DataFrame(macc_data)
 
-        print(f"   ✓ Calculated {len(df_macc)} technology-year combinations")
+        print(f"   - Calculated {len(df_macc)} technology-year combinations")
 
         self.df_macc = df_macc
         return df_macc
@@ -325,7 +325,7 @@ class MACCAnalyzer:
 
     def create_visualizations(self):
         """Create MACC curve visualizations"""
-        print("\n🎨 Creating visualizations...")
+        print("\nCreating Creating visualizations...")
 
         # MACC curves for key years
         key_years = [2025, 2030, 2040, 2050]
@@ -341,30 +341,45 @@ class MACCAnalyzer:
 
             fig, ax = plt.subplots(figsize=(14, 8))
 
+            # Sort by cost for proper MACC ordering
+            df_year_sorted = df_year.sort_values('total_cost_usd_per_tco2')
+
             # Create MACC bars
             x_pos = 0
             colors = {'Heat_Pump': '#2ECC71', 'NCC-H2': '#3498DB', 'NCC-Electricity': '#E74C3C', 'RE_PPA': '#F39C12'}
 
-            for _, row in df_year.iterrows():
+            legend_entries = []
+
+            for _, row in df_year_sorted.iterrows():
                 width = row['abatement_potential_mtco2']
                 height = row['total_cost_usd_per_tco2']
                 color = colors.get(row['technology'], 'gray')
 
-                ax.bar(x_pos + width/2, height, width=width, color=color,
-                      edgecolor='black', linewidth=1, alpha=0.8,
-                      label=row['technology'] if x_pos == 0 or row['technology'] not in [t['technology'] for t in df_year.iloc[:df_year.index.get_loc(row.name)].to_dict('records')] else "")
+                # Determine methodology for label
+                methodology = row.get('methodology', '')
+                if pd.notna(methodology) and methodology == 'LCOE-based':
+                    label = f"{row['technology']} (LCOE)"
+                else:
+                    label = f"{row['technology']}"
+
+                # Add to legend only once per technology
+                if label not in legend_entries:
+                    ax.bar(x_pos + width/2, height, width=width, color=color,
+                          edgecolor='black', linewidth=1, alpha=0.8, label=label)
+                    legend_entries.append(label)
+                else:
+                    ax.bar(x_pos + width/2, height, width=width, color=color,
+                          edgecolor='black', linewidth=1, alpha=0.8)
 
                 x_pos += width
 
             ax.axhline(y=0, color='black', linestyle='-', linewidth=1)
             ax.set_xlabel('Cumulative Abatement Potential (MtCO2/year)', fontsize=12, fontweight='bold')
             ax.set_ylabel('Marginal Abatement Cost ($/tCO2)', fontsize=12, fontweight='bold')
-            ax.set_title(f'Dynamic MACC Curve - {year}', fontsize=14, fontweight='bold')
+            ax.set_title(f'MACC Curve - {year}', fontsize=14, fontweight='bold')
             ax.grid(True, alpha=0.3, axis='y')
 
-            handles, labels = ax.get_legend_handles_labels()
-            by_label = dict(zip(labels, handles))
-            ax.legend(by_label.values(), by_label.keys(), loc='upper left')
+            ax.legend(loc='upper left', fontsize=10)
 
             save_plot(fig, self.output_dir / f'macc_curve_{year}.png')
 
@@ -385,7 +400,7 @@ class MACCAnalyzer:
 
     def save_outputs(self):
         """Save outputs"""
-        print("\n💾 Saving outputs...")
+        print("\nSaving Saving outputs...")
         save_csv_output(self.df_macc, self.output_dir / 'macc_annual_2025_2050.csv',
                        f"({len(self.df_macc)} tech-year combinations)")
 
@@ -400,7 +415,7 @@ class MACCAnalyzer:
         self.save_outputs()
 
         print("\n" + "="*80)
-        print("✓ MODULE 2 COMPLETE")
+        print("- MODULE 2 COMPLETE")
         print("="*80)
         print(f"\nOutputs saved to: {self.output_dir}")
 
