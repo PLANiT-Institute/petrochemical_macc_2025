@@ -137,6 +137,7 @@ def main():
          "🎯 Scenario Explorer",
          "🏢 Company Analysis",
          "📍 Regional Analysis",
+         "📊 Model Assumptions",
          "ℹ️ About the Model"]
     )
 
@@ -155,6 +156,8 @@ def main():
         show_companies(data)
     elif page == "📍 Regional Analysis":
         show_locations(data)
+    elif page == "📊 Model Assumptions":
+        show_assumptions(data)
     elif page == "ℹ️ About the Model":
         show_about()
 
@@ -413,6 +416,88 @@ def show_macc(data):
     - **Total Abatement Potential**: {total_abatement:.1f} MtCO2/year
     - **Cost-Saving Technologies**: {', '.join([tech_labels.get(t, t) for t in negative_cost_techs]) if negative_cost_techs else 'None'}
     - **Interpretation**: Technologies below the zero line save money while reducing emissions
+    """)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # MACC Cost Breakdown - Show CAPEX/OPEX vs Fuel Savings
+    st.markdown("---")
+    st.markdown(f"### 💵 MACC Cost Breakdown - {year}")
+    st.markdown("**Understanding negative costs: CAPEX+OPEX vs Fuel Savings**")
+
+    # Create waterfall-style breakdown
+    cost_breakdown = []
+    for _, row in df_sorted.iterrows():
+        tech = row['technology']
+        capex_opex = row.get('capex_ann_usd_per_tco2', 0) + row.get('opex_ann_usd_per_tco2', 0)
+        fuel_diff = row.get('fuel_cost_diff_usd_per_tco2', 0)
+        total = row['total_cost_usd_per_tco2']
+
+        cost_breakdown.append({
+            'Technology': tech_labels.get(tech, tech),
+            'CAPEX+OPEX': capex_opex,
+            'Fuel Cost Differential': fuel_diff,
+            'Total MACC Cost': total
+        })
+
+    df_breakdown = pd.DataFrame(cost_breakdown)
+
+    # Create grouped bar chart
+    fig_breakdown = go.Figure()
+
+    fig_breakdown.add_trace(go.Bar(
+        name='CAPEX + OPEX',
+        x=df_breakdown['Technology'],
+        y=df_breakdown['CAPEX+OPEX'],
+        marker_color='#E74C3C',
+        text=df_breakdown['CAPEX+OPEX'].round(1),
+        textposition='outside'
+    ))
+
+    fig_breakdown.add_trace(go.Bar(
+        name='Fuel Cost Differential',
+        x=df_breakdown['Technology'],
+        y=df_breakdown['Fuel Cost Differential'],
+        marker_color='#2ECC71',
+        text=df_breakdown['Fuel Cost Differential'].round(1),
+        textposition='outside'
+    ))
+
+    fig_breakdown.add_trace(go.Bar(
+        name='Total MACC Cost',
+        x=df_breakdown['Technology'],
+        y=df_breakdown['Total MACC Cost'],
+        marker_color='#3498DB',
+        marker_line_color='black',
+        marker_line_width=2,
+        text=df_breakdown['Total MACC Cost'].round(1),
+        textposition='outside'
+    ))
+
+    fig_breakdown.update_layout(
+        title="Cost Components: CAPEX+OPEX (positive) + Fuel Savings (negative) = Total MACC",
+        xaxis_title="Technology",
+        yaxis_title="Cost ($/tCO2)",
+        barmode='group',
+        height=400,
+        showlegend=True
+    )
+
+    fig_breakdown.add_hline(y=0, line_dash="solid", line_color="black", line_width=1.5)
+
+    st.plotly_chart(fig_breakdown, use_container_width=True)
+
+    st.markdown('<div class="info-box">', unsafe_allow_html=True)
+    st.markdown("""
+    **Cost Breakdown Interpretation:**
+    - **CAPEX + OPEX** (Red bars): Capital and operational costs are ALWAYS positive (cost to deploy)
+    - **Fuel Cost Differential** (Green bars): Fuel savings are negative (save money on fuel)
+    - **Total MACC Cost** (Blue bars): Net cost = CAPEX+OPEX + Fuel Differential
+    - **Negative Total = Cost-Saving**: Fuel savings exceed CAPEX+OPEX investment!
+
+    **Example - Heat Pump (2030):**
+    - CAPEX+OPEX: +$12.59/tCO2 (investment required)
+    - Fuel Savings: -$760.63/tCO2 (huge naphtha savings!)
+    - **Total: -$748/tCO2** (saves $748 per tonne CO2 abated!)
     """)
     st.markdown('</div>', unsafe_allow_html=True)
 
