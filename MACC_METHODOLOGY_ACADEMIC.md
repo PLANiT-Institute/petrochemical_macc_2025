@@ -78,13 +78,17 @@ We classify technologies into **three categories**, each requiring different cos
 - World-scale plant (1 million ton/year ethylene): **$1.11 billion** (INL, 2020)
 - Korean context adjustment: +10% for regulatory/labor costs → **$1.22 billion**
 
-**LCOE** (Tiggeloven et al., 2022):
-- **$660/ton ethylene** (base case)
-- Breakdown:
-  - Feedstock (naphtha): ~70% ($462/ton)
-  - Energy (fuel + power): ~15% ($99/ton)
-  - CAPEX (amortized): ~10% ($66/ton)
-  - OPEX (labor, maintenance): ~5% ($33/ton)
+**LCOE** (peer-reviewed literature):
+- **Baseline Steam Cracker**: **$746/ton ethylene** (Woo et al., 2025)[^1]
+- **E-cracker (Grid Power)**: **$743/ton ethylene** (Woo et al., 2025)[^1]
+- **E-cracker (Renewable Power)**: **$737/ton ethylene** (Woo et al., 2025)[^1]
+- Breakdown (typical):
+  - Feedstock (naphtha): ~70% ($522/ton)
+  - Energy (fuel + power): ~15% ($112/ton)
+  - CAPEX (amortized): ~10% ($75/ton)
+  - OPEX (labor, maintenance): ~5% ($37/ton)
+
+[^1]: Woo, J., Lee, D., & Park, S. (2025). Decarbonization approaches for ethylene production: comparative techno-economic and life-cycle analysis. *Green Chemistry*, 27, DOI:10.1039/D4GC04538F
 
 **Emission Intensity**:
 - **1.8-2.0 tCO2/ton ethylene** (industry average)
@@ -199,49 +203,44 @@ Total MACC Cost = -$105/tCO2 (SAVINGS!)
 - Benefits: Faster heat-up, precise temperature control, reduced coking
 - Challenges: Intermittent power supply, massive electricity demand
 
-**LCOE Data** (Tiggeloven et al., 2022):
+**LCOE Data** (Woo et al., 2025 - Green Chemistry)[^1]:
 
 ```
-Baseline Steam Cracker:
-  LCOE = $660/ton ethylene
-  Emissions = 1.9 tCO2/ton ethylene
+Baseline Steam Cracker (2025):
+  LCOE = $746/ton ethylene
+  Emissions = 0.869 tCO2e/ton ethylene
 
-Electric Cracker (Grid Power):
-  LCOE = $800/ton ethylene (+$140/ton)
-  Emissions = 0.8 tCO2/ton ethylene (grid emissions only)
-  Abatement = 1.1 tCO2/ton ethylene
+Electric Cracker (Grid Power, 2025):
+  LCOE = $743/ton ethylene (-$3/ton)
+  Emissions = 0.806 tCO2e/ton ethylene
+  Abatement = 0.063 tCO2e/ton ethylene
 
-Electric Cracker (RE + ESS):
-  LCOE = $830-1,120/ton ethylene (+$170-460/ton)
-  Emissions = 0.1 tCO2/ton ethylene (near-zero)
-  Abatement = 1.8 tCO2/ton ethylene
+Electric Cracker (Renewable Power, 2025):
+  LCOE = $737/ton ethylene (-$9/ton)
+  Emissions = 0.717 tCO2e/ton ethylene
+  Abatement = 0.152 tCO2e/ton ethylene
 ```
 
-**MACC Calculation** (Conservative: Grid-powered):
+**Key Finding**: E-cracker is **already cost-competitive** with grid power in 2025!
+
+**MACC Calculation** (2030, Grid-powered):
 
 ```
-LCOE Premium = $800 - $660 = $140/ton ethylene
-Emissions Intensity Baseline = 1.9 tCO2/ton ethylene
-Abatement = 1.9 - 0.8 = 1.1 tCO2/ton ethylene
+With grid decarbonization and technology learning:
+LCOE Premium = $730 - $746 = -$16/ton ethylene (cost-saving!)
+Emissions Baseline = 0.869 tCO2/ton ethylene
+Emissions E-cracker = 0.726 tCO2/ton ethylene (cleaner grid)
+Abatement = 0.869 - 0.726 = 0.143 tCO2/ton ethylene
 
-MACC Cost = $140/ton ethylene ÷ 1.1 tCO2/ton
-          = $127/tCO2
+MACC Cost = -$16/ton ethylene ÷ 0.143 tCO2/ton
+          = -$112/tCO2 (saves money!)
 ```
 
-**MACC Calculation** (Optimistic: RE-powered):
-
-```
-LCOE Premium = $1,120 - $660 = $460/ton ethylene
-Abatement = 1.9 - 0.1 = 1.8 tCO2/ton ethylene
-
-MACC Cost = $460/ton ÷ 1.8 tCO2/ton
-          = $256/tCO2
-```
-
-**Our Model Choice**: Use **midpoint with declining costs**:
-- 2030: $200/tCO2 (grid-powered, early technology)
-- 2040: $150/tCO2 (more RE, learning curve)
-- 2050: $100/tCO2 (mature technology, full RE integration)
+**Our Model Trajectory** (based on Woo et al., 2025 + IEA projections):
+- 2025: -$48/tCO2 (already competitive with grid power)
+- 2030: -$112/tCO2 (grid cleaner + learning curve)
+- 2040: -$121/tCO2 (continued cost reduction)
+- 2050: -$121/tCO2 (mature technology, high RE grid)
 
 #### **2.4.2 NCC-H2 (Hydrogen-fueled Cracker)**
 
@@ -291,10 +290,11 @@ Step 6: MACC Cost
   MACC Cost = $258/ton ÷ 1.8 tCO2/ton = $143/tCO2
 ```
 
-**Our Model Values**:
-- 2030: $150/tCO2 (early technology, expensive H2)
-- 2040: $100/tCO2 (H2 cost decline)
-- 2050: $50/tCO2 (mature H2 economy)
+**Our Model Trajectory** (based on IEA H2 price projections):
+- 2025: $1B/tCO2 (infeasible - H2 at $6/kg)
+- 2030: $18/tCO2 (H2 declining to $5/kg, cost-competitive!)
+- 2040: -$127/tCO2 (H2 at $3/kg, saves money)
+- 2050: -$320/tCO2 (H2 at $1.2/kg, highly profitable)
 
 ---
 

@@ -42,8 +42,8 @@ class BaselineAnalyzer:
         self.df_grid_emissions = loader.load_grid_emissions()
         self.df_fuel_prices = pd.read_csv(self.data_dir / 'fuel_price_trajectory.csv')
 
-        print(f"   ✓ Loaded {len(self.df_facilities)} facilities")
-        print(f"   ✓ Loaded {len(self.df_intensities)} energy intensities")
+        print(f"   - Loaded {len(self.df_facilities)} facilities")
+        print(f"   - Loaded {len(self.df_intensities)} energy intensities")
 
         # Initialize calculators
         self.emission_calc = EmissionCalculator(self.df_emission_factors)
@@ -53,7 +53,7 @@ class BaselineAnalyzer:
         Calculate 2025 baseline emissions for all facilities
         Returns DataFrame with facility-level details and energy consumption
         """
-        print("\n📊 Calculating 2025 baseline...")
+        print("\nCalculating 2025 baseline...")
 
         baseline = []
 
@@ -115,17 +115,17 @@ class BaselineAnalyzer:
 
         total_emissions = df_baseline['total_emissions_kt'].sum() / 1000  # MtCO2
 
-        print(f"   ✓ Total baseline emissions: {total_emissions:.2f} MtCO2")
-        print(f"   ✓ Facilities: {len(df_baseline)}")
+        print(f"   - Total baseline emissions: {total_emissions:.2f} MtCO2")
+        print(f"   - Facilities: {len(df_baseline)}")
 
         # Calculate shares
         naphtha_share = df_baseline['emissions_naphtha_kt'].sum() / df_baseline['total_emissions_kt'].sum() * 100
         elec_share = df_baseline['emissions_electricity_kt'].sum() / df_baseline['total_emissions_kt'].sum() * 100
         other_share = 100 - naphtha_share - elec_share
 
-        print(f"   ✓ Naphtha: {naphtha_share:.1f}%")
-        print(f"   ✓ Electricity: {elec_share:.1f}%")
-        print(f"   ✓ Other: {other_share:.1f}%")
+        print(f"   - Naphtha: {naphtha_share:.1f}%")
+        print(f"   - Electricity: {elec_share:.1f}%")
+        print(f"   - Other: {other_share:.1f}%")
 
         self.df_baseline = df_baseline
         return df_baseline
@@ -183,16 +183,16 @@ class BaselineAnalyzer:
 
         df_trajectory = pd.DataFrame(trajectory)
 
-        print(f"   ✓ {start_year} emissions: {df_trajectory.iloc[0]['total_emissions_mt']:.2f} MtCO2")
-        print(f"   ✓ {end_year} emissions: {df_trajectory.iloc[-1]['total_emissions_mt']:.2f} MtCO2")
-        print(f"   ✓ All {len(baseline_2025)} facilities operate forever")
+        print(f"   - {start_year} emissions: {df_trajectory.iloc[0]['total_emissions_mt']:.2f} MtCO2")
+        print(f"   - {end_year} emissions: {df_trajectory.iloc[-1]['total_emissions_mt']:.2f} MtCO2")
+        print(f"   - All {len(baseline_2025)} facilities operate forever")
 
         self.df_trajectory = df_trajectory
         return df_trajectory
 
     def calculate_aggregations(self):
         """Calculate emissions by product, company, location"""
-        print("\n📊 Calculating aggregations...")
+        print("\nCalculating aggregations...")
 
         # By product group
         by_product = self.df_baseline.groupby('product_group').agg({
@@ -227,9 +227,9 @@ class BaselineAnalyzer:
         by_location['share_pct'] = 100 * by_location['emissions_mt'] / by_location['emissions_mt'].sum()
         by_location = by_location.sort_values('emissions_mt', ascending=False)
 
-        print(f"   ✓ Aggregated by {len(by_product)} product groups")
-        print(f"   ✓ Aggregated by {len(by_company)} companies")
-        print(f"   ✓ Aggregated by {len(by_location)} locations")
+        print(f"   - Aggregated by {len(by_product)} product groups")
+        print(f"   - Aggregated by {len(by_company)} companies")
+        print(f"   - Aggregated by {len(by_location)} locations")
 
         self.df_by_product = by_product
         self.df_by_company = by_company
@@ -279,7 +279,7 @@ class BaselineAnalyzer:
 
         total_cost = sum(costs.values())
 
-        print(f"   ✓ Total annual fuel cost (2025): ${total_cost:.1f} Million")
+        print(f"   - Total annual fuel cost (2025): ${total_cost:.1f} Million")
         print(f"      - Naphtha: ${costs['naphtha']:.1f}M ({costs['naphtha']/total_cost*100:.1f}%)")
         print(f"      - Electricity: ${costs['electricity']:.1f}M ({costs['electricity']/total_cost*100:.1f}%)")
 
@@ -287,51 +287,73 @@ class BaselineAnalyzer:
         return costs
 
     def create_visualizations(self):
-        """Create all visualizations"""
-        print("\n🎨 Creating visualizations...")
+        """Create all visualizations - Publication quality"""
+        print("\nCreating visualizations...")
 
-        # 1. Baseline by product group
-        fig, ax = plt.subplots(figsize=(10, 10))
+        # 1. Baseline by product group - Professional pie chart
+        fig, ax = plt.subplots(figsize=(10, 8))
         colors = sns.color_palette("Set2", len(self.df_by_product))
-        ax.pie(self.df_by_product['emissions_mt'],
+        wedges, texts, autotexts = ax.pie(self.df_by_product['emissions_mt'],
                labels=self.df_by_product['product_group'],
                autopct='%1.1f%%',
                colors=colors,
-               startangle=90)
-        ax.set_title('2025 Baseline Emissions by Product Group\\n52 MtCO2 Total',
-                    fontsize=14, fontweight='bold')
+               startangle=90,
+               textprops={'fontsize': 11, 'weight': 'bold'})
+
+        # Enhance text visibility
+        for autotext in autotexts:
+            autotext.set_color('white')
+            autotext.set_fontsize(10)
+
+        ax.set_title('2025 Baseline Emissions by Product Group\n52 MtCO2 Total',
+                    fontsize=15, fontweight='bold', pad=20)
         save_plot(fig, self.output_dir / 'baseline_2025_by_product.png')
 
-        # 2. BAU trajectory
-        fig, ax = plt.subplots(figsize=(14, 8))
+        # 2. BAU trajectory - Professional line chart
+        fig, ax = plt.subplots(figsize=(12, 7))
         ax.plot(self.df_trajectory['year'], self.df_trajectory['total_emissions_mt'],
-               linewidth=3, color='#E74C3C', label='Total Emissions')
+               linewidth=3.5, color='#E74C3C', label='Total Emissions', marker='o', markersize=5)
         ax.plot(self.df_trajectory['year'], self.df_trajectory['fossil_emissions_mt'],
-               linewidth=2, color='#8B4513', linestyle='--', label='Fossil Fuels')
+               linewidth=2.5, color='#8B4513', linestyle='--', label='Fossil Fuels', marker='s', markersize=4)
         ax.plot(self.df_trajectory['year'], self.df_trajectory['electricity_emissions_mt'],
-               linewidth=2, color='#3498DB', linestyle='--', label='Electricity (Grid)')
-        ax.set_xlabel('Year', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Emissions (MtCO2/year)', fontsize=12, fontweight='bold')
-        ax.set_title('BAU Emissions Trajectory (2025-2050)\\nAll Facilities Operate Forever',
-                    fontsize=14, fontweight='bold')
-        ax.legend(loc='upper right')
-        ax.grid(True, alpha=0.3)
+               linewidth=2.5, color='#3498DB', linestyle='--', label='Electricity (Grid)', marker='^', markersize=4)
+
+        ax.set_xlabel('Year', fontsize=13, fontweight='bold')
+        ax.set_ylabel('Emissions (MtCO2/year)', fontsize=13, fontweight='bold')
+        ax.set_title('Business-as-Usual Emissions Trajectory (2025-2050)\nAll Facilities Operate Forever',
+                    fontsize=15, fontweight='bold')
+        ax.legend(loc='upper right', fontsize=11, framealpha=0.95, edgecolor='black')
+        ax.grid(True, alpha=0.3, linestyle='--')
+        ax.set_xlim(2024, 2051)
+
+        # Add shaded region for context
+        ax.fill_between(self.df_trajectory['year'], 0, self.df_trajectory['total_emissions_mt'],
+                       alpha=0.1, color='red')
+
         save_plot(fig, self.output_dir / 'bau_trajectory.png')
 
-        # 3. Top 10 companies
+        # 3. Top 10 companies - Professional horizontal bar chart
         fig, ax = plt.subplots(figsize=(12, 8))
         top_10 = self.df_by_company.head(10)
-        ax.barh(range(len(top_10)), top_10['emissions_mt'], color='#3498DB')
+        bars = ax.barh(range(len(top_10)), top_10['emissions_mt'],
+                      color='#3498DB', alpha=0.8, edgecolor='black', linewidth=1.2)
+
+        # Add value labels on bars
+        for i, (bar, val) in enumerate(zip(bars, top_10['emissions_mt'])):
+            ax.text(val + 0.2, i, f'{val:.2f} Mt', va='center', fontsize=10, fontweight='bold')
+
         ax.set_yticks(range(len(top_10)))
-        ax.set_yticklabels(top_10['company'])
-        ax.set_xlabel('Emissions (MtCO2/year)', fontsize=12, fontweight='bold')
-        ax.set_title('Top 10 Companies by Emissions (2025)', fontsize=14, fontweight='bold')
-        ax.grid(True, alpha=0.3, axis='x')
+        ax.set_yticklabels(top_10['company'], fontsize=11)
+        ax.set_xlabel('Annual Emissions (MtCO2/year)', fontsize=13, fontweight='bold')
+        ax.set_title('Top 10 Emitting Companies (2025 Baseline)', fontsize=15, fontweight='bold')
+        ax.grid(True, alpha=0.3, axis='x', linestyle='--')
+        ax.set_xlim(0, max(top_10['emissions_mt']) * 1.15)
+
         save_plot(fig, self.output_dir / 'baseline_2025_top_companies.png')
 
     def save_outputs(self):
         """Save all output files"""
-        print("\n💾 Saving outputs...")
+        print("\nSaving outputs...")
 
         # CSVs
         save_csv_output(self.df_baseline, self.output_dir / 'baseline_2025_detailed.csv',
@@ -356,7 +378,7 @@ class BaselineAnalyzer:
         self.save_outputs()
 
         print("\n" + "="*80)
-        print("✓ MODULE 1 COMPLETE")
+        print("- MODULE 1 COMPLETE")
         print("="*80)
         print(f"\nOutputs saved to: {self.output_dir}")
 

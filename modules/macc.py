@@ -339,14 +339,20 @@ class MACCAnalyzer:
             if len(df_year) == 0:
                 continue
 
-            fig, ax = plt.subplots(figsize=(14, 8))
+            fig, ax = plt.subplots(figsize=(12, 7))
 
             # Sort by cost for proper MACC ordering
             df_year_sorted = df_year.sort_values('total_cost_usd_per_tco2')
 
-            # Create MACC bars
+            # Create MACC bars - Publication quality
             x_pos = 0
             colors = {'Heat_Pump': '#2ECC71', 'NCC-H2': '#3498DB', 'NCC-Electricity': '#E74C3C', 'RE_PPA': '#F39C12'}
+            tech_labels = {
+                'Heat_Pump': 'Heat Pump',
+                'RE_PPA': 'RE PPA',
+                'NCC-Electricity': 'NCC-Electricity (LCOE)',
+                'NCC-H2': 'NCC-H2 (LCOE)'
+            }
 
             legend_entries = []
 
@@ -354,48 +360,73 @@ class MACCAnalyzer:
                 width = row['abatement_potential_mtco2']
                 height = row['total_cost_usd_per_tco2']
                 color = colors.get(row['technology'], 'gray')
-
-                # Determine methodology for label
-                methodology = row.get('methodology', '')
-                if pd.notna(methodology) and methodology == 'LCOE-based':
-                    label = f"{row['technology']} (LCOE)"
-                else:
-                    label = f"{row['technology']}"
+                label = tech_labels.get(row['technology'], row['technology'])
 
                 # Add to legend only once per technology
                 if label not in legend_entries:
                     ax.bar(x_pos + width/2, height, width=width, color=color,
-                          edgecolor='black', linewidth=1, alpha=0.8, label=label)
+                          edgecolor='black', linewidth=1.2, alpha=0.85, label=label)
                     legend_entries.append(label)
                 else:
                     ax.bar(x_pos + width/2, height, width=width, color=color,
-                          edgecolor='black', linewidth=1, alpha=0.8)
+                          edgecolor='black', linewidth=1.2, alpha=0.85)
 
                 x_pos += width
 
-            ax.axhline(y=0, color='black', linestyle='-', linewidth=1)
-            ax.set_xlabel('Cumulative Abatement Potential (MtCO2/year)', fontsize=12, fontweight='bold')
-            ax.set_ylabel('Marginal Abatement Cost ($/tCO2)', fontsize=12, fontweight='bold')
-            ax.set_title(f'MACC Curve - {year}', fontsize=14, fontweight='bold')
-            ax.grid(True, alpha=0.3, axis='y')
+            # Zero line
+            ax.axhline(y=0, color='black', linestyle='-', linewidth=1.5, alpha=0.8, zorder=10)
 
-            ax.legend(loc='upper left', fontsize=10)
+            # Labels and formatting
+            ax.set_xlabel('Cumulative Abatement Potential (MtCO2/year)', fontsize=13, fontweight='bold')
+            ax.set_ylabel('Marginal Abatement Cost ($/tCO2)', fontsize=13, fontweight='bold')
+            ax.set_title(f'Marginal Abatement Cost Curve - {year}', fontsize=15, fontweight='bold')
+            ax.grid(True, alpha=0.3, axis='y', linestyle='--')
+
+            # Legend positioning
+            ax.legend(loc='best', fontsize=10, framealpha=0.95, edgecolor='black')
+
+            # Add subtle background shading
+            y_min, y_max = ax.get_ylim()
+            if y_min < 0:
+                ax.axhspan(y_min, 0, alpha=0.08, color='green', zorder=0)
+                ax.text(x_pos * 0.98, min(-20, y_min * 0.95), 'Cost-Saving',
+                       fontsize=9, ha='right', va='bottom', style='italic', color='darkgreen')
+            if y_max > 0:
+                ax.axhspan(0, y_max, alpha=0.05, color='red', zorder=0)
 
             save_plot(fig, self.output_dir / f'macc_curve_{year}.png')
 
-        # Cost evolution
-        fig, ax = plt.subplots(figsize=(14, 8))
-        for tech in ['Heat_Pump', 'NCC-H2', 'NCC-Electricity', 'RE_PPA']:
-            df_tech = self.df_macc[self.df_macc['technology'] == tech]
-            ax.plot(df_tech['year'], df_tech['total_cost_usd_per_tco2'],
-                   linewidth=2.5, label=tech, marker='o', markersize=4)
+        # Cost evolution - Publication quality
+        fig, ax = plt.subplots(figsize=(12, 7))
 
-        ax.axhline(y=0, color='black', linestyle='--', linewidth=1, alpha=0.5)
-        ax.set_xlabel('Year', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Total Cost ($/tCO2)', fontsize=12, fontweight='bold')
-        ax.set_title('Technology Cost Evolution (2025-2050)', fontsize=14, fontweight='bold')
-        ax.legend()
-        ax.grid(True, alpha=0.3)
+        # Technology colors and markers for clarity
+        tech_styles = {
+            'Heat_Pump': {'color': '#2ECC71', 'marker': 'o', 'label': 'Heat Pump'},
+            'RE_PPA': {'color': '#F39C12', 'marker': 's', 'label': 'RE PPA'},
+            'NCC-Electricity': {'color': '#E74C3C', 'marker': '^', 'label': 'NCC-Electricity (LCOE)'},
+            'NCC-H2': {'color': '#3498DB', 'marker': 'D', 'label': 'NCC-H2 (LCOE)'}
+        }
+
+        for tech in ['Heat_Pump', 'RE_PPA', 'NCC-Electricity', 'NCC-H2']:
+            df_tech = self.df_macc[self.df_macc['technology'] == tech]
+            style = tech_styles[tech]
+            ax.plot(df_tech['year'], df_tech['total_cost_usd_per_tco2'],
+                   linewidth=2.5, color=style['color'], marker=style['marker'],
+                   markersize=6, label=style['label'], alpha=0.9)
+
+        ax.axhline(y=0, color='black', linestyle='--', linewidth=1.5, alpha=0.7, label='Cost Parity')
+        ax.set_xlabel('Year', fontsize=13, fontweight='bold')
+        ax.set_ylabel('Marginal Abatement Cost ($/tCO2)', fontsize=13, fontweight='bold')
+        ax.set_title('Technology Cost Trajectories (2025-2050)', fontsize=15, fontweight='bold')
+        ax.legend(loc='best', fontsize=10, framealpha=0.95)
+        ax.grid(True, alpha=0.3, linestyle='--')
+        ax.set_xlim(2024, 2051)
+
+        # Add shaded region for negative costs (profitable)
+        ax.fill_between([2024, 2051], -1000, 0, alpha=0.1, color='green', label='_nolegend_')
+        ax.text(2048, -50, 'Cost-Saving\nRegion', fontsize=10, ha='right', va='top',
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8, edgecolor='green'))
+
         save_plot(fig, self.output_dir / 'cost_evolution_annual.png')
 
     def save_outputs(self):
