@@ -1328,6 +1328,290 @@ def show_locations(data):
     st.markdown("---")
     st.dataframe(df_loc, use_container_width=True)
 
+def show_assumptions(data):
+    """Model assumptions and price trajectories page"""
+    st.markdown('<div class="sub-header">📊 Model Assumptions & Price Trajectories</div>', unsafe_allow_html=True)
+
+    st.markdown("""
+    This page shows all key assumptions and price trajectories used in the model.
+    These assumptions drive the MACC calculations and technology deployment decisions.
+    """)
+
+    # Fuel Price Trajectories
+    st.markdown("---")
+    st.markdown("### ⛽ Fuel Price Trajectories (2025-2050)")
+
+    df_fuel = pd.read_csv('data/fuel_price_trajectory.csv')
+    df_h2 = pd.read_csv('data/h2_price_trajectory.csv')
+    df_re = pd.read_csv('data/re_price_trajectory.csv')
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("#### Fossil Fuel Prices")
+        fig_fossil = go.Figure()
+
+        fossil_fuels = {
+            'Naphtha': ('naphtha_usd_per_gj', '#E74C3C'),
+            'LNG': ('lng_usd_per_gj', '#3498DB'),
+            'Fuel Oil': ('fuel_oil_usd_per_gj', '#95A5A6'),
+            'Diesel': ('diesel_usd_per_gj', '#F39C12')
+        }
+
+        for name, (col_name, color) in fossil_fuels.items():
+            fig_fossil.add_trace(go.Scatter(
+                x=df_fuel['year'],
+                y=df_fuel[col_name],
+                mode='lines+markers',
+                name=name,
+                line=dict(width=2.5, color=color),
+                marker=dict(size=4)
+            ))
+
+        fig_fossil.update_layout(
+            xaxis_title="Year",
+            yaxis_title="Price ($/GJ)",
+            height=350,
+            hovermode='x unified',
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+
+        st.plotly_chart(fig_fossil, use_container_width=True)
+
+        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+        st.markdown("""
+        **Current Assumption:** Constant fossil fuel prices (2025-2050)
+        - Naphtha: $15/GJ
+        - LNG: $12/GJ
+        - Diesel: $16/GJ
+
+        **Rationale:** Conservative baseline. Actual prices may vary with market conditions.
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("#### Clean Energy Prices")
+
+        fig_clean = go.Figure()
+
+        # H2 price
+        fig_clean.add_trace(go.Scatter(
+            x=df_h2['year'],
+            y=df_h2['h2_price_usd_per_kg'],
+            mode='lines+markers',
+            name='Green H2',
+            line=dict(width=3, color='#9B59B6'),
+            marker=dict(size=6),
+            yaxis='y'
+        ))
+
+        # RE price (secondary axis)
+        fig_clean.add_trace(go.Scatter(
+            x=df_re['year'],
+            y=df_re['re_price_usd_per_mwh'],
+            mode='lines+markers',
+            name='Renewable Electricity',
+            line=dict(width=3, color='#2ECC71'),
+            marker=dict(size=6),
+            yaxis='y2'
+        ))
+
+        fig_clean.update_layout(
+            xaxis_title="Year",
+            yaxis_title="H2 Price ($/kg)",
+            yaxis2=dict(
+                title="RE Price ($/MWh)",
+                overlaying='y',
+                side='right'
+            ),
+            height=350,
+            hovermode='x unified',
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+
+        st.plotly_chart(fig_clean, use_container_width=True)
+
+        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+        st.markdown("""
+        **Price Declines (2025 → 2050):**
+        - **Green H2**: $6.0/kg → $1.2/kg (80% decline)
+        - **RE Power**: $58/MWh → $32/MWh (45% decline)
+
+        **Source:** IEA Net Zero 2050, Hydrogen Council projections
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # Grid Emission Factor
+    st.markdown("---")
+    st.markdown("### ⚡ Grid Emission Factor Trajectory")
+
+    df_grid = pd.read_csv('data/grid_emission_trajectory.csv')
+
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        fig_grid = go.Figure()
+
+        fig_grid.add_trace(go.Scatter(
+            x=df_grid['year'],
+            y=df_grid['ef_kwh'],
+            mode='lines+markers',
+            name='Grid Emission Factor',
+            line=dict(width=3, color='#E67E22'),
+            marker=dict(size=6),
+            fill='tozeroy',
+            fillcolor='rgba(230, 126, 34, 0.2)'
+        ))
+
+        fig_grid.update_layout(
+            xaxis_title="Year",
+            yaxis_title="Emission Factor (kgCO2/kWh)",
+            height=350,
+            hovermode='x unified'
+        )
+
+        st.plotly_chart(fig_grid, use_container_width=True)
+
+    with col2:
+        ef_2025 = df_grid[df_grid['year'] == 2025]['ef_kwh'].iloc[0]
+        ef_2050 = df_grid[df_grid['year'] == 2050]['ef_kwh'].iloc[0]
+        reduction_pct = ((ef_2025 - ef_2050) / ef_2025) * 100
+
+        st.metric("2025 Grid EF", f"{ef_2025:.3f} kgCO2/kWh")
+        st.metric("2050 Grid EF", f"{ef_2050:.3f} kgCO2/kWh")
+        st.metric("Reduction", f"-{reduction_pct:.1f}%")
+
+        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+        st.markdown("""
+        **Grid Decarbonization:**
+        Korea's power grid is decarbonizing through renewable energy deployment.
+
+        **Source:** Korea 10th Basic Plan for Electricity Supply
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # Technology Costs
+    st.markdown("---")
+    st.markdown("### 🔧 Technology Cost Assumptions")
+
+    tech_costs_data = {
+        'Technology': ['Heat Pump', 'RE PPA', 'NCC-H2', 'NCC-Electricity'],
+        'CAPEX (M$/MtCO2)': [150, 0, 287, 345],
+        'Lifetime (years)': [20, 15, 25, 25],
+        'OPEX (% CAPEX)': [3, 0, 2.5, 2],
+        'Discount Rate': ['8%', '8%', '8%', '8%'],
+        'Methodology': ['Traditional', 'Fuel Switch', 'LCOE-based', 'LCOE-based']
+    }
+
+    df_tech_costs = pd.DataFrame(tech_costs_data)
+
+    st.dataframe(df_tech_costs, use_container_width=True, hide_index=True)
+
+    st.markdown('<div class="info-box">', unsafe_allow_html=True)
+    st.markdown("""
+    **Cost Methodology:**
+    - **Category A (Heat Pump, RE PPA)**: Traditional CAPEX+OPEX+ΔFuel
+    - **Category B (NCC technologies)**: LCOE Premium Method (see "🎓 LCOE Methodology" tab)
+
+    **CAPEX Annualization:** All CAPEX costs are annualized using Capital Recovery Factor (CRF) at 8% discount rate.
+    """)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # LCOE Trajectories
+    st.markdown("---")
+    st.markdown("### 📈 LCOE Trajectories (NCC Technologies)")
+
+    df_lcoe = pd.read_csv('data/ncc_lcoe_trajectory.csv')
+
+    fig_lcoe = go.Figure()
+
+    fig_lcoe.add_trace(go.Scatter(
+        x=df_lcoe['year'],
+        y=df_lcoe['baseline_steam_cracker_usd_per_ton'],
+        mode='lines+markers',
+        name='Baseline Steam Cracker',
+        line=dict(width=3, color='black', dash='dash'),
+        marker=dict(size=6)
+    ))
+
+    fig_lcoe.add_trace(go.Scatter(
+        x=df_lcoe['year'],
+        y=df_lcoe['ncc_electricity_usd_per_ton'],
+        mode='lines+markers',
+        name='E-cracker',
+        line=dict(width=3, color='#E74C3C'),
+        marker=dict(size=6)
+    ))
+
+    fig_lcoe.add_trace(go.Scatter(
+        x=df_lcoe['year'],
+        y=df_lcoe['ncc_h2_usd_per_ton'],
+        mode='lines+markers',
+        name='H2-cracker',
+        line=dict(width=3, color='#3498DB'),
+        marker=dict(size=6)
+    ))
+
+    fig_lcoe.update_layout(
+        xaxis_title="Year",
+        yaxis_title="LCOE ($/ton ethylene)",
+        height=400,
+        hovermode='x unified'
+    )
+
+    st.plotly_chart(fig_lcoe, use_container_width=True)
+
+    st.markdown('<div class="info-box">', unsafe_allow_html=True)
+    st.markdown("""
+    **LCOE Data Source:** Woo et al. (2025), Green Chemistry, DOI:10.1039/D4GC04538F
+
+    **Key Finding:** E-cracker is already cost-competitive with baseline in 2025!
+    - Baseline: $746/ton
+    - E-cracker (grid): $743/ton
+    - By 2050, both E-cracker and H2-cracker become significantly cheaper due to renewable energy cost reductions.
+    """)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Summary of Key Assumptions
+    st.markdown("---")
+    st.markdown("### 📋 Summary of Key Assumptions")
+
+    assumptions = {
+        'Category': [
+            'Discount Rate',
+            'Project Lifetime',
+            'Naphtha Price',
+            'Grid Decarbonization',
+            'H2 Price Decline',
+            'RE Price Decline',
+            'Technology Availability',
+            'Facility Lifetime'
+        ],
+        'Assumption': [
+            '8% (industry standard)',
+            '20-25 years (technology dependent)',
+            'Constant $15/GJ (2025-2050)',
+            '0.75 → 0.25 kgCO2/kWh (-67%)',
+            '$6/kg → $1.2/kg (-80%)',
+            '$58/MWh → $32/MWh (-45%)',
+            'Heat Pump/RE PPA: 2025+, NCC: 2026+',
+            'All facilities operate until 2050'
+        ],
+        'Source': [
+            'McKinsey, IEA',
+            'Industry reports',
+            'Conservative assumption',
+            'Korea 10th Basic Plan',
+            'IEA Net Zero 2050',
+            'IRENA, IEA',
+            'Technology readiness',
+            'BAU assumption'
+        ]
+    }
+
+    df_assumptions = pd.DataFrame(assumptions)
+    st.dataframe(df_assumptions, use_container_width=True, hide_index=True)
+
 def show_about():
     """About page"""
     st.markdown('<div class="sub-header">About This Model</div>', unsafe_allow_html=True)
