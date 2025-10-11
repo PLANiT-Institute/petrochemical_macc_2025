@@ -409,13 +409,20 @@ def show_macc(data):
     # Key insights box
     st.markdown('<div class="info-box">', unsafe_allow_html=True)
     negative_cost_techs = df_year[df_year['total_cost_usd_per_tco2'] < 0]['technology'].tolist()
-    total_abatement = df_year['abatement_potential_mtco2'].sum()
+
+    # Calculate realistic maximum abatement
+    # NCC technologies are mutually exclusive - only one can be chosen per facility
+    ncc_abatement = df_year[df_year['technology'].str.contains('NCC')]['abatement_potential_mtco2'].max()
+    other_abatement = df_year[~df_year['technology'].str.contains('NCC')]['abatement_potential_mtco2'].sum()
+    realistic_max = ncc_abatement + other_abatement
 
     st.markdown(f"""
     **MACC Interpretation ({year}):**
-    - **Total Abatement Potential**: {total_abatement:.1f} MtCO2/year
+    - **Maximum Realistic Abatement**: {realistic_max:.1f} MtCO2/year
+      - NCC Technologies (choose one): {ncc_abatement:.1f} MtCO2
+      - Other Technologies: {other_abatement:.1f} MtCO2
     - **Cost-Saving Technologies**: {', '.join([tech_labels.get(t, t) for t in negative_cost_techs]) if negative_cost_techs else 'None'}
-    - **Interpretation**: Technologies below the zero line save money while reducing emissions
+    - **⚠️ Note**: NCC-H2 and NCC-Electricity are **mutually exclusive** - same facilities, different technologies
     """)
     st.markdown('</div>', unsafe_allow_html=True)
 

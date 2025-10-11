@@ -98,17 +98,25 @@ class MACCAnalyzer:
         tech_costs = self.tech_cost_calc.get_technology_costs('Heat_Pump', year)
 
         # Abatement potential
+        # Heat pumps can replace ALL fossil fuel combustion (naphtha, LNG, fuel gas, etc)
+        # NOT electricity emissions (those are grid-based)
         potential_mt = 0
         for _, row in self.df_hp_applicability.iterrows():
             product_group = row['product_group']
             applicability = row['applicability_pct'] / 100
 
-            # Get emissions for this product group
-            group_emissions = self.df_baseline[
-                self.df_baseline['product_group'] == product_group
-            ]['emissions_naphtha_kt'].sum() / 1000  # MtCO2
+            # Get ALL fossil fuel combustion emissions for this product group
+            df_group = self.df_baseline[self.df_baseline['product_group'] == product_group]
+            fossil_emissions = (
+                df_group['emissions_naphtha_kt'].sum() +
+                df_group['emissions_lng_kt'].sum() +
+                df_group['emissions_fuel_gas_kt'].sum() +
+                df_group['emissions_lpg_kt'].sum() +
+                df_group['emissions_fuel_oil_kt'].sum() +
+                df_group['emissions_diesel_kt'].sum()
+            ) / 1000  # MtCO2
 
-            potential_mt += group_emissions * applicability
+            potential_mt += fossil_emissions * applicability
 
         # Costs
         capex_musd_per_mtco2 = tech_costs['capex_musd_per_mtco2']
@@ -152,6 +160,9 @@ class MACCAnalyzer:
         tech_costs = self.tech_cost_calc.get_technology_costs('NCC-H2', year)
 
         # Abatement potential (NCC emissions only)
+        # NOTE: This represents the MAXIMUM potential if ALL naphtha crackers adopt H2
+        # In reality, this is mutually exclusive with NCC-Electricity
+        # The optimizer will choose between H2 and Electricity based on cost
         ncc_emissions = self.df_baseline[
             self.df_baseline['product'].apply(is_ncc_facility)
         ]['emissions_naphtha_kt'].sum() / 1000  # MtCO2
