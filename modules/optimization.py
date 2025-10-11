@@ -94,9 +94,21 @@ class CostOptimizer:
             return self._optimize_carbon_budget(scenario_name, scenario_config['budget'])
 
     def _optimize_annual_path(self, scenario_name, emission_path):
-        """Optimize with annual emission targets"""
+        """Optimize with annual emission targets
+
+        KEY CONSTRAINT: Technology irreversibility
+        - Once a technology is deployed, it cannot be reversed
+        - Each year's deployment must be >= previous year's deployment
+        - This prevents the emission trajectory from oscillating
+        """
         years = range(2025, 2051)
         deployment = []
+
+        # Track cumulative investment
+        cumulative_capex_musd = 0
+
+        # Track deployed capacity (irreversible - can only increase)
+        deployed_capacity = {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0}
 
         for year in years:
             bau = self.df_bau[self.df_bau['year'] == year]['total_emissions_mt'].iloc[0]
@@ -109,15 +121,28 @@ class CostOptimizer:
             ].sort_values('total_cost_usd_per_tco2')
 
             # Deploy technologies in cost order
-            deployed = {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0}
-            remaining = required
+            # NEW: Start from previous year's deployment (irreversibility)
+            deployed = deployed_capacity.copy()
+            remaining = max(0, required - sum(deployed.values()))
 
             for _, tech in tech_year.iterrows():
                 if remaining <= 0:
                     break
-                deploy = min(remaining, tech['abatement_potential_mtco2'])
-                deployed[tech['technology']] += deploy
-                remaining -= deploy
+                # Can only ADD capacity, not remove
+                additional_deploy = min(remaining, tech['abatement_potential_mtco2'] - deployed[tech['technology']])
+                if additional_deploy > 0:
+                    # Calculate CAPEX for NEW deployment only
+                    capex_per_tco2 = tech['capex_ann_usd_per_tco2']  # Annualized CAPEX
+                    # Convert to total CAPEX: multiply by lifetime (assume 20 years)
+                    lifetime = 20
+                    total_capex_usd = additional_deploy * 1e6 * capex_per_tco2 * lifetime  # MtCO2 * tCO2/Mt * USD/tCO2 * years
+                    cumulative_capex_musd += total_capex_usd / 1e6  # Convert to million USD
+
+                    deployed[tech['technology']] += additional_deploy
+                    remaining -= additional_deploy
+
+            # Update capacity tracker for next year
+            deployed_capacity = deployed.copy()
 
             # Calculate H2 consumption for NCC-H2 deployment
             # Conversion: ~0.56 kg H2 per tCO2 abated (from 1 GJ naphtha = 67 GJ/tCO2 = 0.56 kg H2 at 120 MJ/kg H2)
@@ -157,6 +182,7 @@ class CostOptimizer:
                 'total_deployed_mt': sum(deployed.values()),
                 'actual_emissions_mt': bau - sum(deployed.values()),
                 'shortfall_mt': max(0, bau - sum(deployed.values()) - target),
+                'cumulative_capex_musd': cumulative_capex_musd,
             })
 
         return pd.DataFrame(deployment)
@@ -167,6 +193,7 @@ class CostOptimizer:
         This uses a simple greedy approach:
         1. Deploy cheapest technologies first across all years
         2. Continue until cumulative emissions = budget
+        3. Technology irreversibility: once deployed, cannot be reversed
         """
         years = range(2025, 2051)
         print(f"   Total carbon budget: {total_budget:.0f} MtCO2 (2025-2050)")
@@ -189,33 +216,52 @@ class CostOptimizer:
                     'technology': tech['technology'],
                     'cost': tech['total_cost_usd_per_tco2'],
                     'potential': tech['abatement_potential_mtco2'],
+                    'capex_ann_usd_per_tco2': tech['capex_ann_usd_per_tco2'],
                 })
 
         # Sort by cost
         tech_options_df = pd.DataFrame(tech_options).sort_values('cost')
 
         # Deploy technologies until budget constraint met
+        # NEW: Track deployed capacity (irreversible)
+        deployed_capacity = {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0}
         deployment_dict = {year: {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0}
                           for year in years}
 
         cumulative = 0
         bau_cumulative_so_far = 0
+        cumulative_capex_musd = 0
 
         for year in years:
             bau = self.df_bau[self.df_bau['year'] == year]['total_emissions_mt'].iloc[0]
             bau_cumulative_so_far += bau
 
+            # Start from previous year's deployment (irreversibility)
+            deployment_dict[year] = deployed_capacity.copy()
+
             # How much room left in budget?
             budget_remaining = total_budget - cumulative
-            required_this_year = bau - budget_remaining / (2051 - year)  # Spread remaining budget
+            required_this_year = max(0, bau - sum(deployment_dict[year].values()))
 
             # Deploy technologies for this year
             for _, tech in tech_options_df[tech_options_df['year'] == year].iterrows():
                 if cumulative >= total_budget:
                     break
-                deploy = min(tech['potential'], bau - sum(deployment_dict[year].values()))
-                if deploy > 0:
-                    deployment_dict[year][tech['technology']] += deploy
+                # Can only ADD capacity
+                current_deploy = deployment_dict[year][tech['technology']]
+                max_additional = min(tech['potential'] - current_deploy, required_this_year)
+
+                if max_additional > 0:
+                    # Calculate CAPEX for new deployment
+                    lifetime = 20
+                    total_capex_usd = max_additional * 1e6 * tech['capex_ann_usd_per_tco2'] * lifetime
+                    cumulative_capex_musd += total_capex_usd / 1e6
+
+                    deployment_dict[year][tech['technology']] += max_additional
+                    required_this_year -= max_additional
+
+            # Update capacity tracker for next year
+            deployed_capacity = deployment_dict[year].copy()
 
             actual_emission = bau - sum(deployment_dict[year].values())
             cumulative += actual_emission
@@ -223,10 +269,24 @@ class CostOptimizer:
         # Convert to dataframe
         deployment = []
         cumulative = 0
+        cumulative_capex_calc = 0  # Recalculate for consistency
+        prev_deployment = {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0}
+
         for year in years:
             bau = self.df_bau[self.df_bau['year'] == year]['total_emissions_mt'].iloc[0]
             actual = bau - sum(deployment_dict[year].values())
             cumulative += actual
+
+            # Calculate CAPEX for new deployment this year
+            tech_year = self.df_macc[(self.df_macc['year'] == year) & (self.df_macc['available'] == True)]
+            for tech_name in ['Heat_Pump', 'NCC-H2', 'NCC-Electricity', 'RE_PPA']:
+                new_capacity = deployment_dict[year][tech_name] - prev_deployment[tech_name]
+                if new_capacity > 0:
+                    tech_data = tech_year[tech_year['technology'] == tech_name]
+                    if not tech_data.empty:
+                        capex_ann = tech_data.iloc[0]['capex_ann_usd_per_tco2']
+                        lifetime = 20
+                        cumulative_capex_calc += new_capacity * 1e6 * capex_ann * lifetime / 1e6
 
             # Calculate H2 consumption
             kg_h2_per_tco2 = (1 / 0.0149) / 120 * 1000
@@ -254,7 +314,10 @@ class CostOptimizer:
                 'actual_emissions_mt': actual,
                 'cumulative_emissions_mt': cumulative,
                 'budget_remaining_mt': total_budget - cumulative,
+                'cumulative_capex_musd': cumulative_capex_calc,
             })
+
+            prev_deployment = deployment_dict[year].copy()
 
         print(f"   Final cumulative: {cumulative:.0f} MtCO2")
         print(f"   Budget compliance: {(cumulative/total_budget)*100:.1f}%")

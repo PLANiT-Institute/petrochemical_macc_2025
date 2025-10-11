@@ -170,6 +170,105 @@ class ReportGenerator:
         pdf.savefig(fig, bbox_inches='tight')
         plt.close()
 
+    def create_energy_investment_summary(self, pdf):
+        """Create energy and investment analysis page"""
+        fig, axes = plt.subplots(2, 2, figsize=(11, 8.5))
+        fig.suptitle('Energy Demand & Investment Analysis', fontsize=16, fontweight='bold', y=0.98)
+
+        # 1. Hydrogen Consumption by Scenario
+        ax = axes[0, 0]
+        for scenario_name, df, color in [
+            ('Conservative', self.conservative, '#3498DB'),
+            ('Moderate', self.moderate, '#F39C12'),
+            ('Aggressive', self.aggressive, '#E74C3C')
+        ]:
+            ax.plot(df['year'], df['h2_consumption_kt'],
+                   label=scenario_name, color=color, linewidth=2, marker='o', markersize=4)
+
+        ax.set_xlabel('Year', fontweight='bold')
+        ax.set_ylabel('H2 Consumption (kt/year)', fontweight='bold')
+        ax.set_title('Hydrogen Demand Trajectory')
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+
+        # 2. Electricity Consumption Increase by Scenario
+        ax = axes[0, 1]
+        for scenario_name, df, color in [
+            ('Conservative', self.conservative, '#3498DB'),
+            ('Moderate', self.moderate, '#F39C12'),
+            ('Aggressive', self.aggressive, '#E74C3C')
+        ]:
+            ax.plot(df['year'], df['electricity_consumption_increase_twh'],
+                   label=scenario_name, color=color, linewidth=2, marker='s', markersize=4)
+
+        ax.set_xlabel('Year', fontweight='bold')
+        ax.set_ylabel('Electricity Increase (TWh/year)', fontweight='bold')
+        ax.set_title('Additional Electricity Demand')
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+
+        # Add reference line for Korea total electricity
+        korea_total = 550  # TWh/year
+        ax.axhline(y=korea_total * 0.05, color='red', linestyle='--',
+                  linewidth=1, alpha=0.5, label='5% of Korea total')
+
+        # 3. Cumulative CAPEX by Scenario
+        ax = axes[1, 0]
+        for scenario_name, df, color in [
+            ('Conservative', self.conservative, '#3498DB'),
+            ('Moderate', self.moderate, '#F39C12'),
+            ('Aggressive', self.aggressive, '#E74C3C')
+        ]:
+            ax.plot(df['year'], df['cumulative_capex_musd'] / 1000,
+                   label=scenario_name, color=color, linewidth=2.5)
+            ax.fill_between(df['year'], 0, df['cumulative_capex_musd'] / 1000,
+                           color=color, alpha=0.2)
+
+        ax.set_xlabel('Year', fontweight='bold')
+        ax.set_ylabel('Cumulative Investment (Billion USD)', fontweight='bold')
+        ax.set_title('Total CAPEX Requirements')
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+
+        # 4. Investment vs Abatement (2050)
+        ax = axes[1, 1]
+        scenarios = ['Conservative', 'Moderate', 'Aggressive']
+        investments = []
+        abatements = []
+        colors_bar = ['#3498DB', '#F39C12', '#E74C3C']
+
+        for df in [self.conservative, self.moderate, self.aggressive]:
+            capex_2050 = df[df['year'] == 2050]['cumulative_capex_musd'].iloc[0] / 1000  # Billion USD
+            abatement_2050 = df[df['year'] == 2050]['total_deployed_mt'].iloc[0]
+            investments.append(capex_2050)
+            abatements.append(abatement_2050)
+
+        x = np.arange(len(scenarios))
+        width = 0.35
+
+        ax2 = ax.twinx()
+        bars1 = ax.bar(x - width/2, investments, width, label='CAPEX (B USD)',
+                      color=colors_bar, alpha=0.7)
+        bars2 = ax2.bar(x + width/2, abatements, width, label='Abatement (MtCO2)',
+                       color='green', alpha=0.5)
+
+        ax.set_xlabel('Scenario', fontweight='bold')
+        ax.set_ylabel('Investment (Billion USD)', fontweight='bold', color='black')
+        ax2.set_ylabel('Abatement (MtCO2/year)', fontweight='bold', color='green')
+        ax.set_title('Investment vs Abatement (2050)')
+        ax.set_xticks(x)
+        ax.set_xticklabels(scenarios)
+        ax.grid(True, alpha=0.3, axis='y')
+
+        # Combine legends
+        lines1, labels1 = ax.get_legend_handles_labels()
+        lines2, labels2 = ax2.get_legend_handles_labels()
+        ax.legend(lines1 + lines2, labels1 + labels2, loc='upper left')
+
+        plt.tight_layout()
+        pdf.savefig(fig, bbox_inches='tight')
+        plt.close()
+
     def create_detailed_results(self, pdf):
         """Create detailed results pages"""
         # Page 1: MACC Evolution
@@ -341,6 +440,9 @@ class ReportGenerator:
 
             print("Creating executive summary...")
             self.create_executive_summary(pdf)
+
+            print("Creating energy & investment analysis...")
+            self.create_energy_investment_summary(pdf)
 
             print("Creating detailed results...")
             self.create_detailed_results(pdf)

@@ -847,8 +847,98 @@ def show_scenarios(data):
     # Format scenario names for display
     display_names = {k: k.replace('_', ' ').title() for k in scenario_names}
 
-    selected_display = st.sidebar.selectbox(
-        "Select Scenario:",
+    # Multi-Scenario Comparison Section (NEW)
+    st.markdown("### 📊 All Scenarios Comparison")
+    st.markdown('<div class="info-box">', unsafe_allow_html=True)
+    st.markdown("""
+    **Comparing all emission reduction pathways:**
+    - **Conservative**: Gradual transition (62% reduction by 2050)
+    - **Moderate**: Balanced approach (81% reduction by 2050)
+    - **Aggressive**: Rapid decarbonization (90% reduction by 2050)
+    """)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Emission Trajectories Comparison
+    fig_compare = go.Figure()
+
+    # Add BAU
+    if 'bau_trajectory' in data:
+        fig_compare.add_trace(go.Scatter(
+            x=data['bau_trajectory']['year'],
+            y=data['bau_trajectory']['total_emissions_mt'],
+            mode='lines',
+            name='BAU (No Action)',
+            line=dict(width=2, dash='dash', color='gray')
+        ))
+
+    # Add all scenarios
+    scenario_colors = {
+        'Conservative': '#3498DB',  # Blue
+        'Moderate': '#F39C12',      # Orange
+        'Aggressive': '#E74C3C'     # Red
+    }
+
+    for scenario_name, df_sc in data['scenarios'].items():
+        display_name = display_names[scenario_name]
+        color = scenario_colors.get(display_name, '#2ECC71')
+        fig_compare.add_trace(go.Scatter(
+            x=df_sc['year'],
+            y=df_sc['actual_emissions_mt'],
+            mode='lines+markers',
+            name=display_name,
+            line=dict(width=3, color=color),
+            marker=dict(size=5)
+        ))
+
+    fig_compare.update_layout(
+        title="Annual Emissions by Scenario",
+        xaxis_title="Year",
+        yaxis_title="Emissions (MtCO2/year)",
+        height=450,
+        hovermode='x unified',
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+
+    st.plotly_chart(fig_compare, use_container_width=True)
+
+    # Key Metrics Comparison Table
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("#### 📉 Emission Reductions")
+        comparison_emissions = []
+        for scenario_name, df_sc in data['scenarios'].items():
+            emissions_2030 = df_sc[df_sc['year'] == 2030]['actual_emissions_mt'].iloc[0]
+            emissions_2050 = df_sc[df_sc['year'] == 2050]['actual_emissions_mt'].iloc[0]
+            comparison_emissions.append({
+                'Scenario': display_names[scenario_name],
+                '2030 (Mt)': f"{emissions_2030:.1f}",
+                '2050 (Mt)': f"{emissions_2050:.1f}",
+                'Reduction (%)': f"{((52 - emissions_2050) / 52) * 100:.1f}%"
+            })
+        st.dataframe(pd.DataFrame(comparison_emissions), use_container_width=True, hide_index=True)
+
+    with col2:
+        st.markdown("#### 💰 Investment Requirements")
+        comparison_capex = []
+        for scenario_name, df_sc in data['scenarios'].items():
+            if 'cumulative_capex_musd' in df_sc.columns:
+                capex_2050 = df_sc[df_sc['year'] == 2050]['cumulative_capex_musd'].iloc[0]
+                comparison_capex.append({
+                    'Scenario': display_names[scenario_name],
+                    'CAPEX (B USD)': f"${capex_2050/1000:.2f}",
+                    'per tCO2': f"${(capex_2050 * 1e6) / (df_sc[df_sc['year'] == 2050]['total_deployed_mt'].iloc[0] * 1e6):.2f}"
+                })
+        if comparison_capex:
+            st.dataframe(pd.DataFrame(comparison_capex), use_container_width=True, hide_index=True)
+
+    st.markdown("---")
+
+    # Individual Scenario Selection
+    st.markdown("### 🎯 Detailed Scenario Analysis")
+
+    selected_display = st.selectbox(
+        "Select Scenario for Detailed View:",
         list(display_names.values())
     )
 
@@ -1081,6 +1171,54 @@ def show_scenarios(data):
         - **Heat Pump**: Replaces naphtha combustion with electric heat pump (COP=4)
         - **NCC-Electricity**: Electric steam cracker replaces naphtha-fired cracker
         - **RE PPA**: No additional consumption, just switches electricity source
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # Cumulative Investment (CAPEX)
+    if 'cumulative_capex_musd' in df_scenario.columns:
+        st.markdown("---")
+        st.markdown("### 💰 Cumulative Investment (CAPEX)")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            capex_2050 = df_scenario[df_scenario['year'] == 2050]['cumulative_capex_musd'].iloc[0]
+            st.metric("Total Investment by 2050", f"${capex_2050:,.0f} Million USD")
+            st.metric("", f"${capex_2050/1000:.2f} Billion USD")
+
+            # Per ton CO2 abated
+            total_abatement = df_scenario[df_scenario['year'] == 2050]['total_deployed_mt'].iloc[0]
+            if total_abatement > 0:
+                capex_per_tco2 = (capex_2050 * 1e6) / (total_abatement * 1e6)  # USD per tCO2
+                st.caption(f"Investment intensity: ${capex_per_tco2:.2f}/tCO2 abated")
+
+        with col2:
+            fig_capex = go.Figure()
+            fig_capex.add_trace(go.Scatter(
+                x=df_scenario['year'],
+                y=df_scenario['cumulative_capex_musd'] / 1000,  # Convert to billion USD
+                mode='lines+markers',
+                name='Cumulative CAPEX',
+                line=dict(width=3, color='darkgreen'),
+                marker=dict(size=6),
+                fill='tozeroy',
+                fillcolor='rgba(0, 128, 0, 0.2)'
+            ))
+            fig_capex.update_layout(
+                xaxis_title="Year",
+                yaxis_title="Cumulative Investment (Billion USD)",
+                height=300,
+                showlegend=False
+            )
+            st.plotly_chart(fig_capex, use_container_width=True)
+
+        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+        st.markdown("""
+        **Investment Calculation:**
+        - **CAPEX**: Total upfront capital cost for technology deployment
+        - **Lifetime**: 20 years assumed for all technologies
+        - **Irreversibility**: Once installed, technology cannot be reversed (increasing trajectory)
+        - **Note**: This does NOT include OPEX (operational costs) or fuel savings
         """)
         st.markdown('</div>', unsafe_allow_html=True)
 
