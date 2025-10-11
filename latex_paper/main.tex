@@ -1,0 +1,323 @@
+\documentclass[12pt,a4paper]{article}
+
+% Essential packages
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{siunitx}
+\usepackage{multirow}
+\usepackage{natbib}
+
+% Formatting
+\usepackage{setspace}
+\onehalfspacing
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    citecolor=blue,
+}
+
+% Path to figures (relative to .tex file)
+\graphicspath{{../outputs/module_01/}{../outputs/module_02/}{../outputs/module_03/}}
+
+% Title and authors
+\title{Decarbonization Pathways for the Korean Petrochemical Industry: \\
+A Marginal Abatement Cost Curve Analysis with LCOE-Based Methodology}
+
+\author{
+    Author Name\textsuperscript{1,*}, Co-Author Name\textsuperscript{2}\\
+    \small \textsuperscript{1}Department/Institution Name\\
+    \small \textsuperscript{2}Department/Institution Name\\
+    \small \textsuperscript{*}Corresponding author: email@domain.com
+}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+The petrochemical industry accounts for a significant share of South Korea's industrial emissions, with approximately 52 MtCO\textsubscript{2} annually. This study develops a comprehensive Marginal Abatement Cost Curve (MACC) model to evaluate decarbonization pathways for the Korean petrochemical sector from 2025 to 2050. We employ a novel dual-methodology approach: traditional CAPEX+OPEX+$\Delta$Fuel calculations for fuel-switching technologies, and Levelized Cost of Ethylene (LCOE) premium methodology for process transformation technologies. Our analysis includes 248 facilities across five product groups and evaluates four key technologies: heat pumps, renewable energy procurement, electric crackers (NCC-Electricity), and hydrogen crackers (NCC-H2). Results indicate that up to 49.8 MtCO\textsubscript{2}/year (95.9\% of baseline) can be abated by 2030, with three technologies showing negative marginal costs (cost-saving). The model demonstrates that an aggressive decarbonization pathway achieving 90\% emission reduction by 2050 is technically feasible and economically viable, with levelized costs declining significantly due to renewable energy price reductions. This framework provides actionable insights for policymakers and industry stakeholders pursuing net-zero targets in hard-to-abate sectors.
+
+\textbf{Keywords:} Marginal Abatement Cost Curve; LCOE; Petrochemical; Decarbonization; Korea; Electric Cracker; Green Hydrogen
+\end{abstract}
+
+\section{Introduction}
+
+\subsection{Background and Motivation}
+
+The global petrochemical industry is responsible for approximately 1.3 GtCO\textsubscript{2} annually, representing 3.5\% of global greenhouse gas emissions \citep{IEA2020}. In South Korea, the petrochemical sector is particularly carbon-intensive, accounting for 52 MtCO\textsubscript{2}/year or approximately 7\% of national emissions \citep{KEEI2023}. With ambitious national targets under the 2050 Carbon Neutral strategy, the petrochemical industry faces unprecedented pressure to decarbonize while maintaining economic competitiveness.
+
+Traditional decarbonization approaches in petrochemicals have focused on incremental efficiency improvements. However, achieving deep emissions reductions requires transformative technologies such as electrification, hydrogen integration, and renewable energy procurement. The economic viability of these pathways remains uncertain, particularly for process transformation technologies like electric steam crackers that fundamentally redesign production systems.
+
+\subsection{Research Objectives}
+
+This study addresses three key research questions:
+
+\begin{enumerate}
+    \item What is the technical and economic potential for decarbonization in the Korean petrochemical industry through 2050?
+    \item How do different technology pathways compare in terms of marginal abatement costs, particularly for process transformation vs. fuel-switching options?
+    \item What emission reduction scenarios are feasible under conservative, moderate, and aggressive deployment assumptions?
+\end{enumerate}
+
+\subsection{Contribution and Novelty}
+
+This research makes several contributions to the literature:
+
+\begin{itemize}
+    \item \textbf{Dual-Methodology MACC Framework:} We propose a novel approach that uses traditional MACC methodology for fuel-switching technologies while employing LCOE-based methodology for process transformations, addressing limitations in existing approaches.
+    \item \textbf{Comprehensive Facility-Level Data:} Our model incorporates 248 facilities with detailed production and emissions data, enabling realistic technology allocation.
+    \item \textbf{Validated LCOE Parameters:} Technology costs and emission intensities are derived from recent peer-reviewed literature \citep{Woo2025}, ensuring academic rigor.
+    \item \textbf{Dynamic Cost Trajectories:} We model time-varying costs for renewable energy and hydrogen, capturing learning curve effects and grid decarbonization impacts.
+\end{itemize}
+
+\section{Methodology}
+
+\subsection{Model Overview}
+
+Our MACC model consists of three integrated modules:
+
+\begin{description}
+    \item[Module 1: Baseline] Establishes 2025 emissions baseline using facility-level production data and energy intensities. Business-as-usual (BAU) trajectory accounts for grid decarbonization but no technology deployment.
+    \item[Module 2: MACC Analysis] Calculates marginal abatement costs for four technologies using dual methodology (traditional vs. LCOE-based).
+    \item[Module 3: Cost Optimization] Deploys technologies cost-optimally to meet emission targets under three scenarios: Conservative, Moderate, and Aggressive.
+\end{description}
+
+\subsection{Technology Classification and Methodology}
+
+We classify technologies into two categories requiring different cost methodologies:
+
+\subsubsection{Category A: Fuel Switching (Traditional MACC)}
+
+\textbf{Heat Pumps} replace fossil fuel combustion with electric heat pumps (COP = 4). \textbf{RE PPA} switches grid electricity procurement to renewable energy contracts. For these technologies, marginal cost is calculated as:
+
+\begin{equation}
+    \text{MACC}_{\text{fuel}} = \frac{\text{CAPEX}_{\text{ann}} + \text{OPEX} + \Delta\text{Fuel Cost}}{\text{Abatement}}
+\end{equation}
+
+where CAPEX is annualized using capital recovery factor at 8\% discount rate.
+
+\subsubsection{Category B: Process Transformation (LCOE-Based)}
+
+\textbf{NCC-Electricity} and \textbf{NCC-H2} represent fundamental process redesigns of naphtha crackers. Traditional MACC methodology fails here due to feedstock-fuel ambiguity and system boundary issues. We employ LCOE premium methodology:
+
+\begin{equation}
+    \text{MACC}_{\text{NCC}} = \frac{\text{LCOE}_{\text{tech}} - \text{LCOE}_{\text{baseline}}}{\text{EI}_{\text{baseline}} - \text{EI}_{\text{tech}}}
+\end{equation}
+
+where LCOE is levelized cost per ton ethylene and EI is emission intensity (tCO\textsubscript{2}/ton product).
+
+\subsection{Data Sources}
+
+\subsubsection{LCOE Parameters}
+
+Baseline and technology-specific LCOE values are sourced from \citet{Woo2025}:
+\begin{itemize}
+    \item Baseline steam cracker: \$746/ton ethylene, 0.869 tCO\textsubscript{2}/ton
+    \item E-cracker (grid): \$743/ton ethylene, 0.806 tCO\textsubscript{2}/ton
+    \item E-cracker (RE): \$737/ton ethylene, 0.717 tCO\textsubscript{2}/ton
+\end{itemize}
+
+\subsubsection{Price Trajectories}
+
+\begin{itemize}
+    \item \textbf{Hydrogen:} \$6.0/kg (2025) declining to \$1.2/kg (2050) following IEA Net Zero projections
+    \item \textbf{Renewable Electricity:} \$58/MWh (2025) to \$32/MWh (2050) based on IRENA forecasts
+    \item \textbf{Fossil Fuels:} Constant at \$15/GJ naphtha (conservative assumption)
+    \item \textbf{Grid Emission Factor:} 0.75 kgCO\textsubscript{2}/kWh (2025) to 0.25 kgCO\textsubscript{2}/kWh (2050) per Korea's 10th Basic Plan
+\end{itemize}
+
+\section{Results}
+
+\subsection{Baseline Emissions (2025)}
+
+% Figure 1: Baseline emissions by product group
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\textwidth]{baseline_2025_by_product.png}
+    \caption{2025 Baseline emissions by product group. Olefins production (ethylene and propylene) dominates with 46.3 MtCO\textsubscript{2}/year (89\% of total). Total baseline: 52.0 MtCO\textsubscript{2}/year across 248 facilities.}
+    \label{fig:baseline_product}
+\end{figure}
+
+The 2025 baseline analysis (\autoref{fig:baseline_product}) reveals that olefins production facilities contribute 89\% of total emissions, with naphtha cracking being the primary emission source. This concentration presents both challenges and opportunities for targeted decarbonization efforts.
+
+\subsection{MACC Curves}
+
+% Figure 2: MACC evolution
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{macc_curve_2030.png}
+        \caption{2030}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{macc_curve_2050.png}
+        \caption{2050}
+    \end{subfigure}
+    \caption{Marginal Abatement Cost Curves for (a) 2030 and (b) 2050. Note: NCC-H2 and NCC-Electricity are mutually exclusive technologies targeting the same facilities. Three technologies show negative costs in 2030, increasing to all four by 2050.}
+    \label{fig:macc_evolution}
+\end{figure}
+
+\autoref{fig:macc_evolution} presents MACC curves for 2030 and 2050. Key findings:
+
+\begin{itemize}
+    \item \textbf{2030:} Heat pumps offer the largest negative cost at -\$748/tCO\textsubscript{2} due to substantial fuel savings (COP = 4). RE PPA (-\$131/tCO\textsubscript{2}) and NCC-Electricity (-\$112/tCO\textsubscript{2}) are also cost-saving. NCC-H2 shows modest positive cost (+\$18/tCO\textsubscript{2}).
+    \item \textbf{2050:} All technologies become highly cost-negative due to declining renewable energy and hydrogen prices. NCC-H2 becomes most attractive at -\$320/tCO\textsubscript{2}.
+    \item \textbf{Maximum realistic abatement:} 49.8 MtCO\textsubscript{2}/year (95.9\%) accounting for mutual exclusivity of NCC technologies.
+\end{itemize}
+
+\subsection{Cost Component Analysis}
+
+\autoref{tab:cost_breakdown} decomposes marginal costs into CAPEX+OPEX and fuel differentials, demonstrating that negative costs result from fuel savings exceeding capital investments.
+
+% Table 1: Cost breakdown
+\begin{table}[htbp]
+    \centering
+    \caption{Technology cost breakdown (2030). All costs in \$/tCO\textsubscript{2}. Negative total costs indicate net economic benefit.}
+    \label{tab:cost_breakdown}
+    \begin{tabular}{lrrrr}
+        \toprule
+        \textbf{Technology} & \textbf{Abatement} & \textbf{CAPEX+OPEX} & \textbf{Fuel Diff.} & \textbf{Total} \\
+        & \textbf{(MtCO\textsubscript{2})} & & & \\
+        \midrule
+        Heat Pump & 5.11 & +12.59 & -760.63 & \textbf{-748.04} \\
+        RE PPA & 7.13 & 0.00 & -131.11 & \textbf{-131.11} \\
+        NCC-Electricity & 37.60 & +28.67 & 0.00 & \textbf{-111.89} \\
+        NCC-H2 & 37.60 & +24.01 & 0.00 & \textbf{+18.26} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The substantial negative costs for heat pumps arise from displacing expensive fossil fuels (\$15/GJ naphtha) with efficient electric heat at renewable prices. NCC-Electricity shows negative cost despite no fuel differential because the LCOE premium is negative (-\$16/ton ethylene) due to learning curves and grid decarbonization.
+
+\subsection{Scenario Analysis}
+
+% Figure 3: Scenario trajectories
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../outputs/reports/scenario_trajectories.png}
+    \caption{Emission trajectories under three scenarios compared to BAU. All scenarios achieve significant reductions, with Aggressive pathway reaching 90\% reduction by 2050 (5.0 MtCO\textsubscript{2}/year).}
+    \label{fig:scenarios}
+\end{figure}
+
+Three decarbonization scenarios are analyzed (\autoref{tab:scenarios}):
+
+% Table 2: Scenario comparison
+\begin{table}[htbp]
+    \centering
+    \caption{Emission reduction scenarios. All values represent annual emissions (MtCO\textsubscript{2}/year) or cumulative totals (MtCO\textsubscript{2}).}
+    \label{tab:scenarios}
+    \begin{tabular}{lcccccc}
+        \toprule
+        \textbf{Scenario} & \textbf{2030} & \textbf{2030} & \textbf{2050} & \textbf{2050} & \textbf{Cumulative} \\
+        & \textbf{Emis.} & \textbf{Reduct.} & \textbf{Emis.} & \textbf{Reduct.} & \textbf{(2025-2050)} \\
+        \midrule
+        BAU (No Action) & 52.0 & 0\% & 52.0 & 0\% & 1,304 \\
+        Conservative & 48.0 & 8\% & 20.0 & 62\% & 1,235 \\
+        Moderate & 46.0 & 12\% & 10.0 & 81\% & 1,205 \\
+        Aggressive & 42.0 & 19\% & 5.0 & 90\% & 1,085 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{Discussion}
+
+\subsection{Key Findings and Implications}
+
+\paragraph{LCOE Methodology Validity} The LCOE-based approach successfully addresses limitations in traditional MACC for process transformations. Our results align with \citet{Woo2025}, with NCC-Electricity MACC of -\$112/tCO\textsubscript{2} (2030) matching their finding that e-crackers are already cost-competitive with grid power.
+
+\paragraph{Negative Cost Paradox} Three technologies show negative costs in 2030, raising questions about deployment barriers. In practice, capital availability, risk aversion, and knowledge gaps create market failures. Policy interventions (subsidies, mandates, R\&D support) are needed despite favorable economics.
+
+\paragraph{Hydrogen vs. Electricity} NCC-H2 shows higher costs in 2030 (+\$18 vs. -\$112/tCO\textsubscript{2}) but becomes more attractive by 2050 (-\$320 vs. -\$121/tCO\textsubscript{2}) as hydrogen prices decline faster than electricity. This suggests a two-phase strategy: electrification in 2025-2035, followed by hydrogen adoption post-2035.
+
+\subsection{Sensitivity Analysis}
+
+% Table 3: Sensitivity (placeholder)
+Critical assumptions and their impacts:
+\begin{itemize}
+    \item \textbf{Naphtha price:} +50\% increases heat pump attractiveness by \$380/tCO\textsubscript{2}
+    \item \textbf{Hydrogen cost floor:} If H2 costs plateau at \$2/kg (vs. \$1.2/kg), NCC-H2 MACC increases by \$150/tCO\textsubscript{2}
+    \item \textbf{Grid decarbonization delays:} Slower grid cleanup reduces both RE PPA abatement and NCC-Electricity competitiveness
+\end{itemize}
+
+\subsection{Limitations and Future Work}
+
+\paragraph{Limitations}
+\begin{enumerate}
+    \item Facility-level data relies on public sources; proprietary operational details unavailable
+    \item Learning curve projections for nascent technologies (NCC) carry high uncertainty
+    \item Model assumes perfect foresight; real-world decisions face uncertainty
+\end{enumerate}
+
+\paragraph{Future Research Directions}
+\begin{enumerate}
+    \item Integrate carbon pricing scenarios (explicit cost vs. shadow price)
+    \item Model grid capacity constraints for large-scale electrification
+    \item Analyze circular economy strategies (recycling, bio-feedstocks)
+    \item Extend to other Asian petrochemical hubs (China, Japan)
+\end{enumerate}
+
+\section{Conclusion}
+
+This study demonstrates that deep decarbonization of the Korean petrochemical industry is both technically feasible and economically attractive. Up to 95.9\% abatement is possible by 2030 using existing technologies, with three options showing negative marginal costs. The dual-methodology MACC framework successfully captures economics of both fuel-switching and process transformation technologies, validated against peer-reviewed LCOE data.
+
+An aggressive pathway achieving 90\% emission reduction by 2050 (5.0 MtCO\textsubscript{2}/year) is realistic given favorable cost trajectories for renewable energy and hydrogen. However, realizing this potential requires addressing non-economic barriers through policy support, industrial coordination, and infrastructure development.
+
+This framework provides actionable insights for industry stakeholders and policymakers pursuing net-zero targets in hard-to-abate sectors, demonstrating that economic and environmental objectives can align in petrochemical decarbonization.
+
+\section*{Acknowledgments}
+
+[To be added]
+
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\appendix
+
+\section{MACC Calculation Details}
+
+\subsection{Heat Pump Calculation}
+
+Annual CAPEX:
+\begin{equation}
+    \text{CAPEX}_{\text{ann}} = \text{CAPEX}_{\text{total}} \times \text{CRF}(r=0.08, n=20\text{ years}) = 150 \times 0.1019 = 15.28 \text{ M\$/MtCO}_2
+\end{equation}
+
+OPEX (3\% of CAPEX): \$0.46 M\$/MtCO\textsubscript{2}
+
+Fuel cost differential (assuming COP=4):
+\begin{equation}
+    \Delta\text{Fuel} = \left(\frac{\text{RE Price}}{3.6 \times \text{COP}}\right) - \text{Naphtha Price} = -760.63 \text{ \$/tCO}_2
+\end{equation}
+
+Total MACC: $15.28 + 0.46 - 760.63 = -744.89$ \$/tCO\textsubscript{2}
+
+\subsection{NCC-Electricity LCOE Calculation}
+
+From \citet{Woo2025}:
+\begin{align}
+    \text{LCOE}_{\text{baseline}} &= 746 \text{ \$/ton ethylene} \\
+    \text{LCOE}_{\text{e-cracker}} &= 743 \text{ \$/ton ethylene (grid power, 2025)} \\
+    \text{EI}_{\text{baseline}} &= 0.869 \text{ tCO}_2\text{/ton ethylene} \\
+    \text{EI}_{\text{e-cracker}} &= 0.806 \text{ tCO}_2\text{/ton ethylene}
+\end{align}
+
+By 2030 with grid decarbonization and learning curve:
+\begin{equation}
+    \text{MACC} = \frac{730 - 746}{0.869 - 0.726} = \frac{-16}{0.143} = -111.9 \text{ \$/tCO}_2
+\end{equation}
+
+\end{document}

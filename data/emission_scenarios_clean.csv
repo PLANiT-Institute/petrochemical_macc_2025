@@ -1,0 +1,19 @@
+scenario_name,constraint_type,year,target_mt,description
+Conservative,annual_path,2025,52.00,Baseline year
+Conservative,annual_path,2030,48.00,8% reduction by 2030 (gradual approach)
+Conservative,annual_path,2035,44.00,15% reduction by 2035
+Conservative,annual_path,2040,38.00,27% reduction by 2040
+Conservative,annual_path,2045,30.00,42% reduction by 2045
+Conservative,annual_path,2050,20.00,62% reduction by 2050 (feasible long-term)
+Moderate,annual_path,2025,52.00,Baseline year
+Moderate,annual_path,2030,46.00,12% reduction by 2030 (balanced)
+Moderate,annual_path,2035,40.00,23% reduction by 2035
+Moderate,annual_path,2040,32.00,38% reduction by 2040
+Moderate,annual_path,2045,22.00,58% reduction by 2045
+Moderate,annual_path,2050,10.00,81% reduction by 2050 (ambitious but realistic)
+Aggressive,annual_path,2025,52.00,Baseline year
+Aggressive,annual_path,2030,42.00,19% reduction by 2030 (rapid transition)
+Aggressive,annual_path,2035,32.00,38% reduction by 2035
+Aggressive,annual_path,2040,22.00,58% reduction by 2040
+Aggressive,annual_path,2045,12.00,77% reduction by 2045
+Aggressive,annual_path,2050,5.00,90% reduction by 2050 (very ambitious)

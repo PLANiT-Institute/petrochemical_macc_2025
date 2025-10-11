@@ -18,7 +18,7 @@ class CostOptimizer:
     """
 
     def __init__(self, baseline_output='outputs/module_01', macc_output='outputs/module_02',
-                 output_dir='outputs/module_03', scenario_file='data/emission_scenarios_template.csv'):
+                 output_dir='outputs/module_03', scenario_file='data/emission_scenarios_clean.csv'):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
