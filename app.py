@@ -1383,8 +1383,25 @@ def show_companies(data):
 
     df_companies = data['emissions_by_company'].copy()
 
-    # Top emitters
-    st.markdown("### 🏢 Top Emitters")
+    # Scenario selector for company analysis
+    st.markdown("### 🎯 Scenario Selection")
+    if 'scenarios' in data and len(data['scenarios']) > 0:
+        scenario_names = list(data['scenarios'].keys())
+        display_names = {k: k.replace('_', ' ').title() for k in scenario_names}
+
+        selected_display = st.selectbox(
+            "Select Scenario for Company Analysis:",
+            list(display_names.values()),
+            key='company_scenario'
+        )
+        selected_scenario = [k for k, v in display_names.items() if v == selected_display][0]
+    else:
+        st.warning("No scenarios available. Showing baseline only.")
+        selected_scenario = None
+
+    # Top emitters overview
+    st.markdown("---")
+    st.markdown("### 🏢 2025 Baseline Emissions")
 
     col1, col2 = st.columns([2, 1])
 
@@ -1396,7 +1413,7 @@ def show_companies(data):
             y='emissions_mt',
             color='emissions_mt',
             color_continuous_scale='Reds',
-            title='Top 10 Companies by Emissions (2025)'
+            title='Top 10 Companies by Emissions (2025 Baseline)'
         )
         fig.update_layout(height=400, showlegend=False)
         fig.update_xaxes(tickangle=45)
@@ -1411,9 +1428,157 @@ def show_companies(data):
                 f"{row['share_pct']:.1f}%"
             )
 
-    # Company table
+    # Company-level targets and deployment (if scenario selected)
+    if selected_scenario and 'facility_allocations' in data:
+        st.markdown("---")
+        st.markdown(f"### 📊 Company-Level Analysis - {selected_display} (2050)")
+
+        if selected_scenario in data['facility_allocations']:
+            df_facility = data['facility_allocations'][selected_scenario]
+
+            # Calculate company-level aggregates
+            company_summary = []
+            for company in df_companies['company'].values:
+                df_comp = df_facility[df_facility['company'] == company]
+
+                if len(df_comp) > 0:
+                    total_baseline = df_comp['total_emissions_kt'].sum() / 1000
+                    total_abatement = df_comp['abatement_mt'].sum()
+                    total_2050 = df_comp['emissions_2050_kt'].sum() / 1000
+
+                    # Technology deployment
+                    facilities_hp = (df_comp['tech_heat_pump_pct'] > 0).sum()
+                    facilities_re = (df_comp['tech_re_ppa_pct'] > 0).sum()
+                    facilities_h2 = (df_comp['tech_ncc_h2_pct'] > 0).sum()
+                    facilities_elec = (df_comp['tech_ncc_elec_pct'] > 0).sum()
+
+                    company_summary.append({
+                        'Company': company,
+                        'Baseline 2025 (Mt)': total_baseline,
+                        'Abatement (Mt)': total_abatement,
+                        '2050 Emissions (Mt)': total_2050,
+                        'Reduction (%)': (total_abatement / total_baseline * 100) if total_baseline > 0 else 0,
+                        'Facilities': len(df_comp),
+                        'Heat Pump': facilities_hp,
+                        'RE PPA': facilities_re,
+                        'NCC-H2': facilities_h2,
+                        'NCC-Elec': facilities_elec
+                    })
+
+            df_summary = pd.DataFrame(company_summary).sort_values('Abatement (Mt)', ascending=False)
+
+            # Key metrics
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                total_abatement = df_summary['Abatement (Mt)'].sum()
+                st.metric("Total Industry Abatement", f"{total_abatement:.1f} Mt")
+            with col2:
+                avg_reduction = df_summary['Reduction (%)'].mean()
+                st.metric("Avg. Company Reduction", f"{avg_reduction:.1f}%")
+            with col3:
+                companies_with_tech = (df_summary['Abatement (Mt)'] > 0).sum()
+                st.metric("Companies with Technologies", companies_with_tech)
+            with col4:
+                total_facilities = df_summary['Facilities'].sum()
+                st.metric("Total Facilities", total_facilities)
+
+            # Company reduction comparison
+            st.markdown("#### 📉 Company Reduction Targets")
+
+            fig = go.Figure()
+
+            # Baseline
+            fig.add_trace(go.Bar(
+                name='Baseline 2025',
+                x=df_summary['Company'].head(10),
+                y=df_summary['Baseline 2025 (Mt)'].head(10),
+                marker_color='lightcoral'
+            ))
+
+            # 2050 Emissions
+            fig.add_trace(go.Bar(
+                name='2050 Emissions',
+                x=df_summary['Company'].head(10),
+                y=df_summary['2050 Emissions (Mt)'].head(10),
+                marker_color='lightgreen'
+            ))
+
+            fig.update_layout(
+                title=f"Top 10 Companies - Emission Reduction Pathway ({selected_display})",
+                xaxis_title="Company",
+                yaxis_title="Emissions (MtCO2/year)",
+                barmode='group',
+                height=400,
+                xaxis_tickangle=45
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Technology deployment by company
+            st.markdown("#### 🔧 Technology Deployment by Company")
+
+            fig = go.Figure()
+
+            top_companies = df_summary.head(10)
+
+            fig.add_trace(go.Bar(
+                name='Heat Pump',
+                x=top_companies['Company'],
+                y=top_companies['Heat Pump'],
+                marker_color='#2ECC71'
+            ))
+
+            fig.add_trace(go.Bar(
+                name='RE PPA',
+                x=top_companies['Company'],
+                y=top_companies['RE PPA'],
+                marker_color='#F39C12'
+            ))
+
+            fig.add_trace(go.Bar(
+                name='NCC-H2',
+                x=top_companies['Company'],
+                y=top_companies['NCC-H2'],
+                marker_color='#3498DB'
+            ))
+
+            fig.add_trace(go.Bar(
+                name='NCC-Elec',
+                x=top_companies['Company'],
+                y=top_companies['NCC-Elec'],
+                marker_color='#E74C3C'
+            ))
+
+            fig.update_layout(
+                title="Number of Facilities by Technology (Top 10 Companies)",
+                xaxis_title="Company",
+                yaxis_title="Number of Facilities",
+                barmode='stack',
+                height=400,
+                xaxis_tickangle=45
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Detailed company table
+            st.markdown("#### 📋 Detailed Company Summary")
+
+            # Format for display
+            df_display = df_summary.copy()
+            df_display['Baseline 2025 (Mt)'] = df_display['Baseline 2025 (Mt)'].round(2)
+            df_display['Abatement (Mt)'] = df_display['Abatement (Mt)'].round(2)
+            df_display['2050 Emissions (Mt)'] = df_display['2050 Emissions (Mt)'].round(2)
+            df_display['Reduction (%)'] = df_display['Reduction (%)'].round(1)
+
+            st.dataframe(
+                df_display.style.background_gradient(subset=['Reduction (%)'], cmap='RdYlGn'),
+                use_container_width=True,
+                hide_index=True
+            )
+
+    # Baseline company table
     st.markdown("---")
-    st.markdown("### 📊 All Companies")
+    st.markdown("### 📊 All Companies - Baseline Emissions (2025)")
 
     st.dataframe(
         df_companies.style.background_gradient(subset=['emissions_mt'], cmap='YlOrRd'),
@@ -1430,6 +1595,11 @@ def show_companies(data):
     - LG Chem: Ranked #1 (Model: 9.1 Mt vs ESG: 10-15 Mt) ✓
     - Lotte Chemical: Ranked #3 (Model: 7.4 Mt vs ESG: ~6 Mt) ✓
     - Relative rankings validated against industry disclosures
+
+    **Technology Deployment Notes:**
+    - Heat Pump: Applicable to all companies with thermal processes
+    - RE PPA: Available to all companies (electricity consumers)
+    - NCC-H2/Electricity: Only for naphtha cracker operators
     """)
     st.markdown('</div>', unsafe_allow_html=True)
 
