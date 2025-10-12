@@ -42,6 +42,19 @@ class BaselineAnalyzer:
         self.df_grid_emissions = loader.load_grid_emissions()
         self.df_fuel_prices = pd.read_csv(self.data_dir / 'fuel_price_trajectory.csv')
 
+        # Load demand growth trajectory
+        try:
+            self.df_demand_growth = pd.read_csv(self.data_dir / 'demand_growth_trajectory.csv')
+            print(f"   - Loaded demand growth trajectory (2025-2050)")
+            print(f"   - Total capacity growth: {(self.df_demand_growth[self.df_demand_growth['year']==2050]['cumulative_capacity_multiplier'].iloc[0]-1)*100:.1f}%")
+        except FileNotFoundError:
+            print("   - ⚠️  No demand growth file found, assuming zero growth")
+            self.df_demand_growth = pd.DataFrame({
+                'year': range(2025, 2051),
+                'annual_growth_rate_pct': [0.0] * 26,
+                'cumulative_capacity_multiplier': [1.0] * 26
+            })
+
         print(f"   - Loaded {len(self.df_facilities)} facilities")
         print(f"   - Loaded {len(self.df_intensities)} energy intensities")
 
@@ -134,7 +147,8 @@ class BaselineAnalyzer:
         """
         Project BAU emissions trajectory
         - All facilities continue operating forever (no retirement)
-        - Only change is grid decarbonization
+        - Grid decarbonization reduces electricity emissions
+        - Demand growth increases overall capacity and emissions
         """
         print(f"\n📈 Projecting BAU trajectory ({start_year}-{end_year})...")
 
@@ -151,11 +165,18 @@ class BaselineAnalyzer:
             # Get grid emission factor for this year
             grid_ef = self.df_grid_emissions[self.df_grid_emissions['year'] == year]['grid_ef_tco2_per_mwh'].iloc[0]
 
-            # All facilities continue operating (no retirement)
-            # Only electricity emissions change due to grid decarbonization
+            # Get capacity multiplier for this year (demand growth)
+            capacity_multiplier = self.df_demand_growth[
+                self.df_demand_growth['year'] == year
+            ]['cumulative_capacity_multiplier'].iloc[0]
 
-            # Fossil fuel emissions stay constant
-            fossil_emissions = (
+            # All facilities continue operating (no retirement)
+            # Emissions scale with:
+            # 1. Demand growth (capacity multiplier)
+            # 2. Grid decarbonization (electricity only)
+
+            # Fossil fuel emissions scale with demand growth
+            fossil_emissions_base = (
                 baseline_2025['emissions_naphtha_kt'].sum() +
                 baseline_2025['emissions_lng_kt'].sum() +
                 baseline_2025['emissions_fuel_gas_kt'].sum() +
@@ -164,13 +185,17 @@ class BaselineAnalyzer:
                 baseline_2025['emissions_fuel_oil_kt'].sum() +
                 baseline_2025['emissions_diesel_kt'].sum()
             )
+            fossil_emissions = fossil_emissions_base * capacity_multiplier
 
-            # Electricity emissions scale with grid decarbonization
+            # Electricity emissions scale with both demand growth AND grid decarbonization
             elec_emissions_2025 = baseline_2025['emissions_electricity_kt'].sum()
             grid_scaling = grid_ef / grid_ef_2025
-            elec_emissions = elec_emissions_2025 * grid_scaling
+            elec_emissions = elec_emissions_2025 * capacity_multiplier * grid_scaling
 
             total_emissions = fossil_emissions + elec_emissions
+
+            # Calculate total capacity
+            total_capacity = baseline_2025['capacity_kt'].sum() * capacity_multiplier
 
             trajectory.append({
                 'year': year,
@@ -179,12 +204,15 @@ class BaselineAnalyzer:
                 'total_emissions_mt': total_emissions / 1000,
                 'grid_ef_tco2_per_mwh': grid_ef,
                 'n_facilities': len(baseline_2025),
+                'capacity_multiplier': capacity_multiplier,
+                'total_capacity_kt': total_capacity,
             })
 
         df_trajectory = pd.DataFrame(trajectory)
 
         print(f"   - {start_year} emissions: {df_trajectory.iloc[0]['total_emissions_mt']:.2f} MtCO2")
         print(f"   - {end_year} emissions: {df_trajectory.iloc[-1]['total_emissions_mt']:.2f} MtCO2")
+        print(f"   - Capacity growth: {(df_trajectory.iloc[-1]['capacity_multiplier']-1)*100:.1f}%")
         print(f"   - All {len(baseline_2025)} facilities operate forever")
 
         self.df_trajectory = df_trajectory

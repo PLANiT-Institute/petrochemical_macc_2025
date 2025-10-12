@@ -135,6 +135,7 @@ def main():
          "💰 MACC Analysis",
          "🎓 LCOE Methodology",
          "🎯 Scenario Explorer",
+         "🔄 Transition Visualizations",
          "🔬 Sensitivity Analysis",
          "🏢 Company Analysis",
          "📍 Regional Analysis",
@@ -153,6 +154,8 @@ def main():
         show_lcoe_methodology(data)
     elif page == "🎯 Scenario Explorer":
         show_scenarios(data)
+    elif page == "🔄 Transition Visualizations":
+        show_transition_visualizations(data)
     elif page == "🔬 Sensitivity Analysis":
         show_sensitivity_analysis(data)
     elif page == "🏢 Company Analysis":
@@ -1423,6 +1426,140 @@ def show_scenarios(data):
     st.markdown("---")
     with st.expander("📋 View Detailed Deployment Data"):
         st.dataframe(df_scenario, use_container_width=True)
+
+def show_transition_visualizations(data):
+    """Enhanced transition visualizations page"""
+    st.markdown('<div class="sub-header">Industry Transition Visualizations</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="info-box">', unsafe_allow_html=True)
+    st.markdown("""
+    **Enhanced Analysis of Industry Transformation:**
+    - **Energy Transition**: Shift from fossil fuels to clean energy
+    - **Investment Timeline**: When and how much capital is needed
+    - **Technology Deployment**: Rollout schedule for each technology
+    - **Capacity Growth**: Industry expansion over time (with demand growth)
+
+    *Run `python run_enhanced_visualizations.py` to generate these charts*
+    """)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Check if visualizations exist
+    viz_dir = Path('outputs/visualizations')
+    if not viz_dir.exists():
+        st.warning("⚠️ Enhanced visualizations not found. Please run: `python run_enhanced_visualizations.py`")
+        return
+
+    # Get available scenarios
+    viz_files = list(viz_dir.glob('*_energy_transition.png'))
+    scenarios = [f.stem.replace('_energy_transition', '') for f in viz_files]
+
+    if len(scenarios) == 0:
+        st.warning("⚠️ No visualization files found. Please run: `python run_enhanced_visualizations.py`")
+        return
+
+    # Scenario selector
+    if len(scenarios) > 1:
+        selected_scenario = st.selectbox("Select Scenario:", scenarios, format_func=lambda x: x.replace('_', ' ').title())
+    else:
+        selected_scenario = scenarios[0]
+        st.markdown(f"**Scenario:** {selected_scenario.replace('_', ' ').title()}")
+
+    # 1. Energy Transition
+    st.markdown("---")
+    st.markdown("### ⚡ Energy Mix Transition")
+    st.markdown("**Fossil fuels → Hydrogen → Renewable electricity**")
+
+    energy_file = viz_dir / f'{selected_scenario}_energy_transition.png'
+    if energy_file.exists():
+        st.image(str(energy_file), use_column_width=True)
+    else:
+        st.info("Energy transition chart not available")
+
+    # 2. Investment Timeline
+    st.markdown("---")
+    st.markdown("### 💰 Investment Requirements")
+    st.markdown("**Annual and cumulative investment needs**")
+
+    investment_file = viz_dir / f'{selected_scenario}_investment_timeline.png'
+    if investment_file.exists():
+        st.image(str(investment_file), use_column_width=True)
+    else:
+        st.info("Investment timeline chart not available")
+
+    # 3. Technology Deployment
+    st.markdown("---")
+    st.markdown("### 🔧 Technology Deployment Schedule")
+    st.markdown("**When each technology is adopted (cumulative)**")
+
+    deployment_file = viz_dir / f'{selected_scenario}_technology_deployment.png'
+    if deployment_file.exists():
+        st.image(str(deployment_file), use_column_width=True)
+    else:
+        st.info("Technology deployment chart not available")
+
+    # 4. Facility Transition Waterfall
+    st.markdown("---")
+    st.markdown("### 📊 Emission Reduction Waterfall (2050)")
+    st.markdown("**How each technology contributes to emission reduction**")
+
+    waterfall_file = viz_dir / f'{selected_scenario}_waterfall_2050.png'
+    if waterfall_file.exists():
+        st.image(str(waterfall_file), use_column_width=True)
+    else:
+        st.info("Waterfall chart not available")
+
+    # 5. Capacity Growth (scenario-independent)
+    st.markdown("---")
+    st.markdown("### 📈 Industry Capacity Growth")
+    st.markdown("**Demand growth over time (applies to all scenarios)**")
+
+    capacity_file = viz_dir / 'capacity_growth.png'
+    if capacity_file.exists():
+        st.image(str(capacity_file), use_column_width=True)
+
+        # Add capacity growth data if available
+        if 'bau_trajectory' in data and 'capacity_multiplier' in data['bau_trajectory'].columns:
+            df_traj = data['bau_trajectory']
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                growth_2030 = (df_traj[df_traj['year'] == 2030]['capacity_multiplier'].iloc[0] - 1) * 100
+                st.metric("Capacity Growth by 2030", f"+{growth_2030:.1f}%")
+            with col2:
+                growth_2040 = (df_traj[df_traj['year'] == 2040]['capacity_multiplier'].iloc[0] - 1) * 100
+                st.metric("Capacity Growth by 2040", f"+{growth_2040:.1f}%")
+            with col3:
+                growth_2050 = (df_traj[df_traj['year'] == 2050]['capacity_multiplier'].iloc[0] - 1) * 100
+                st.metric("Capacity Growth by 2050", f"+{growth_2050:.1f}%")
+    else:
+        st.info("Capacity growth chart not available")
+
+    # Key insights
+    st.markdown("---")
+    st.markdown('<div class="info-box">', unsafe_allow_html=True)
+    st.markdown("""
+    ### 🔑 Key Insights
+
+    **Energy Transition:**
+    - Fossil fuel consumption gradually replaced by clean alternatives
+    - Heat pumps provide immediate efficiency gains (COP=4)
+    - Hydrogen and electricity for high-temperature processes
+
+    **Investment Pattern:**
+    - Front-loaded investment in early years for cost-effective technologies
+    - Major capital deployment for NCC transformation technologies
+    - Cumulative investment scales with ambition level
+
+    **Technology Sequencing:**
+    - Heat pumps deployed first (available 2025, cost-effective)
+    - RE PPAs provide quick wins for electricity decarbonization
+    - NCC transformation technologies deployed when available (2030+)
+
+    **Capacity Growth Impact:**
+    - Industry grows ~29% by 2050 (1.5% annual early, tapering to 0.5%)
+    - Without abatement, emissions would increase proportionally
+    - Technologies must overcome both growth AND baseline emissions
+    """)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def show_companies(data):
     """Company-level analysis"""

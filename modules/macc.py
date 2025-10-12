@@ -45,6 +45,17 @@ class MACCAnalyzer:
         self.df_grid_emission = pd.read_csv(self.data_dir / 'grid_emission_trajectory.csv')
         self.df_ncc_lcoe = pd.read_csv(self.data_dir / 'ncc_lcoe_trajectory.csv')
 
+        # Load demand growth trajectory
+        try:
+            self.df_demand_growth = pd.read_csv(self.data_dir / 'demand_growth_trajectory.csv')
+            print(f"   - Loaded demand growth trajectory")
+        except FileNotFoundError:
+            print("   - No demand growth file, assuming zero growth")
+            self.df_demand_growth = pd.DataFrame({
+                'year': range(2025, 2051),
+                'cumulative_capacity_multiplier': [1.0] * 26
+            })
+
         print(f"   - Loaded baseline: {len(self.df_baseline)} facilities")
         print(f"   - Loaded {len(self.df_tech_params)} technologies")
         print(f"   - Loaded LCOE trajectory for NCC technologies")
@@ -97,6 +108,11 @@ class MACCAnalyzer:
         """Calculate heat pump MACC"""
         tech_costs = self.tech_cost_calc.get_technology_costs('Heat_Pump', year)
 
+        # Get capacity multiplier for this year (demand growth)
+        capacity_multiplier = self.df_demand_growth[
+            self.df_demand_growth['year'] == year
+        ]['cumulative_capacity_multiplier'].iloc[0]
+
         # Abatement potential
         # Heat pumps can replace ALL fossil fuel combustion (naphtha, LNG, fuel gas, etc)
         # NOT electricity emissions (those are grid-based)
@@ -117,6 +133,9 @@ class MACCAnalyzer:
             ) / 1000  # MtCO2
 
             potential_mt += fossil_emissions * applicability
+
+        # Scale by demand growth
+        potential_mt *= capacity_multiplier
 
         # Costs
         capex_musd_per_mtco2 = tech_costs['capex_musd_per_mtco2']
@@ -159,6 +178,11 @@ class MACCAnalyzer:
         """
         tech_costs = self.tech_cost_calc.get_technology_costs('NCC-H2', year)
 
+        # Get capacity multiplier for this year (demand growth)
+        capacity_multiplier = self.df_demand_growth[
+            self.df_demand_growth['year'] == year
+        ]['cumulative_capacity_multiplier'].iloc[0]
+
         # Abatement potential (NCC emissions only)
         # NOTE: This represents the MAXIMUM potential if ALL naphtha crackers adopt H2
         # In reality, this is mutually exclusive with NCC-Electricity
@@ -166,6 +190,9 @@ class MACCAnalyzer:
         ncc_emissions = self.df_baseline[
             self.df_baseline['product'].apply(is_ncc_facility)
         ]['emissions_naphtha_kt'].sum() / 1000  # MtCO2
+
+        # Scale by demand growth
+        ncc_emissions *= capacity_multiplier
 
         # Get LCOE data for this year
         lcoe_data = self.df_ncc_lcoe[self.df_ncc_lcoe['year'] == year].iloc[0]
@@ -225,10 +252,18 @@ class MACCAnalyzer:
         """
         tech_costs = self.tech_cost_calc.get_technology_costs('NCC-Electricity', year)
 
+        # Get capacity multiplier for this year (demand growth)
+        capacity_multiplier = self.df_demand_growth[
+            self.df_demand_growth['year'] == year
+        ]['cumulative_capacity_multiplier'].iloc[0]
+
         # Abatement potential
         ncc_emissions = self.df_baseline[
             self.df_baseline['product'].apply(is_ncc_facility)
         ]['emissions_naphtha_kt'].sum() / 1000
+
+        # Scale by demand growth
+        ncc_emissions *= capacity_multiplier
 
         # Get LCOE data for this year
         lcoe_data = self.df_ncc_lcoe[self.df_ncc_lcoe['year'] == year].iloc[0]
@@ -286,6 +321,11 @@ class MACCAnalyzer:
         """
         tech_costs = self.tech_cost_calc.get_technology_costs('Renewable_Energy', year)
 
+        # Get capacity multiplier for this year (demand growth)
+        capacity_multiplier = self.df_demand_growth[
+            self.df_demand_growth['year'] == year
+        ]['cumulative_capacity_multiplier'].iloc[0]
+
         # Get grid electricity price (convert from $/kWh to $/MWh)
         grid_price_per_kwh = self.df_fuel_prices[
             self.df_fuel_prices['year'] == year
@@ -299,6 +339,9 @@ class MACCAnalyzer:
 
         # Calculate total electricity emissions for NCC facilities
         total_elec_emissions_mt = ncc_facilities['emissions_electricity_kt'].sum() / 1000  # MtCO2
+
+        # Scale by demand growth
+        total_elec_emissions_mt *= capacity_multiplier
 
         # Emission factors
         re_ef = 0.05  # tCO2/MWh (lifecycle emissions for renewable energy)
