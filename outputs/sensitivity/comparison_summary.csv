@@ -1,0 +1,17 @@
+scenario,technology,macc_2030,macc_2040,macc_2050,macc_avg
+baseline,Heat_Pump,-748.04,-799.66,-849.7,-786.24
+baseline,NCC-H2,18.26,-256.59,-319.9,38461589.46
+baseline,NCC-Electricity,-111.89,-118.81,-120.95,-111.07
+baseline,RE_PPA,-139.51,-265.45,-472.0,-247.46
+no_fuel_diff,Heat_Pump,12.59,9.44,7.87,10.74
+no_fuel_diff,NCC-H2,18.26,-256.59,-319.9,38461589.46
+no_fuel_diff,NCC-Electricity,-111.89,-118.81,-120.95,-111.07
+no_fuel_diff,RE_PPA,0.0,0.0,0.0,0.0
+no_learning,Heat_Pump,-744.89,-793.36,-841.83,-781.24
+no_learning,NCC-H2,18.26,-256.59,-319.9,38461589.46
+no_learning,NCC-Electricity,-111.89,-118.81,-120.95,-111.07
+no_learning,RE_PPA,-139.51,-265.45,-472.0,-247.46
+no_fuel_no_learning,Heat_Pump,15.74,15.74,15.74,15.74
+no_fuel_no_learning,NCC-H2,18.26,-256.59,-319.9,38461589.46
+no_fuel_no_learning,NCC-Electricity,-111.89,-118.81,-120.95,-111.07
+no_fuel_no_learning,RE_PPA,0.0,0.0,0.0,0.0

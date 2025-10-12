@@ -162,6 +162,18 @@ Grid Emission Factor (decarbonizing):
 • 2030: 0.225 tCO₂/MWh  (20% coal, 35% LNG, 30% nuclear, 15% RE)
 • 2050: 0.023 tCO₂/MWh  (0% coal, 20% LNG, 10% nuclear, 70% RE)
 
+TECHNOLOGY LEARNING CURVES (CAPEX Reduction)
+
+All technologies experience cost reductions through deployment and learning:
+• Heat Pump:        $150M → $75M/MtCO₂  (-50%, -2.7%/year)
+• NCC-H₂:           $300M → $150M/MtCO₂ (-50%, -2.7%/year)
+• NCC-Electricity:  $350M → $180M/MtCO₂ (-49%, -2.6%/year)
+• RE PPA:           $180M → $80M/MtCO₂  (-56%, -3.2%/year)
+
+Method: Linear interpolation between milestone years (2025, 2030, 2040, 2050)
+Basis: IEA, IRENA, Hydrogen Council projections
+Assumption: Time-based learning (conservative vs deployment-based)
+
 OPTIMIZATION CONSTRAINTS
 
 1. Technology Irreversibility

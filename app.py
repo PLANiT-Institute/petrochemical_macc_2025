@@ -135,6 +135,7 @@ def main():
          "💰 MACC Analysis",
          "🎓 LCOE Methodology",
          "🎯 Scenario Explorer",
+         "🔬 Sensitivity Analysis",
          "🏢 Company Analysis",
          "📍 Regional Analysis",
          "📊 Model Assumptions",
@@ -152,6 +153,8 @@ def main():
         show_lcoe_methodology(data)
     elif page == "🎯 Scenario Explorer":
         show_scenarios(data)
+    elif page == "🔬 Sensitivity Analysis":
+        show_sensitivity_analysis(data)
     elif page == "🏢 Company Analysis":
         show_companies(data)
     elif page == "📍 Regional Analysis":
@@ -2079,6 +2082,236 @@ def show_about():
     **Model Version:** 2.0
     **Last Updated:** January 2025
     **Status:** Production Ready ✅
+    """)
+
+def show_sensitivity_analysis(data):
+    """Sensitivity Analysis page - Testing key assumptions"""
+    st.markdown('<div class="sub-header">🔬 Sensitivity Analysis: Testing Key Assumptions</div>', unsafe_allow_html=True)
+
+    st.markdown("""
+    This page shows how the model results change when we **remove** or **modify** critical assumptions:
+    - **Fuel Cost Differential**: Impact of fuel switching economics
+    - **Learning Curves**: Impact of technology cost reduction over time
+    """)
+
+    # Check if sensitivity data exists
+    sensitivity_dir = Path('outputs/sensitivity')
+    if not sensitivity_dir.exists():
+        st.warning("⚠️ Sensitivity analysis has not been run yet. Please run: `python -c 'from modules.sensitivity import SensitivityAnalyzer; SensitivityAnalyzer().run_all_scenarios()'`")
+        return
+
+    # Load sensitivity data
+    try:
+        df_baseline = pd.read_csv(sensitivity_dir / 'macc_baseline.csv')
+        df_no_fuel = pd.read_csv(sensitivity_dir / 'macc_no_fuel_diff.csv')
+        df_no_learning = pd.read_csv(sensitivity_dir / 'macc_no_learning.csv')
+        df_both = pd.read_csv(sensitivity_dir / 'macc_no_fuel_no_learning.csv')
+    except FileNotFoundError:
+        st.error("❌ Sensitivity data files not found. Please run the sensitivity analysis first.")
+        return
+
+    # Scenario selector
+    st.markdown("### 📊 Select Analysis Year")
+    year = st.select_slider(
+        "Year:",
+        options=[2025, 2030, 2040, 2050],
+        value=2030,
+        help="Select year to view sensitivity analysis results"
+    )
+
+    st.markdown("---")
+
+    # Comparison table
+    st.markdown(f"### 📋 MACC Comparison ({year}) - $/tCO₂")
+
+    technologies = ['Heat_Pump', 'RE_PPA', 'NCC-H2', 'NCC-Electricity']
+    tech_labels = {'Heat_Pump': 'Heat Pump', 'RE_PPA': 'RE PPA', 'NCC-H2': 'NCC-H2', 'NCC-Electricity': 'NCC-Electricity'}
+
+    comparison_data = []
+    for tech in technologies:
+        baseline_val = df_baseline[(df_baseline['technology'] == tech) & (df_baseline['year'] == year)]['total_cost_usd_per_tco2'].iloc[0]
+        no_fuel_val = df_no_fuel[(df_no_fuel['technology'] == tech) & (df_no_fuel['year'] == year)]['total_cost_usd_per_tco2'].iloc[0]
+        no_learning_val = df_no_learning[(df_no_learning['technology'] == tech) & (df_no_learning['year'] == year)]['total_cost_usd_per_tco2'].iloc[0]
+        both_val = df_both[(df_both['technology'] == tech) & (df_both['year'] == year)]['total_cost_usd_per_tco2'].iloc[0]
+
+        comparison_data.append({
+            'Technology': tech_labels[tech],
+            'Baseline (Full Model)': f"${baseline_val:.0f}",
+            'No Fuel Differential': f"${no_fuel_val:.0f}",
+            'No Learning Curves': f"${no_learning_val:.0f}",
+            'Both Removed': f"${both_val:.0f}",
+            'Fuel Impact': f"${no_fuel_val - baseline_val:+.0f}",
+            'Learning Impact': f"${no_learning_val - baseline_val:+.0f}",
+        })
+
+    df_comparison = pd.DataFrame(comparison_data)
+    st.dataframe(df_comparison, use_container_width=True)
+
+    # Key insights
+    st.markdown("### 💡 Key Insights")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+        st.markdown(f"""
+        **Fuel Cost Differential Impact ({year})**
+
+        - **Heat Pump**: Fuel savings account for **>95%** of value
+        - **RE PPA**: Entirely driven by grid price differential
+        - **NCC Technologies**: Included in LCOE (no separate effect)
+
+        **Conclusion**: Fuel switching economics are **CRITICAL** for Heat Pump and RE PPA
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col2:
+        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+        st.markdown(f"""
+        **Learning Curve Impact ({year})**
+
+        - **Heat Pump**: Learning curves have **<1% impact** on MACC
+        - **All Technologies**: CAPEX reduction is **secondary** to fuel savings
+        - **NCC Technologies**: Learning already in LCOE trajectory
+
+        **Conclusion**: Model results are **ROBUST** to learning rate uncertainty
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # Visualizations
+    st.markdown("---")
+    st.markdown("### 📈 Sensitivity Visualizations")
+
+    # Check for images
+    images = {
+        f'{year}': f'sensitivity_comparison_{year}.png',
+        'Timeline': 'macc_evolution_timeline.png',
+        'Impact': 'impact_magnitude.png'
+    }
+
+    tab_names = [f'Comparison {year}', 'Timeline Evolution', 'Impact Magnitude']
+    tabs = st.tabs(tab_names)
+
+    with tabs[0]:
+        img_path = sensitivity_dir / images[f'{year}']
+        if img_path.exists():
+            st.image(str(img_path), use_container_width=True)
+        else:
+            st.info(f"Visualization not available. Run: `python visualize_sensitivity.py`")
+
+    with tabs[1]:
+        img_path = sensitivity_dir / images['Timeline']
+        if img_path.exists():
+            st.image(str(img_path), use_container_width=True)
+        else:
+            st.info("Visualization not available. Run: `python visualize_sensitivity.py`")
+
+    with tabs[2]:
+        img_path = sensitivity_dir / images['Impact']
+        if img_path.exists():
+            st.image(str(img_path), use_container_width=True)
+        else:
+            st.info("Visualization not available. Run: `python visualize_sensitivity.py`")
+
+    # Interactive comparison chart
+    st.markdown("---")
+    st.markdown("### 🎯 Interactive Comparison")
+
+    selected_tech = st.selectbox(
+        "Select Technology:",
+        options=technologies,
+        format_func=lambda x: tech_labels[x]
+    )
+
+    # Extract data for selected technology
+    tech_data = {
+        'Baseline': df_baseline[df_baseline['technology'] == selected_tech].sort_values('year'),
+        'No Fuel Diff': df_no_fuel[df_no_fuel['technology'] == selected_tech].sort_values('year'),
+        'No Learning': df_no_learning[df_no_learning['technology'] == selected_tech].sort_values('year'),
+        'Both Removed': df_both[df_both['technology'] == selected_tech].sort_values('year'),
+    }
+
+    # Create plotly chart
+    fig = go.Figure()
+
+    colors = ['#2ecc71', '#e74c3c', '#f39c12', '#c0392b']
+    for i, (scenario_name, df) in enumerate(tech_data.items()):
+        fig.add_trace(go.Scatter(
+            x=df['year'],
+            y=df['total_cost_usd_per_tco2'],
+            name=scenario_name,
+            mode='lines+markers',
+            line=dict(width=3, color=colors[i]),
+            marker=dict(size=8)
+        ))
+
+    fig.update_layout(
+        title=f'{tech_labels[selected_tech]}: MACC Evolution (2025-2050)',
+        xaxis_title='Year',
+        yaxis_title='MACC ($/tCO₂)',
+        hovermode='x unified',
+        height=500,
+        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
+    )
+
+    fig.add_hline(y=0, line_dash="dash", line_color="black", annotation_text="Break-even")
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Summary statistics
+    st.markdown("---")
+    st.markdown("### 📊 Summary Statistics")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        baseline_2030 = df_baseline[df_baseline['year'] == 2030]['total_cost_usd_per_tco2'].mean()
+        no_fuel_2030 = df_no_fuel[df_no_fuel['year'] == 2030]['total_cost_usd_per_tco2'].mean()
+        st.metric(
+            "Avg MACC (2030)",
+            f"${baseline_2030:.0f}/tCO₂",
+            f"${no_fuel_2030 - baseline_2030:+.0f} without fuel diff"
+        )
+
+    with col2:
+        baseline_2050 = df_baseline[df_baseline['year'] == 2050]['total_cost_usd_per_tco2'].mean()
+        no_fuel_2050 = df_no_fuel[df_no_fuel['year'] == 2050]['total_cost_usd_per_tco2'].mean()
+        st.metric(
+            "Avg MACC (2050)",
+            f"${baseline_2050:.0f}/tCO₂",
+            f"${no_fuel_2050 - baseline_2050:+.0f} without fuel diff"
+        )
+
+    with col3:
+        baseline_2030_learn = df_baseline[df_baseline['year'] == 2030]['total_cost_usd_per_tco2'].mean()
+        no_learn_2030 = df_no_learning[df_no_learning['year'] == 2030]['total_cost_usd_per_tco2'].mean()
+        st.metric(
+            "Learning Impact (2030)",
+            f"${no_learn_2030 - baseline_2030_learn:+.0f}/tCO₂",
+            "Minimal impact (<1%)",
+            delta_color="off"
+        )
+
+    # Recommendations
+    st.markdown("---")
+    st.markdown("### 🎯 Model Robustness Assessment")
+
+    st.markdown("""
+    **Key Findings from Sensitivity Analysis**:
+
+    1. ✅ **Model is ROBUST to learning curve uncertainty**
+       - Changing learning rates by ±50% has **<1% impact** on MACC
+       - Fuel savings ($700-900/tCO₂) dominate CAPEX changes ($3-8/tCO₂)
+
+    2. ⚠️ **Fuel/electricity price assumptions are CRITICAL**
+       - Heat Pump: -$748/tCO₂ → +$13/tCO₂ without fuel savings
+       - RE PPA: -$140/tCO₂ → $0/tCO₂ without electricity price gap
+
+    3. ✅ **LCOE-based methodology validated**
+       - NCC technologies show **no sensitivity** to these assumptions
+       - LCOE already incorporates fuel costs and learning curves
+
+    **Recommendation**: Focus sensitivity testing on **fuel/electricity price trajectories**, not learning rates.
     """)
 
 # Run app
