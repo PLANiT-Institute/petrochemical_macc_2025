@@ -85,6 +85,120 @@ class ReportGenerator:
         pdf.savefig(fig, bbox_inches='tight')
         plt.close()
 
+    def create_methodology_page(self, pdf):
+        """Create detailed methodology explanation page"""
+        fig = plt.figure(figsize=(8.5, 11))
+        fig.suptitle('Methodology & Key Assumptions', fontsize=16, fontweight='bold', y=0.98)
+
+        ax = fig.add_subplot(111)
+        ax.axis('off')
+
+        methodology_text = """
+DUAL MACC METHODOLOGY
+
+1. Category A Technologies (Heat Pump, RE PPA)
+   Traditional MACC Formula:
+
+   MACC ($/tCO₂) = (CAPEX_annual + OPEX_annual + ΔFuel_cost) / Abatement
+
+   • CAPEX_annual: Capital cost annualized over 20 years at 8% discount rate
+   • OPEX_annual: Operating costs (3% of CAPEX for Heat Pump, 2% for RE PPA)
+   • ΔFuel_cost: Net change in fuel costs (often negative = savings)
+
+2. Category B Technologies (NCC-H2, NCC-Electricity)
+   LCOE Premium Method:
+
+   MACC ($/tCO₂) = (LCOE_new - LCOE_baseline) / Emission_intensity
+
+   • LCOE data from: Woo et al. (2025), Green Chemistry
+   • Accounts for integrated petrochemical process complexity
+   • Includes all capex, opex, and feedstock costs
+
+TECHNOLOGY DETAILS
+
+Heat Pump (Industrial)
+• Target: All fossil fuel combustion (naphtha, LNG, fuel gas, etc.)
+• COP (Coefficient of Performance): 4.0
+• CAPEX: $800/kW_thermal installed
+• Applicability: 60-100% by product group
+• Result: Highly cost-negative due to fuel savings
+
+RE PPA (Renewable Energy Power Purchase Agreement)
+• Target: Grid electricity emissions (Scope 2)
+• Mechanism: Switch from grid to dedicated renewable power
+• Declining abatement: Grid decarbonizes 0.40→0.02 tCO₂/MWh (2025→2050)
+• Price trajectory: Premium in 2025 ($150/MWh), parity 2030+
+
+NCC-H2 (Hydrogen-Based Naphtha Cracker)
+• Target: Naphtha cracker facilities only (Ethylene, Propylene)
+• H₂ consumption: 0.559 kg H₂ per tCO₂ abated
+• H₂ price: $3.50/kg (2025) → $1.50/kg (2050, green H₂)
+• LCOE: $759/ton ethylene vs $746/ton baseline (+$13/ton)
+• Technology maturity: TRL 6-7 (BASF pilot)
+
+NCC-Electricity (Electric Cracker)
+• Target: Same facilities as NCC-H2 (mutually exclusive)
+• Electricity: 10 MWh/ton ethylene
+• RE power required for zero emissions
+• LCOE: $737/ton ethylene vs $746 baseline (-$9/ton!)
+• Technology maturity: TRL 5-6 (BASF-SABIC development)
+
+KEY PRICE ASSUMPTIONS (2025 → 2050)
+
+Fossil Fuels (increasing):
+• Naphtha:    $15.0/GJ → $19.0/GJ  (+27%)
+• LNG:        $12.0/GJ → $17.5/GJ  (+46%)
+
+Electricity (diverging):
+• Grid power: $120/MWh → $150/MWh (+25%, infrastructure costs)
+• RE PPA:     $150/MWh → $110/MWh (-27%, learning curve)
+
+Hydrogen (declining):
+• Blue H₂:    $3.50/kg → $2.00/kg  (-43%)
+• Green H₂:   $5.00/kg → $1.50/kg  (-70%, 2050 target)
+
+Grid Emission Factor (decarbonizing):
+• 2025: 0.404 tCO₂/MWh  (35% coal, 30% LNG, 25% nuclear, 10% RE)
+• 2030: 0.225 tCO₂/MWh  (20% coal, 35% LNG, 30% nuclear, 15% RE)
+• 2050: 0.023 tCO₂/MWh  (0% coal, 20% LNG, 10% nuclear, 70% RE)
+
+OPTIMIZATION CONSTRAINTS
+
+1. Technology Irreversibility
+   Once deployed, technology cannot be reversed
+   → Deployment[t] ≥ Deployment[t-1] for all years
+
+2. Mutual Exclusivity
+   NCC-H2 and NCC-Electricity target same facilities
+   → Can only deploy one per cracker
+
+3. Annual Emission Targets
+   Linear interpolation between milestone years
+   → Conservative: 52 Mt (2025) → 20 Mt (2050), 62% reduction
+   → Moderate:      52 Mt (2025) → 10 Mt (2050), 81% reduction
+   → Aggressive:    52 Mt (2025) →  5 Mt (2050), 90% reduction
+
+4. Cost Minimization
+   Deploy least-cost technologies first
+   Subject to abatement potential limits
+
+DATA SOURCES
+
+• Baseline emissions: GHG Inventory Center (2021) + growth projections
+• LCOE data: Woo et al. (2025), Green Chemistry, DOI:10.1039/D4GC04538F
+• Heat pump costs: IEA Industrial Heat Pumps (2023)
+• Hydrogen prices: IEA Hydrogen Strategy (2021), Hydrogen Council (2021)
+• Grid factors: Korea 10th Power Supply Plan (2023)
+• RE prices: IRENA Renewable Power Generation Costs (2023)
+        """
+
+        ax.text(0.05, 0.92, methodology_text, ha='left', va='top', fontsize=8,
+               family='monospace', verticalalignment='top',
+               bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.3))
+
+        pdf.savefig(fig, bbox_inches='tight')
+        plt.close()
+
     def create_executive_summary(self, pdf):
         """Create executive summary page"""
         fig, axes = plt.subplots(2, 2, figsize=(11, 8.5))
@@ -437,6 +551,9 @@ class ReportGenerator:
         with PdfPages(report_path) as pdf:
             print("Creating cover page...")
             self.create_cover_page(pdf)
+
+            print("Creating methodology page...")
+            self.create_methodology_page(pdf)
 
             print("Creating executive summary...")
             self.create_executive_summary(pdf)

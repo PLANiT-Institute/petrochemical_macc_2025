@@ -319,27 +319,75 @@ def show_macc(data):
     """MACC analysis page"""
     st.markdown('<div class="sub-header">Marginal Abatement Cost Curve (MACC) - LCOE Methodology</div>', unsafe_allow_html=True)
 
-    st.markdown('<div class="info-box">', unsafe_allow_html=True)
-    st.markdown("""
-    **Dual Methodology Approach:**
-    - **Category A (Fuel Switching)**: Heat Pump, RE PPA → Traditional CAPEX+OPEX+ΔFuel
-    - **Category B (Process Transformation)**: NCC-H2, NCC-Electricity → LCOE premium method
+    # Prominent methodology explanation
+    st.markdown("### 📐 Understanding Our MACC Methodology")
 
-    *See "🎓 LCOE Methodology" tab for detailed academic framework*
-    """)
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown("")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+        st.markdown("""
+        **Category A: Traditional MACC**
+
+        **Heat Pump** & **RE PPA**
+
+        Formula:
+        ```
+        MACC = (CAPEX_ann + OPEX_ann + ΔFuel) / Abatement
+        ```
+
+        **Why negative costs?**
+        - Heat Pump: Fuel savings >> Investment costs
+        - Example: $15/GJ naphtha → $8/GJ electricity
+        - Result: $750/tCO2 fuel savings!
+
+        **Key Parameters:**
+        - Discount rate: 8%
+        - Lifetime: 20 years
+        - Heat Pump COP: 4.0
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col2:
+        st.markdown('<div class="info-box">', unsafe_allow_html=True)
+        st.markdown("""
+        **Category B: LCOE Premium Method**
+
+        **NCC-H2** & **NCC-Electricity**
+
+        Formula:
+        ```
+        MACC = (LCOE_new - LCOE_baseline) / Emission_intensity
+        ```
+
+        **Why this method?**
+        - Naphtha crackers = complex integrated process
+        - CAPEX/OPEX hard to separate
+        - Uses real cost data from literature
+
+        **Data Source:**
+        - Woo et al. (2025), Green Chemistry
+        - DOI: 10.1039/D4GC04538F
+        - Peer-reviewed LCOE estimates
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown("---")
 
     if 'macc' not in data:
         st.error("MACC data not found. Please run Module 2.")
         return
 
-    # Year selector
-    year = st.sidebar.selectbox(
-        "Select Year:",
-        [2025, 2030, 2040, 2050],
-        index=1
-    )
+    # Year selector with explanation
+    st.markdown("### 📅 Select Analysis Year")
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        year = st.select_slider(
+            "Year:",
+            options=[2025, 2030, 2040, 2050],
+            value=2030,
+            help="Select year to view MACC curve. Costs and abatement potentials change over time due to technology learning curves and grid decarbonization."
+        )
 
     # Filter data
     df_year = data['macc'][data['macc']['year'] == year].copy()

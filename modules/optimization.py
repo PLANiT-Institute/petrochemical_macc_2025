@@ -110,9 +110,39 @@ class CostOptimizer:
         # Track deployed capacity (irreversible - can only increase)
         deployed_capacity = {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0}
 
+        # Interpolate missing years in emission path
+        years_with_targets = sorted([y for y in emission_path.keys()])
+        interpolated_path = {}
+        for year in years:
+            if year in emission_path:
+                interpolated_path[year] = emission_path[year]
+            else:
+                # Linear interpolation
+                # Find surrounding years
+                before = [y for y in years_with_targets if y < year]
+                after = [y for y in years_with_targets if y > year]
+
+                if before and after:
+                    y1 = before[-1]
+                    y2 = after[0]
+                    t1 = emission_path[y1]
+                    t2 = emission_path[y2]
+                    # Linear interpolation
+                    interpolated_path[year] = t1 + (t2 - t1) * (year - y1) / (y2 - y1)
+                elif after:
+                    # Before first target, use first target
+                    interpolated_path[year] = emission_path[after[0]]
+                elif before:
+                    # After last target, use last target
+                    interpolated_path[year] = emission_path[before[-1]]
+                else:
+                    # No targets at all, use BAU
+                    bau = self.df_bau[self.df_bau['year'] == year]['total_emissions_mt'].iloc[0]
+                    interpolated_path[year] = bau
+
         for year in years:
             bau = self.df_bau[self.df_bau['year'] == year]['total_emissions_mt'].iloc[0]
-            target = emission_path.get(year, bau)  # Use BAU if no target specified
+            target = interpolated_path[year]
             required = max(0, bau - target)
 
             # Get available technologies sorted by cost

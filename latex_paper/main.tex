@@ -132,12 +132,52 @@ Baseline and technology-specific LCOE values are sourced from \citet{Woo2025}:
 
 \subsubsection{Price Trajectories}
 
+Our price assumptions reflect technology learning curves, policy trajectories, and energy transition dynamics:
+
+\textbf{Fossil Fuels (increasing trend):}
 \begin{itemize}
-    \item \textbf{Hydrogen:} \$6.0/kg (2025) declining to \$1.2/kg (2050) following IEA Net Zero projections
-    \item \textbf{Renewable Electricity:} \$58/MWh (2025) to \$32/MWh (2050) based on IRENA forecasts
-    \item \textbf{Fossil Fuels:} Constant at \$15/GJ naphtha (conservative assumption)
-    \item \textbf{Grid Emission Factor:} 0.75 kgCO\textsubscript{2}/kWh (2025) to 0.25 kgCO\textsubscript{2}/kWh (2050) per Korea's 10th Basic Plan
+    \item Naphtha: \$15.0/GJ (2025) → \$19.0/GJ (2050), +27\%
+    \item LNG: \$12.0/GJ (2025) → \$17.5/GJ (2050), +46\%
+    \item Rationale: Supply constraints, carbon pricing, geopolitical risks
 \end{itemize}
+
+\textbf{Electricity (diverging paths):}
+\begin{itemize}
+    \item Grid power: \$120/MWh (2025) → \$150/MWh (2050), +25\%
+    \begin{itemize}
+        \item Driven by: Grid infrastructure investment, transmission costs
+    \end{itemize}
+    \item RE PPA: \$150/MWh (2025) → \$110/MWh (2050), -27\%
+    \begin{itemize}
+        \item Driven by: Solar/wind LCOE decline, learning curve effects
+        \item Grid parity achieved: 2030
+    \end{itemize}
+\end{itemize}
+
+\textbf{Hydrogen (Blue → Green transition):}
+\begin{itemize}
+    \item Blue H\textsubscript{2}: \$3.50/kg (2025) → \$2.00/kg (2040), -43\%
+    \begin{itemize}
+        \item Source: Natural gas reforming + CCS
+        \item Dominant pathway: 2025-2035
+    \end{itemize}
+    \item Green H\textsubscript{2}: \$5.00/kg (2025) → \$1.50/kg (2050), -70\%
+    \begin{itemize}
+        \item Source: Renewable electrolysis
+        \item Dominant pathway: 2040-2050
+    \end{itemize}
+    \item References: IEA Hydrogen Strategy (2021), Hydrogen Council (2021)
+\end{itemize}
+
+\textbf{Grid Emission Factor (decarbonization):}
+\begin{itemize}
+    \item 2025: 0.404 tCO\textsubscript{2}/MWh (35\% coal, 30\% LNG, 25\% nuclear, 10\% RE)
+    \item 2030: 0.225 tCO\textsubscript{2}/MWh (20\% coal, 35\% LNG, 30\% nuclear, 15\% RE)
+    \item 2050: 0.023 tCO\textsubscript{2}/MWh (0\% coal, 20\% LNG, 10\% nuclear, 70\% RE)
+    \item Source: Korea 10th Basic Power Supply Plan (2023)
+\end{itemize}
+
+\textbf{Key assumption - Technology irreversibility:} Once deployed, technologies cannot be reversed, reflecting real capital investment constraints. This ensures monotonically decreasing emission trajectories.
 
 \section{Results}
 
