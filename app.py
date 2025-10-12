@@ -2085,27 +2085,32 @@ def show_about():
     """)
 
 def show_sensitivity_analysis(data):
-    """Sensitivity Analysis page - Testing key assumptions"""
-    st.markdown('<div class="sub-header">🔬 Sensitivity Analysis: Testing Key Assumptions</div>', unsafe_allow_html=True)
+    """Sensitivity Analysis page - Testing key assumptions (CORRECTED)"""
+    st.markdown('<div class="sub-header">🔬 Sensitivity Analysis: Testing Key Assumptions (CORRECTED)</div>', unsafe_allow_html=True)
 
     st.markdown("""
     This page shows how the model results change when we **remove** or **modify** critical assumptions:
-    - **Fuel Cost Differential**: Impact of fuel switching economics
-    - **Learning Curves**: Impact of technology cost reduction over time
+
+    **CORRECTED INTERPRETATION:**
+    - **Fossil Fuel Savings**: What if fossil fuels (naphtha, LNG) were FREE? (price = $0)
+      - This removes the benefit of avoiding fossil fuel purchases
+      - Shows the value of fuel switching economics
+    - **Learning Curves**: What if technology CAPEX stayed at 2025 levels? (no cost reduction)
+      - Shows the impact of technology maturation over time
     """)
 
     # Check if sensitivity data exists
     sensitivity_dir = Path('outputs/sensitivity')
     if not sensitivity_dir.exists():
-        st.warning("⚠️ Sensitivity analysis has not been run yet. Please run: `python -c 'from modules.sensitivity import SensitivityAnalyzer; SensitivityAnalyzer().run_all_scenarios()'`")
+        st.warning("⚠️ Sensitivity analysis has not been run yet. Please run: `python -c 'from modules.sensitivity_corrected import SensitivityAnalyzerCorrected; SensitivityAnalyzerCorrected().run_all_scenarios()'`")
         return
 
-    # Load sensitivity data
+    # Load sensitivity data (CORRECTED version)
     try:
         df_baseline = pd.read_csv(sensitivity_dir / 'macc_baseline.csv')
-        df_no_fuel = pd.read_csv(sensitivity_dir / 'macc_no_fuel_diff.csv')
+        df_no_fossil = pd.read_csv(sensitivity_dir / 'macc_no_fossil_savings.csv')
         df_no_learning = pd.read_csv(sensitivity_dir / 'macc_no_learning.csv')
-        df_both = pd.read_csv(sensitivity_dir / 'macc_no_fuel_no_learning.csv')
+        df_both = pd.read_csv(sensitivity_dir / 'macc_no_fossil_no_learning.csv')
     except FileNotFoundError:
         st.error("❌ Sensitivity data files not found. Please run the sensitivity analysis first.")
         return
@@ -2130,17 +2135,17 @@ def show_sensitivity_analysis(data):
     comparison_data = []
     for tech in technologies:
         baseline_val = df_baseline[(df_baseline['technology'] == tech) & (df_baseline['year'] == year)]['total_cost_usd_per_tco2'].iloc[0]
-        no_fuel_val = df_no_fuel[(df_no_fuel['technology'] == tech) & (df_no_fuel['year'] == year)]['total_cost_usd_per_tco2'].iloc[0]
+        no_fossil_val = df_no_fossil[(df_no_fossil['technology'] == tech) & (df_no_fossil['year'] == year)]['total_cost_usd_per_tco2'].iloc[0]
         no_learning_val = df_no_learning[(df_no_learning['technology'] == tech) & (df_no_learning['year'] == year)]['total_cost_usd_per_tco2'].iloc[0]
         both_val = df_both[(df_both['technology'] == tech) & (df_both['year'] == year)]['total_cost_usd_per_tco2'].iloc[0]
 
         comparison_data.append({
             'Technology': tech_labels[tech],
             'Baseline (Full Model)': f"${baseline_val:.0f}",
-            'No Fuel Differential': f"${no_fuel_val:.0f}",
+            'No Fossil Fuel Savings': f"${no_fossil_val:.0f}",
             'No Learning Curves': f"${no_learning_val:.0f}",
             'Both Removed': f"${both_val:.0f}",
-            'Fuel Impact': f"${no_fuel_val - baseline_val:+.0f}",
+            'Fossil Fuel Impact': f"${no_fossil_val - baseline_val:+.0f}",
             'Learning Impact': f"${no_learning_val - baseline_val:+.0f}",
         })
 
@@ -2155,13 +2160,14 @@ def show_sensitivity_analysis(data):
     with col1:
         st.markdown('<div class="info-box">', unsafe_allow_html=True)
         st.markdown(f"""
-        **Fuel Cost Differential Impact ({year})**
+        **Fossil Fuel Savings Impact ({year})**
 
-        - **Heat Pump**: Fuel savings account for **>95%** of value
-        - **RE PPA**: Entirely driven by grid price differential
-        - **NCC Technologies**: Included in LCOE (no separate effect)
+        - **Heat Pump**: +$1,007/tCO2 if naphtha were free (MASSIVE impact!)
+        - **NCC-H2**: +$1,703/tCO2 impact (dominant driver)
+        - **NCC-Electricity**: +$2,608/tCO2 impact (largest impact of all)
+        - **RE PPA**: No impact (compares grid vs RE electricity, not fossil fuels)
 
-        **Conclusion**: Fuel switching economics are **CRITICAL** for Heat Pump and RE PPA
+        **Conclusion**: The value of abatement comes from **avoiding expensive fossil fuel purchases**, not from CAPEX reduction!
         """)
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -2170,11 +2176,11 @@ def show_sensitivity_analysis(data):
         st.markdown(f"""
         **Learning Curve Impact ({year})**
 
-        - **Heat Pump**: Learning curves have **<1% impact** on MACC
-        - **All Technologies**: CAPEX reduction is **secondary** to fuel savings
-        - **NCC Technologies**: Learning already in LCOE trajectory
+        - **Heat Pump**: Only +$3-8/tCO2 impact (<1% of total)
+        - **NCC Technologies**: $0/tCO2 impact (learning already in LCOE)
+        - **RE PPA**: $0/tCO2 impact (no CAPEX)
 
-        **Conclusion**: Model results are **ROBUST** to learning rate uncertainty
+        **Conclusion**: Model is **ROBUST** to learning rate uncertainty. Even if CAPEX stayed flat, results barely change. **Fossil fuel prices are 100-300x more important than learning curves!**
         """)
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -2182,11 +2188,11 @@ def show_sensitivity_analysis(data):
     st.markdown("---")
     st.markdown("### 📈 Sensitivity Visualizations")
 
-    # Check for images
+    # Check for images (CORRECTED versions)
     images = {
-        f'{year}': f'sensitivity_comparison_{year}.png',
-        'Timeline': 'macc_evolution_timeline.png',
-        'Impact': 'impact_magnitude.png'
+        f'{year}': f'sensitivity_comparison_{year}_corrected.png',
+        'Timeline': 'macc_evolution_timeline_corrected.png',
+        'Impact': 'impact_magnitude_corrected.png'
     }
 
     tab_names = [f'Comparison {year}', 'Timeline Evolution', 'Impact Magnitude']
@@ -2197,21 +2203,21 @@ def show_sensitivity_analysis(data):
         if img_path.exists():
             st.image(str(img_path), use_container_width=True)
         else:
-            st.info(f"Visualization not available. Run: `python visualize_sensitivity.py`")
+            st.info(f"Visualization not available. Run: `python visualize_sensitivity_corrected.py`")
 
     with tabs[1]:
         img_path = sensitivity_dir / images['Timeline']
         if img_path.exists():
             st.image(str(img_path), use_container_width=True)
         else:
-            st.info("Visualization not available. Run: `python visualize_sensitivity.py`")
+            st.info("Visualization not available. Run: `python visualize_sensitivity_corrected.py`")
 
     with tabs[2]:
         img_path = sensitivity_dir / images['Impact']
         if img_path.exists():
             st.image(str(img_path), use_container_width=True)
         else:
-            st.info("Visualization not available. Run: `python visualize_sensitivity.py`")
+            st.info("Visualization not available. Run: `python visualize_sensitivity_corrected.py`")
 
     # Interactive comparison chart
     st.markdown("---")
@@ -2226,7 +2232,7 @@ def show_sensitivity_analysis(data):
     # Extract data for selected technology
     tech_data = {
         'Baseline': df_baseline[df_baseline['technology'] == selected_tech].sort_values('year'),
-        'No Fuel Diff': df_no_fuel[df_no_fuel['technology'] == selected_tech].sort_values('year'),
+        'No Fossil Savings': df_no_fossil[df_no_fossil['technology'] == selected_tech].sort_values('year'),
         'No Learning': df_no_learning[df_no_learning['technology'] == selected_tech].sort_values('year'),
         'Both Removed': df_both[df_both['technology'] == selected_tech].sort_values('year'),
     }
@@ -2266,20 +2272,20 @@ def show_sensitivity_analysis(data):
 
     with col1:
         baseline_2030 = df_baseline[df_baseline['year'] == 2030]['total_cost_usd_per_tco2'].mean()
-        no_fuel_2030 = df_no_fuel[df_no_fuel['year'] == 2030]['total_cost_usd_per_tco2'].mean()
+        no_fossil_2030 = df_no_fossil[df_no_fossil['year'] == 2030]['total_cost_usd_per_tco2'].mean()
         st.metric(
             "Avg MACC (2030)",
             f"${baseline_2030:.0f}/tCO₂",
-            f"${no_fuel_2030 - baseline_2030:+.0f} without fuel diff"
+            f"${no_fossil_2030 - baseline_2030:+.0f} without fossil savings"
         )
 
     with col2:
         baseline_2050 = df_baseline[df_baseline['year'] == 2050]['total_cost_usd_per_tco2'].mean()
-        no_fuel_2050 = df_no_fuel[df_no_fuel['year'] == 2050]['total_cost_usd_per_tco2'].mean()
+        no_fossil_2050 = df_no_fossil[df_no_fossil['year'] == 2050]['total_cost_usd_per_tco2'].mean()
         st.metric(
             "Avg MACC (2050)",
             f"${baseline_2050:.0f}/tCO₂",
-            f"${no_fuel_2050 - baseline_2050:+.0f} without fuel diff"
+            f"${no_fossil_2050 - baseline_2050:+.0f} without fossil savings"
         )
 
     with col3:
@@ -2297,21 +2303,24 @@ def show_sensitivity_analysis(data):
     st.markdown("### 🎯 Model Robustness Assessment")
 
     st.markdown("""
-    **Key Findings from Sensitivity Analysis**:
+    **Key Findings from Sensitivity Analysis (CORRECTED)**:
 
     1. ✅ **Model is ROBUST to learning curve uncertainty**
-       - Changing learning rates by ±50% has **<1% impact** on MACC
-       - Fuel savings ($700-900/tCO₂) dominate CAPEX changes ($3-8/tCO₂)
+       - Freezing CAPEX at 2025 levels has **<1% impact** on MACC
+       - Fossil fuel savings (+$1,000-2,600/tCO₂) dominate CAPEX changes (+$3-8/tCO₂)
+       - **Learning curves are 100-300x LESS important than fossil fuel prices!**
 
-    2. ⚠️ **Fuel/electricity price assumptions are CRITICAL**
-       - Heat Pump: -$748/tCO₂ → +$13/tCO₂ without fuel savings
-       - RE PPA: -$140/tCO₂ → $0/tCO₂ without electricity price gap
+    2. ⚠️ **Fossil fuel prices are CRITICAL (largest driver)**
+       - Heat Pump: -$748/tCO₂ → +$259/tCO₂ if naphtha were free (+$1,007/tCO₂ impact!)
+       - NCC-H2: +$18/tCO₂ → +$1,721/tCO₂ without fossil savings (+$1,703/tCO₂)
+       - NCC-Electricity: -$112/tCO₂ → +$2,497/tCO₂ without fossil savings (+$2,608/tCO₂ - LARGEST impact!)
 
-    3. ✅ **LCOE-based methodology validated**
-       - NCC technologies show **no sensitivity** to these assumptions
-       - LCOE already incorporates fuel costs and learning curves
+    3. 💡 **Economic driver is operational savings, not capital costs**
+       - Technologies are attractive because they avoid expensive naphtha purchases ($15/GJ)
+       - Heat pump efficiency (COP=3.5) provides 70% energy savings
+       - This creates large ongoing cost savings that dwarf CAPEX impacts
 
-    **Recommendation**: Focus sensitivity testing on **fuel/electricity price trajectories**, not learning rates.
+    **Recommendation**: Focus sensitivity analysis on **fossil fuel & electricity prices**, NOT learning rates. The model value comes from avoiding fossil fuel purchases, not from CAPEX reduction over time.
     """)
 
 # Run app
