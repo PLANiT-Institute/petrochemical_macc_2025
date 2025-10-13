@@ -143,14 +143,21 @@ class BaselineAnalyzer:
         self.df_baseline = df_baseline
         return df_baseline
 
-    def project_bau_trajectory(self, start_year=2025, end_year=2050):
+    def project_bau_trajectory(self, start_year=2025, end_year=2050, facility_lifetime=None):
         """
         Project BAU emissions trajectory
-        - All facilities continue operating forever (no retirement)
+        - Optional facility retirement based on lifetime (default: no retirement)
         - Grid decarbonization reduces electricity emissions
         - Demand growth increases overall capacity and emissions
+
+        Parameters:
+        - facility_lifetime: If specified (e.g., 50), facilities retire after this many years
         """
         print(f"\n📈 Projecting BAU trajectory ({start_year}-{end_year})...")
+        if facility_lifetime:
+            print(f"   - Facility lifetime: {facility_lifetime} years (retirement enabled)")
+        else:
+            print(f"   - Facility lifetime: infinite (no retirement)")
 
         years = range(start_year, end_year + 1)
         trajectory = []
@@ -170,32 +177,48 @@ class BaselineAnalyzer:
                 self.df_demand_growth['year'] == year
             ]['cumulative_capacity_multiplier'].iloc[0]
 
-            # All facilities continue operating (no retirement)
-            # Emissions scale with:
-            # 1. Demand growth (capacity multiplier)
-            # 2. Grid decarbonization (electricity only)
+            # Calculate active facilities if retirement is enabled
+            if facility_lifetime:
+                # Facilities retire when (year - year_built) > lifetime
+                retirement_year_threshold = year - facility_lifetime
+                active_facilities = baseline_2025[baseline_2025['year_built'] > retirement_year_threshold]
 
-            # Fossil fuel emissions scale with demand growth
+                # Calculate remaining capacity fraction
+                remaining_capacity_fraction = active_facilities['capacity_kt'].sum() / baseline_2025['capacity_kt'].sum()
+                n_active = len(active_facilities)
+                n_retired = len(baseline_2025) - n_active
+            else:
+                active_facilities = baseline_2025
+                remaining_capacity_fraction = 1.0
+                n_active = len(baseline_2025)
+                n_retired = 0
+
+            # Emissions scale with:
+            # 1. Remaining capacity (after retirement)
+            # 2. Demand growth (capacity multiplier)
+            # 3. Grid decarbonization (electricity only)
+
+            # Fossil fuel emissions
             fossil_emissions_base = (
-                baseline_2025['emissions_naphtha_kt'].sum() +
-                baseline_2025['emissions_lng_kt'].sum() +
-                baseline_2025['emissions_fuel_gas_kt'].sum() +
-                baseline_2025['emissions_byproduct_gas_kt'].sum() +
-                baseline_2025['emissions_lpg_kt'].sum() +
-                baseline_2025['emissions_fuel_oil_kt'].sum() +
-                baseline_2025['emissions_diesel_kt'].sum()
+                active_facilities['emissions_naphtha_kt'].sum() +
+                active_facilities['emissions_lng_kt'].sum() +
+                active_facilities['emissions_fuel_gas_kt'].sum() +
+                active_facilities['emissions_byproduct_gas_kt'].sum() +
+                active_facilities['emissions_lpg_kt'].sum() +
+                active_facilities['emissions_fuel_oil_kt'].sum() +
+                active_facilities['emissions_diesel_kt'].sum()
             )
             fossil_emissions = fossil_emissions_base * capacity_multiplier
 
             # Electricity emissions scale with both demand growth AND grid decarbonization
-            elec_emissions_2025 = baseline_2025['emissions_electricity_kt'].sum()
+            elec_emissions_base = active_facilities['emissions_electricity_kt'].sum()
             grid_scaling = grid_ef / grid_ef_2025
-            elec_emissions = elec_emissions_2025 * capacity_multiplier * grid_scaling
+            elec_emissions = elec_emissions_base * capacity_multiplier * grid_scaling
 
             total_emissions = fossil_emissions + elec_emissions
 
             # Calculate total capacity
-            total_capacity = baseline_2025['capacity_kt'].sum() * capacity_multiplier
+            total_capacity = active_facilities['capacity_kt'].sum() * capacity_multiplier
 
             trajectory.append({
                 'year': year,
@@ -203,7 +226,9 @@ class BaselineAnalyzer:
                 'electricity_emissions_mt': elec_emissions / 1000,
                 'total_emissions_mt': total_emissions / 1000,
                 'grid_ef_tco2_per_mwh': grid_ef,
-                'n_facilities': len(baseline_2025),
+                'n_facilities_active': n_active,
+                'n_facilities_retired': n_retired,
+                'remaining_capacity_fraction': remaining_capacity_fraction,
                 'capacity_multiplier': capacity_multiplier,
                 'total_capacity_kt': total_capacity,
             })
@@ -213,7 +238,11 @@ class BaselineAnalyzer:
         print(f"   - {start_year} emissions: {df_trajectory.iloc[0]['total_emissions_mt']:.2f} MtCO2")
         print(f"   - {end_year} emissions: {df_trajectory.iloc[-1]['total_emissions_mt']:.2f} MtCO2")
         print(f"   - Capacity growth: {(df_trajectory.iloc[-1]['capacity_multiplier']-1)*100:.1f}%")
-        print(f"   - All {len(baseline_2025)} facilities operate forever")
+        if facility_lifetime:
+            print(f"   - {df_trajectory.iloc[0]['n_facilities_active']} → {df_trajectory.iloc[-1]['n_facilities_active']} facilities (retired: {df_trajectory.iloc[-1]['n_facilities_retired']})")
+            print(f"   - Remaining capacity: {df_trajectory.iloc[-1]['remaining_capacity_fraction']*100:.1f}%")
+        else:
+            print(f"   - All {len(baseline_2025)} facilities operate forever")
 
         self.df_trajectory = df_trajectory
         return df_trajectory
@@ -392,14 +421,38 @@ class BaselineAnalyzer:
         save_csv_output(self.df_by_company, self.output_dir / 'emissions_by_company.csv')
         save_csv_output(self.df_by_location, self.output_dir / 'emissions_by_location.csv')
 
-    def run_complete_analysis(self):
+    def run_complete_analysis(self, include_retirement_scenario=True):
         """Run complete baseline analysis"""
         print("\n" + "="*80)
         print("RUNNING COMPLETE BASELINE ANALYSIS")
         print("="*80)
 
         self.calculate_baseline_2025()
-        self.project_bau_trajectory()
+
+        # Scenario 1: No retirement (infinite lifetime)
+        print("\n" + "="*60)
+        print("SCENARIO 1: NO RETIREMENT (Infinite Lifetime)")
+        print("="*60)
+        df_traj_infinite = self.project_bau_trajectory(facility_lifetime=None)
+
+        # Scenario 2: 50-year retirement (optional)
+        df_traj_50yr = None
+        if include_retirement_scenario:
+            print("\n" + "="*60)
+            print("SCENARIO 2: 50-YEAR FACILITY LIFETIME")
+            print("="*60)
+            df_traj_50yr = self.project_bau_trajectory(facility_lifetime=50)
+
+            # Save retirement scenario separately
+            save_csv_output(df_traj_50yr, self.output_dir / 'bau_trajectory_with_retirement_50yr.csv',
+                           f"({len(df_traj_50yr)} years)")
+
+            # Create comparison visualization
+            self._create_retirement_comparison(df_traj_infinite, df_traj_50yr)
+
+        # Use infinite lifetime as default for subsequent analysis
+        self.df_trajectory = df_traj_infinite
+
         self.calculate_aggregations()
         self.calculate_fuel_costs()
         self.create_visualizations()
@@ -413,7 +466,57 @@ class BaselineAnalyzer:
         return {
             'baseline': self.df_baseline,
             'trajectory': self.df_trajectory,
+            'trajectory_50yr': df_traj_50yr,
             'by_product': self.df_by_product,
             'by_company': self.df_by_company,
             'by_location': self.df_by_location,
         }
+
+    def _create_retirement_comparison(self, df_infinite, df_50yr):
+        """Create comparison visualization for retirement scenarios"""
+        print("\nCreating retirement scenario comparison...")
+
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+
+        # Plot 1: Emissions comparison
+        ax1.plot(df_infinite['year'], df_infinite['total_emissions_mt'],
+                linewidth=3, color='#E74C3C', label='No Retirement (Infinite)', marker='o', markersize=5)
+        ax1.plot(df_50yr['year'], df_50yr['total_emissions_mt'],
+                linewidth=3, color='#2ECC71', label='50-Year Retirement', marker='s', markersize=5)
+
+        ax1.fill_between(df_infinite['year'], df_50yr['total_emissions_mt'], df_infinite['total_emissions_mt'],
+                        alpha=0.3, color='orange', label='Difference')
+
+        ax1.set_xlabel('Year', fontsize=13, fontweight='bold')
+        ax1.set_ylabel('Emissions (MtCO2/year)', fontsize=13, fontweight='bold')
+        ax1.set_title('BAU Emissions: Retirement Impact', fontsize=15, fontweight='bold')
+        ax1.legend(loc='upper right', fontsize=11)
+        ax1.grid(True, alpha=0.3, linestyle='--')
+
+        # Plot 2: Active facilities
+        ax2.plot(df_50yr['year'], df_50yr['n_facilities_active'],
+                linewidth=3, color='#3498DB', marker='o', markersize=5)
+        ax2.fill_between(df_50yr['year'], 0, df_50yr['n_facilities_active'],
+                        alpha=0.3, color='#3498DB')
+
+        ax2_twin = ax2.twinx()
+        ax2_twin.plot(df_50yr['year'], df_50yr['n_facilities_retired'],
+                     linewidth=3, color='#E74C3C', linestyle='--', marker='s', markersize=5)
+
+        ax2.set_xlabel('Year', fontsize=13, fontweight='bold')
+        ax2.set_ylabel('Active Facilities', fontsize=13, fontweight='bold', color='#3498DB')
+        ax2_twin.set_ylabel('Retired Facilities', fontsize=13, fontweight='bold', color='#E74C3C')
+        ax2.set_title('Facility Retirement Schedule (50-Year Lifetime)', fontsize=15, fontweight='bold')
+        ax2.grid(True, alpha=0.3, linestyle='--')
+        ax2.tick_params(axis='y', labelcolor='#3498DB')
+        ax2_twin.tick_params(axis='y', labelcolor='#E74C3C')
+
+        plt.tight_layout()
+        save_plot(fig, self.output_dir / 'bau_retirement_comparison.png')
+
+        # Calculate and print key statistics
+        reduction_2050 = df_infinite.iloc[-1]['total_emissions_mt'] - df_50yr.iloc[-1]['total_emissions_mt']
+        reduction_pct = (reduction_2050 / df_infinite.iloc[-1]['total_emissions_mt']) * 100
+
+        print(f"   - 2050 emissions reduction from retirement: {reduction_2050:.2f} MtCO2 ({reduction_pct:.1f}%)")
+        print(f"   - Facilities retired by 2050: {df_50yr.iloc[-1]['n_facilities_retired']}/{len(self.df_baseline)}")
