@@ -2163,25 +2163,12 @@ def show_about():
         - Least-cost technology deployment
         - Scenario comparison and sensitivity analysis
 
-        ### ⚙️ Technical Details
-
-        - **Language:** Python 3.12
-        - **Key libraries:** pandas, numpy, matplotlib, plotly, streamlit
-        - **Runtime:** ~10-15 seconds for complete analysis
-        - **Output:** 20+ CSV files, 15+ visualizations
-
         ### 📈 Validation
 
         ✅ **Company rankings** match ESG reports (LG Chem #1, Lotte #3)
         ✅ **Emissions levels** within ±10% of IEA benchmarks
         ✅ **Technology costs** align with peer-reviewed literature
         ✅ **Total baseline:** 52 MtCO2 (vs. KPIA estimate: 50-55 MtCO2)
-
-        ---
-
-        **Model Version:** 2.1
-        **Last Updated:** January 2025
-        **Status:** Production Ready ✅
         """)
 
     with tab2:
