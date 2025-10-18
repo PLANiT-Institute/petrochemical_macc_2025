@@ -2,16 +2,15 @@
 Sensitivity Analysis Module (CORRECTED)
 
 Creates alternative MACC scenarios with different assumptions:
-1. No FOSSIL FUEL cost differential (naphtha/LNG/fuel gas prices = 0)
-   - This removes the savings from avoiding fossil fuel purchases
-   - BUT keeps the costs of new energy carriers (H2, electricity)
-2. No learning curves (constant 2025 CAPEX)
-3. Combined (no fossil fuel savings + no learning)
+1. Baseline removes fossil fuel savings (set fossil fuel prices to zero)
+   - New energy carriers (H2, electricity) still incur their full costs
+2. Legacy comparison keeps fossil fuel prices unchanged (allows savings)
+3. Learning curve sensitivities (with/without legacy fossil savings)
 
 CORRECTED INTERPRETATION:
 "Fuel cost differential" = savings from NOT buying naphtha/LNG/fuel gas
-When we remove fuel differential, we set fossil fuel prices to ZERO,
-which makes the technologies look MORE expensive (lose the savings benefit)
+Removing fossil savings sets fossil fuel prices to ZERO so technologies no longer
+benefit from avoided fuel purchases, but they still pay for alternative energy.
 """
 
 import pandas as pd
@@ -45,24 +44,34 @@ class SensitivityAnalyzerCorrected:
 
         scenarios = {
             'baseline': {
-                'remove_fossil_fuel_savings': False,
+                'remove_fossil_fuel_savings': True,
                 'include_learning': True,
-                'description': 'Baseline (Full Model)'
+                'description': 'Baseline (No fossil fuel savings)'
             },
             'no_fossil_savings': {
                 'remove_fossil_fuel_savings': True,
                 'include_learning': True,
-                'description': 'No Fossil Fuel Savings (naphtha price = 0)'
+                'description': 'No Fossil Fuel Savings (alias of baseline)'
             },
             'no_learning': {
-                'remove_fossil_fuel_savings': False,
+                'remove_fossil_fuel_savings': True,
                 'include_learning': False,
-                'description': 'No Learning Curves (2025 CAPEX constant)'
+                'description': 'No Learning Curves (no fossil savings)'
             },
             'no_fossil_no_learning': {
                 'remove_fossil_fuel_savings': True,
                 'include_learning': False,
-                'description': 'No Fossil Savings + No Learning'
+                'description': 'No Fossil Savings + No Learning (alias)'
+            },
+            'legacy_with_savings': {
+                'remove_fossil_fuel_savings': False,
+                'include_learning': True,
+                'description': 'Legacy: keeps fossil fuel savings'
+            },
+            'legacy_with_savings_no_learning': {
+                'remove_fossil_fuel_savings': False,
+                'include_learning': False,
+                'description': 'Legacy: fossil savings + no learning'
             }
         }
 

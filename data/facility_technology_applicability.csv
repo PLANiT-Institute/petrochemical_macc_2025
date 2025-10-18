@@ -1,0 +1,17 @@
+product_group,product,process,heat_pump_applicable,ncc_h2_applicable,ncc_electricity_applicable,re_ppa_applicable,priority_technology,notes
+Olefins,Ethylene,Naphtha Cracker,FALSE,TRUE,TRUE,TRUE,NCC-H2,Primary cracking product - full electrification or H2 possible
+Olefins,Propylene,Naphtha Cracker,FALSE,TRUE,TRUE,TRUE,NCC-H2,Co-product of ethylene cracking
+Olefins,Butadiene,Naphtha Cracker,FALSE,TRUE,TRUE,TRUE,NCC-H2,Co-product of ethylene cracking
+Aromatics,Benzene,BTX Plant,TRUE,FALSE,FALSE,TRUE,Heat_Pump,Separation process - heat pump applicable for low-temp heat
+Aromatics,Toluene,BTX Plant,TRUE,FALSE,FALSE,TRUE,Heat_Pump,Separation process - heat pump applicable
+Aromatics,Xylene,BTX Plant,TRUE,FALSE,FALSE,TRUE,Heat_Pump,Separation process - heat pump applicable
+Aromatics,Styrene,Utility,TRUE,FALSE,FALSE,TRUE,Heat_Pump,Downstream processing
+Polymers,LDPE,Utility,TRUE,FALSE,FALSE,TRUE,Heat_Pump,Polymerization process
+Polymers,HDPE,Utility,TRUE,FALSE,FALSE,TRUE,Heat_Pump,Polymerization process
+Polymers,PP,Utility,TRUE,FALSE,FALSE,TRUE,Heat_Pump,Polymerization process
+Polymers,PS,Utility,TRUE,FALSE,FALSE,TRUE,Heat_Pump,Polymerization process
+Polymers,PVC,Utility,TRUE,FALSE,FALSE,TRUE,Heat_Pump,Polymerization process
+Intermediates,Phenol,Utility,TRUE,FALSE,FALSE,TRUE,Heat_Pump,Chemical intermediate production
+Intermediates,Acetone,Utility,TRUE,FALSE,FALSE,TRUE,Heat_Pump,Chemical intermediate production
+Intermediates,EG,Utility,TRUE,FALSE,FALSE,TRUE,Heat_Pump,Ethylene glycol production
+Other,All other products,Utility,TRUE,FALSE,FALSE,TRUE,Heat_Pump,Default applicability for downstream processes

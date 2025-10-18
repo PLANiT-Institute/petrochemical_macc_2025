@@ -46,7 +46,11 @@ class DataLoader:
 
     def load_technology_params(self):
         """Load technology parameters"""
-        return pd.read_csv(self.data_dir / 'technology_parameters.csv')
+        # Check both data_dir and output_dir for backwards compatibility
+        tech_path = self.data_dir / 'technology_parameters.csv'
+        if not tech_path.exists():
+            tech_path = Path('output') / 'technology_parameters.csv'
+        return pd.read_csv(tech_path, index_col=None)
 
     def load_heat_pump_applicability(self):
         """Load heat pump applicability"""
@@ -176,6 +180,23 @@ class PriceCalculator:
         # Interpolate if year not found
         return np.interp(year, self.re_prices['year'], self.re_prices['re_price_usd_per_mwh'])
 
+    def get_fuel_prices(self, year):
+        """Get all fuel prices for a given year ($/GJ or $/kWh)"""
+        if self.fuel_prices is None:
+            raise ValueError("Fuel price trajectory not loaded")
+
+        row = self.fuel_prices[self.fuel_prices['year'] == year]
+        if len(row) > 0:
+            return row.iloc[0].to_dict()
+
+        # Interpolate if year not found
+        result = {}
+        for col in self.fuel_prices.columns:
+            if col != 'year':
+                result[col] = np.interp(year, self.fuel_prices['year'], self.fuel_prices[col])
+        result['year'] = year
+        return result
+
     def calculate_capital_recovery_factor(self, discount_rate, lifetime):
         """Calculate CRF for annualizing capital costs"""
         if discount_rate == 0:
@@ -224,6 +245,11 @@ class TechnologyCostCalculator:
             'available': available,
             'cop': tech_row.get('cop', None),
             'trl': tech_row.get('trl', None),
+            'h2_ton_per_ton_ethylene': tech_row.get('h2_ton_per_ton_ethylene', None),
+            'elec_mwh_per_ton_ethylene': tech_row.get('elec_mwh_per_ton_ethylene', None),
+            'naphtha_combustion_gj_per_ton_ethylene': tech_row.get('naphtha_combustion_gj_per_ton_ethylene', None),
+            'thermal_energy_replaced_gj_per_ton': tech_row.get('thermal_energy_replaced_gj_per_ton', None),
+            'energy_conversion_efficiency': tech_row.get('energy_conversion_efficiency', 1.0),
         }
 
 

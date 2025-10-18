@@ -1,9 +1,9 @@
 """
 Sensitivity Analysis Module
 Creates alternative MACC scenarios with different assumptions:
-1. No fuel cost differential (fuel_diff = 0)
-2. No learning curves (constant 2025 CAPEX)
-3. Combined (no fuel diff + no learning)
+1. Baseline clamps fossil fuel savings at zero (no negative fuel_diff)
+2. Legacy comparison retains the full fuel cost differential
+3. Learning curve sensitivities (with/without legacy fuel differential)
 """
 
 import pandas as pd
@@ -26,24 +26,34 @@ class SensitivityAnalyzer:
 
         scenarios = {
             'baseline': {
-                'include_fuel_diff': True,
+                'include_fuel_diff': False,
                 'include_learning': True,
-                'description': 'Baseline (Full Model)'
+                'description': 'Baseline (No fossil fuel savings)'
             },
             'no_fuel_diff': {
                 'include_fuel_diff': False,
                 'include_learning': True,
-                'description': 'No Fuel Cost Differential'
+                'description': 'No Fuel Cost Differential (same as baseline)'
             },
             'no_learning': {
-                'include_fuel_diff': True,
+                'include_fuel_diff': False,
                 'include_learning': False,
                 'description': 'No Learning Curves (2025 CAPEX constant)'
             },
             'no_fuel_no_learning': {
                 'include_fuel_diff': False,
                 'include_learning': False,
-                'description': 'No Fuel Diff + No Learning'
+                'description': 'No Fuel Diff + No Learning (same as baseline assumptions)'
+            },
+            'legacy_with_fuel_diff': {
+                'include_fuel_diff': True,
+                'include_learning': True,
+                'description': 'Legacy: includes fossil fuel savings'
+            },
+            'legacy_with_fuel_diff_no_learning': {
+                'include_fuel_diff': True,
+                'include_learning': False,
+                'description': 'Legacy: fuel savings + no learning'
             }
         }
 
@@ -152,13 +162,15 @@ class SensitivityAnalyzer:
             opex_ann = capex_ann * (tech_costs['opex_pct_capex'] / 100)
 
             # Fuel cost differential
+            cop = tech_costs['cop']
+            re_price_per_gj_thermal = (re_price / 3.6) / cop
+            gj_per_tco2 = 1 / ef_naphtha
+            fuel_cost_diff_raw = (re_price_per_gj_thermal - naphtha_price) * gj_per_tco2
+
             if include_fuel_diff:
-                cop = tech_costs['cop']
-                re_price_per_gj_thermal = (re_price / 3.6) / cop
-                gj_per_tco2 = 1 / ef_naphtha
-                fuel_cost_diff = (re_price_per_gj_thermal - naphtha_price) * gj_per_tco2
+                fuel_cost_diff = fuel_cost_diff_raw
             else:
-                fuel_cost_diff = 0.0  # Sensitivity: Remove fuel savings
+                fuel_cost_diff = max(0.0, fuel_cost_diff_raw)
 
             total_cost = capex_ann + opex_ann + fuel_cost_diff
 
@@ -284,10 +296,12 @@ class SensitivityAnalyzer:
         grid_price = 100 + (150 - 100) * (year - 2025) / (2050 - 2025)
 
         # Cost differential
+        cost_diff_per_mwh_raw = re_price - grid_price
+
         if include_fuel_diff:
-            cost_diff_per_mwh = re_price - grid_price
+            cost_diff_per_mwh = cost_diff_per_mwh_raw
         else:
-            cost_diff_per_mwh = 0.0  # Sensitivity: No cost difference
+            cost_diff_per_mwh = max(0.0, cost_diff_per_mwh_raw)
 
         # MACC
         if grid_ef > 0:
@@ -302,7 +316,7 @@ class SensitivityAnalyzer:
             'abatement_potential_mtco2': potential_mt,
             'capex_ann_usd_per_tco2': 0,
             'opex_ann_usd_per_tco2': 0,
-            'fuel_cost_diff_usd_per_tco2': cost_diff_per_mwh / grid_ef if grid_ef > 0 else 0,
+            'fuel_cost_diff_usd_per_tco2': (cost_diff_per_mwh / grid_ef) if grid_ef > 0 else 0,
             'total_cost_usd_per_tco2': macc,
             'grid_price_usd_per_mwh': grid_price,
             'grid_ef_tco2_per_mwh': grid_ef,

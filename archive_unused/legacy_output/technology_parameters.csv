@@ -1,0 +1,5 @@
+technology,applies_to,cop,h2_ton_per_ton_ethylene,elec_mwh_per_ton_ethylene,thermal_energy_replaced_gj_per_ton,energy_conversion_efficiency,trl,available_year,capex_2025_musd_per_mtco2,capex_2030_musd_per_mtco2,capex_2040_musd_per_mtco2,capex_2050_musd_per_mtco2,opex_pct_capex,lifetime_years,notes
+Heat_Pump,All processes <165C,4.0,,,,0.95,9.0,2025,150,120,90,75,3.0,20,Heat pump replaces fossil fuel combustion with electricity
+NCC-H2,Naphtha crackers only,,0.20,,,0.85,7.0,2030,300,250,180,150,2.5,25,H2 cracker: 0.20 ton H2 per ton ethylene (naphtha remains as feedstock only)
+NCC-Electricity,Naphtha crackers only,,,3.0,,0.95,6.0,2030,350,300,220,180,2.0,25,Electric cracker: 3.0 MWh per ton ethylene (naphtha remains as feedstock only)
+RE_PPA,NCC electricity only,,,,,1.0,,2025,0,0,0,0,0.0,99,Renewable PPA: contract switch only

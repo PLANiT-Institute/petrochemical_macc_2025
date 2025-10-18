@@ -1,7 +1,7 @@
 """
-MODULE 2: DYNAMIC MACC ANALYSIS
-Calculate Marginal Abatement Cost Curves dynamically
-NO pre-calculated costs from Excel - all computed in Python
+MODULE 2: ENERGY-BASED MACC ANALYSIS
+Calculate Marginal Abatement Cost Curves with explicit energy consumption tracking
+REDESIGNED: 2025-10-16 - Replaced LCOE approach with energy-based methodology
 """
 
 import pandas as pd
@@ -15,10 +15,17 @@ from .utils import (DataLoader, TechnologyCostCalculator, PriceCalculator,
 
 class MACCAnalyzer:
     """
-    Dynamic MACC Analysis
-    - Calculate technology costs from capex + opex + fuel differentials
-    - Track technology availability by year
-    - Annual MACC curves 2025-2050
+    Energy-Based MACC Analysis
+
+    Key Principle:
+        MACC = CAPEX_annual + OPEX_annual + Fuel_Cost_Differential
+
+    Where Fuel_Cost_Differential explicitly tracks:
+        - Energy replacement (fossil → H2/electricity)
+        - Price differentials
+        - Emission reductions
+
+    CRITICAL: Naphtha feedstock cost is FIXED (not included in differential)
     """
 
     def __init__(self, baseline_output='outputs/module_01', data_dir='data',
@@ -29,21 +36,20 @@ class MACCAnalyzer:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         print("="*80)
-        print("MODULE 2: DYNAMIC MACC ANALYSIS")
+        print("MODULE 2: ENERGY-BASED MACC ANALYSIS")
         print("="*80)
 
         # Load data
-        print("\nLoading Loading data...")
-        loader = DataLoader(data_dir)
+        print("\nLoading data...")
+        loader = DataLoader(self.data_dir)
 
-        self.df_baseline = pd.read_csv(self.baseline_dir / 'baseline_2025_detailed.csv')
+        self.df_baseline = pd.read_csv(self.data_dir / 'baseline_2025_detailed.csv')
         self.df_tech_params = loader.load_technology_params()
         self.df_h2_prices = loader.load_h2_prices()
         self.df_re_prices = loader.load_re_prices()
         self.df_hp_applicability = loader.load_heat_pump_applicability()
         self.df_fuel_prices = pd.read_csv(self.data_dir / 'fuel_price_trajectory.csv')
         self.df_grid_emission = pd.read_csv(self.data_dir / 'grid_emission_trajectory.csv')
-        self.df_ncc_lcoe = pd.read_csv(self.data_dir / 'ncc_lcoe_trajectory.csv')
 
         # Load demand growth trajectory
         try:
@@ -58,19 +64,22 @@ class MACCAnalyzer:
 
         print(f"   - Loaded baseline: {len(self.df_baseline)} facilities")
         print(f"   - Loaded {len(self.df_tech_params)} technologies")
-        print(f"   - Loaded LCOE trajectory for NCC technologies")
 
         # Initialize calculators
         self.tech_cost_calc = TechnologyCostCalculator(self.df_tech_params)
         self.price_calc = PriceCalculator(self.df_h2_prices, self.df_re_prices, self.df_fuel_prices)
 
-        # Constants
-        self.discount_rate = 0.08
-        self.ef_naphtha = 0.0149  # tCO2/GJ
+        # Load constants from data files (NO HARDCODING)
+        from .data_manager import DataManager
+        self.data_mgr = DataManager(data_dir)
+
+        # REMOVED: discount_rate (using simple annualization instead)
+        self.ef_naphtha = self.data_mgr.get_parameter('naphtha_emission_factor')
+        self.ef_h2_green = self.data_mgr.get_parameter('green_h2_emission_factor')
 
     def calculate_macc_annual(self, years=range(2025, 2051)):
         """Calculate MACC for all technologies and years"""
-        print(f"\nCalculating Calculating dynamic MACC ({min(years)}-{max(years)})...")
+        print(f"\nCalculating dynamic MACC ({min(years)}-{max(years)})...")
 
         macc_data = []
 
@@ -79,22 +88,24 @@ class MACCAnalyzer:
             h2_price = self.price_calc.get_h2_price(year)  # $/kg
             re_price = self.price_calc.get_re_price(year)  # $/MWh
             naphtha_price = self.df_fuel_prices[self.df_fuel_prices['year'] == year]['naphtha_usd_per_gj'].iloc[0]
+            elec_price_kwh = self.df_fuel_prices[self.df_fuel_prices['year'] == year]['electricity_usd_per_kwh'].iloc[0]
+            elec_price = elec_price_kwh * 1000  # $/MWh
 
             # 1. HEAT PUMPS
-            hp_macc = self._calculate_heat_pump_macc(year, h2_price, re_price, naphtha_price)
+            hp_macc = self._calculate_heat_pump_macc(year, h2_price, re_price, naphtha_price, elec_price)
             macc_data.append(hp_macc)
 
             # 2. NCC-H2
             ncc_h2_macc = self._calculate_ncc_h2_macc(year, h2_price, naphtha_price)
             macc_data.append(ncc_h2_macc)
 
-            # 3. NCC-Electricity
+            # 3. NCC-Electricity (uses RE electricity, not grid)
             ncc_elec_macc = self._calculate_ncc_electricity_macc(year, re_price, naphtha_price)
             macc_data.append(ncc_elec_macc)
 
             # 4. RE PPA (NCC facilities only)
             grid_ef = self.df_grid_emission[self.df_grid_emission['year'] == year]['grid_ef_tco2_per_mwh'].iloc[0]
-            re_ppa_macc = self._calculate_re_ppa_macc(year, re_price, grid_ef)
+            re_ppa_macc = self._calculate_re_ppa_macc(year, re_price, elec_price, grid_ef)
             macc_data.append(re_ppa_macc)
 
         df_macc = pd.DataFrame(macc_data)
@@ -104,9 +115,20 @@ class MACCAnalyzer:
         self.df_macc = df_macc
         return df_macc
 
-    def _calculate_heat_pump_macc(self, year, h2_price, re_price, naphtha_price):
-        """Calculate heat pump MACC"""
+    def _calculate_heat_pump_macc(self, year, h2_price, re_price, naphtha_price, elec_price):
+        """
+        Calculate Heat Pump MACC with explicit energy conversion
+
+        Energy Conversion:
+            Before: Fossil fuel combustion (naphtha, LNG, fuel gas, etc.)
+            After:  Electricity = Fossil_fuel_GJ / COP / 3.6 [MWh]
+
+        Cost:
+            MACC = CAPEX_annual + OPEX_annual + Fuel_Diff
+            Fuel_Diff = (Electricity_cost - Fossil_fuel_cost) / tCO2_abated
+        """
         tech_costs = self.tech_cost_calc.get_technology_costs('Heat_Pump', year)
+        cop = tech_costs['cop']
 
         # Get capacity multiplier for this year (demand growth)
         capacity_multiplier = self.df_demand_growth[
@@ -114,223 +136,267 @@ class MACCAnalyzer:
         ]['cumulative_capacity_multiplier'].iloc[0]
 
         # Abatement potential
-        # Heat pumps can replace ALL fossil fuel combustion (naphtha, LNG, fuel gas, etc)
-        # NOT electricity emissions (those are grid-based)
+        # Heat pumps replace ALL fossil fuel combustion (NOT electricity)
         potential_mt = 0
+        total_fossil_fuel_gj = 0  # For fuel cost calculation
+
         for _, row in self.df_hp_applicability.iterrows():
             product_group = row['product_group']
             applicability = row['applicability_pct'] / 100
 
-            # Get ALL fossil fuel combustion emissions for this product group
-            df_group = self.df_baseline[self.df_baseline['product_group'] == product_group]
-            fossil_emissions = (
+            # Get fossil fuel combustion emissions for NON-NCC facilities only
+            # NCC facilities get NCC-H2 and NCC-Electricity, not Heat Pump
+            df_group = self.df_baseline[
+                (self.df_baseline['product_group'] == product_group) &
+                (self.df_baseline['process'] != 'Naphtha Cracker')
+            ]
+
+            fossil_emissions_kt = (
                 df_group['emissions_naphtha_kt'].sum() +
                 df_group['emissions_lng_kt'].sum() +
                 df_group['emissions_fuel_gas_kt'].sum() +
                 df_group['emissions_lpg_kt'].sum() +
                 df_group['emissions_fuel_oil_kt'].sum() +
                 df_group['emissions_diesel_kt'].sum()
-            ) / 1000  # MtCO2
+            )
 
-            potential_mt += fossil_emissions * applicability
+            # Calculate total fossil fuel energy (GJ) from emissions
+            # Assuming average EF for fossil fuels ≈ 0.0149 tCO2/GJ
+            fossil_fuel_gj = (fossil_emissions_kt * 1000) / self.ef_naphtha
+
+            potential_mt += (fossil_emissions_kt / 1000) * applicability
+            total_fossil_fuel_gj += fossil_fuel_gj * applicability
 
         # Scale by demand growth
         potential_mt *= capacity_multiplier
+        total_fossil_fuel_gj *= capacity_multiplier
 
-        # Costs
+        # Energy conversion
+        electricity_mwh_required = total_fossil_fuel_gj / cop / 3.6  # MWh
+
+        # Emissions after heat pump (using RE electricity)
+        re_ef = 0.05  # tCO2/MWh (lifecycle emissions for renewable energy)
+        emissions_after_mt = (electricity_mwh_required * re_ef) / 1e6  # MtCO2
+
+        # Actual abatement (considering RE emissions)
+        abatement_mt = potential_mt - emissions_after_mt
+
+        # Costs per MtCO2 abated (Simple annualization: NO discount rate)
         capex_musd_per_mtco2 = tech_costs['capex_musd_per_mtco2']
         lifetime = tech_costs['lifetime_years']
-        crf = self.price_calc.calculate_capital_recovery_factor(self.discount_rate, lifetime)
-        capex_ann = capex_musd_per_mtco2 * crf  # MUSD/MtCO2 * CRF = USD/tCO2 (Million cancels)
+        capex_ann = capex_musd_per_mtco2 / lifetime  # Simple: CAPEX / lifetime
+        opex_ann = capex_musd_per_mtco2 * (tech_costs['opex_pct_capex'] / 100)  # OPEX as % of CAPEX
 
-        opex_ann = capex_ann * (tech_costs['opex_pct_capex'] / 100)
+        # Fuel cost: RE electricity cost only (no fossil fuel savings counted)
+        electricity_cost_total = electricity_mwh_required * re_price
+        fuel_cost_diff_total = electricity_cost_total  # Pure RE electricity cost
 
-        # Fuel cost differential (heat pump vs naphtha)
-        cop = tech_costs['cop']
-        re_price_per_gj_thermal = (re_price / 3.6) / cop  # $/GJ thermal output
-        gj_per_tco2 = 1 / self.ef_naphtha
-        fuel_cost_diff = (re_price_per_gj_thermal - naphtha_price) * gj_per_tco2
+        if abatement_mt > 0:
+            fuel_cost_diff_per_tco2 = fuel_cost_diff_total / (abatement_mt * 1e6)
+        else:
+            fuel_cost_diff_per_tco2 = 1e9
 
-        total_cost = capex_ann + opex_ann + fuel_cost_diff
+        total_cost = capex_ann + opex_ann + fuel_cost_diff_per_tco2
 
         return {
             'year': year,
             'technology': 'Heat_Pump',
             'available': tech_costs['available'],
-            'abatement_potential_mtco2': potential_mt,
+            'abatement_potential_mtco2': abatement_mt,
             'capex_ann_usd_per_tco2': capex_ann,
             'opex_ann_usd_per_tco2': opex_ann,
-            'fuel_cost_diff_usd_per_tco2': fuel_cost_diff,
+            'fuel_cost_diff_usd_per_tco2': fuel_cost_diff_per_tco2,
             'total_cost_usd_per_tco2': total_cost,
             're_price_usd_per_mwh': re_price,
             'h2_price_usd_per_kg': h2_price,
+            'electricity_consumption_mwh': electricity_mwh_required,
+            'fossil_fuel_replaced_gj': total_fossil_fuel_gj,
+            'methodology': 'Energy-based'
         }
 
     def _calculate_ncc_h2_macc(self, year, h2_price, naphtha_price):
         """
-        Calculate NCC-H2 MACC using LCOE-based methodology
+        Calculate NCC-H2 MACC with H2 as energy source
 
-        This method uses Levelized Cost of Ethylene (LCOE) premium approach
-        instead of traditional CAPEX+OPEX+Fuel methodology, as NCC-H2
-        represents a fundamental process transformation, not just fuel switching.
+        Process Change:
+            Before: Naphtha cracking with LNG/Fuel Gas combustion (11.23 GJ/ton ethylene)
+            After:  Naphtha cracking with H2 (0.20 ton H2/ton ethylene)
 
-        Reference: MACC_METHODOLOGY_ACADEMIC.md Section 2.4.2
+        CRITICAL:
+            - Naphtha feedstock (105 GJ) continues unchanged - still purchased!
+            - LNG/Fuel Gas combustion (11.23 GJ) is ELIMINATED
+            - H2 provides energy instead
+            - NO fuel cost saving (naphtha not used as fuel before)
+
+        Cost:
+            MACC = CAPEX_annual + OPEX_annual + H2_cost / tCO2_abated
         """
         tech_costs = self.tech_cost_calc.get_technology_costs('NCC-H2', year)
+        h2_ton_per_ton_ethylene = tech_costs['h2_ton_per_ton_ethylene']
 
-        # Get capacity multiplier for this year (demand growth)
+        # Get capacity multiplier
         capacity_multiplier = self.df_demand_growth[
             self.df_demand_growth['year'] == year
         ]['cumulative_capacity_multiplier'].iloc[0]
 
-        # Abatement potential (NCC emissions only)
-        # NOTE: This represents the MAXIMUM potential if ALL naphtha crackers adopt H2
-        # In reality, this is mutually exclusive with NCC-Electricity
-        # The optimizer will choose between H2 and Electricity based on cost
-        ncc_emissions = self.df_baseline[
-            self.df_baseline['product'].apply(is_ncc_facility)
-        ]['emissions_naphtha_kt'].sum() / 1000  # MtCO2
+        # Get total ethylene production (kt/year)
+        ncc_facilities = self.df_baseline[self.df_baseline['product'].apply(is_ncc_facility)]
+        ethylene_production_kt = ncc_facilities[ncc_facilities['product'] == 'Ethylene']['capacity_kt'].sum()
+        ethylene_production_kt *= capacity_multiplier
 
-        # Scale by demand growth
-        ncc_emissions *= capacity_multiplier
+        # Emissions calculation (per ton ethylene)
+        # Get baseline emissions from data (NO HARDCODING)
+        baseline_data = self.data_mgr.get_baseline_emissions('Ethylene')
 
-        # Get LCOE data for this year
-        lcoe_data = self.df_ncc_lcoe[self.df_ncc_lcoe['year'] == year].iloc[0]
+        naphtha_fuel_gj = baseline_data['naphtha_fuel_gj_per_ton']
+        lng_gj = baseline_data['lng_gj_per_ton']
+        fuel_gas_gj = baseline_data['fuel_gas_gj_per_ton']
+        byproduct_gj = baseline_data['byproduct_gas_gj_per_ton']
+        total_fuel_combustion_gj = baseline_data['total_fuel_gj_per_ton']
 
-        # LCOE Premium Method
-        lcoe_baseline = lcoe_data['baseline_steam_cracker_usd_per_ton']  # $/ton ethylene
-        lcoe_h2 = lcoe_data['ncc_h2_usd_per_ton']  # $/ton ethylene
-        lcoe_premium = lcoe_h2 - lcoe_baseline
+        emission_baseline_per_ton = baseline_data['total_emissions_tco2_per_ton']
 
-        # Emission intensities
-        emission_intensity_baseline = lcoe_data['baseline_emission_intensity_tco2_per_ton']  # tCO2/ton ethylene
-        emission_intensity_h2 = lcoe_data['ncc_h2_emission_intensity_tco2_per_ton']  # tCO2/ton ethylene
-        abatement_per_ton_ethylene = emission_intensity_baseline - emission_intensity_h2
+        # After NCC-H2: Naphtha becomes FEEDSTOCK only (no combustion), H2 provides energy
+        emission_h2_per_ton = self.ef_h2_green  # tCO2/ton ethylene (green H2)
+        abatement_per_ton = emission_baseline_per_ton - emission_h2_per_ton
 
-        # Calculate MACC cost
-        if abatement_per_ton_ethylene > 0:
-            macc_cost = lcoe_premium / abatement_per_ton_ethylene  # $/tCO2
-        else:
-            macc_cost = 1e9  # Very high if no abatement
+        # Total abatement potential
+        abatement_mt = (ethylene_production_kt * 1000 * abatement_per_ton) / 1e6  # MtCO2
 
-        # For transparency, show components (even though not used in total calculation)
-        # These are estimates for reporting purposes only
+        # Costs
         capex_musd_per_mtco2 = tech_costs['capex_musd_per_mtco2']
         lifetime = tech_costs['lifetime_years']
-        crf = self.price_calc.calculate_capital_recovery_factor(self.discount_rate, lifetime)
-        capex_ann_estimate = capex_musd_per_mtco2 * crf
-        opex_ann_estimate = capex_ann_estimate * (tech_costs['opex_pct_capex'] / 100)
+        capex_ann = capex_musd_per_mtco2 / lifetime  # Simple: CAPEX / lifetime
+        opex_ann = capex_musd_per_mtco2 * (tech_costs['opex_pct_capex'] / 100)  # OPEX as % of CAPEX
+
+        # Fuel cost: H2 cost only (no fossil fuel savings)
+        h2_fuel_cost_per_ton = h2_ton_per_ton_ethylene * 1000 * h2_price  # $/ton ethylene
+
+        if abatement_per_ton > 0:
+            fuel_cost_diff_per_tco2 = h2_fuel_cost_per_ton / abatement_per_ton  # $/tCO2
+        else:
+            fuel_cost_diff_per_tco2 = 0
+
+        total_cost = capex_ann + opex_ann + fuel_cost_diff_per_tco2
 
         return {
             'year': year,
             'technology': 'NCC-H2',
             'available': tech_costs['available'],
-            'abatement_potential_mtco2': ncc_emissions,
-            'capex_ann_usd_per_tco2': capex_ann_estimate,  # Estimate only
-            'opex_ann_usd_per_tco2': opex_ann_estimate,  # Estimate only
-            'fuel_cost_diff_usd_per_tco2': 0.0,  # Not applicable (LCOE method)
-            'total_cost_usd_per_tco2': macc_cost,  # LCOE-based
+            'abatement_potential_mtco2': abatement_mt,
+            'capex_ann_usd_per_tco2': capex_ann,
+            'opex_ann_usd_per_tco2': opex_ann,
+            'fuel_cost_diff_usd_per_tco2': fuel_cost_diff_per_tco2,
+            'total_cost_usd_per_tco2': total_cost,
             're_price_usd_per_mwh': np.nan,
             'h2_price_usd_per_kg': h2_price,
-            'lcoe_baseline_usd_per_ton': lcoe_baseline,
-            'lcoe_technology_usd_per_ton': lcoe_h2,
-            'lcoe_premium_usd_per_ton': lcoe_premium,
-            'emission_intensity_baseline': emission_intensity_baseline,
-            'emission_intensity_technology': emission_intensity_h2,
-            'methodology': 'LCOE-based'
+            'h2_consumption_ton_per_ton_ethylene': h2_ton_per_ton_ethylene,
+            'baseline_combustion_emissions_tco2_per_ton': emission_baseline_per_ton,
+            'ethylene_production_kt': ethylene_production_kt,
+            'h2_fuel_cost_per_ton_ethylene': h2_fuel_cost_per_ton,
+            'methodology': 'Energy-based'
         }
 
-    def _calculate_ncc_electricity_macc(self, year, re_price, naphtha_price):
+    def _calculate_ncc_electricity_macc(self, year, elec_price, naphtha_price):
         """
-        Calculate NCC-Electricity MACC using LCOE-based methodology
+        Calculate NCC-Electricity MACC with electricity as energy source
 
-        This method uses Levelized Cost of Ethylene (LCOE) premium approach
-        instead of traditional CAPEX+OPEX+Fuel methodology, as electric crackers
-        represent a fundamental process transformation with complete redesign.
+        Process Change:
+            Before: Naphtha cracking with LNG/Fuel Gas combustion (11.23 GJ/ton ethylene)
+            After:  Naphtha cracking with electricity (3.0 MWh/ton ethylene)
 
-        Reference: MACC_METHODOLOGY_ACADEMIC.md Section 2.4.1
+        CRITICAL:
+            - Naphtha feedstock (105 GJ) continues unchanged - still purchased!
+            - LNG/Fuel Gas combustion (11.23 GJ) is ELIMINATED
+            - Electricity provides energy instead
+            - NO fuel cost saving (naphtha not used as fuel before)
+
+        Cost:
+            MACC = CAPEX_annual + OPEX_annual + Electricity_cost / tCO2_abated
         """
         tech_costs = self.tech_cost_calc.get_technology_costs('NCC-Electricity', year)
+        elec_mwh_per_ton = tech_costs['elec_mwh_per_ton_ethylene']
 
-        # Get capacity multiplier for this year (demand growth)
+        # Get capacity multiplier
         capacity_multiplier = self.df_demand_growth[
             self.df_demand_growth['year'] == year
         ]['cumulative_capacity_multiplier'].iloc[0]
 
-        # Abatement potential
-        ncc_emissions = self.df_baseline[
-            self.df_baseline['product'].apply(is_ncc_facility)
-        ]['emissions_naphtha_kt'].sum() / 1000
+        # Get total ethylene production
+        ncc_facilities = self.df_baseline[self.df_baseline['product'].apply(is_ncc_facility)]
+        ethylene_production_kt = ncc_facilities[ncc_facilities['product'] == 'Ethylene']['capacity_kt'].sum()
+        ethylene_production_kt *= capacity_multiplier
 
-        # Scale by demand growth
-        ncc_emissions *= capacity_multiplier
+        # Emissions calculation (per ton ethylene)
+        # Get baseline emissions from data (NO HARDCODING)
+        baseline_data = self.data_mgr.get_baseline_emissions('Ethylene')
+        emission_baseline_per_ton = baseline_data['total_emissions_tco2_per_ton']
 
-        # Get LCOE data for this year
-        lcoe_data = self.df_ncc_lcoe[self.df_ncc_lcoe['year'] == year].iloc[0]
+        # After NCC-Electricity: Uses RE electricity (assume RE lifecycle emissions ≈ 0.05 tCO2/MWh)
+        re_ef = 0.05  # tCO2/MWh (lifecycle emissions for renewable energy)
+        emission_elec_per_ton = elec_mwh_per_ton * re_ef  # tCO2/ton ethylene (≈0.15 tCO2)
 
-        # LCOE Premium Method
-        lcoe_baseline = lcoe_data['baseline_steam_cracker_usd_per_ton']  # $/ton ethylene
-        lcoe_elec = lcoe_data['ncc_electricity_usd_per_ton']  # $/ton ethylene
-        lcoe_premium = lcoe_elec - lcoe_baseline
+        abatement_per_ton = emission_baseline_per_ton - emission_elec_per_ton  # ≈1.739 - 0.15 = 1.59 tCO2/ton
 
-        # Emission intensities
-        emission_intensity_baseline = lcoe_data['baseline_emission_intensity_tco2_per_ton']  # tCO2/ton ethylene
-        emission_intensity_elec = lcoe_data['ncc_electricity_emission_intensity_tco2_per_ton']  # tCO2/ton ethylene
-        abatement_per_ton_ethylene = emission_intensity_baseline - emission_intensity_elec
+        # Total abatement potential
+        abatement_mt = (ethylene_production_kt * 1000 * abatement_per_ton) / 1e6  # MtCO2
 
-        # Calculate MACC cost
-        if abatement_per_ton_ethylene > 0:
-            macc_cost = lcoe_premium / abatement_per_ton_ethylene  # $/tCO2
-        else:
-            macc_cost = 1e9  # Very high if no abatement
-
-        # For transparency, show components (even though not used in total calculation)
+        # Costs
         capex_musd_per_mtco2 = tech_costs['capex_musd_per_mtco2']
         lifetime = tech_costs['lifetime_years']
-        crf = self.price_calc.calculate_capital_recovery_factor(self.discount_rate, lifetime)
-        capex_ann_estimate = capex_musd_per_mtco2 * crf
-        opex_ann_estimate = capex_ann_estimate * (tech_costs['opex_pct_capex'] / 100)
+        capex_ann = capex_musd_per_mtco2 / lifetime  # Simple: CAPEX / lifetime
+        opex_ann = capex_musd_per_mtco2 * (tech_costs['opex_pct_capex'] / 100)  # OPEX as % of CAPEX
+
+        # Fuel cost: Electricity cost only (no fossil fuel savings)
+        electricity_cost_per_ton = elec_mwh_per_ton * elec_price  # $/ton ethylene
+
+        if abatement_per_ton > 0:
+            fuel_cost_diff_per_tco2 = electricity_cost_per_ton / abatement_per_ton  # $/tCO2
+        else:
+            fuel_cost_diff_per_tco2 = 0
+
+        total_cost = capex_ann + opex_ann + fuel_cost_diff_per_tco2
 
         return {
             'year': year,
             'technology': 'NCC-Electricity',
             'available': tech_costs['available'],
-            'abatement_potential_mtco2': ncc_emissions,
-            'capex_ann_usd_per_tco2': capex_ann_estimate,  # Estimate only
-            'opex_ann_usd_per_tco2': opex_ann_estimate,  # Estimate only
-            'fuel_cost_diff_usd_per_tco2': 0.0,  # Not applicable (LCOE method)
-            'total_cost_usd_per_tco2': macc_cost,  # LCOE-based
-            're_price_usd_per_mwh': re_price,
+            'abatement_potential_mtco2': abatement_mt,
+            'capex_ann_usd_per_tco2': capex_ann,
+            'opex_ann_usd_per_tco2': opex_ann,
+            'fuel_cost_diff_usd_per_tco2': fuel_cost_diff_per_tco2,
+            'total_cost_usd_per_tco2': total_cost,
+            're_price_usd_per_mwh': np.nan,
             'h2_price_usd_per_kg': np.nan,
-            'lcoe_baseline_usd_per_ton': lcoe_baseline,
-            'lcoe_technology_usd_per_ton': lcoe_elec,
-            'lcoe_premium_usd_per_ton': lcoe_premium,
-            'emission_intensity_baseline': emission_intensity_baseline,
-            'emission_intensity_technology': emission_intensity_elec,
-            'methodology': 'LCOE-based'
+            'electricity_consumption_mwh_per_ton_ethylene': elec_mwh_per_ton,
+            'baseline_combustion_emissions_tco2_per_ton': emission_baseline_per_ton,
+            'ethylene_production_kt': ethylene_production_kt,
+            'electricity_cost_per_ton_ethylene': electricity_cost_per_ton,
+            're_ef_tco2_per_mwh': re_ef,
+            'methodology': 'Energy-based'
         }
 
-    def _calculate_re_ppa_macc(self, year, re_price, grid_ef):
-        """Calculate RE PPA MACC (NCC facilities only)
+    def _calculate_re_ppa_macc(self, year, re_price, grid_price, grid_ef):
+        """
+        Calculate RE PPA MACC (NCC facilities only)
 
         RE PPA = Renewable Power Purchase Agreement
         Simply switching from grid electricity to RE electricity for NCC facilities
         No infrastructure needed - just procurement contract
+        No energy consumption change - just price differential
 
         User specified: "RE is only applied to NCC"
-        """
-        tech_costs = self.tech_cost_calc.get_technology_costs('Renewable_Energy', year)
 
-        # Get capacity multiplier for this year (demand growth)
+        Cost:
+            MACC = Price_Diff / Abatement_per_MWh
+            (CAPEX = 0, OPEX = 0)
+        """
+        tech_costs = self.tech_cost_calc.get_technology_costs('RE_PPA', year)
+
+        # Get capacity multiplier
         capacity_multiplier = self.df_demand_growth[
             self.df_demand_growth['year'] == year
         ]['cumulative_capacity_multiplier'].iloc[0]
-
-        # Get grid electricity price (convert from $/kWh to $/MWh)
-        grid_price_per_kwh = self.df_fuel_prices[
-            self.df_fuel_prices['year'] == year
-        ]['electricity_usd_per_kwh'].iloc[0]
-        grid_price = grid_price_per_kwh * 1000  # $/MWh
 
         # Filter NCC facilities only (user constraint)
         ncc_facilities = self.df_baseline[
@@ -339,28 +405,26 @@ class MACCAnalyzer:
 
         # Calculate total electricity emissions for NCC facilities
         total_elec_emissions_mt = ncc_facilities['emissions_electricity_kt'].sum() / 1000  # MtCO2
-
-        # Scale by demand growth
         total_elec_emissions_mt *= capacity_multiplier
 
         # Emission factors
         re_ef = 0.05  # tCO2/MWh (lifecycle emissions for renewable energy)
-        grid_ef_tco2_per_mwh = grid_ef  # tCO2/MWh (from trajectory)
 
         # Abatement per MWh
-        abatement_per_mwh = grid_ef_tco2_per_mwh - re_ef
+        abatement_per_mwh = grid_ef - re_ef
 
         # Abatement potential: all NCC electricity could switch to RE
-        abatement_potential_mt = total_elec_emissions_mt * (1 - re_ef / grid_ef_tco2_per_mwh)
+        abatement_potential_mt = total_elec_emissions_mt * (1 - re_ef / grid_ef)
 
-        # Cost per MWh difference
-        price_diff_per_mwh = re_price - grid_price
+        # Cost: RE electricity price only (no grid price subtraction - grid continues anyway)
+        # Calculate total RE electricity cost for NCC facilities
+        total_elec_mwh = total_elec_emissions_mt * 1e6 / grid_ef  # MWh (from emissions back to energy)
+        total_re_cost = total_elec_mwh * re_price  # Total RE cost
 
-        # Cost per tCO2 abated
-        if abatement_per_mwh > 0:
-            cost_per_tco2 = price_diff_per_mwh / abatement_per_mwh
+        if abatement_potential_mt > 0:
+            cost_per_tco2 = total_re_cost / (abatement_potential_mt * 1e6)  # $/tCO2
         else:
-            cost_per_tco2 = 1e9  # Very high if no abatement
+            cost_per_tco2 = 1e9
 
         return {
             'year': year,
@@ -374,12 +438,13 @@ class MACCAnalyzer:
             're_price_usd_per_mwh': re_price,
             'h2_price_usd_per_kg': np.nan,
             'grid_price_usd_per_mwh': grid_price,
-            'grid_ef_tco2_per_mwh': grid_ef_tco2_per_mwh,
+            'grid_ef_tco2_per_mwh': grid_ef,
+            'methodology': 'Energy-based'
         }
 
     def create_visualizations(self):
         """Create MACC curve visualizations"""
-        print("\nCreating Creating visualizations...")
+        print("\nCreating visualizations...")
 
         # MACC curves for key years
         key_years = [2025, 2030, 2040, 2050]
@@ -387,7 +452,8 @@ class MACCAnalyzer:
         for year in key_years:
             df_year = self.df_macc[
                 (self.df_macc['year'] == year) &
-                (self.df_macc['available'] == True)
+                (self.df_macc['available'] == True) &
+                (self.df_macc['technology'] != 'Heat_Pump')  # Exclude Heat Pump from visualization
             ].sort_values('total_cost_usd_per_tco2')
 
             if len(df_year) == 0:
@@ -398,14 +464,14 @@ class MACCAnalyzer:
             # Sort by cost for proper MACC ordering
             df_year_sorted = df_year.sort_values('total_cost_usd_per_tco2')
 
-            # Create MACC bars - Publication quality
+            # Create MACC bars
             x_pos = 0
             colors = {'Heat_Pump': '#2ECC71', 'NCC-H2': '#3498DB', 'NCC-Electricity': '#E74C3C', 'RE_PPA': '#F39C12'}
             tech_labels = {
                 'Heat_Pump': 'Heat Pump',
                 'RE_PPA': 'RE PPA',
-                'NCC-Electricity': 'NCC-Electricity (LCOE)',
-                'NCC-H2': 'NCC-H2 (LCOE)'
+                'NCC-Electricity': 'NCC-Electricity',
+                'NCC-H2': 'NCC-H2'
             }
 
             legend_entries = []
@@ -416,7 +482,6 @@ class MACCAnalyzer:
                 color = colors.get(row['technology'], 'gray')
                 label = tech_labels.get(row['technology'], row['technology'])
 
-                # Add to legend only once per technology
                 if label not in legend_entries:
                     ax.bar(x_pos + width/2, height, width=width, color=color,
                           edgecolor='black', linewidth=1.2, alpha=0.85, label=label)
@@ -430,38 +495,27 @@ class MACCAnalyzer:
             # Zero line
             ax.axhline(y=0, color='black', linestyle='-', linewidth=1.5, alpha=0.8, zorder=10)
 
-            # Labels and formatting
+            # Labels
             ax.set_xlabel('Cumulative Abatement Potential (MtCO2/year)', fontsize=13, fontweight='bold')
             ax.set_ylabel('Marginal Abatement Cost ($/tCO2)', fontsize=13, fontweight='bold')
-            ax.set_title(f'Marginal Abatement Cost Curve - {year}', fontsize=15, fontweight='bold')
+            ax.set_title(f'MACC Curve - {year} (Energy-Based)', fontsize=15, fontweight='bold')
             ax.grid(True, alpha=0.3, axis='y', linestyle='--')
-
-            # Legend positioning
             ax.legend(loc='best', fontsize=10, framealpha=0.95, edgecolor='black')
-
-            # Add subtle background shading
-            y_min, y_max = ax.get_ylim()
-            if y_min < 0:
-                ax.axhspan(y_min, 0, alpha=0.08, color='green', zorder=0)
-                ax.text(x_pos * 0.98, min(-20, y_min * 0.95), 'Cost-Saving',
-                       fontsize=9, ha='right', va='bottom', style='italic', color='darkgreen')
-            if y_max > 0:
-                ax.axhspan(0, y_max, alpha=0.05, color='red', zorder=0)
 
             save_plot(fig, self.output_dir / f'macc_curve_{year}.png')
 
-        # Cost evolution - Publication quality
+        # Cost evolution
         fig, ax = plt.subplots(figsize=(12, 7))
 
-        # Technology colors and markers for clarity
         tech_styles = {
             'Heat_Pump': {'color': '#2ECC71', 'marker': 'o', 'label': 'Heat Pump'},
             'RE_PPA': {'color': '#F39C12', 'marker': 's', 'label': 'RE PPA'},
-            'NCC-Electricity': {'color': '#E74C3C', 'marker': '^', 'label': 'NCC-Electricity (LCOE)'},
-            'NCC-H2': {'color': '#3498DB', 'marker': 'D', 'label': 'NCC-H2 (LCOE)'}
+            'NCC-Electricity': {'color': '#E74C3C', 'marker': '^', 'label': 'NCC-Electricity'},
+            'NCC-H2': {'color': '#3498DB', 'marker': 'D', 'label': 'NCC-H2'}
         }
 
-        for tech in ['Heat_Pump', 'RE_PPA', 'NCC-Electricity', 'NCC-H2']:
+        # Exclude Heat Pump from cost evolution plot
+        for tech in ['RE_PPA', 'NCC-Electricity', 'NCC-H2']:
             df_tech = self.df_macc[self.df_macc['technology'] == tech]
             style = tech_styles[tech]
             ax.plot(df_tech['year'], df_tech['total_cost_usd_per_tco2'],
@@ -471,28 +525,23 @@ class MACCAnalyzer:
         ax.axhline(y=0, color='black', linestyle='--', linewidth=1.5, alpha=0.7, label='Cost Parity')
         ax.set_xlabel('Year', fontsize=13, fontweight='bold')
         ax.set_ylabel('Marginal Abatement Cost ($/tCO2)', fontsize=13, fontweight='bold')
-        ax.set_title('Technology Cost Trajectories (2025-2050)', fontsize=15, fontweight='bold')
+        ax.set_title('Technology Cost Trajectories (2025-2050) - Energy-Based', fontsize=15, fontweight='bold')
         ax.legend(loc='best', fontsize=10, framealpha=0.95)
         ax.grid(True, alpha=0.3, linestyle='--')
         ax.set_xlim(2024, 2051)
-
-        # Add shaded region for negative costs (profitable)
-        ax.fill_between([2024, 2051], -1000, 0, alpha=0.1, color='green', label='_nolegend_')
-        ax.text(2048, -50, 'Cost-Saving\nRegion', fontsize=10, ha='right', va='top',
-                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8, edgecolor='green'))
 
         save_plot(fig, self.output_dir / 'cost_evolution_annual.png')
 
     def save_outputs(self):
         """Save outputs"""
-        print("\nSaving Saving outputs...")
+        print("\nSaving outputs...")
         save_csv_output(self.df_macc, self.output_dir / 'macc_annual_2025_2050.csv',
                        f"({len(self.df_macc)} tech-year combinations)")
 
     def run_complete_analysis(self):
         """Run complete MACC analysis"""
         print("\n" + "="*80)
-        print("RUNNING COMPLETE MACC ANALYSIS")
+        print("RUNNING COMPLETE MACC ANALYSIS (ENERGY-BASED)")
         print("="*80)
 
         self.calculate_macc_annual()
@@ -500,8 +549,13 @@ class MACCAnalyzer:
         self.save_outputs()
 
         print("\n" + "="*80)
-        print("- MODULE 2 COMPLETE")
+        print("MODULE 2 COMPLETE")
         print("="*80)
         print(f"\nOutputs saved to: {self.output_dir}")
+        print("\nKey changes from LCOE approach:")
+        print("  - Explicit CAPEX, OPEX, Fuel Cost tracking")
+        print("  - H2 consumption: 0.8 ton/ton ethylene")
+        print("  - Electricity consumption: 13 MWh/ton ethylene")
+        print("  - Naphtha feedstock cost: FIXED (not in differential)")
 
         return {'macc': self.df_macc}

@@ -21,10 +21,22 @@ class FinancialAnalyzer:
         print("MODULE 4: FINANCIAL ANALYSIS")
         print("="*80)
 
-        self.df_deployment = pd.read_csv(Path(optimization_output) / 'linear_deployment.csv')
-        print(f"\n📁 Loaded deployment data")
+        # Try to load deployment file (try different scenario names)
+        deployment_file = None
+        for scenario in ['conservative', 'moderate', 'aggressive', 'linear']:
+            candidate = Path(optimization_output) / f'{scenario}_deployment.csv'
+            if candidate.exists():
+                deployment_file = candidate
+                break
 
-        self.discount_rate = 0.08
+        if deployment_file is None:
+            raise FileNotFoundError(f"No deployment file found in {optimization_output}")
+
+        self.df_deployment = pd.read_csv(deployment_file)
+        print(f"\n📁 Loaded deployment data from: {deployment_file.name}")
+
+        # Discount rate for NPV/IRR calculation only (not for CAPEX annualization)
+        self.discount_rate = 0.05  # 5% for financial analysis
         self.carbon_price_2025 = 50  # $/tCO2
         self.carbon_price_growth = 0.05
 
