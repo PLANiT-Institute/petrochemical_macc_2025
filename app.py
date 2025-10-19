@@ -735,6 +735,9 @@ def show_transition_outlook(data: dict) -> None:
 
     key_h2_years = regional_h2[regional_h2["year"].isin([2030, 2035, 2050])]
     if not key_h2_years.empty:
+        key_h2_years = (
+            key_h2_years.groupby(["region", "year"], as_index=False)["hydrogen_kt"].sum()
+        )
         h2_pivot = key_h2_years.pivot(index="region", columns="year", values="hydrogen_kt").fillna(0.0)
         h2_pivot = h2_pivot.reindex(sorted(h2_pivot.index))
         st.dataframe(
@@ -761,6 +764,9 @@ def show_transition_outlook(data: dict) -> None:
     components["year"] = components["year"].astype(int)
     comp_2050 = components[components["year"] == 2050]
     if not comp_2050.empty:
+        comp_2050 = (
+            comp_2050.groupby(["region", "component"], as_index=False)["twh"].sum()
+        )
         comp_pivot = comp_2050.pivot(index="region", columns="component", values="twh").fillna(0.0)
         comp_pivot = comp_pivot.reindex(sorted(comp_pivot.index))
         st.dataframe(
