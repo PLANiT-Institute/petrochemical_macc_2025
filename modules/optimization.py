@@ -533,6 +533,10 @@ class CostOptimizer:
         for scenario_name, deployment_df in results.items():
             self.create_facility_level_allocation(scenario_name, deployment_df)
 
+        # Create regional energy transition analysis
+        print("\n📍 Creating regional energy transition analysis...")
+        self._create_regional_analysis(results)
+
         print("\n✓ MODULE 3 COMPLETE")
         print(f"Outputs saved to: {self.output_dir}")
         return results
@@ -562,4 +566,81 @@ class CostOptimizer:
 
         df_comparison = pd.DataFrame(comparison)
         save_csv_output(df_comparison, self.output_dir / 'scenario_comparison.csv')
-        print(f"   ✓ Saved: scenario_comparison.csv")
+
+    def _create_regional_analysis(self, results):
+        """Create regional energy transition analysis for all scenarios"""
+        from .regional_energy_tracker import RegionalEnergyTracker
+
+        tracker = RegionalEnergyTracker(
+            baseline_dir='data',
+            output_dir=self.output_dir / 'regional_analysis'
+        )
+
+        # Create baseline regional summary
+        regional_baseline = tracker.create_regional_baseline()
+        save_csv_output(regional_baseline, self.output_dir / 'regional_baseline.csv',
+                       "Baseline emissions and energy by region")
+
+        # For each scenario, create regional deployment tracking
+        for scenario_name, df_deployment in results.items():
+            print(f"   - Analyzing {scenario_name} regional deployment...")
+
+            # Extract technology deployment by reading facility allocation
+            try:
+                df_facility = pd.read_csv(
+                    self.output_dir / f'{scenario_name.lower()}_facility_allocation_2050.csv'
+                )
+
+                # Aggregate by region
+                df_regional = self._aggregate_regional_deployment(df_facility, tracker)
+
+                # Save regional deployment
+                save_csv_output(
+                    df_regional,
+                    self.output_dir / f'{scenario_name}_regional_deployment.csv',
+                    f"Regional technology deployment for {scenario_name}"
+                )
+
+                # Skip energy consumption change (complex time-series analysis)
+                # For now, just save regional deployment summary
+                pass
+
+            except FileNotFoundError:
+                print(f"   ⚠️ Facility allocation not found for {scenario_name}")
+                continue
+
+        print("   ✓ Regional analysis complete")
+
+    def _aggregate_regional_deployment(self, df_facility, tracker):
+        """Aggregate facility-level deployment to regional level (2050 snapshot)"""
+
+        # df_facility already has location column
+        df = df_facility.copy()
+
+        # Aggregate by location
+        regional_summary = []
+
+        for location in df['location'].unique():
+            df_region = df[df['location'] == location]
+
+            summary = {
+                'location': location,
+                'year': 2050,  # Snapshot year
+                'num_facilities': len(df_region),
+                'total_baseline_emissions_kt': df_region['total_emissions_kt'].sum(),
+                'total_abatement_mt': df_region['abatement_mt'].sum(),
+                'total_emissions_2050_kt': df_region['emissions_2050_kt'].sum(),
+            }
+
+            # Add technology penetration rates
+            tech_cols = [c for c in df.columns if c.startswith('tech_') and c.endswith('_pct')]
+            for col in tech_cols:
+                tech_name = col.replace('tech_', '').replace('_pct', '')
+                # Average penetration rate across facilities
+                summary[f'{tech_name}_avg_pct'] = df_region[col].mean()
+                # Number of facilities using this tech
+                summary[f'{tech_name}_num_facilities'] = (df_region[col] > 0).sum()
+
+            regional_summary.append(summary)
+
+        return pd.DataFrame(regional_summary)

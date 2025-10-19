@@ -538,6 +538,12 @@ class MACCAnalyzer:
         save_csv_output(self.df_macc, self.output_dir / 'macc_annual_2025_2050.csv',
                        f"({len(self.df_macc)} tech-year combinations)")
 
+        # Add alternative cost units
+        from .regional_energy_tracker import create_cost_conversion_table
+        df_cost_conversion = create_cost_conversion_table(self.df_macc)
+        save_csv_output(df_cost_conversion, self.output_dir / 'macc_cost_units_comparison.csv',
+                       "Multiple cost units for easier interpretation")
+
     def run_complete_analysis(self):
         """Run complete MACC analysis"""
         print("\n" + "="*80)
