@@ -859,7 +859,15 @@ def main() -> None:
     st.sidebar.title("Navigation")
     if st.sidebar.button("🔄 Refresh outputs", help="Re-load Modules 1–3 outputs from disk"):
         load_data.clear()
-        st.experimental_rerun()
+        try:
+            from streamlit.runtime.scriptrunner import get_script_run_ctx  # type: ignore
+        except Exception:  # pragma: no cover - Streamlit not running
+            get_script_run_ctx = None
+
+        if get_script_run_ctx is not None:
+            ctx = get_script_run_ctx()
+            if ctx is not None:
+                st.experimental_rerun()
 
     page = st.sidebar.radio(
         "Go to",
