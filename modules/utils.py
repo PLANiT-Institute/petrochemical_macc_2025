@@ -6,7 +6,15 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
-import seaborn as sns
+
+try:
+    import seaborn as sns
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    class _SeabornStub:
+        def set_style(self, *_args, **_kwargs):
+            """Fallback when seaborn is unavailable."""
+
+    sns = _SeabornStub()
 
 # Set plotting style
 sns.set_style("whitegrid")

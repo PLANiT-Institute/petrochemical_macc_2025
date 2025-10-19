@@ -7,7 +7,15 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
-import seaborn as sns
+
+try:
+    import seaborn as sns
+except ModuleNotFoundError:  # pragma: no cover - optional dependency
+    class _SeabornStub:
+        def heatmap(self, *_args, **_kwargs):
+            """Fallback heatmap when seaborn is missing."""
+
+    sns = _SeabornStub()
 
 
 class RegionalEnergyTracker:
