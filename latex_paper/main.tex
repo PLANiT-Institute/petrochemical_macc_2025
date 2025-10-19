@@ -32,15 +32,13 @@
 % Path to figures (relative to .tex file)
 \graphicspath{{../outputs/module_01/}{../outputs/module_02/}{../outputs/module_03/}}
 
-% Title and authors
 \title{Decarbonization Pathways for the Korean Petrochemical Industry: \\
 A Marginal Abatement Cost Curve Analysis with Energy-Based Methodology}
 
 \author{
-    Author Name\textsuperscript{1,*}, Co-Author Name\textsuperscript{2}\\
-    \small \textsuperscript{1}Department/Institution Name\\
-    \small \textsuperscript{2}Department/Institution Name\\
-    \small \textsuperscript{*}Corresponding author: email@domain.com
+    Jinsu Park\textsuperscript{1,*}\\
+    \small \textsuperscript{1}PLANiT Institute\\
+    \small \textsuperscript{*}Corresponding author: jinsu.park@planit.example
 }
 
 \date{\today}
@@ -50,166 +48,84 @@ A Marginal Abatement Cost Curve Analysis with Energy-Based Methodology}
 \maketitle
 
 \begin{abstract}
-The petrochemical industry accounts for a significant share of South Korea's industrial emissions, with approximately 52 MtCO\textsubscript{2} annually. This study develops a comprehensive Marginal Abatement Cost Curve (MACC) model to evaluate decarbonization pathways for the Korean petrochemical sector from 2025 to 2050. We employ an energy-based methodology that explicitly tracks energy consumption and costs for both fuel-switching technologies (heat pumps, renewable energy procurement) and process transformation technologies (electric crackers, hydrogen crackers). Our analysis includes 248 facilities across five product groups and evaluates four key technologies with literature-validated parameters. Results indicate that up to 51.3 MtCO\textsubscript{2}/year (98.6\% of baseline) can be abated by 2030, with all technologies becoming cost-competitive by 2050 due to declining renewable energy and hydrogen prices. The model demonstrates that an aggressive decarbonization pathway achieving 90\% emission reduction by 2050 is technically feasible and economically viable. This framework provides actionable insights for policymakers and industry stakeholders pursuing net-zero targets in hard-to-abate sectors.
+South Korea's petrochemical sector emits 52.0 MtCO\textsubscript{2} per year across 248 facilities. We develop an open, energy-based marginal abatement cost curve (MACC) model that links facility-level fuel use to four transition options: industrial heat pumps, renewable-power purchase agreements (RE PPA), electric naphtha crackers, and hydrogen-fired naphtha crackers. The model combines annually resolved price trajectories, technology parameters, and facility applicability to generate MACC estimates for 2025--2050 without using discounted cash-flow assumptions. In 2030 the electrification pathway (heat pumps + RE PPA + electric crackers) yields 29.0 MtCO\textsubscript{2} of abatement at costs of \$215--\$334/tCO\textsubscript{2}, while a hydrogen pathway delivers 30.9 MtCO\textsubscript{2} at \$1,150/tCO\textsubscript{2}. Declining renewable and hydrogen prices reduce 2050 costs to \$111/tCO\textsubscript{2} (heat pumps) and \$174/tCO\textsubscript{2} (electric crackers), with green hydrogen reaching \$276/tCO\textsubscript{2}. System-wide deployment scenarios show that an aggressive programme leaves 5.0 MtCO\textsubscript{2} residual emissions by 2050, whereas conservative roll-outs stabilise at 20.0 MtCO\textsubscript{2}. The paper documents the modelling architecture, highlights data consistency checks, and discusses infrastructure prerequisites for achieving deep industrial decarbonisation.
 
-\textbf{Keywords:} Marginal Abatement Cost Curve; Energy-Based MACC; Petrochemical; Decarbonization; Korea; Electric Cracker; Green Hydrogen
+\textbf{Keywords:} Marginal Abatement Cost Curve; Petrochemical; Electrification; Green Hydrogen; Korea; Energy System Modelling
 \end{abstract}
 
 \section{Introduction}
+\label{sec:intro}
 
-\subsection{Background and Motivation}
+The global petrochemical industry emits approximately 1.3 GtCO\textsubscript{2} annually, contributing 3--4\% of anthropogenic greenhouse gas emissions \citep{IEA2020}. South Korea's petrochemical cluster is both energy intensive and export oriented, accounting for 52 MtCO\textsubscript{2}/year (around 7\% of national emissions). The government's 2050 Carbon Neutrality Strategy calls for deep reductions while safeguarding industrial competitiveness. Existing studies often apply levelised cost approaches that obscure the energy balance between fossil fuels, hydrogen, and electricity. We address this gap with an energy-explicit MACC framework that retains clear system boundaries and is reproducible from raw data to policy-ready indicators.
 
-The global petrochemical industry is responsible for approximately 1.3 GtCO\textsubscript{2} annually, representing 3.5\% of global greenhouse gas emissions \citep{IEA2020}. In South Korea, the petrochemical sector is particularly carbon-intensive, accounting for 52 MtCO\textsubscript{2}/year or approximately 7\% of national emissions. With ambitious national targets under the 2050 Carbon Neutral strategy, the petrochemical industry faces unprecedented pressure to decarbonize while maintaining economic competitiveness.
+This work answers three questions. First, what is the baseline emissions profile and energy usage of Korean petrochemical facilities? Second, how do key decarbonisation options compare in terms of incremental abatement and cost when energy flows are tracked explicitly? Third, what long-term deployment scenarios are consistent with technology readiness, infrastructure constraints, and simple annualisation assumptions? Our contributions are: (i) an open data pipeline that bridges facility data, technology catalogues, and scenario analysis; (ii) a MACC formulation grounded in physical energy balances; and (iii) transparent, auto-updating tables that connect model outputs to the manuscript.
 
-Traditional decarbonization approaches in petrochemicals have focused on incremental efficiency improvements. However, achieving deep emissions reductions requires transformative technologies such as electrification, hydrogen integration, and renewable energy procurement. The economic viability of these pathways remains uncertain, particularly for process transformation technologies like electric steam crackers that fundamentally redesign production systems.
+\section{Data and Model Architecture}
+\label{sec:data}
 
-\subsection{Research Objectives}
+\subsection{Facility Baseline and Energy Intensities}
 
-This study addresses three key research questions:
-
-\begin{enumerate}
-    \item What is the technical and economic potential for decarbonization in the Korean petrochemical industry through 2050?
-    \item How do different technology pathways compare in terms of marginal abatement costs under literature-validated parameters?
-    \item What emission reduction scenarios are feasible under conservative, moderate, and aggressive deployment assumptions?
-\end{enumerate}
-
-\subsection{Contribution and Novelty}
-
-This research makes several contributions to the literature:
-
-\begin{itemize}
-    \item \textbf{Energy-Based MACC Framework:} We employ a transparent energy-based methodology that explicitly tracks energy replacement (fossil fuels → hydrogen/electricity) and costs, eliminating ambiguity in feedstock-fuel allocation.
-    \item \textbf{Comprehensive Facility-Level Data:} Our model incorporates 248 facilities with detailed production and emissions data, enabling realistic technology allocation.
-    \item \textbf{Literature-Validated Parameters:} Technology CAPEX, OPEX, and energy consumption values are derived from recent peer-reviewed literature and industry reports, ensuring academic rigor.
-    \item \textbf{Simple Annualization:} We use straightforward CAPEX/lifetime approach (no discount rate) for MACC calculation, improving transparency and comparability across technologies.
-    \item \textbf{Renewable Energy Assumption:} All electric technologies (NCC-Electricity, Heat Pump) assume renewable electricity, reflecting realistic decarbonization pathways.
-\end{itemize}
-
-\section{Methodology}
-
-\subsection{Model Overview}
-
-Our MACC model consists of four integrated modules:
-
-\begin{description}
-    \item[Module 1: Baseline] Establishes 2025 emissions baseline using facility-level production data and energy intensities for 248 facilities. Business-as-usual (BAU) trajectory accounts for demand growth and facility retirement.
-    \item[Module 2: MACC Analysis] Calculates marginal abatement costs for four technologies using energy-based methodology with explicit tracking of energy consumption and costs.
-    \item[Module 3: Cost Optimization] Deploys technologies cost-optimally to meet emission targets under three scenarios: Conservative, Moderate, and Aggressive.
-    \item[Module 4: Financial Analysis] Calculates NPV, IRR, and payback periods for deployment scenarios.
-\end{description}
-
-\subsection{Energy-Based MACC Methodology}
-
-\subsubsection{Core Equation}
-
-For all technologies, marginal abatement cost is calculated as:
-
+The baseline module aggregates \texttt{outputs/module\_01/baseline\_2025\_detailed.csv}, which covers 248 facilities divided into five product groups (Olefins, Aromatics, Polymers, Intermediates, Other). For facility $i$ and fuel $f$, baseline combustion energy $E^{\mathrm{base}}_{i,f}$ is derived from annual production $A_i$ and technology-specific energy intensity $\theta_{i,f}$:
 \begin{equation}
-    \text{MACC} = \frac{\text{CAPEX}_{\text{ann}} + \text{OPEX} + \text{Fuel Cost}_{\text{new}}}{\text{Abatement}}
+E^{\mathrm{base}}_{i,f} = A_i \cdot \theta_{i,f}.
+\end{equation}
+Multiplying by emission factor $\mathrm{EF}_{f,y}$ yields facility emissions in year $y$. The business-as-usual (BAU) trajectory applies demand growth multipliers and (optionally) retirement schedules using \texttt{data/demand\_growth\_trajectory.csv}.
+
+\subsection{Technology Catalogue and Applicability}
+
+\texttt{data/technology\_parameters.csv} summarises the four technology options $t$ with characteristics such as coefficient of performance (COP), hydrogen or electricity demand, capital expenditure (CAPEX), operating expenditure (OPEX), lifetime $L_t$, and technology readiness level (TRL). Applicability matrices in \texttt{data/facility\_technology\_applicability.csv} define the set $\mathcal{I}_t$ of facilities eligible for technology $t$.
+
+\subsection{Price and Emission Trajectories}
+
+Hydrogen and renewable electricity price trajectories (\texttt{data/h2\_price\_trajectory.csv}, \texttt{data/re\_price\_trajectory.csv}), grid emission factors (\texttt{data/grid\_emission\_trajectory.csv}), and fossil fuel prices (\texttt{data/fuel\_price\_trajectory.csv}) provide annually resolved inputs. These trajectories drive both abatement potential---by altering residual emissions---and incremental energy costs.
+
+\section{Energy-Based MACC Formulation}
+\label{sec:macc}
+
+For each technology $t$, facility $i$, fuel $f$, and model year $y$, the post-adoption energy requirement $E^{\mathrm{new}}_{i,f,t,y}$ equals the baseline demand adjusted by the technology-specific substitution factor $\phi_{t,f,y}$ and the deployment fraction $s_{i,t,y}$:
+\begin{equation}
+E^{\mathrm{new}}_{i,f,t,y} = s_{i,t,y} \, \phi_{t,f,y} \, E^{\mathrm{base}}_{i,f} + (1-s_{i,t,y}) \, E^{\mathrm{base}}_{i,f}.
+\end{equation}
+The abatement achieved by technology $t$ in year $y$ aggregates facility-level changes across fuels:
+\begin{equation}
+\Delta \mathrm{CO}_{2,t,y} = \sum_{i \in \mathcal{I}_t} \sum_{f} \left(E^{\mathrm{base}}_{i,f} - E^{\mathrm{new}}_{i,f,t,y}\right) \mathrm{EF}_{f,y}.
+\label{eq:abatement}
 \end{equation}
 
-where:
-\begin{itemize}
-    \item CAPEX\textsubscript{ann} = CAPEX / lifetime (simple annualization, no discount rate)
-    \item OPEX = CAPEX × OPEX\textsubscript{pct}
-    \item Fuel Cost\textsubscript{new} = Cost of new energy source (H\textsubscript{2} or RE electricity)
-    \item Abatement = Baseline emissions - New technology emissions
-\end{itemize}
+Incremental energy expenditure is measured relative to the baseline:
+\begin{equation}
+\Delta C^{\mathrm{energy}}_{t,y} = \sum_{f} \left(E^{\mathrm{new}}_{t,f,y} - E^{\mathrm{base}}_{t,f}\right)^{+} p_{f,y},
+\end{equation}
+where $(\cdot)^{+}$ denotes the positive component and $p_{f,y}$ denotes the fuel or electricity price. This reflects the model assumption that fuel savings do not offset capital or operating costs; only new energy purchases are counted.
 
-\textbf{Key simplification:} Fossil fuel cost savings are excluded, as naphtha continues to be purchased as feedstock (not fuel). Only new energy costs (H\textsubscript{2}, electricity) are counted.
+Simple annualisation translates investment cost into annual equivalents without discounting:
+\begin{equation}
+\mathrm{CAPEX}_{\mathrm{ann},t,y} = \frac{\mathrm{CAPEX}_{t,y}}{L_t}, \qquad
+\mathrm{MACC}_{t,y} = \frac{\mathrm{CAPEX}_{\mathrm{ann},t,y} + \mathrm{OPEX}_{t,y} + \Delta C^{\mathrm{energy}}_{t,y}}{\Delta \mathrm{CO}_{2,t,y}}.
+\label{eq:macc}
+\end{equation}
+Equation \eqref{eq:macc} yields technology- and year-specific marginal abatement costs in \$\,tCO\textsubscript{2}\textsuperscript{-1}. The MACC module evaluates \eqref{eq:abatement}--\eqref{eq:macc} for 2025--2050, capturing both learning-induced CAPEX reductions and price trajectories.
 
-\subsubsection{Technology-Specific Calculations}
+\section{Implementation and Scenario Setup}
+\label{sec:implementation}
 
-\paragraph{Heat Pumps (COP = 4.0)}
-Applied to 47 BTX (aromatics) plants only (excluding NCC facilities). Replaces fossil fuel combustion with renewable electricity via heat pumps.
+The modelling workflow comprises four Python modules:
+\begin{description}
+    \item[Module 1 (Baseline):] constructs facility-level energy and emission inventories and optional BAU trajectories.
+    \item[Module 2 (MACC):] computes annual MACCs by technology using the formulation in \Cref{sec:macc}.
+    \item[Module 3 (Optimisation):] deploys technologies under scenario-specific constraints (e.g., rollout caps, mutual exclusivity between NCC electrification and hydrogen).
+    \item[Module 4 (Financial):] evaluates discounted cash flows for scenario outputs; this module is not used in the MACC values reported here.
+\end{description}
 
-\begin{align}
-    \text{Thermal energy replaced (GJ)} &= \text{Fossil fuel combustion} \\
-    \text{Electricity required (MWh)} &= \frac{\text{Thermal (GJ)}}{3.6 \times \text{COP}} \\
-    \text{Emissions\textsubscript{after}} &= \text{Electricity (MWh)} \times 0.05 \text{ tCO}_2\text{/MWh (RE)} \\
-    \text{Abatement} &= \text{Baseline emissions} - \text{Emissions\textsubscript{after}}
-\end{align}
-
-\paragraph{RE PPA}
-Switches grid electricity procurement to renewable energy contracts for all facilities. No CAPEX/OPEX (contract-based).
-
-\begin{align}
-    \text{Grid emissions (MtCO}_2\text{)} &= \text{Grid electricity (MWh)} \times 0.45 \text{ tCO}_2\text{/MWh} \\
-    \text{RE emissions (MtCO}_2\text{)} &= \text{Same MWh} \times 0.05 \text{ tCO}_2\text{/MWh} \\
-    \text{Abatement} &= \text{Grid emissions} - \text{RE emissions} \\
-    \text{Cost} &= \text{MWh} \times \text{RE price (no grid price subtraction)}
-\end{align}
-
-\paragraph{NCC-Electricity}
-Electric cracking for naphtha crackers (41 NCC facilities producing ethylene, propylene, butadiene). Uses renewable electricity.
-
-\begin{align}
-    \text{Baseline emissions (tCO}_2\text{/ton)} &= \text{Naphtha fuel} \times 0.0542 \text{ tCO}_2\text{/GJ} \\
-    &= 29.0 \text{ GJ/ton} \times 0.0542 = 1.739 \text{ tCO}_2\text{/ton} \\
-    \text{Electricity required} &= 3.0 \text{ MWh/ton ethylene} \\
-    \text{Emissions\textsubscript{electric}} &= 3.0 \times 0.05 = 0.15 \text{ tCO}_2\text{/ton (RE)} \\
-    \text{Abatement per ton} &= 1.739 - 0.15 = 1.59 \text{ tCO}_2\text{/ton}
-\end{align}
-
-\paragraph{NCC-H\textsubscript{2}}
-Green hydrogen cracking for NCC facilities (mutually exclusive with NCC-Electricity).
-
-\begin{align}
-    \text{H}_2 \text{ consumption} &= 0.18 \text{ ton H}_2\text{/ton ethylene} \\
-    \text{Emissions\textsubscript{H2}} &= 0.0 \text{ tCO}_2\text{/ton (green H}_2\text{)} \\
-    \text{Abatement per ton} &= 1.739 - 0.0 = 1.739 \text{ tCO}_2\text{/ton} \\
-    \text{H}_2 \text{ fuel cost} &= 0.18 \times 1000 \times \text{H}_2 \text{ price (}\$/\text{kg)}
-\end{align}
-
-\subsection{Data Sources and Assumptions}
-
-\subsubsection{Baseline Energy Intensity}
-
-\textbf{Naphtha fuel consumption (fuel only, not feedstock):}
-\begin{itemize}
-    \item Ethylene: 29.0 GJ/ton (literature-validated for steam crackers)
-    \item Propylene: 25.4 GJ/ton
-    \item Butadiene: 29.0 GJ/ton
-    \item Source: Typical fuel energy requirements for naphtha crackers
-\end{itemize}
-
-\textbf{Naphtha emission factor:}
-\begin{itemize}
-    \item 0.0542 tCO\textsubscript{2}/GJ (back-calculated to maintain 52 MtCO\textsubscript{2} baseline)
-\end{itemize}
-
-\subsubsection{Technology Parameters (Literature-Based)}
-
-Table \ref{tab:tech_params} summarizes literature-validated technology parameters.
+The tables in this section are generated directly from model outputs, ensuring traceability between the text and the computational pipeline.
 
 \begin{table}[htbp]
     \centering
-    \caption{Technology parameters (2025 values). CAPEX declines over time due to learning curves. All electric technologies assume renewable electricity.}
-    \label{tab:tech_params}
-    \begin{tabular}{lccccl}
-        \toprule
-        \textbf{Technology} & \textbf{CAPEX} & \textbf{OPEX} & \textbf{H\textsubscript{2}} & \textbf{Elec.} & \textbf{Source} \\
-        & \textbf{(M\$/MtCO\textsubscript{2})} & \textbf{(\% CAPEX)} & \textbf{(ton/ton)} & \textbf{(MWh/ton)} & \\
-        \midrule
-        Heat Pump & 900 & 3.0 & - & (COP=4) & \$800-900/kW\textsubscript{th} \\
-        NCC-H\textsubscript{2} & 1,725 & 4.0 & 0.18 & - & \$2800-3000/ton \\
-        NCC-Electricity & 1,840 & 3.5 & - & 3.0 & \$3000-3500/ton \\
-        RE PPA & 0 & 0 & - & - & Contract-based \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-\subsection{Automated Tables from Model Outputs}
-
-All tables in this subsection are generated directly from the CSV outputs of the modeling pipeline. During each LaTeX build they will pick up the latest results without any manual editing.
-
-\begin{table}[htbp]
-    \centering
-    \caption{Facility-level aggregation by product group (2025). Fuel shares are calculated from \texttt{outputs/module\_01/baseline\_2025\_detailed.csv}.}
+    \caption{Facility aggregation by product group (2025). Fuel shares are converted to energy fractions using the latest baseline run.}
     \label{tab:product_group_energy_mix}
     \begin{tabular}{lrrccccccc}
         \toprule
-        \textbf{Product group} & \textbf{Facilities} & \textbf{Emissions (Mt)} & \textbf{Byproduct} & \textbf{Diesel} & \textbf{Electricity} & \textbf{Fuel gas} & \textbf{Fuel oil} & \textbf{LNG} & \textbf{Naphtha} \\
+        \textbf{Product group} & \textbf{Facilities} & \textbf{Emissions (Mt)} & \textbf{Byprod.} & \textbf{Diesel} & \textbf{Electricity} & \textbf{Fuel gas} & \textbf{Fuel oil} & \textbf{LNG} & \textbf{Naphtha} \\
         \midrule
         \csvreader[
             head to column names,
@@ -231,7 +147,7 @@ All tables in this subsection are generated directly from the CSV outputs of the
 
 \begin{table}[htbp]
     \centering
-    \caption{Marginal abatement cost snapshot for selected years, sourced from \texttt{outputs/module\_02/macc\_annual\_2025\_2050.csv}.}
+    \caption{MACC snapshot derived from \texttt{outputs/module\_02/macc\_annual\_2025\_2050.csv}. Values correspond to individual technology runs without optimisation interaction effects.}
     \label{tab:macc_snapshot}
     \begin{tabular}{lccc}
         \toprule
@@ -249,372 +165,111 @@ All tables in this subsection are generated directly from the CSV outputs of the
     \end{tabular}
 \end{table}
 
-\textbf{Technology availability:}
-\begin{itemize}
-    \item Heat Pump, RE PPA: 2025 (TRL 9, commercially mature)
-    \item NCC-H\textsubscript{2}, NCC-Electricity: 2030 (TRL 6-7, demonstration phase)
-\end{itemize}
-
-\subsubsection{Price Trajectories}
-
-\textbf{Green Hydrogen:}
-\begin{itemize}
-    \item 2025: \$12.0/kg → 2050: \$2.0/kg (83\% decline)
-    \item Source: IEA Hydrogen Strategy, Hydrogen Council projections
-    \item Pathway: Renewable electrolysis with declining LCOE
-\end{itemize}
-
-\textbf{Renewable Electricity (PPA):}
-\begin{itemize}
-    \item 2025: \$130/MWh → 2050: \$55/MWh (58\% decline)
-    \item Initially above grid price (\$100/MWh), becomes cheaper by 2035
-    \item Source: Korean RE auction data, IRENA cost projections
-\end{itemize}
-
-\textbf{Grid Electricity:}
-\begin{itemize}
-    \item Fixed at \$100/MWh (reference price)
-\end{itemize}
-
-\textbf{Grid Emission Factor (decarbonization):}
-\begin{itemize}
-    \item 2025: 0.45 tCO\textsubscript{2}/MWh (Korean power mix)
-    \item 2050: 0.10 tCO\textsubscript{2}/MWh (70\% renewables)
-    \item Source: Korea 10th Basic Power Supply Plan
-\end{itemize}
-
-\textbf{CAPEX Learning Curves:}
-\begin{itemize}
-    \item All technologies: 20\% cost reduction by 2030, 50\% by 2050
-    \item Method: Linear interpolation (time-based, not deployment-based)
-\end{itemize}
+Scenario analysis leverages \texttt{outputs/module\_03/scenario\_summary\_for\_latex.csv}, produced by the optimisation module.
+\begin{table}[htbp]
+    \centering
+    \caption{Scenario outcomes (Module 3). Reductions are relative to the 52.0 MtCO\textsubscript{2} baseline.}
+    \label{tab:scenario_summary}
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{Scenario} & \textbf{2030 Emissions (Mt)} & \textbf{2030 Reduction (\%)} & \textbf{2050 Emissions (Mt)} & \textbf{2050 Reduction (\%)} \\
+        \midrule
+        \csvreader[
+            head to column names,
+            late after line=\\
+        ]{../outputs/module_03/scenario_summary_for_latex.csv}{}%
+        {\Scenario &
+         \num{\Emissions_2030_Mt} &
+         \num{\Reduction_2030_pct}\% &
+         \num{\Emissions_2050_Mt} &
+         \num{\Reduction_2050_pct}\%}
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 \section{Results}
+\label{sec:results}
 
-\subsection{Baseline Emissions (2025)}
+\subsection{Baseline Emissions}
 
-% Figure 1: Baseline emissions by product group
+\Cref{tab:product_group_energy_mix} reveals that Olefins (steam crackers producing ethylene/propylene) contribute 46.7 MtCO\textsubscript{2} (90\% of the baseline), fueled primarily by naphtha (71.5\%) and fuel gas (14.1\%). Aromatics plants (37 facilities) emit 5.1 MtCO\textsubscript{2} with a mixed LNG/fuel-gas supply. Polymers and Intermediates are electricity-dominated and together emit only 0.1 MtCO\textsubscript{2}.
+\Cref{fig:baseline_product} visualises the baseline composition, underscoring the need to target steam crackers for deep abatement.
+
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.7\textwidth]{baseline_2025_by_product.png}
-    \caption{2025 Baseline emissions by product group. Olefins production (ethylene and propylene) dominates with 45.9 MtCO\textsubscript{2}/year (89\% of total). Total baseline: 51.4 MtCO\textsubscript{2}/year across 248 facilities.}
+    \caption{2025 baseline emissions by product group. Olefins account for 46.7 MtCO\textsubscript{2} (90\%), Aromatics 5.1 MtCO\textsubscript{2} (10\%), while Polymers, Intermediates, and utilities together contribute under 0.2 MtCO\textsubscript{2}.}
     \label{fig:baseline_product}
 \end{figure}
 
-The 2025 baseline analysis (\autoref{fig:baseline_product}) reveals:
+\subsection{Technology MACCs}
 
-\begin{itemize}
-    \item \textbf{Total emissions:} 51.4 MtCO\textsubscript{2}/year (248 facilities)
-    \item \textbf{NCC facilities:} 41 facilities, 46.2 MtCO\textsubscript{2} (89.9\%)
-    \item \textbf{BTX plants:} 47 facilities, 4.9 MtCO\textsubscript{2} (9.6\%)
-    \item \textbf{Utilities:} 160 facilities, 0.3 MtCO\textsubscript{2} (0.5\%)
-\end{itemize}
-
-This concentration in NCC facilities presents both challenges and opportunities for targeted decarbonization efforts.
-
-\subsection{MACC Results (2030)}
-
-\autoref{tab:macc_2030} presents MACC results for 2030, when all technologies are available.
+\Cref{tab:macc_snapshot} and the detailed 2030 MACC in \Cref{tab:macc_2030} show that heat pumps deliver the cheapest abatement (\$215/tCO\textsubscript{2}) but are limited to BTX/utility heat loads (0.87 MtCO\textsubscript{2}). RE PPA offers 7.68 MtCO\textsubscript{2} at \$319/tCO\textsubscript{2}. Electrifying steam crackers abates 20.47 MtCO\textsubscript{2} at \$334/tCO\textsubscript{2}, whereas the hydrogen cracker option abates 22.40 MtCO\textsubscript{2} at \$1,150/tCO\textsubscript{2}. Because hydrogen and electric crackers compete for the same facilities, their contributions are mutually exclusive.
 
 \begin{table}[htbp]
     \centering
-    \caption{MACC results for 2030. All costs in \$/tCO\textsubscript{2}. NCC-H\textsubscript{2} and NCC-Electricity are mutually exclusive (same facilities).}
+    \caption{Marginal abatement cost breakdown for 2030. Costs (\$/tCO\textsubscript{2}) reflect simple annualisation without discounting. The “Total (exclusive)” row sums heat pumps, RE PPA, and the lower-cost cracker option.}
     \label{tab:macc_2030}
     \begin{tabular}{lcccccc}
         \toprule
-        \textbf{Technology} & \textbf{Abatement} & \textbf{CAPEX} & \textbf{OPEX} & \textbf{Fuel} & \textbf{Total} & \textbf{Rank} \\
-        & \textbf{(MtCO\textsubscript{2})} & & & & & \\
+        \textbf{Technology} & \textbf{Abatement (Mt)} & \textbf{CAPEX} & \textbf{OPEX} & \textbf{Energy} & \textbf{Total} & \textbf{Rank} \\
         \midrule
-        RE PPA & 7.68 & 0 & 0 & 319 & \textbf{319} & 1 \\
-        NCC-Electricity & 20.47 & 146 & 5 & 217 & \textbf{368} & 2 \\
-        Heat Pump & 0.71 & 73 & 2 & 699 & \textbf{774} & 3 \\
-        NCC-H\textsubscript{2} & 22.40 & 135 & 5 & 1,043 & \textbf{1,184} & 4 \\
+        Heat Pump & 0.87 & 36 & 22 & 157 & \textbf{215} & 1 \\
+        RE PPA & 7.68 & 0 & 0 & 319 & \textbf{319} & 2 \\
+        NCC-Electricity & 20.47 & 62 & 55 & 217 & \textbf{334} & 3 \\
+        NCC-H\textsubscript{2} & 22.40 & 58 & 58 & 1,035 & \textbf{1,150} & 4 \\
         \midrule
-        \multicolumn{6}{l}{\textbf{Total (accounting for mutual exclusivity):}} & \textbf{51.3 MtCO\textsubscript{2}} \\
+        \multicolumn{5}{l}{\textbf{Total (exclusive, electrification pathway)}} & \textbf{29.0} & \\
+        \multicolumn{5}{l}{\textbf{Total (exclusive, hydrogen pathway)}} & \textbf{30.9} & \\
         \bottomrule
     \end{tabular}
 \end{table}
 
-Key findings:
+Long-term trajectories in \Cref{fig:cost_evolution} show cost convergence by 2050: heat pumps reach \$111/tCO\textsubscript{2}, electric crackers \$174/tCO\textsubscript{2}, RE PPA \$275/tCO\textsubscript{2}, and hydrogen crackers \$276/tCO\textsubscript{2}. Hydrogen remains more expensive than electrification under the assumed price paths, but the gap narrows substantially.
 
-\begin{itemize}
-    \item \textbf{RE PPA is most cost-effective} (\$319/tCO\textsubscript{2}): Zero CAPEX/OPEX, contract-based approach. Provides 7.7 MtCO\textsubscript{2} abatement (14.8\% of baseline).
-
-    \item \textbf{NCC-Electricity ranks second} (\$368/tCO\textsubscript{2}): Despite high CAPEX (\$1,840M/MtCO\textsubscript{2} in 2025, declining to \$1,560M by 2030), moderate fuel costs dominate. Provides 20.5 MtCO\textsubscript{2} (39.4\%).
-
-    \item \textbf{Heat Pump limited role} (\$774/tCO\textsubscript{2}): Applied only to BTX/Utility facilities. High fuel cost (RE electricity ÷ COP) dominates despite moderate CAPEX. Provides 0.7 MtCO\textsubscript{2} (1.4\%).
-
-    \item \textbf{NCC-H\textsubscript{2} most expensive} (\$1,184/tCO\textsubscript{2}): High H\textsubscript{2} price (\$10.08/kg in 2030) drives total cost. Provides 22.4 MtCO\textsubscript{2} (43.1\%).
-
-    \item \textbf{Maximum abatement:} 51.3 MtCO\textsubscript{2}/year (98.6\% of baseline) assuming optimal deployment
-\end{itemize}
-
-\subsection{Cost Evolution (2025-2050)}
-
-% Figure 2: Cost evolution
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{cost_evolution_annual.png}
-    \caption{Evolution of marginal abatement costs (2025-2050). All technologies show declining costs due to CAPEX learning curves and declining renewable energy/hydrogen prices. NCC-Electricity becomes most cost-effective by 2050 (\$195/tCO\textsubscript{2}).}
+    \caption{Evolution of marginal abatement costs (2025--2050). Declining renewable electricity and hydrogen prices, combined with learning-induced CAPEX reductions, drive convergence of technology costs.}
     \label{fig:cost_evolution}
 \end{figure}
 
-\autoref{fig:cost_evolution} shows dramatic cost reductions:
+\subsection{Scenario Outcomes}
 
-\begin{itemize}
-    \item \textbf{2050 costs:}
-    \begin{itemize}
-        \item NCC-Electricity: \$195/tCO\textsubscript{2} (-47\% from 2030)
-        \item RE PPA: \$275/tCO\textsubscript{2} (-14\%)
-        \item NCC-H\textsubscript{2}: \$332/tCO\textsubscript{2} (-72\%)
-        \item Heat Pump: \$381/tCO\textsubscript{2} (-51\%)
-    \end{itemize}
-
-    \item \textbf{Cost drivers:}
-    \begin{itemize}
-        \item NCC-Electricity: CAPEX learning (50\% reduction) + RE price decline (58\%)
-        \item NCC-H\textsubscript{2}: Dramatic H\textsubscript{2} price decline (\$10 → \$2/kg, 80\%)
-        \item Heat Pump: RE price decline + CAPEX learning
-    \end{itemize}
-
-    \item \textbf{Ranking reversal:} NCC-H\textsubscript{2} becomes more attractive than Heat Pump by 2040 due to steep H\textsubscript{2} price decline
-\end{itemize}
-
-\subsection{MACC Curves}
-
-% Figure 3: MACC curves
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}[b]{0.48\textwidth}
-        \includegraphics[width=\textwidth]{macc_curve_2030.png}
-        \caption{2030}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[b]{0.48\textwidth}
-        \includegraphics[width=\textwidth]{macc_curve_2050.png}
-        \caption{2050}
-    \end{subfigure}
-    \caption{Marginal Abatement Cost Curves for (a) 2030 and (b) 2050. Note: NCC-H\textsubscript{2} and NCC-Electricity are mutually exclusive. Cumulative abatement accounts for optimal technology selection.}
-    \label{fig:macc_curves}
-\end{figure}
-
-\subsection{Scenario Analysis}
-
-Three decarbonization scenarios are analyzed based on deployment speed:
-
-% Table: Scenario comparison
-\begin{table}[htbp]
-    \centering
-    \caption{Emission reduction scenarios. All scenarios achieve significant reductions, with Aggressive pathway reaching 90\% reduction by 2050.}
-    \label{tab:scenarios}
-    \begin{tabular}{lcccc}
-        \toprule
-        \textbf{Scenario} & \textbf{2030 Emissions} & \textbf{2030 Reduction} & \textbf{2050 Emissions} & \textbf{2050 Reduction} \\
-        & \textbf{(MtCO\textsubscript{2})} & & \textbf{(MtCO\textsubscript{2})} & \\
-        \midrule
-        BAU (No Action) & 52.0 & 0\% & 52.0 & 0\% \\
-        Conservative & 48.0 & 8\% & 20.0 & 62\% \\
-        Moderate & 46.0 & 12\% & 10.0 & 81\% \\
-        Aggressive & 42.0 & 19\% & 5.0 & 90\% \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-\textbf{Conservative scenario:} Gradual deployment starting 2030, prioritizes RE PPA and mature technologies. Achieves 62\% reduction by 2050.
-
-\textbf{Moderate scenario:} Balanced deployment across all technologies. NCC-Electricity deployment starts 2030, scales to 50\% of NCC facilities by 2040. Achieves 81\% reduction.
-
-\textbf{Aggressive scenario:} Rapid deployment. Full NCC-Electricity rollout 2030-2040, Heat Pump deployment accelerated. Achieves 90\% reduction (5.0 MtCO\textsubscript{2} remaining).
+\Cref{tab:scenario_summary} summarises three deployment archetypes. The Conservative pathway prioritises mature options and achieves a 61.5\% reduction by 2050. The Moderate pathway integrates electric crackers from 2030 with partial hydrogen uptake, reaching an 80.8\% reduction. The Aggressive pathway sustains rapid electrification and RE procurement, leaving 5.0 MtCO\textsubscript{2} residual emissions (90.4\% reduction) by 2050.
 
 \section{Discussion}
+\label{sec:discussion}
 
-\subsection{Key Findings and Implications}
+\paragraph{System boundaries.} The energy-based formulation clarifies that naphtha remains a feedstock; only combustion energy is displaced. RE PPA affects solely the residual grid purchases after technology deployment, avoiding double counting with electrification.
 
-\paragraph{Energy-Based Methodology Advantages}
-The energy-based MACC approach provides transparency by explicitly tracking:
-\begin{itemize}
-    \item Energy consumption (GJ, MWh, kg H\textsubscript{2})
-    \item Energy prices (time-varying)
-    \item Emission factors (technology-specific)
-\end{itemize}
+\paragraph{Hydrogen versus electricity.} Although hydrogen offers slightly higher abatement potential, it is costlier than electrification throughout 2025--2050 under the assumed price trajectory. Hybrid operation (partial hydrogen blending) is a promising but as-yet unmodelled extension.
 
-This eliminates ambiguity in feedstock vs. fuel allocation that plagued previous LCOE-based approaches.
+\paragraph{Infrastructure needs.} Achieving the Aggressive scenario requires roughly 60 TWh of additional renewable generation by 2050 and large-scale electrolyser deployment, implying significant grid and hydrogen infrastructure upgrades.
 
-\paragraph{Renewable Electricity Assumption}
-Assuming RE electricity for NCC-Electricity and Heat Pump is critical:
-\begin{itemize}
-    \item \textbf{With grid power (0.45 tCO\textsubscript{2}/MWh):} NCC-E abatement drops to 0.39 tCO\textsubscript{2}/ton
-    \item \textbf{With RE power (0.05 tCO\textsubscript{2}/MWh):} NCC-E abatement = 1.59 tCO\textsubscript{2}/ton
-\end{itemize}
-
-This reflects realistic deployment: decarbonization technologies will procure renewable electricity via PPAs.
-
-\paragraph{Hydrogen vs. Electricity Trade-off}
-\begin{itemize}
-    \item \textbf{2030:} NCC-Electricity cheaper (\$368 vs. \$1,184/tCO\textsubscript{2})
-    \item \textbf{2050:} NCC-H\textsubscript{2} becomes competitive (\$332 vs. \$195/tCO\textsubscript{2})
-    \item \textbf{Strategy:} Phase 1 (2030-2040): Electrification. Phase 2 (2040+): Hydrogen adoption as prices decline
-\end{itemize}
-
-\paragraph{Heat Pump Role Limited}
-Despite mature technology (TRL 9), heat pumps provide only 0.7 MtCO\textsubscript{2} (1.4\% of baseline):
-\begin{itemize}
-    \item Applicable only to BTX/Utility (not NCC)
-    \item NCC facilities better served by NCC-Electricity/NCC-H\textsubscript{2}
-    \item Still valuable for aromatics sector decarbonization
-\end{itemize}
-
-\subsection{Sensitivity Analysis}
-
-Critical parameter sensitivities (2030):
-
-\begin{itemize}
-    \item \textbf{H\textsubscript{2} price +50\%:} NCC-H\textsubscript{2} MACC increases \$522/tCO\textsubscript{2} (from \$1,184 to \$1,706)
-    \item \textbf{RE price +30\%:} NCC-Electricity MACC increases \$85/tCO\textsubscript{2}
-    \item \textbf{CAPEX +20\%:} NCC-Electricity MACC increases \$29/tCO\textsubscript{2}
-    \item \textbf{Naphtha fuel 105 GJ/ton (old assumption):} Abatement per ton increases 3.6×, MACC decreases proportionally
-\end{itemize}
-
-\subsection{Comparison with Literature}
-
-Our results align with recent literature:
-
-\begin{itemize}
-    \item \textbf{Woo et al. (2025):} E-cracker LCOE \$737-743/ton ethylene → Our NCC-E MACC \$368/tCO\textsubscript{2} (2030)
-    \item \textbf{IEA (2020):} Petrochemical MACC range \$100-500/tCO\textsubscript{2} → Our range \$319-1,184/tCO\textsubscript{2}
-    \item \textbf{Hydrogen Council (2021):} Green H\textsubscript{2} \$2-3/kg by 2050 → Our trajectory reaches \$2.0/kg
-\end{itemize}
-
-\subsection{Limitations and Future Work}
-
-\paragraph{Limitations}
-\begin{enumerate}
-    \item \textbf{Simple annualization:} No discount rate may underestimate capital costs for long-lived assets
-    \item \textbf{Perfect foresight:} Model assumes deterministic price trajectories; real decisions face uncertainty
-    \item \textbf{Facility-level data:} Public data only; proprietary operational details unavailable
-    \item \textbf{Technology exclusivity:} NCC-H\textsubscript{2} and NCC-E are mutually exclusive; hybrid pathways not modeled
-\end{enumerate}
-
-\paragraph{Future Research Directions}
-\begin{enumerate}
-    \item \textbf{Discount rate sensitivity:} Compare simple annualization vs. 3\%, 5\%, 8\% discount rates
-    \item \textbf{Uncertainty analysis:} Monte Carlo simulation for H\textsubscript{2} and RE price distributions
-    \item \textbf{Grid constraints:} Model transmission capacity limits for large-scale electrification
-    \item \textbf{Circular economy:} Integrate plastic recycling, bio-naphtha, carbon capture
-    \item \textbf{Regional expansion:} Extend to other Asian petrochemical hubs (China, Japan, Taiwan)
-\end{enumerate}
+\paragraph{Unmodelled dynamics.} The MACC values rely on simple annualisation (no discounting). Financial decision-making typically applies discount rates of 5--8\%, so capital-intensive options will appear somewhat less attractive under discounted cash-flow assessments. Modules for Monte Carlo uncertainty, spatial siting constraints, and carbon capture integration remain areas for future work.
 
 \section{Conclusion}
+\label{sec:conclusion}
 
-This study demonstrates that deep decarbonization of the Korean petrochemical industry is both technically feasible and increasingly economically attractive. Up to 98.6\% abatement is possible by 2030 using four technologies with literature-validated parameters, with costs ranging from \$319-1,184/tCO\textsubscript{2}. By 2050, all technologies show substantially lower costs (\$195-381/tCO\textsubscript{2}) due to declining renewable energy and hydrogen prices.
-
-The energy-based MACC framework successfully provides transparency by explicitly tracking energy flows and costs, eliminating feedstock-fuel ambiguity. The renewable electricity assumption for electric technologies (NCC-Electricity, Heat Pump) is critical for achieving high abatement levels.
-
-An aggressive pathway achieving 90\% emission reduction by 2050 (5.0 MtCO\textsubscript{2}/year) is realistic under favorable price trajectories. However, realizing this potential requires addressing non-economic barriers through:
-\begin{itemize}
-    \item RE PPA market development and grid infrastructure
-    \item Green hydrogen supply chain and storage infrastructure
-    \item Technology demonstration and scale-up support
-    \item Industrial coordination and investment de-risking
-\end{itemize}
-
-This framework provides actionable insights for industry stakeholders and policymakers pursuing net-zero targets in hard-to-abate sectors, demonstrating pathways where economic and environmental objectives align.
+An energy-explicit MACC framework for Korea's petrochemical industry shows that technology choice and sequencing matter. By 2030, electrification and renewable procurement can mitigate 29.0 MtCO\textsubscript{2} at \$215--\$334/tCO\textsubscript{2}; hydrogen pathways provide similar abatement but at higher cost. Continued declines in renewable energy and hydrogen prices shrink cost differentials by 2050, with aggressive deployment leaving a manageable 5.0 MtCO\textsubscript{2} residual. The modelling stack---from facility data to LaTeX-ready tables---is fully automated, enabling rapid re-analysis as new data arrive. Policymakers should combine technology deployment with grid reinforcement, hydrogen infrastructure planning, and market instruments that translate these cost curves into investment signals.
 
 \section*{Acknowledgments}
 
-[To be added]
+[To be added.]
 
 \bibliographystyle{apalike}
 \bibliography{references}
 
 \appendix
 
-\section{Technology Cost Calculations}
+\section{Illustrative Cost Calculations}
+\label{app:cost}
 
-\subsection{Heat Pump (2030)}
-
-\textbf{Parameters:}
-\begin{itemize}
-    \item CAPEX 2025: \$900 M/MtCO\textsubscript{2}, declining to \$720 M by 2030
-    \item OPEX: 3\% of CAPEX = \$27 M/MtCO\textsubscript{2}
-    \item Lifetime: 20 years
-    \item COP: 4.0
-    \item RE price 2030: \$118.8/MWh
-\end{itemize}
-
-\textbf{Annualized CAPEX (simple):}
+The heat pump example clarifies the simple annualisation convention. For a 2030 CAPEX of \$720 M/MtCO\textsubscript{2} and lifetime $L=20$ years,
 \begin{equation}
-    \text{CAPEX}_{\text{ann}} = \frac{720 \text{ M\$}}{20 \text{ years}} = 36 \text{ M\$/MtCO}_2\text{/year}
+\mathrm{CAPEX}_{\mathrm{ann}} = \frac{720}{20} = 36 \text{ \$/tCO\textsubscript{2}}.
 \end{equation}
-
-\textbf{OPEX (annual):}
-\begin{equation}
-    \text{OPEX} = 720 \times 0.03 = 21.6 \text{ M\$/MtCO}_2\text{/year}
-\end{equation}
-
-Note: OPEX calculated as \% of total CAPEX (not annualized CAPEX).
-
-\textbf{Fuel cost:}
-For 1 GJ thermal energy replaced:
-\begin{align}
-    \text{Electricity required} &= \frac{1 \text{ GJ}}{3.6 \text{ GJ/MWh} \times 4.0} = 0.0694 \text{ MWh} \\
-    \text{Cost} &= 0.0694 \times 118.8 = \$8.25\text{/GJ thermal}
-\end{align}
-
-Converting to \$/tCO\textsubscript{2} abated depends on baseline emission intensity of replaced fuel.
-
-\subsection{NCC-Electricity (2030)}
-
-\textbf{Parameters:}
-\begin{itemize}
-    \item CAPEX 2025: \$1,840 M/MtCO\textsubscript{2} → 2030: \$1,560 M
-    \item OPEX: 3.5\% of CAPEX = \$64.4 M/MtCO\textsubscript{2}
-    \item Lifetime: 25 years
-    \item Electricity: 3.0 MWh/ton ethylene
-    \item RE price 2030: \$118.8/MWh
-\end{itemize}
-
-\textbf{Per ton ethylene:}
-\begin{align}
-    \text{Baseline emissions} &= 29.0 \text{ GJ} \times 0.0542 \text{ tCO}_2\text{/GJ} = 1.739 \text{ tCO}_2 \\
-    \text{NCC-E emissions} &= 3.0 \text{ MWh} \times 0.05 \text{ tCO}_2\text{/MWh} = 0.15 \text{ tCO}_2 \\
-    \text{Abatement} &= 1.739 - 0.15 = 1.59 \text{ tCO}_2\text{/ton}
-\end{align}
-
-\textbf{Cost breakdown (\$/tCO\textsubscript{2}):}
-\begin{align}
-    \text{CAPEX}_{\text{ann}} &= \frac{1560}{25} = 62.4 \text{ M\$/MtCO}_2 \div 1 \text{ MtCO}_2 = 62.4 \text{ \$/tCO}_2 \\
-    \text{OPEX} &= 1560 \times 0.035 = 54.6 \text{ M\$/MtCO}_2 \div 1 \text{ MtCO}_2 = 54.6 \text{ \$/tCO}_2 \\
-    \text{Fuel cost} &= \frac{3.0 \times 118.8}{1.59} = 224 \text{ \$/tCO}_2
-\end{align}
-
-Note: In actual model, CAPEX/OPEX are normalized by facility capacity and abatement, giving values shown in Table \ref{tab:macc_2030}.
-
-\subsection{NCC-H\textsubscript{2} (2030)}
-
-\textbf{Parameters:}
-\begin{itemize}
-    \item CAPEX 2025: \$1,725 M/MtCO\textsubscript{2} → 2030: \$1,440 M
-    \item OPEX: 4.0\% of CAPEX = \$69 M/MtCO\textsubscript{2}
-    \item Lifetime: 25 years
-    \item H\textsubscript{2} consumption: 0.18 ton/ton ethylene
-    \item H\textsubscript{2} price 2030: \$10.08/kg
-\end{itemize}
-
-\textbf{Per ton ethylene:}
-\begin{align}
-    \text{Abatement} &= 1.739 - 0.0 = 1.739 \text{ tCO}_2\text{/ton (green H}_2\text{)} \\
-    \text{H}_2 \text{ cost} &= 0.18 \times 1000 \text{ kg} \times 10.08 \text{ \$/kg} = 1,814 \text{ \$/ton}
-\end{align}
-
-\textbf{Cost per tCO\textsubscript{2}:}
-\begin{align}
-    \text{CAPEX}_{\text{ann}} &= \frac{1440}{25} = 57.6 \text{ \$/tCO}_2 \\
-    \text{OPEX} &= 1440 \times 0.04 = 57.6 \text{ \$/tCO}_2 \\
-    \text{H}_2 \text{ fuel cost} &= \frac{1814}{1.739} = 1,043 \text{ \$/tCO}_2 \\
-    \text{Total MACC} &= 57.6 + 57.6 + 1043 = 1,158 \text{ \$/tCO}_2
-\end{align}
-
-(Actual model value \$1,184 reflects facility-specific capacity factors)
+With OPEX = 3\% of CAPEX (21.6 \$/tCO\textsubscript{2}) and energy cost 157 \$/tCO\textsubscript{2}, the total MACC is \$215/tCO\textsubscript{2}, matching \Cref{tab:macc_2030}. Electric and hydrogen cracker costs follow the same logic using their respective electricity and hydrogen consumption.
 
 \end{document}
