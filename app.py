@@ -28,10 +28,35 @@ st.set_page_config(
 # -----------------------------------------------------------------------------
 # Data loading
 # -----------------------------------------------------------------------------
+def _slugify(text: str) -> str:
+    """Convert scenario names to filename-friendly slugs."""
+    return (
+        text.strip()
+        .lower()
+        .replace(" ", "_")
+        .replace("-", "_")
+    )
+
+
 @st.cache_data(show_spinner=False)
 def load_data() -> dict:
     """Load all model output artifacts into a dictionary."""
     data: dict[str, pd.DataFrame | dict] = {}
+
+    scenario_definition: pd.DataFrame | None = None
+    scenario_names: list[str] = []
+    scenario_name_lookup: dict[str, str] = {}
+    scenario_slug: str | None = None
+    scenario_label: str | None = None
+    scenario_deployment: pd.DataFrame | None = None
+
+    try:
+        scenario_definition = pd.read_csv("data/emission_scenarios_clean.csv")
+        scenario_names = scenario_definition["scenario_name"].dropna().unique().tolist()
+        scenario_name_lookup = {_slugify(name): name for name in scenario_names}
+        data["scenario_definition"] = scenario_definition
+    except FileNotFoundError:
+        scenario_definition = None
 
     # Module 1 – Baseline
     try:
@@ -49,26 +74,40 @@ def load_data() -> dict:
         st.warning("Module 2 outputs not found. Run the MACC pipeline.")
 
     # Module 3 – Scenario optimisation
-    try:
-        data["scenario_comparison"] = pd.read_csv("outputs/module_03/scenario_comparison.csv")
+    outputs_dir = Path("outputs/module_03")
+    candidate_slugs = [_slugify(name) for name in scenario_names] if scenario_names else []
 
-        # deployment trajectories
-        deployment_files = sorted(Path("outputs/module_03").glob("*_deployment.csv"))
-        if deployment_files:
-            data["scenario_deployments"] = {
-                f.stem.replace("_deployment", ""): pd.read_csv(f)
-                for f in deployment_files
-            }
+    if outputs_dir.exists():
+        for slug in candidate_slugs:
+            path = outputs_dir / f"{slug}_deployment.csv"
+            if path.exists():
+                scenario_slug = slug
+                scenario_label = scenario_name_lookup.get(slug, slug.replace("_", " ").title())
+                scenario_deployment = pd.read_csv(path)
+                break
+        if scenario_deployment is None and not candidate_slugs:
+            for f in sorted(outputs_dir.glob("*_deployment.csv")):
+                slug = f.stem.replace("_deployment", "")
+                path = outputs_dir / f"{slug}_deployment.csv"
+                if not path.exists():
+                    continue
+                scenario_slug = slug
+                scenario_label = scenario_name_lookup.get(slug, slug.replace("_", " ").title())
+                scenario_deployment = pd.read_csv(path)
+                break
 
-        # facility allocation snapshots
-        allocation_files = sorted(Path("outputs/module_03").glob("*_facility_allocation_2050.csv"))
-        if allocation_files:
-            data["facility_allocations"] = {
-                f.stem.replace("_facility_allocation_2050", ""): pd.read_csv(f)
-                for f in allocation_files
-            }
-    except FileNotFoundError:
-        pass
+    if scenario_deployment is not None and scenario_slug is not None:
+        data["scenario_deployment"] = scenario_deployment
+        data["scenario_slug"] = scenario_slug
+        data["scenario_label"] = scenario_label or scenario_slug.replace("_", " ").title()
+
+        facility_path = outputs_dir / f"{scenario_slug}_facility_allocation_2050.csv"
+        if facility_path.exists():
+            data["scenario_facility_allocation"] = pd.read_csv(facility_path)
+
+        regional_path = outputs_dir / f"{scenario_slug}_regional_deployment.csv"
+        if regional_path.exists():
+            data["scenario_regional"] = pd.read_csv(regional_path)
 
     # Pre-computed LaTeX summaries (auto-generated in the modelling workflow)
     for csv_path in [
@@ -81,6 +120,21 @@ def load_data() -> dict:
             data[key] = pd.read_csv(csv_path)
         except FileNotFoundError:
             pass
+
+    # Scenario comparison / summary filtered to the active scenario
+    if scenario_label:
+        try:
+            scenario_comparison = pd.read_csv("outputs/module_03/scenario_comparison.csv")
+            scenario_comparison = scenario_comparison[
+                scenario_comparison["scenario"] == scenario_label
+            ]
+            data["scenario_comparison"] = scenario_comparison
+        except FileNotFoundError:
+            pass
+
+    if "scenario_summary_for_latex" in data and scenario_label:
+        df_summary = data["scenario_summary_for_latex"]
+        data["scenario_summary_for_latex"] = df_summary[df_summary["Scenario"] == scenario_label]
 
     try:
         data["grid_emissions"] = pd.read_csv("data/grid_emission_trajectory.csv")
@@ -561,158 +615,70 @@ def show_macc(data: dict) -> None:
     st.plotly_chart(line_fig, use_container_width=True)
 
 
-def show_scenarios(data: dict) -> None:
-    st.header("🎯 Scenario Explorer")
-    scenario_summary = data.get("scenario_summary_for_latex")
-    scenario_comparison = data.get("scenario_comparison")
-    scenario_deployments: dict | None = data.get("scenario_deployments")  # type: ignore
-    facility_allocations: dict | None = data.get("facility_allocations")  # type: ignore
-
-    if scenario_summary is None and scenario_comparison is None:
-        st.info("Run Module 3 to generate scenario outputs.")
-        return
-
-    if scenario_summary is not None:
-        st.markdown("### Key outcomes (relative to 52.0 MtCO₂ baseline)")
-        st.dataframe(
-            scenario_summary,
-            hide_index=True,
-            column_config={
-                "Scenario": st.column_config.TextColumn("Scenario"),
-                "Emissions_2030_Mt": st.column_config.NumberColumn("2030 Emissions (Mt)", format="%.1f"),
-                "Reduction_2030_pct": st.column_config.NumberColumn("2030 Reduction (%)", format="%.1f"),
-                "Emissions_2050_Mt": st.column_config.NumberColumn("2050 Emissions (Mt)", format="%.1f"),
-                "Reduction_2050_pct": st.column_config.NumberColumn("2050 Reduction (%)", format="%.1f"),
-            },
-        )
-
-    if scenario_comparison is not None:
-        st.markdown("### Emissions trajectory by scenario")
-        plot_df = scenario_comparison.melt(
-            id_vars="scenario",
-            value_vars=[col for col in scenario_comparison.columns if "emissions_" in col and col.endswith("_mt")],
-            var_name="metric",
-            value_name="value",
-        )
-        # Extract year and scenario
-        plot_df["year"] = plot_df["metric"].str.extract(r"emissions_(\d{4})")[0].astype(int)
-        fig = px.line(
-            plot_df,
-            x="year",
-            y="value",
-            color="scenario",
-            labels={"value": "Emissions (MtCO₂/yr)", "year": "Year", "scenario": "Scenario"},
-            template="plotly_white",
-        )
-        fig.update_traces(mode="lines+markers")
-        st.plotly_chart(fig, use_container_width=True)
-
-    if scenario_deployments:
-        st.markdown("### Deployment details")
-        scenario_names = sorted(scenario_deployments.keys())
-        selected = st.selectbox("Select scenario", scenario_names, format_func=lambda s: s.capitalize())
-        deploy_df = scenario_deployments[selected].copy()
-
-        tech_cols = ["heat_pump_mt", "re_ppa_mt", "ncc_elec_mt", "ncc_h2_mt"]
-        existing_cols = [c for c in tech_cols if c in deploy_df.columns]
-        if existing_cols:
-            stacked = deploy_df.melt(
-                id_vars="year",
-                value_vars=existing_cols,
-                var_name="technology",
-                value_name="abatement_mt",
-            )
-            tech_labels = {
-                "heat_pump_mt": "Heat Pump",
-                "re_ppa_mt": "RE PPA",
-                "ncc_elec_mt": "NCC-Electricity",
-                "ncc_h2_mt": "NCC-H₂",
-            }
-            stacked["technology"] = stacked["technology"].map(tech_labels)
-            area_fig = px.area(
-                stacked,
-                x="year",
-                y="abatement_mt",
-                color="technology",
-                labels={"abatement_mt": "Abatement (MtCO₂)", "year": "Year", "technology": "Technology"},
-                template="plotly_white",
-            )
-            area_fig.update_layout(legend_title=None)
-            st.plotly_chart(area_fig, use_container_width=True)
-
-        energy_cols: list[str] = []
-        if "electricity_consumption_increase_twh" in deploy_df.columns:
-            energy_cols.append("electricity_consumption_increase_twh")
-        if "h2_consumption_kt" in deploy_df.columns:
-            energy_cols.append("h2_consumption_kt")
-        if energy_cols:
-            rename_map = {
-                "electricity_consumption_increase_twh": "Electricity increase (TWh)",
-                "h2_consumption_kt": "Hydrogen consumption (kt)",
-            }
-            energy_plot = deploy_df[["year"] + energy_cols].rename(columns=rename_map)
-            energy_fig = px.line(
-                energy_plot,
-                x="year",
-                y=list(rename_map[col] for col in energy_cols),
-                labels={"value": "Value", "variable": "Metric", "year": "Year"},
-                template="plotly_white",
-            )
-            energy_fig.update_traces(mode="lines+markers")
-            energy_fig.update_yaxes(title="Energy impact")
-            st.plotly_chart(energy_fig, use_container_width=True)
-
-        if "cumulative_capex_musd" in deploy_df.columns:
-            capex_fig = px.line(
-                deploy_df,
-                x="year",
-                y="cumulative_capex_musd",
-                labels={"cumulative_capex_musd": "Cumulative CAPEX (MUSD)", "year": "Year"},
-                template="plotly_white",
-            )
-            capex_fig.update_traces(mode="lines+markers", line=dict(color="#d62728"))
-            st.plotly_chart(capex_fig, use_container_width=True)
-
-    if facility_allocations and selected in facility_allocations:
-        st.markdown("#### Facility allocation snapshot (2050)")
-        alloc_df = facility_allocations[selected]
-        st.dataframe(alloc_df.head(20), hide_index=True)
-
-
-def _format_scenario_label(name: str) -> str:
-    return name.replace("_", " ").replace("-", " ").title()
-
-
 def show_transition_outlook(data: dict) -> None:
     st.header("🌐 Transition Outlook")
     baseline = data.get("baseline")
-    deployments: dict | None = data.get("scenario_deployments")  # type: ignore
+    deployment_df: pd.DataFrame | None = data.get("scenario_deployment")  # type: ignore
     macc = data.get("macc")
     grid_emissions = data.get("grid_emissions")
+    scenario_label = data.get("scenario_label", "Decarbonization Pathway")
 
-    if baseline is None or deployments is None or not deployments:
+    if baseline is None or deployment_df is None:
         st.info("Run Modules 1–3 to generate scenario deployment results.")
         return
     if macc is None:
         st.info("Module 2 MACC outputs are required to evaluate investment needs.")
         return
 
-    scenario_names = sorted(deployments.keys())
-    selected = st.selectbox(
-        "Select scenario",
-        scenario_names,
-        format_func=_format_scenario_label,
+    st.subheader(f"{scenario_label}")
+    baseline_mt = None
+    if isinstance(baseline, pd.DataFrame) and "total_emissions_kt" in baseline.columns:
+        baseline_mt = baseline["total_emissions_kt"].sum() / 1000
+
+    def _emissions_for_year(df: pd.DataFrame, year: int) -> float | None:
+        if "year" not in df.columns or "actual_emissions_mt" not in df.columns:
+            return None
+        match = df[df["year"] == year]
+        if match.empty:
+            return None
+        return float(match.iloc[0]["actual_emissions_mt"])
+
+    emissions_2035 = _emissions_for_year(deployment_df, 2035)
+    emissions_2050 = _emissions_for_year(deployment_df, 2050)
+    cumulative_emissions = float(deployment_df["actual_emissions_mt"].sum()) if "actual_emissions_mt" in deployment_df.columns else None
+
+    def _reduction_pct(emissions: float | None) -> float | None:
+        if emissions is None or baseline_mt is None or baseline_mt <= 0:
+            return None
+        return (baseline_mt - emissions) / baseline_mt * 100
+
+    reduction_2035 = _reduction_pct(emissions_2035)
+    reduction_2050 = _reduction_pct(emissions_2050)
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric(
+        "2035 Emissions (MtCO₂/yr)",
+        f"{emissions_2035:.1f}" if emissions_2035 is not None else "–",
+        delta=f"{reduction_2035:.0f}% vs 2025" if reduction_2035 is not None else None,
+    )
+    col2.metric(
+        "2050 Emissions (MtCO₂/yr)",
+        f"{emissions_2050:.1f}" if emissions_2050 is not None else "–",
+        delta=f"{reduction_2050:.0f}% vs 2025" if reduction_2050 is not None else None,
+    )
+    col3.metric(
+        "Cumulative 2025–2050 (MtCO₂)",
+        f"{cumulative_emissions:.0f}" if cumulative_emissions is not None else "–",
     )
 
-    deploy_df = deployments[selected]
-    insights = prepare_transition_outputs(baseline, deploy_df, macc, grid_emissions)
+    insights = prepare_transition_outputs(baseline, deployment_df, macc, grid_emissions)
     if insights is None:
         st.warning("Transition insights could not be prepared. Check that scenario files contain the required columns.")
         return
 
     st.markdown(
         """
-        선택한 시나리오에 대해 **지역별 수소·재생에너지 도입 궤적**과
+        정책 경로에 대해 **지역별 수소·재생에너지 도입 궤적**과
         **기업별 누적 투자 규모**를 함께 정리했습니다. 2035년 50% 감축과
         2050년 90% 감축을 위해 어떤 지역이 언제 얼마나 준비해야 하는지
         최종적으로 한눈에 확인할 수 있습니다.
@@ -897,7 +863,6 @@ def main() -> None:
             "Overview",
             "Baseline & BAU",
             "MACC Analysis",
-            "Scenario Explorer",
             "Transition Outlook",
             "Data & Assumptions",
             "About",
@@ -910,8 +875,6 @@ def main() -> None:
         show_baseline(data)
     elif page == "MACC Analysis":
         show_macc(data)
-    elif page == "Scenario Explorer":
-        show_scenarios(data)
     elif page == "Transition Outlook":
         show_transition_outlook(data)
     elif page == "Data & Assumptions":
