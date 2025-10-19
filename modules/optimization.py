@@ -140,6 +140,13 @@ class CostOptimizer:
                     bau = self.df_bau[self.df_bau['year'] == year]['total_emissions_mt'].iloc[0]
                     interpolated_path[year] = bau
 
+        # Enforce non-increasing emission targets to prohibit rebounds
+        previous_target = None
+        for year in years:
+            if previous_target is not None:
+                interpolated_path[year] = min(interpolated_path[year], previous_target)
+            previous_target = interpolated_path[year]
+
         for year in years:
             bau = self.df_bau[self.df_bau['year'] == year]['total_emissions_mt'].iloc[0]
             target = interpolated_path[year]
