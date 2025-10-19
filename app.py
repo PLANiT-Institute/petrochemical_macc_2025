@@ -49,6 +49,22 @@ def load_data() -> dict:
     # Module 3 – Scenario optimisation
     try:
         data["scenario_comparison"] = pd.read_csv("outputs/module_03/scenario_comparison.csv")
+
+        # deployment trajectories
+        deployment_files = sorted(Path("outputs/module_03").glob("*_deployment.csv"))
+        if deployment_files:
+            data["scenario_deployments"] = {
+                f.stem.replace("_deployment", ""): pd.read_csv(f)
+                for f in deployment_files
+            }
+
+        # facility allocation snapshots
+        allocation_files = sorted(Path("outputs/module_03").glob("*_facility_allocation_2050.csv"))
+        if allocation_files:
+            data["facility_allocations"] = {
+                f.stem.replace("_facility_allocation_2050", ""): pd.read_csv(f)
+                for f in allocation_files
+            }
     except FileNotFoundError:
         pass
 
@@ -234,6 +250,8 @@ def show_scenarios(data: dict) -> None:
     st.header("🎯 Scenario Explorer")
     scenario_summary = data.get("scenario_summary_for_latex")
     scenario_comparison = data.get("scenario_comparison")
+    scenario_deployments: dict | None = data.get("scenario_deployments")  # type: ignore
+    facility_allocations: dict | None = data.get("facility_allocations")  # type: ignore
 
     if scenario_summary is None and scenario_comparison is None:
         st.info("Run Module 3 to generate scenario outputs.")
@@ -273,6 +291,77 @@ def show_scenarios(data: dict) -> None:
         )
         fig.update_traces(mode="lines+markers")
         st.plotly_chart(fig, use_container_width=True)
+
+    if scenario_deployments:
+        st.markdown("### Deployment details")
+        scenario_names = sorted(scenario_deployments.keys())
+        selected = st.selectbox("Select scenario", scenario_names, format_func=lambda s: s.capitalize())
+        deploy_df = scenario_deployments[selected].copy()
+
+        tech_cols = ["heat_pump_mt", "re_ppa_mt", "ncc_elec_mt", "ncc_h2_mt"]
+        existing_cols = [c for c in tech_cols if c in deploy_df.columns]
+        if existing_cols:
+            stacked = deploy_df.melt(
+                id_vars="year",
+                value_vars=existing_cols,
+                var_name="technology",
+                value_name="abatement_mt",
+            )
+            tech_labels = {
+                "heat_pump_mt": "Heat Pump",
+                "re_ppa_mt": "RE PPA",
+                "ncc_elec_mt": "NCC-Electricity",
+                "ncc_h2_mt": "NCC-H₂",
+            }
+            stacked["technology"] = stacked["technology"].map(tech_labels)
+            area_fig = px.area(
+                stacked,
+                x="year",
+                y="abatement_mt",
+                color="technology",
+                labels={"abatement_mt": "Abatement (MtCO₂)", "year": "Year", "technology": "Technology"},
+                template="plotly_white",
+            )
+            area_fig.update_layout(legend_title=None)
+            st.plotly_chart(area_fig, use_container_width=True)
+
+        energy_cols: list[str] = []
+        if "electricity_consumption_increase_twh" in deploy_df.columns:
+            energy_cols.append("electricity_consumption_increase_twh")
+        if "h2_consumption_kt" in deploy_df.columns:
+            energy_cols.append("h2_consumption_kt")
+        if energy_cols:
+            rename_map = {
+                "electricity_consumption_increase_twh": "Electricity increase (TWh)",
+                "h2_consumption_kt": "Hydrogen consumption (kt)",
+            }
+            energy_plot = deploy_df[["year"] + energy_cols].rename(columns=rename_map)
+            energy_fig = px.line(
+                energy_plot,
+                x="year",
+                y=list(rename_map[col] for col in energy_cols),
+                labels={"value": "Value", "variable": "Metric", "year": "Year"},
+                template="plotly_white",
+            )
+            energy_fig.update_traces(mode="lines+markers")
+            energy_fig.update_yaxes(title="Energy impact")
+            st.plotly_chart(energy_fig, use_container_width=True)
+
+        if "cumulative_capex_musd" in deploy_df.columns:
+            capex_fig = px.line(
+                deploy_df,
+                x="year",
+                y="cumulative_capex_musd",
+                labels={"cumulative_capex_musd": "Cumulative CAPEX (MUSD)", "year": "Year"},
+                template="plotly_white",
+            )
+            capex_fig.update_traces(mode="lines+markers", line=dict(color="#d62728"))
+            st.plotly_chart(capex_fig, use_container_width=True)
+
+        if facility_allocations and selected in facility_allocations:
+            st.markdown("#### Facility allocation snapshot (2050)")
+            alloc_df = facility_allocations[selected]
+            st.dataframe(alloc_df.head(20), hide_index=True)
 
 
 def show_data_catalog(data: dict) -> None:
