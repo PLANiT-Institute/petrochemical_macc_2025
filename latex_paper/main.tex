@@ -48,24 +48,24 @@ A Marginal Abatement Cost Curve Analysis with Energy-Based Methodology}
 \maketitle
 
 \begin{abstract}
-South Korea's petrochemical sector emits 52.0 MtCO\textsubscript{2} per year across 248 facilities. We develop an open, energy-based marginal abatement cost curve (MACC) model that links facility-level fuel use to four transition options: industrial heat pumps, renewable-power purchase agreements (RE PPA), electric naphtha crackers, and hydrogen-fired naphtha crackers. The model combines annually resolved price trajectories, technology parameters, and facility applicability to generate MACC estimates for 2025--2050 without using discounted cash-flow assumptions. In 2030 the electrification pathway (heat pumps + RE PPA + electric crackers) yields 29.0 MtCO\textsubscript{2} of abatement at costs of \$215--\$334/tCO\textsubscript{2}, while a hydrogen pathway delivers 30.9 MtCO\textsubscript{2} at \$1,150/tCO\textsubscript{2}. Declining renewable and hydrogen prices reduce 2050 costs to \$111/tCO\textsubscript{2} (heat pumps) and \$174/tCO\textsubscript{2} (electric crackers), with green hydrogen reaching \$276/tCO\textsubscript{2}. System-wide deployment scenarios show that an aggressive programme leaves 5.0 MtCO\textsubscript{2} residual emissions by 2050, whereas conservative roll-outs stabilise at 20.0 MtCO\textsubscript{2}. The paper documents the modelling architecture, highlights data consistency checks, and discusses infrastructure prerequisites for achieving deep industrial decarbonisation.
+South Korea's petrochemical sector emits 52.0~MtCO\textsubscript{2} per year across 248 facilities. We compile facility-level energy balances from national statistics \citep{KEEI2023} and technology catalogues \citep{Woo2025,Arpagaus2018,Sadler2020} to build an open, energy-explicit marginal abatement cost curve (MACC) model covering 2025--2050. Four transition options are modelled: industrial heat pumps, renewable-power purchase agreements (RE~PPA), electric naphtha crackers, and hydrogen-fired crackers. Costs are expressed without discounted cash-flow assumptions; annualised CAPEX, OPEX, and energy deltas are traced explicitly. A policy-aligned optimisation enforces a monotone emission path that halves sectoral emissions by 2035 (26.0~MtCO\textsubscript{2}) and achieves a 90\% reduction by 2050 (5.2~MtCO\textsubscript{2}). Meeting this trajectory requires cumulative abatement of 46.8~MtCO\textsubscript{2} by 2050, an additional 130~TWh of renewable electricity, 12.9~kt~H\textsubscript{2}/yr, and \$47.9~billion (2023 USD) of capital. Electrification technologies dominate the abatement portfolio until the mid-2030s, after which hydrogen crackers are introduced to satisfy the tightening constraint. The modelling workflow---baseline analytics, MACC construction, optimisation, and reporting---is scripted end-to-end, providing reproducible evidence for industrial decarbonisation planning.
 
-\textbf{Keywords:} Marginal Abatement Cost Curve; Petrochemical; Electrification; Green Hydrogen; Korea; Energy System Modelling
+\textbf{Keywords:} Marginal abatement cost curve; Petrochemical industry; Electrification; Green hydrogen; Korea; Energy system modelling
 \end{abstract}
 
 \section{Introduction}
 \label{sec:intro}
 
-The global petrochemical industry emits approximately 1.3 GtCO\textsubscript{2} annually, contributing 3--4\% of anthropogenic greenhouse gas emissions \citep{IEA2020}. South Korea's petrochemical cluster is both energy intensive and export oriented, accounting for 52 MtCO\textsubscript{2}/year (around 7\% of national emissions). The government's 2050 Carbon Neutrality Strategy calls for deep reductions while safeguarding industrial competitiveness. Existing studies often apply levelised cost approaches that obscure the energy balance between fossil fuels, hydrogen, and electricity. We address this gap with an energy-explicit MACC framework that retains clear system boundaries and is reproducible from raw data to policy-ready indicators.
+The global petrochemical industry emits approximately 1.3~GtCO\textsubscript{2} annually, contributing 3--4\% of anthropogenic greenhouse gas emissions \citep{IEA2020}. South Korea hosts one of the densest petrochemical clusters worldwide; in 2025 it emits 52~MtCO\textsubscript{2}, equivalent to roughly 7\% of national greenhouse gases. The government's 2050 Carbon Neutrality Strategy and the 10th Basic Electricity Plan call for rapid electrification, renewable deployment, and hydrogen infrastructure build-out \citep{Korea10thPlan}. Existing assessments for petrochemicals often rely on levelised cost comparisons that mask the interplay between fossil fuels, electricity, and hydrogen \citep{Tiggeloven2022}. A transparent, energy-explicit framework is needed to evaluate compliance pathways against interim policy targets.
 
-This work answers three questions. First, what is the baseline emissions profile and energy usage of Korean petrochemical facilities? Second, how do key decarbonisation options compare in terms of incremental abatement and cost when energy flows are tracked explicitly? Third, what long-term deployment scenarios are consistent with technology readiness, infrastructure constraints, and simple annualisation assumptions? Our contributions are: (i) an open data pipeline that bridges facility data, technology catalogues, and scenario analysis; (ii) a MACC formulation grounded in physical energy balances; and (iii) transparent, auto-updating tables that connect model outputs to the manuscript.
+This study addresses three questions. \emph{Baseline:} what do facility-level emissions and fuel balances look like in 2025? \emph{Technology economics:} how do heat pumps, renewable procurement, electric crackers, and hydrogen crackers compare when costs are expressed per tonne of abatement without discounting? \emph{Policy compliance:} which deployment schedule satisfies a linear 50\% reduction by 2035 and a 90\% reduction by 2050? We contribute (i) a fully scripted data pipeline connecting public energy statistics \citep{KEEI2023} to technology parameters and MACC outputs; (ii) an energy-based cost formulation that preserves physical balances; and (iii) a policy-consistent optimisation that produces facility, regional, and investment metrics ready for reporting.
 
 \section{Data and Model Architecture}
 \label{sec:data}
 
 \subsection{Facility Baseline and Energy Intensities}
 
-The baseline module aggregates \texttt{outputs/module\_01/baseline\_2025\_detailed.csv}, which covers 248 facilities divided into five product groups (Olefins, Aromatics, Polymers, Intermediates, Other). For facility $i$ and fuel $f$, baseline combustion energy $E^{\mathrm{base}}_{i,f}$ is derived from annual production $A_i$ and technology-specific energy intensity $\theta_{i,f}$:
+The baseline module aggregates \texttt{outputs/module\_01/baseline\_2025\_detailed.csv}, which covers 248 facilities divided into five product groups (Olefins, Aromatics, Polymers, Intermediates, Other). The underlying facility database merges plant-level capacity, fuel purchases, and location data from the Korea Energy Economics Institute statistics yearbook \citep{KEEI2023} with internal reconciliations of company disclosures. Grid emission factors and demand growth trajectories are aligned with the 10th Basic Electricity Plan \citep{Korea10thPlan}. For facility $i$ and fuel $f$, baseline combustion energy $E^{\mathrm{base}}_{i,f}$ is derived from annual production $A_i$ and technology-specific energy intensity $\theta_{i,f}$:
 \begin{equation}
 E^{\mathrm{base}}_{i,f} = A_i \cdot \theta_{i,f}.
 \end{equation}
@@ -73,11 +73,11 @@ Multiplying by emission factor $\mathrm{EF}_{f,y}$ yields facility emissions in 
 
 \subsection{Technology Catalogue and Applicability}
 
-\texttt{data/technology\_parameters.csv} summarises the four technology options $t$ with characteristics such as coefficient of performance (COP), hydrogen or electricity demand, capital expenditure (CAPEX), operating expenditure (OPEX), lifetime $L_t$, and technology readiness level (TRL). Applicability matrices in \texttt{data/facility\_technology\_applicability.csv} define the set $\mathcal{I}_t$ of facilities eligible for technology $t$.
+\texttt{data/technology\_parameters.csv} summarises the four technology options $t$ with characteristics such as coefficient of performance (COP), hydrogen or electricity demand, capital expenditure (CAPEX), operating expenditure (OPEX), lifetime $L_t$, and technology readiness level (TRL). Parameter values draw upon techno-economic studies of high temperature heat pumps \citep{Arpagaus2018}, electric crackers \citep{Sadler2020}, hydrogen-based chemical production \citep{Zhang2023}, and benchmarking data from recent ethylene decarbonisation assessments \citep{Woo2025}. Applicability matrices in \texttt{data/facility\_technology\_applicability.csv} define the set $\mathcal{I}_t$ of facilities eligible for technology $t$.
 
 \subsection{Price and Emission Trajectories}
 
-Hydrogen and renewable electricity price trajectories (\texttt{data/h2\_price\_trajectory.csv}, \texttt{data/re\_price\_trajectory.csv}), grid emission factors (\texttt{data/grid\_emission\_trajectory.csv}), and fossil fuel prices (\texttt{data/fuel\_price\_trajectory.csv}) provide annually resolved inputs. These trajectories drive both abatement potential---by altering residual emissions---and incremental energy costs.
+Hydrogen and renewable electricity price trajectories (\texttt{data/h2\_price\_trajectory.csv}, \texttt{data/re\_price\_trajectory.csv}) follow Hydrogen Council cost outlooks \citep{HydrogenCouncil2021} and IRENA renewable benchmarks \citep{IRENA2023}. Grid emission factors (\texttt{data/grid\_emission\_trajectory.csv}) draw on Korea's net-zero roadmap \citep{IEA2021NetZero}, while fossil fuel prices (\texttt{data/fuel\_price\_trajectory.csv}) reflect domestic import statistics \citep{KEEI2023}. These trajectories influence both abatement potential---by altering residual emissions---and incremental energy costs.
 
 \section{Energy-Based MACC Formulation}
 \label{sec:macc}
@@ -116,6 +116,27 @@ The modelling workflow comprises four Python modules:
     \item[Module 3 (Optimisation):] deploys technologies under scenario-specific constraints (e.g., rollout caps, mutual exclusivity between NCC electrification and hydrogen).
     \item[Module 4 (Financial):] evaluates discounted cash flows for scenario outputs; this module is not used in the MACC values reported here.
 \end{description}
+
+\subsection{Policy-target optimisation}
+
+The optimisation focuses on a single ``Policy Target'' trajectory that interpolates linearly between the 2025 baseline (52.0~MtCO\textsubscript{2}), a 2035 midpoint (26.0~MtCO\textsubscript{2}), and a 2050 endpoint (5.2~MtCO\textsubscript{2}). Let $E_y^{\mathrm{bau}}$ denote business-as-usual emissions in year $y$, $E_y$ the modelled emissions after technology deployment, and $T_y$ the policy target:
+\begin{equation}
+T_y = \begin{cases}
+52.0 & y = 2025, \\
+52.0 - 2.6 (y-2025) & 2025 < y \le 2035, \\
+26.0 - 1.3867 (y-2035) & 2035 < y \le 2050.
+\end{cases}
+\end{equation}
+Module~3 enforces two constraints: (i) emissions must not exceed the interpolated target,
+\begin{equation}
+E_y \le T_y \quad \forall y \in [2025,2050],
+\label{eq:target_constraint}
+\end{equation}
+and (ii) the realised trajectory must be non-increasing to avoid rebound behaviour,
+\begin{equation}
+E_y \le E_{y-1} \quad \forall y > 2025.
+\end{equation}
+Abatement in year $y$ is therefore $\Delta_y = \max(0, E_y^{\mathrm{bau}} - E_y)$, which the optimisation satisfies by selecting least-cost technologies subject to irreversibility (cumulative deployment cannot decrease over time). The resulting deployment schedule produces plant-level, regional, and investment outputs used in \Cref{sec:results}.
 
 The tables in this section are generated directly from model outputs, ensuring traceability between the text and the computational pipeline.
 
@@ -165,24 +186,29 @@ The tables in this section are generated directly from model outputs, ensuring t
     \end{tabular}
 \end{table}
 
-Scenario analysis leverages \texttt{outputs/module\_03/scenario\_summary\_for\_latex.csv}, produced by the optimisation module.
+The policy-target optimisation writes \texttt{outputs/module\_03/policy\_target\_deployment.csv}, from which milestone statistics are extracted in \Cref{tab:policy_milestones}.
 \begin{table}[htbp]
     \centering
-    \caption{Scenario outcomes (Module 3). Reductions are relative to the 52.0 MtCO\textsubscript{2} baseline.}
-    \label{tab:scenario_summary}
-    \begin{tabular}{lcccc}
+    \caption{Policy-target milestones. Emissions and technology deployment metrics are direct slices of the optimisation output.}
+    \label{tab:policy_milestones}
+    \begin{tabular}{rcccccccc}
         \toprule
-        \textbf{Scenario} & \textbf{2030 Emissions (Mt)} & \textbf{2030 Reduction (\%)} & \textbf{2050 Emissions (Mt)} & \textbf{2050 Reduction (\%)} \\
+        \textbf{Year} & \textbf{Emissions} & \textbf{HP} & \textbf{NCC-H\textsubscript{2}} & \textbf{NCC-E} & \textbf{RE PPA} & \textbf{Electricity} & \textbf{Hydrogen} & \textbf{Cum. CAPEX} \\
+        & (MtCO\textsubscript{2}) & (Mt) & (Mt) & (Mt) & (Mt) & (TWh/yr) & (kt/yr) & (USD bn) \\
         \midrule
         \csvreader[
             head to column names,
             late after line=\\
-        ]{../outputs/module_03/scenario_summary_for_latex.csv}{}%
-        {\Scenario &
-         \num{\Emissions_2030_Mt} &
-         \num{\Reduction_2030_pct}\% &
-         \num{\Emissions_2050_Mt} &
-         \num{\Reduction_2050_pct}\%}
+        ]{../outputs/module_03/policy_target_milestones_for_latex.csv}{}%
+        {\num{\year} &
+         \num{\actual_emissions_mt} &
+         \num{\abatement_heat_pump_mt} &
+         \num{\abatement_ncc_h2_mt} &
+         \num{\abatement_ncc_elec_mt} &
+         \num{\abatement_re_ppa_mt} &
+         \num{\electricity_twh} &
+         \num{\hydrogen_kt} &
+         \num{\cumulative_capex_usd_bn}}
         \bottomrule
     \end{tabular}
 \end{table}
@@ -234,25 +260,25 @@ Long-term trajectories in \Cref{fig:cost_evolution} show cost convergence by 205
     \label{fig:cost_evolution}
 \end{figure}
 
-\subsection{Scenario Outcomes}
+\subsection{Policy-target deployment}
 
-\Cref{tab:scenario_summary} summarises three deployment archetypes. The Conservative pathway prioritises mature options and achieves a 61.5\% reduction by 2050. The Moderate pathway integrates electric crackers from 2030 with partial hydrogen uptake, reaching an 80.8\% reduction. The Aggressive pathway sustains rapid electrification and RE procurement, leaving 5.0 MtCO\textsubscript{2} residual emissions (90.4\% reduction) by 2050. Across all scenarios, cumulative electrification drives an additional 130~TWh of renewable electricity demand by the late 2040s, while green hydrogen consumption peaks at 13~kt~H\textsubscript{2}/yr in the aggressive case; these energy requirements originate from Module~3 deployment outputs.
+\Cref{tab:policy_milestones} shows how the optimisation satisfies the interpolated targets. By 2030 the model deploys 16.2~Mt of abatement, primarily through electric crackers (7.66~Mt) and RE~PPA (7.68~Mt), leaving residual emissions of 39.0~MtCO\textsubscript{2}. Heat pumps contribute 0.87~Mt, and hydrogen use is deferred. Meeting the 2035 requirement (26.0~MtCO\textsubscript{2}) necessitates partial conversion of crackers to hydrogen (1.21~Mt abatement) while continuing electrification; electricity demand rises to 116~TWh/yr, and hydrogen consumption begins at 0.68~kt/yr. By 2050 the system operates with 5.2~MtCO\textsubscript{2} residual emissions and cumulative CAPEX of \$47.9~bn. Electric crackers deliver 24.5~Mt of annual abatement, hydrogen crackers 23.0~Mt, and RE~PPA 8.44~Mt. The associated energy inputs are 130~TWh/yr of renewable electricity and 12.9~kt/yr of green hydrogen.
 
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph{System boundaries.} The energy-based formulation clarifies that naphtha remains a feedstock; only combustion energy is displaced. RE PPA affects solely the residual grid purchases after technology deployment, avoiding double counting with electrification.
+\paragraph{System boundaries.} The energy-based formulation clarifies that naphtha is retained as a feedstock; only combustion energy is displaced. RE~PPA affects residual grid purchases after technology deployment, preventing double counting with electrification decisions.
 
-\paragraph{Hydrogen versus electricity.} Although hydrogen offers slightly higher abatement potential, it is costlier than electrification throughout 2025--2050 under the assumed price trajectory. Hybrid operation (partial hydrogen blending) is a promising but as-yet unmodelled extension.
+\paragraph{Hydrogen versus electricity.} Electrification remains the marginally cheaper pathway through 2050, yet hydrogen becomes indispensable to respect the monotone target: without hydrogen deployment in the late 2030s the electric option saturates, and the optimisation would violate \eqref{eq:target_constraint}. Hybrid cracker operation and staged conversions are priorities for future modelling.
 
-\paragraph{Infrastructure needs.} Achieving the Aggressive scenario requires approximately 130~TWh of additional renewable generation and up to 13~kt~H\textsubscript{2}/yr by 2050, implying significant upgrades to transmission, storage, and hydrogen supply infrastructure.
+\paragraph{Infrastructure needs.} The policy trajectory requires about 130~TWh/yr of additional renewable electricity and 12.9~kt/yr of green hydrogen supply by 2050. These figures imply coordinated expansion of transmission, storage, electrolyser capacity, and import terminals consistent with national energy plans \citep{Korea10thPlan,HydrogenCouncil2021}.
 
-\paragraph{Unmodelled dynamics.} The MACC values rely on simple annualisation (no discounting). Financial decision-making typically applies discount rates of 5--8\%, so capital-intensive options will appear somewhat less attractive under discounted cash-flow assessments. Modules for Monte Carlo uncertainty, spatial siting constraints, and carbon capture integration remain areas for future work.
+\paragraph{Unmodelled dynamics.} MACC values rely on simple annualisation (no discounting). Financial decision-making often applies discount rates of 5--8\%, which would raise the apparent cost of capital-intensive options. The current framework also omits uncertainty analysis, spatial network constraints, and carbon capture retrofits; these remain areas for future development.
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-An energy-explicit MACC framework for Korea's petrochemical industry shows that technology choice and sequencing matter. By 2030, electrification and renewable procurement can mitigate 29.0 MtCO\textsubscript{2} at \$215--\$334/tCO\textsubscript{2}; hydrogen pathways provide similar abatement but at higher cost. Continued declines in renewable energy and hydrogen prices shrink cost differentials by 2050, with aggressive deployment leaving a manageable 5.0 MtCO\textsubscript{2} residual. The modelling stack---from facility data to LaTeX-ready tables---is fully automated, enabling rapid re-analysis as new data arrive. Policymakers should combine technology deployment with grid reinforcement, hydrogen infrastructure planning, and market instruments that translate these cost curves into investment signals.
+An energy-explicit MACC framework for Korea's petrochemical industry shows that technology choice and sequencing matter when policy targets require rapid reductions. By 2030, electrification and renewable procurement mitigate 29.0~MtCO\textsubscript{2} at \$215--\$334/tCO\textsubscript{2}. The 2035 midpoint introduces hydrogen to unlock additional abatement while maintaining non-increasing emissions. By 2050 the sector reaches the 5.2~MtCO\textsubscript{2} target with cumulative CAPEX of \$47.9~bn, supported by 130~TWh/yr of renewable electricity and 12.9~kt/yr of green hydrogen. The modelling stack---from facility data to LaTeX-ready tables---is fully automated, enabling rapid re-analysis as new data arrive. Policymakers should pair technology deployment incentives with grid reinforcement, hydrogen infrastructure planning, and market instruments that translate these cost curves into investment signals.
 
 \section*{Acknowledgments}
 
