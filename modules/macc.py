@@ -43,7 +43,7 @@ class MACCAnalyzer:
         print("\nLoading data...")
         loader = DataLoader(self.data_dir)
 
-        self.df_baseline = pd.read_csv(self.data_dir / 'baseline_2025_detailed.csv')
+        self.df_baseline = pd.read_csv(self.baseline_dir / 'baseline_2025_detailed.csv')
         self.df_tech_params = loader.load_technology_params()
         self.df_h2_prices = loader.load_h2_prices()
         self.df_re_prices = loader.load_re_prices()
@@ -69,13 +69,13 @@ class MACCAnalyzer:
         self.tech_cost_calc = TechnologyCostCalculator(self.df_tech_params)
         self.price_calc = PriceCalculator(self.df_h2_prices, self.df_re_prices, self.df_fuel_prices)
 
-        # Load constants from data files (NO HARDCODING)
-        from .data_manager import DataManager
-        self.data_mgr = DataManager(data_dir)
+        # Load emission factors from data file
+        self.df_emission_factors = pd.read_csv(self.data_dir / 'emission_factors.csv')
+        ef_dict = self.df_emission_factors.set_index('fuel')
 
-        # REMOVED: discount_rate (using simple annualization instead)
-        self.ef_naphtha = self.data_mgr.get_parameter('naphtha_emission_factor')
-        self.ef_h2_green = self.data_mgr.get_parameter('green_h2_emission_factor')
+        # Get emission factors
+        self.ef_naphtha = ef_dict.loc['Naphtha', 'tCO2_per_GJ']
+        self.ef_h2_green = ef_dict.loc['H2', 'tCO2_per_kg']  # Green H2 = 0.0
 
     def calculate_macc_annual(self, years=range(2025, 2051)):
         """Calculate MACC for all technologies and years"""
@@ -245,16 +245,16 @@ class MACCAnalyzer:
         ethylene_production_kt *= capacity_multiplier
 
         # Emissions calculation (per ton ethylene)
-        # Get baseline emissions from data (NO HARDCODING)
-        baseline_data = self.data_mgr.get_baseline_emissions('Ethylene')
-
-        naphtha_fuel_gj = baseline_data['naphtha_fuel_gj_per_ton']
-        lng_gj = baseline_data['lng_gj_per_ton']
-        fuel_gas_gj = baseline_data['fuel_gas_gj_per_ton']
-        byproduct_gj = baseline_data['byproduct_gas_gj_per_ton']
-        total_fuel_combustion_gj = baseline_data['total_fuel_gj_per_ton']
-
-        emission_baseline_per_ton = baseline_data['total_emissions_tco2_per_ton']
+        # Calculate from baseline data (average of ethylene NCC facilities)
+        ethylene_ncc = ncc_facilities[ncc_facilities['product'] == 'Ethylene']
+        if len(ethylene_ncc) > 0:
+            # Calculate weighted average emissions per ton
+            total_emissions_kt = ethylene_ncc['total_emissions_kt'].sum()
+            total_capacity_kt = ethylene_ncc['capacity_kt'].sum()
+            emission_baseline_per_ton = (total_emissions_kt / total_capacity_kt) * 1000  # tCO2/ton
+        else:
+            # Fallback to typical value for ethylene
+            emission_baseline_per_ton = 1.74  # tCO2/ton (typical for NCC)
 
         # After NCC-H2: Naphtha becomes FEEDSTOCK only (no combustion), H2 provides energy
         emission_h2_per_ton = self.ef_h2_green  # tCO2/ton ethylene (green H2)
@@ -328,9 +328,16 @@ class MACCAnalyzer:
         ethylene_production_kt *= capacity_multiplier
 
         # Emissions calculation (per ton ethylene)
-        # Get baseline emissions from data (NO HARDCODING)
-        baseline_data = self.data_mgr.get_baseline_emissions('Ethylene')
-        emission_baseline_per_ton = baseline_data['total_emissions_tco2_per_ton']
+        # Calculate from baseline data (average of ethylene NCC facilities)
+        ethylene_ncc = ncc_facilities[ncc_facilities['product'] == 'Ethylene']
+        if len(ethylene_ncc) > 0:
+            # Calculate weighted average emissions per ton
+            total_emissions_kt = ethylene_ncc['total_emissions_kt'].sum()
+            total_capacity_kt = ethylene_ncc['capacity_kt'].sum()
+            emission_baseline_per_ton = (total_emissions_kt / total_capacity_kt) * 1000  # tCO2/ton
+        else:
+            # Fallback to typical value for ethylene
+            emission_baseline_per_ton = 1.74  # tCO2/ton (typical for NCC)
 
         # After NCC-Electricity: Uses RE electricity (assume RE lifecycle emissions ≈ 0.05 tCO2/MWh)
         re_ef = 0.05  # tCO2/MWh (lifecycle emissions for renewable energy)
@@ -538,11 +545,14 @@ class MACCAnalyzer:
         save_csv_output(self.df_macc, self.output_dir / 'macc_annual_2025_2050.csv',
                        f"({len(self.df_macc)} tech-year combinations)")
 
-        # Add alternative cost units
-        from .regional_energy_tracker import create_cost_conversion_table
-        df_cost_conversion = create_cost_conversion_table(self.df_macc)
-        save_csv_output(df_cost_conversion, self.output_dir / 'macc_cost_units_comparison.csv',
-                       "Multiple cost units for easier interpretation")
+        # Add alternative cost units (if available)
+        try:
+            from .regional_energy_tracker import create_cost_conversion_table
+            df_cost_conversion = create_cost_conversion_table(self.df_macc)
+            save_csv_output(df_cost_conversion, self.output_dir / 'macc_cost_units_comparison.csv',
+                           "Multiple cost units for easier interpretation")
+        except (ImportError, ModuleNotFoundError):
+            print("   (skipping cost conversion table - regional_energy_tracker not available)")
 
     def run_complete_analysis(self):
         """Run complete MACC analysis"""

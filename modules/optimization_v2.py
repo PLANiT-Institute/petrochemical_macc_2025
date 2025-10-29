@@ -672,17 +672,21 @@ class CostOptimizerV2:
 
     def _create_regional_analysis(self, results):
         """Create regional energy transition analysis for all scenarios"""
-        from .regional_energy_tracker import RegionalEnergyTracker
+        try:
+            from .regional_energy_tracker import RegionalEnergyTracker
 
-        tracker = RegionalEnergyTracker(
-            baseline_dir='data',
-            output_dir=self.output_dir / 'regional_analysis'
-        )
+            tracker = RegionalEnergyTracker(
+                baseline_dir='data',
+                output_dir=self.output_dir / 'regional_analysis'
+            )
 
-        # Create baseline regional summary
-        regional_baseline = tracker.create_regional_baseline()
-        save_csv_output(regional_baseline, self.output_dir / 'regional_baseline.csv',
-                       "Baseline emissions and energy by region")
+            # Create baseline regional summary
+            regional_baseline = tracker.create_regional_baseline()
+            save_csv_output(regional_baseline, self.output_dir / 'regional_baseline.csv',
+                           "Baseline emissions and energy by region")
+        except (ImportError, ModuleNotFoundError):
+            print("   (skipping regional analysis - regional_energy_tracker not available)")
+            return
 
         # For each scenario, create regional deployment tracking
         for scenario_name, df_deployment in results.items():
