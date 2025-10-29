@@ -1,0 +1,229 @@
+================================================================================
+RUNNING MODEL WITH CORRECTED DATA
+================================================================================
+
+Data Corrections Applied:
+  1. LNG emission factor: 0.0149 → 0.0561 tCO2/GJ (+276%)
+  2. Fuel Gas emission factor: 0.0149 → 0.050 tCO2/GJ (+235%)
+  3. H2 price (2025): $12.00 → $6.00/kg (-50%)
+  4. H2 price (2030): $10.00 → $3.50/kg (-65%)
+  5. RE price (2025): $130 → $90/MWh (-31%)
+  6. RE price (2030): $115 → $75/MWh (-35%)
+
+================================================================================
+
+📊 Original Baseline (2025): 52.01 MtCO2
+
+================================================================================
+MODULE 1: BASELINE ANALYSIS (WITH CORRECTED EMISSION FACTORS)
+================================================================================
+================================================================================
+MODULE 1: BASELINE ANALYSIS
+================================================================================
+
+📁 Loading data...
+   - Loaded demand growth trajectory (2025-2050)
+   - Total capacity growth: 28.8%
+   - Loaded 248 facilities
+   - Loaded 248 energy intensities
+
+================================================================================
+RUNNING COMPLETE BASELINE ANALYSIS
+================================================================================
+
+Calculating 2025 baseline...
+   - Total baseline emissions: 66.19 MtCO2
+   - Facilities: 248
+   - Naphtha: 57.4%
+   - Electricity: 12.6%
+   - Other: 30.0%
+
+============================================================
+SCENARIO 1: NO RETIREMENT (Infinite Lifetime)
+============================================================
+
+📈 Projecting BAU trajectory (2025-2050)...
+   - Facility lifetime: infinite (no retirement)
+   - 2025 emissions: 66.19 MtCO2
+   - 2050 emissions: 80.46 MtCO2
+   - Capacity growth: 28.8%
+   - All 248 facilities operate forever
+
+Calculating aggregations...
+   - Aggregated by 5 product groups
+   - Aggregated by 60 companies
+   - Aggregated by 14 locations
+
+💰 Calculating fuel costs...
+   - Total annual fuel cost (2025): $14393.0 Million
+      - Naphtha: $10507.8M (73.0%)
+      - Electricity: $186.0M (1.3%)
+
+Creating visualizations...
+   ✓ Saved: baseline_2025_by_product.png 
+   ✓ Saved: bau_trajectory.png 
+   ✓ Saved: baseline_2025_top_companies.png 
+
+Saving outputs...
+   ✓ Saved: baseline_2025_detailed.csv (248 facilities)
+   ✓ Saved: bau_trajectory_2025_2050.csv (26 years)
+   ✓ Saved: emissions_by_product.csv 
+   ✓ Saved: emissions_by_company.csv 
+   ✓ Saved: emissions_by_location.csv 
+
+================================================================================
+- MODULE 1 COMPLETE
+================================================================================
+
+Outputs saved to: outputs/module_01_corrected
+
+📊 Corrected Baseline (2025): 66.19 MtCO2
+   Change: +14.18 MtCO2 (+27.3%)
+
+================================================================================
+MODULE 2: MACC ANALYSIS (WITH CORRECTED PRICES)
+================================================================================
+================================================================================
+MODULE 2: ENERGY-BASED MACC ANALYSIS
+================================================================================
+
+Loading data...
+   - Loaded demand growth trajectory
+   - Loaded baseline: 248 facilities
+   - Loaded 4 technologies
+
+================================================================================
+DATA MANAGER: Loading all model data
+================================================================================
+Loading model parameters...
+Loading baseline emissions...
+Loading technology specifications...
+Loading facility-technology mapping...
+Loading price trajectories...
+Loading facility database...
+
+Validating data consistency...
+  ✓ Price trajectories: 2025-2050
+  ✓ Baseline emissions defined for 3 products
+  ✓ 248 facilities loaded
+  ✓ All critical parameters present
+✓ All data loaded and validated
+================================================================================
+
+
+================================================================================
+RUNNING COMPLETE MACC ANALYSIS (ENERGY-BASED)
+================================================================================
+
+Calculating dynamic MACC (2025-2050)...
+   - Calculated 104 technology-year combinations
+
+Creating visualizations...
+   ✓ Saved: macc_curve_2025.png 
+   ✓ Saved: macc_curve_2030.png 
+   ✓ Saved: macc_curve_2040.png 
+   ✓ Saved: macc_curve_2050.png 
+   ✓ Saved: cost_evolution_annual.png 
+
+Saving outputs...
+   ✓ Saved: macc_annual_2025_2050.csv (104 tech-year combinations)
+   ✓ Saved: macc_cost_units_comparison.csv Multiple cost units for easier interpretation
+
+================================================================================
+MODULE 2 COMPLETE
+================================================================================
+
+Outputs saved to: outputs/module_02_corrected
+
+Key changes from LCOE approach:
+  - Explicit CAPEX, OPEX, Fuel Cost tracking
+  - H2 consumption: 0.8 ton/ton ethylene
+  - Electricity consumption: 13 MWh/ton ethylene
+  - Naphtha feedstock cost: FIXED (not in differential)
+
+📊 Technology Costs (2030):
+   Heat_Pump           : $    160/tCO2
+   NCC-H2              : $    477/tCO2
+   NCC-Electricity     : $    259/tCO2
+   RE_PPA              : $    208/tCO2
+
+================================================================================
+MODULE 3: COST OPTIMIZATION (WITH CORRECTED DATA)
+================================================================================
+================================================================================
+MODULE 3: COST OPTIMIZATION
+================================================================================
+
+📁 Loaded emission scenarios from: data/emission_scenarios_clean.csv
+   ✓ Found 1 scenarios:
+      - Policy_Target: Annual path (2025: 52.0 Mt → 2050: 5.2 Mt)
+
+================================================================================
+RUNNING COST OPTIMIZATION
+================================================================================
+
+�� Optimizing: Policy_Target
+   Year 2030: Selecting NCC-Electricity ($477 vs $259 per tCO2)
+   ✓ Saved: policy_target_deployment.csv 
+
+🎨 Creating visualizations...
+   ✓ Saved: deployment_policy_target.png 
+   ✓ Saved: scenario_comparison.csv 
+
+📍 Creating facility-level technology allocations...
+
+📍 Creating facility-level allocation for Policy_Target...
+   Allocated NCC-Electricity: 24.48 Mt to NCC facilities
+   ✓ Allocated technologies to 248 facilities
+   ✓ 76 facilities have technology deployment
+   ✓ Total abatement: 30.34 Mt (45.8% of baseline)
+   ✓ Final emissions: 35851 kt
+   ✓ Saved: policy_target_facility_allocation_2050.csv 
+
+📍 Creating regional energy transition analysis...
+   ✓ Saved: regional_baseline.csv Baseline emissions and energy by region
+   - Analyzing Policy_Target regional deployment...
+   ✓ Saved: Policy_Target_regional_deployment.csv Regional technology deployment for Policy_Target
+   ✓ Regional analysis complete
+
+✓ MODULE 3 COMPLETE
+Outputs saved to: outputs/module_03_corrected
+
+📊 2050 Deployment (Corrected Data):
+   Heat Pump:         1.04 MtCO2
+   NCC-H2:            0.00 MtCO2
+   NCC-Electricity:  24.48 MtCO2
+   RE PPA:            4.82 MtCO2
+   ─────────────────────────────
+   Total:            30.34 MtCO2
+
+   BAU 2050:         80.46 MtCO2
+   Actual 2050:      50.12 MtCO2
+   Reduction:        37.7%
+
+   Investment:      $30.37 Billion
+   H2 Consumption:     0.0 kt/year
+   Elec Increase:    129.8 TWh/year
+
+================================================================================
+GENERATING COMPARISON REPORT
+================================================================================
+
+📊 Summary of Changes:
+
+   baseline_2025_emissions_mt:
+      Original:  52.01
+      Corrected: 66.19
+      Change:    +14.18 (+27.3%)
+
+================================================================================
+MODEL RUN COMPLETE
+================================================================================
+
+Outputs saved to:
+  - outputs/module_01_corrected/
+  - outputs/module_02_corrected/
+  - outputs/module_03_corrected/
+  - outputs/data_correction_comparison.json
+
+================================================================================

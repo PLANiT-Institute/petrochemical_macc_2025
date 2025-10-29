@@ -58,23 +58,23 @@ def load_data() -> dict:
     except FileNotFoundError:
         scenario_definition = None
 
-    # Module 1 – Baseline
+    # Module 1 – Baseline (CORRECTED DATA)
     try:
-        data["baseline"] = pd.read_csv("outputs/module_01/baseline_2025_detailed.csv")
-        data["bau"] = pd.read_csv("outputs/module_01/bau_trajectory_2025_2050.csv")
-        data["emissions_by_product"] = pd.read_csv("outputs/module_01/emissions_by_product.csv")
-        data["emissions_by_location"] = pd.read_csv("outputs/module_01/emissions_by_location.csv")
+        data["baseline"] = pd.read_csv("outputs/module_01_corrected/baseline_2025_detailed.csv")
+        data["bau"] = pd.read_csv("outputs/module_01_corrected/bau_trajectory_2025_2050.csv")
+        data["emissions_by_product"] = pd.read_csv("outputs/module_01_corrected/emissions_by_product.csv")
+        data["emissions_by_location"] = pd.read_csv("outputs/module_01_corrected/emissions_by_location.csv")
     except FileNotFoundError:
-        st.warning("Module 1 outputs not found. Run the baseline pipeline.")
+        st.warning("Module 1 outputs not found. Run the corrected baseline pipeline.")
 
-    # Module 2 – MACC
+    # Module 2 – MACC (CORRECTED DATA)
     try:
-        data["macc"] = pd.read_csv("outputs/module_02/macc_annual_2025_2050.csv")
+        data["macc"] = pd.read_csv("outputs/module_02_corrected/macc_annual_2025_2050.csv")
     except FileNotFoundError:
-        st.warning("Module 2 outputs not found. Run the MACC pipeline.")
+        st.warning("Module 2 outputs not found. Run the corrected MACC pipeline.")
 
-    # Module 3 – Scenario optimisation
-    outputs_dir = Path("outputs/module_03")
+    # Module 3 – Scenario optimisation (CORRECTED DATA)
+    outputs_dir = Path("outputs/module_03_corrected")
     candidate_slugs = [_slugify(name) for name in scenario_names] if scenario_names else []
 
     if outputs_dir.exists():
@@ -111,9 +111,9 @@ def load_data() -> dict:
 
     # Pre-computed LaTeX summaries (auto-generated in the modelling workflow)
     for csv_path in [
-        "outputs/module_01/product_group_energy_mix.csv",
-        "outputs/module_02/macc_cost_snapshot.csv",
-        "outputs/module_03/scenario_summary_for_latex.csv",
+        "outputs/module_01_corrected/product_group_energy_mix.csv",
+        "outputs/module_02_corrected/macc_cost_snapshot.csv",
+        "outputs/module_03_corrected/scenario_summary_for_latex.csv",
     ]:
         try:
             key = Path(csv_path).stem
@@ -124,7 +124,7 @@ def load_data() -> dict:
     # Scenario comparison / summary filtered to the active scenario
     if scenario_label:
         try:
-            scenario_comparison = pd.read_csv("outputs/module_03/scenario_comparison.csv")
+            scenario_comparison = pd.read_csv("outputs/module_03_corrected/scenario_comparison.csv")
             scenario_comparison = scenario_comparison[
                 scenario_comparison["scenario"] == scenario_label
             ]
@@ -812,10 +812,11 @@ def show_data_catalog(data: dict) -> None:
     st.header("📂 Data & Assumptions")
     st.markdown(
         """
-        - **Module 1 outputs:** `outputs/module_01/*`
-        - **Module 2 outputs:** `outputs/module_02/macc_annual_2025_2050.csv`
-        - **Module 3 outputs:** `outputs/module_03/*.csv`
-        - **Assumption files:** `data/technology_parameters.csv`, `data/h2_price_trajectory.csv`, `data/re_price_trajectory.csv`
+        - **Module 1 outputs (CORRECTED):** `outputs/module_01_corrected/*`
+        - **Module 2 outputs (CORRECTED):** `outputs/module_02_corrected/macc_annual_2025_2050.csv`
+        - **Module 3 outputs (CORRECTED):** `outputs/module_03_corrected/*.csv`
+        - **Assumption files (CORRECTED):** `data/technology_parameters.csv`, `data/h2_price_trajectory_corrected.csv`, `data/re_price_trajectory_corrected.csv`
+        - **Emission factors (CORRECTED):** `data/emission_factors.csv` (LNG: 0.0561 tCO2/GJ, Fuel Gas: 0.050 tCO2/GJ)
         """
     )
     if st.checkbox("Preview technology parameters (first 10 rows)"):
@@ -823,11 +824,21 @@ def show_data_catalog(data: dict) -> None:
             st.dataframe(pd.read_csv("data/technology_parameters.csv").head(10))
         except FileNotFoundError:
             st.warning("Missing data/technology_parameters.csv")
-    if st.checkbox("Preview hydrogen price trajectory"):
+    if st.checkbox("Preview hydrogen price trajectory (CORRECTED)"):
         try:
-            st.dataframe(pd.read_csv("data/h2_price_trajectory.csv"))
+            st.dataframe(pd.read_csv("data/h2_price_trajectory_corrected.csv"))
         except FileNotFoundError:
-            st.warning("Missing data/h2_price_trajectory.csv")
+            st.warning("Missing data/h2_price_trajectory_corrected.csv")
+    if st.checkbox("Preview renewable electricity price trajectory (CORRECTED)"):
+        try:
+            st.dataframe(pd.read_csv("data/re_price_trajectory_corrected.csv"))
+        except FileNotFoundError:
+            st.warning("Missing data/re_price_trajectory_corrected.csv")
+    if st.checkbox("Preview emission factors (CORRECTED)"):
+        try:
+            st.dataframe(pd.read_csv("data/emission_factors.csv"))
+        except FileNotFoundError:
+            st.warning("Missing data/emission_factors.csv")
 
 
 def show_about() -> None:

@@ -295,8 +295,13 @@ def identify_product_group(product_name):
 
 
 def is_ncc_facility(product_name):
-    """Check if facility is a Naphtha Cracking Complex"""
-    ncc_keywords = ['ethylene', 'propylene', 'butadiene', 'benzene', 'toluene', 'xylene', 'styrene']
+    """Check if facility is a Naphtha Cracking Complex
+
+    IMPORTANT: Only Ethylene, Propylene, Butadiene are TRUE NCC products
+    Benzene, Toluene, Xylene are produced in BTX Plants (aromatics extraction)
+    NOT in Naphtha Crackers
+    """
+    ncc_keywords = ['ethylene', 'propylene', 'butadiene']
     product_lower = str(product_name).lower()
     return any(keyword in product_lower for keyword in ncc_keywords)
 
