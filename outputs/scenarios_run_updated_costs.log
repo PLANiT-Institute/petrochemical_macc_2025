@@ -1,0 +1,577 @@
+/Users/jinsupark/jinsu-coding/petrochemical_macc_2025/modules/macc.py:424: RuntimeWarning: divide by zero encountered in scalar divide
+  abatement_potential_mt = total_elec_emissions_mt * (1 - re_ef / grid_ef)
+/Users/jinsupark/jinsu-coding/petrochemical_macc_2025/modules/macc.py:428: RuntimeWarning: divide by zero encountered in scalar divide
+  total_elec_mwh = total_elec_emissions_mt * 1e6 / grid_ef  # MWh (from emissions back to energy)
+/Users/jinsupark/miniforge3/lib/python3.12/site-packages/matplotlib/axes/_axes.py:2315: RuntimeWarning: invalid value encountered in subtract
+  dx = [convert(x0 + ddx) - x for ddx in dx]
+/Users/jinsupark/jinsu-coding/petrochemical_macc_2025/modules/macc.py:424: RuntimeWarning: divide by zero encountered in scalar divide
+  abatement_potential_mt = total_elec_emissions_mt * (1 - re_ef / grid_ef)
+/Users/jinsupark/jinsu-coding/petrochemical_macc_2025/modules/macc.py:428: RuntimeWarning: divide by zero encountered in scalar divide
+  total_elec_mwh = total_elec_emissions_mt * 1e6 / grid_ef  # MWh (from emissions back to energy)
+/Users/jinsupark/miniforge3/lib/python3.12/site-packages/matplotlib/axes/_axes.py:2315: RuntimeWarning: invalid value encountered in subtract
+  dx = [convert(x0 + ddx) - x for ddx in dx]
+================================================================================
+한국 석유화학 MACC 모델 - 3개 시나리오 실행
+================================================================================
+
+✓ 원본 백업: data/demand_growth_trajectory_original_backup.csv
+
+================================================================================
+시나리오 실행: Shaheen (성장)
+설명: S-Oil Shaheen project (+1.8Mt, 2026), then fixed
+================================================================================
+
+✓ 수요 성장 파일 업데이트: scenario_shaheen
+  2025: 1.000
+  2030: 1.150
+  2050: 1.150
+
+>>> Module 1: Baseline Emissions & BAU Trajectory
+================================================================================
+MODULE 1: BASELINE ANALYSIS
+================================================================================
+
+📁 Loading data...
+   - Loaded demand growth trajectory (2025-2050)
+   - Total capacity growth: 15.0%
+   - Loaded 248 facilities
+   - Loaded 248 energy intensities
+
+================================================================================
+RUNNING COMPLETE BASELINE ANALYSIS
+================================================================================
+
+Calculating 2025 baseline...
+   - Total baseline emissions: 66.19 MtCO2
+   - Facilities: 248
+   - Naphtha: 57.4%
+   - Electricity: 12.6%
+   - Other: 30.0%
+
+============================================================
+SCENARIO 1: NO RETIREMENT (Infinite Lifetime)
+============================================================
+
+📈 Projecting BAU trajectory (2025-2050)...
+   - Facility lifetime: infinite (no retirement)
+   - 2025 emissions: 66.19 MtCO2
+   - 2050 emissions: 66.49 MtCO2
+   - Capacity growth: 15.0%
+   - All 248 facilities operate forever
+
+============================================================
+SCENARIO 2: 50-YEAR FACILITY LIFETIME
+============================================================
+
+📈 Projecting BAU trajectory (2025-2050)...
+   - Facility lifetime: 50 years (retirement enabled)
+   - 2025 emissions: 65.79 MtCO2
+   - 2050 emissions: 21.95 MtCO2
+   - Capacity growth: 15.0%
+   - 232.0 → 79.0 facilities (retired: 169.0)
+   - Remaining capacity: 31.6%
+   ✓ Saved: bau_trajectory_with_retirement_50yr.csv (26 years)
+
+Creating retirement scenario comparison...
+   ✓ Saved: bau_retirement_comparison.png 
+   - 2050 emissions reduction from retirement: 44.54 MtCO2 (67.0%)
+   - Facilities retired by 2050: 169.0/248
+
+Calculating aggregations...
+   - Aggregated by 5 product groups
+   - Aggregated by 60 companies
+   - Aggregated by 14 locations
+
+💰 Calculating fuel costs...
+   - Total annual fuel cost (2025): $14393.0 Million
+      - Naphtha: $10507.8M (73.0%)
+      - Electricity: $186.0M (1.3%)
+
+Creating visualizations...
+   ✓ Saved: baseline_2025_by_product.png 
+   ✓ Saved: bau_trajectory.png 
+   ✓ Saved: baseline_2025_top_companies.png 
+
+Saving outputs...
+   ✓ Saved: baseline_2025_detailed.csv (248 facilities)
+   ✓ Saved: bau_trajectory_2025_2050.csv (26 years)
+   ✓ Saved: emissions_by_product.csv 
+   ✓ Saved: emissions_by_company.csv 
+   ✓ Saved: emissions_by_location.csv 
+
+================================================================================
+- MODULE 1 COMPLETE
+================================================================================
+
+Outputs saved to: outputs/scenarios_shaheen/module_01_baseline
+   ✓ Module 1 완료
+
+>>> Module 2: MACC Calculation
+================================================================================
+MODULE 2: ENERGY-BASED MACC ANALYSIS
+================================================================================
+
+Loading data...
+   - Loaded demand growth trajectory
+   - Loaded baseline: 248 facilities
+   - Loaded 4 technologies
+
+================================================================================
+RUNNING COMPLETE MACC ANALYSIS (ENERGY-BASED)
+================================================================================
+
+Calculating dynamic MACC (2025-2050)...
+   - Calculated 104 technology-year combinations
+
+Creating visualizations...
+   ✓ Saved: macc_curve_2025.png 
+   ✓ Saved: macc_curve_2030.png 
+   ✓ Saved: macc_curve_2040.png 
+   ✓ Saved: macc_curve_2050.png 
+   ✓ Saved: cost_evolution_annual.png 
+
+Saving outputs...
+   ✓ Saved: macc_annual_2025_2050.csv (104 tech-year combinations)
+   (skipping cost conversion table - regional_energy_tracker not available)
+
+================================================================================
+MODULE 2 COMPLETE
+================================================================================
+
+Outputs saved to: outputs/scenarios_shaheen/module_02_macc
+
+Key changes from LCOE approach:
+  - Explicit CAPEX, OPEX, Fuel Cost tracking
+  - H2 consumption: 0.8 ton/ton ethylene
+  - Electricity consumption: 13 MWh/ton ethylene
+  - Naphtha feedstock cost: FIXED (not in differential)
+   ✓ Module 2 완료
+
+>>> Module 3: Cost Optimization
+================================================================================
+MODULE 3: COST OPTIMIZATION
+================================================================================
+
+📁 Loaded emission scenarios from: data/emission_scenarios_clean.csv
+   ✓ Found 1 scenarios:
+      - Policy_Target: Annual path (2025: 66.2 Mt → 2050: 0.0 Mt)
+
+================================================================================
+RUNNING COST OPTIMIZATION
+================================================================================
+
+�� Optimizing: Policy_Target
+   Year 2030: Selecting NCC-H2 ($116 vs $125 per tCO2)
+   ✓ Saved: policy_target_deployment.csv 
+
+🎨 Creating visualizations...
+   ✓ Saved: deployment_policy_target.png 
+   ✓ Saved: scenario_comparison.csv 
+
+📍 Creating facility-level technology allocations...
+
+📍 Creating facility-level allocation for Policy_Target...
+   Allocated NCC-H2: 58.48 Mt to NCC facilities
+   ⚠️  WARNING: 39 facilities have NEGATIVE emissions!
+   This indicates double-counting error in allocation logic.
+   ✓ Allocated technologies to 248 facilities
+   ✓ 76 facilities have technology deployment
+   ✓ Total abatement: 66.49 Mt (100.5% of baseline)
+   ✓ Final emissions: 6415 kt
+   ✓ Saved: policy_target_facility_allocation_2050.csv 
+
+📍 Creating regional energy transition analysis...
+   (skipping regional analysis - regional_energy_tracker not available)
+
+✓ MODULE 3 COMPLETE
+Outputs saved to: outputs/scenarios_shaheen/module_03_optimization
+   ✓ Module 3 완료
+
+✓ Shaheen (성장) 시나리오 완료
+  2050 BAU 배출량: 66.49 MtCO2
+  2050 실제 배출량: 0.00 MtCO2
+  누적 CAPEX: $56.9 billion USD
+
+================================================================================
+시나리오 실행: 구조조정 25%
+설명: 2026: -3.7Mt (25% reduction), then fixed
+================================================================================
+
+✓ 수요 성장 파일 업데이트: scenario_restructure_25pct
+  2025: 1.000
+  2030: 0.691
+  2050: 0.691
+
+>>> Module 1: Baseline Emissions & BAU Trajectory
+================================================================================
+MODULE 1: BASELINE ANALYSIS
+================================================================================
+
+📁 Loading data...
+   - Loaded demand growth trajectory (2025-2050)
+   - Total capacity growth: -30.9%
+   - Loaded 248 facilities
+   - Loaded 248 energy intensities
+
+================================================================================
+RUNNING COMPLETE BASELINE ANALYSIS
+================================================================================
+
+Calculating 2025 baseline...
+   - Total baseline emissions: 66.19 MtCO2
+   - Facilities: 248
+   - Naphtha: 57.4%
+   - Electricity: 12.6%
+   - Other: 30.0%
+
+============================================================
+SCENARIO 1: NO RETIREMENT (Infinite Lifetime)
+============================================================
+
+📈 Projecting BAU trajectory (2025-2050)...
+   - Facility lifetime: infinite (no retirement)
+   - 2025 emissions: 66.19 MtCO2
+   - 2050 emissions: 39.95 MtCO2
+   - Capacity growth: -30.9%/Users/jinsupark/jinsu-coding/petrochemical_macc_2025/modules/macc.py:424: RuntimeWarning: divide by zero encountered in scalar divide
+  abatement_potential_mt = total_elec_emissions_mt * (1 - re_ef / grid_ef)
+/Users/jinsupark/jinsu-coding/petrochemical_macc_2025/modules/macc.py:428: RuntimeWarning: divide by zero encountered in scalar divide
+  total_elec_mwh = total_elec_emissions_mt * 1e6 / grid_ef  # MWh (from emissions back to energy)
+/Users/jinsupark/miniforge3/lib/python3.12/site-packages/matplotlib/axes/_axes.py:2315: RuntimeWarning: invalid value encountered in subtract
+  dx = [convert(x0 + ddx) - x for ddx in dx]
+
+   - All 248 facilities operate forever
+
+============================================================
+SCENARIO 2: 50-YEAR FACILITY LIFETIME
+============================================================
+
+📈 Projecting BAU trajectory (2025-2050)...
+   - Facility lifetime: 50 years (retirement enabled)
+   - 2025 emissions: 65.79 MtCO2
+   - 2050 emissions: 13.19 MtCO2
+   - Capacity growth: -30.9%
+   - 232.0 → 79.0 facilities (retired: 169.0)
+   - Remaining capacity: 31.6%
+   ✓ Saved: bau_trajectory_with_retirement_50yr.csv (26 years)
+
+Creating retirement scenario comparison...
+   ✓ Saved: bau_retirement_comparison.png 
+   - 2050 emissions reduction from retirement: 26.76 MtCO2 (67.0%)
+   - Facilities retired by 2050: 169.0/248
+
+Calculating aggregations...
+   - Aggregated by 5 product groups
+   - Aggregated by 60 companies
+   - Aggregated by 14 locations
+
+💰 Calculating fuel costs...
+   - Total annual fuel cost (2025): $14393.0 Million
+      - Naphtha: $10507.8M (73.0%)
+      - Electricity: $186.0M (1.3%)
+
+Creating visualizations...
+   ✓ Saved: baseline_2025_by_product.png 
+   ✓ Saved: bau_trajectory.png 
+   ✓ Saved: baseline_2025_top_companies.png 
+
+Saving outputs...
+   ✓ Saved: baseline_2025_detailed.csv (248 facilities)
+   ✓ Saved: bau_trajectory_2025_2050.csv (26 years)
+   ✓ Saved: emissions_by_product.csv 
+   ✓ Saved: emissions_by_company.csv 
+   ✓ Saved: emissions_by_location.csv 
+
+================================================================================
+- MODULE 1 COMPLETE
+================================================================================
+
+Outputs saved to: outputs/scenarios_restructure_25pct/module_01_baseline
+   ✓ Module 1 완료
+
+>>> Module 2: MACC Calculation
+================================================================================
+MODULE 2: ENERGY-BASED MACC ANALYSIS
+================================================================================
+
+Loading data...
+   - Loaded demand growth trajectory
+   - Loaded baseline: 248 facilities
+   - Loaded 4 technologies
+
+================================================================================
+RUNNING COMPLETE MACC ANALYSIS (ENERGY-BASED)
+================================================================================
+
+Calculating dynamic MACC (2025-2050)...
+   - Calculated 104 technology-year combinations
+
+Creating visualizations...
+   ✓ Saved: macc_curve_2025.png 
+   ✓ Saved: macc_curve_2030.png 
+   ✓ Saved: macc_curve_2040.png 
+   ✓ Saved: macc_curve_2050.png 
+   ✓ Saved: cost_evolution_annual.png 
+
+Saving outputs...
+   ✓ Saved: macc_annual_2025_2050.csv (104 tech-year combinations)
+   (skipping cost conversion table - regional_energy_tracker not available)
+
+================================================================================
+MODULE 2 COMPLETE
+================================================================================
+
+Outputs saved to: outputs/scenarios_restructure_25pct/module_02_macc
+
+Key changes from LCOE approach:
+  - Explicit CAPEX, OPEX, Fuel Cost tracking
+  - H2 consumption: 0.8 ton/ton ethylene
+  - Electricity consumption: 13 MWh/ton ethylene
+  - Naphtha feedstock cost: FIXED (not in differential)
+   ✓ Module 2 완료
+
+>>> Module 3: Cost Optimization
+================================================================================
+MODULE 3: COST OPTIMIZATION
+================================================================================
+
+📁 Loaded emission scenarios from: data/emission_scenarios_clean.csv
+   ✓ Found 1 scenarios:
+      - Policy_Target: Annual path (2025: 66.2 Mt → 2050: 0.0 Mt)
+
+================================================================================
+RUNNING COST OPTIMIZATION
+================================================================================
+
+�� Optimizing: Policy_Target
+   Year 2030: Selecting NCC-H2 ($116 vs $125 per tCO2)
+   ✓ Saved: policy_target_deployment.csv 
+
+🎨 Creating visualizations...
+   ✓ Saved: deployment_policy_target.png 
+   ✓ Saved: scenario_comparison.csv 
+
+📍 Creating facility-level technology allocations...
+
+📍 Creating facility-level allocation for Policy_Target...
+   Allocated NCC-H2: 39.95 Mt to NCC facilities
+   ✓ Allocated technologies to 248 facilities
+   ✓ 39 facilities have technology deployment
+   ✓ Total abatement: 39.95 Mt (60.4% of baseline)
+   ✓ Final emissions: 26239 kt
+   ✓ Saved: policy_target_facility_allocation_2050.csv 
+
+📍 Creating regional energy transition analysis...
+   (skipping regional analysis - regional_energy_tracker not available)
+
+✓ MODULE 3 COMPLETE
+Outputs saved to: outputs/scenarios_restructure_25pct/module_03_optimization
+   ✓ Module 3 완료
+
+✓ 구조조정 25% 시나리오 완료
+  2050 BAU 배출량: 39.95 MtCO2
+  2050 실제 배출량: 0.00 MtCO2
+  누적 CAPEX: $32.5 billion USD
+
+================================================================================
+시나리오 실행: 구조조정 40%
+설명: 2040: Gradual 40% reduction
+================================================================================
+
+✓ 수요 성장 파일 업데이트: scenario_restructure_40pct
+  2025: 1.000
+  2030: 0.875
+  2050: 0.600
+
+>>> Module 1: Baseline Emissions & BAU Trajectory
+================================================================================
+MODULE 1: BASELINE ANALYSIS
+================================================================================
+
+📁 Loading data...
+   - Loaded demand growth trajectory (2025-2050)
+   - Total capacity growth: -40.0%
+   - Loaded 248 facilities
+   - Loaded 248 energy intensities
+
+================================================================================
+RUNNING COMPLETE BASELINE ANALYSIS
+================================================================================
+
+Calculating 2025 baseline...
+   - Total baseline emissions: 66.19 MtCO2
+   - Facilities: 248
+   - Naphtha: 57.4%
+   - Electricity: 12.6%
+   - Other: 30.0%
+
+============================================================
+SCENARIO 1: NO RETIREMENT (Infinite Lifetime)
+============================================================
+
+📈 Projecting BAU trajectory (2025-2050)...
+   - Facility lifetime: infinite (no retirement)
+   - 2025 emissions: 66.19 MtCO2
+   - 2050 emissions: 34.69 MtCO2
+   - Capacity growth: -40.0%
+   - All 248 facilities operate forever
+
+============================================================
+SCENARIO 2: 50-YEAR FACILITY LIFETIME
+============================================================
+
+📈 Projecting BAU trajectory (2025-2050)...
+   - Facility lifetime: 50 years (retirement enabled)
+   - 2025 emissions: 65.79 MtCO2
+   - 2050 emissions: 11.45 MtCO2
+   - Capacity growth: -40.0%
+   - 232.0 → 79.0 facilities (retired: 169.0)
+   - Remaining capacity: 31.6%
+   ✓ Saved: bau_trajectory_with_retirement_50yr.csv (26 years)
+
+Creating retirement scenario comparison...
+   ✓ Saved: bau_retirement_comparison.png 
+   - 2050 emissions reduction from retirement: 23.24 MtCO2 (67.0%)
+   - Facilities retired by 2050: 169.0/248
+
+Calculating aggregations...
+   - Aggregated by 5 product groups
+   - Aggregated by 60 companies
+   - Aggregated by 14 locations
+
+💰 Calculating fuel costs...
+   - Total annual fuel cost (2025): $14393.0 Million
+      - Naphtha: $10507.8M (73.0%)
+      - Electricity: $186.0M (1.3%)
+
+Creating visualizations...
+   ✓ Saved: baseline_2025_by_product.png 
+   ✓ Saved: bau_trajectory.png 
+   ✓ Saved: baseline_2025_top_companies.png 
+
+Saving outputs...
+   ✓ Saved: baseline_2025_detailed.csv (248 facilities)
+   ✓ Saved: bau_trajectory_2025_2050.csv (26 years)
+   ✓ Saved: emissions_by_product.csv 
+   ✓ Saved: emissions_by_company.csv 
+   ✓ Saved: emissions_by_location.csv 
+
+================================================================================
+- MODULE 1 COMPLETE
+================================================================================
+
+Outputs saved to: outputs/scenarios_restructure_40pct/module_01_baseline
+   ✓ Module 1 완료
+
+>>> Module 2: MACC Calculation
+================================================================================
+MODULE 2: ENERGY-BASED MACC ANALYSIS
+================================================================================
+
+Loading data...
+   - Loaded demand growth trajectory
+   - Loaded baseline: 248 facilities
+   - Loaded 4 technologies
+
+================================================================================
+RUNNING COMPLETE MACC ANALYSIS (ENERGY-BASED)
+================================================================================
+
+Calculating dynamic MACC (2025-2050)...
+   - Calculated 104 technology-year combinations
+
+Creating visualizations...
+   ✓ Saved: macc_curve_2025.png 
+   ✓ Saved: macc_curve_2030.png 
+   ✓ Saved: macc_curve_2040.png 
+   ✓ Saved: macc_curve_2050.png 
+   ✓ Saved: cost_evolution_annual.png 
+
+Saving outputs...
+   ✓ Saved: macc_annual_2025_2050.csv (104 tech-year combinations)
+   (skipping cost conversion table - regional_energy_tracker not available)
+
+================================================================================
+MODULE 2 COMPLETE
+================================================================================
+
+Outputs saved to: outputs/scenarios_restructure_40pct/module_02_macc
+
+Key changes from LCOE approach:
+  - Explicit CAPEX, OPEX, Fuel Cost tracking
+  - H2 consumption: 0.8 ton/ton ethylene
+  - Electricity consumption: 13 MWh/ton ethylene
+  - Naphtha feedstock cost: FIXED (not in differential)
+   ✓ Module 2 완료
+
+>>> Module 3: Cost Optimization
+================================================================================
+MODULE 3: COST OPTIMIZATION
+================================================================================
+
+📁 Loaded emission scenarios from: data/emission_scenarios_clean.csv
+   ✓ Found 1 scenarios:
+      - Policy_Target: Annual path (2025: 66.2 Mt → 2050: 0.0 Mt)
+
+================================================================================
+RUNNING COST OPTIMIZATION
+================================================================================
+
+�� Optimizing: Policy_Target
+   Year 2030: Selecting NCC-H2 ($116 vs $125 per tCO2)
+   ✓ Saved: policy_target_deployment.csv 
+
+🎨 Creating visualizations...
+   ✓ Saved: deployment_policy_target.png 
+   ✓ Saved: scenario_comparison.csv 
+
+📍 Creating facility-level technology allocations...
+
+📍 Creating facility-level allocation for Policy_Target...
+   Allocated NCC-H2: 32.59 Mt to NCC facilities
+   ✓ Allocated technologies to 248 facilities
+   ✓ 76 facilities have technology deployment
+   ✓ Total abatement: 34.69 Mt (52.4% of baseline)
+   ✓ Final emissions: 31500 kt
+   ✓ Saved: policy_target_facility_allocation_2050.csv 
+
+📍 Creating regional energy transition analysis...
+   (skipping regional analysis - regional_energy_tracker not available)
+
+✓ MODULE 3 COMPLETE
+Outputs saved to: outputs/scenarios_restructure_40pct/module_03_optimization
+   ✓ Module 3 완료
+
+✓ 구조조정 40% 시나리오 완료
+  2050 BAU 배출량: 34.69 MtCO2
+  2050 실제 배출량: 0.00 MtCO2
+  누적 CAPEX: $28.3 billion USD
+
+✓ 원본 수요 성장 파일 복원
+
+================================================================================
+시나리오 비교 요약
+================================================================================
+
+2050년 시나리오 비교:
+
+Scenario              Emissions (Mt)    Cost (B$)     NCC-H2   NCC-Elec     RE PPA    Heat Pump
+----------------------------------------------------------------------------------------------------
+Shaheen (성장)                    0.00         56.9      58.48       0.00       4.72         3.29
+구조조정 25%                        0.00         32.5      39.95       0.00       0.00         0.00
+구조조정 40%                        0.00         28.3      32.59       0.00       0.00         2.10
+
+✓ 저장: outputs/scenarios_comparison/summary.csv
+
+================================================================================
+모든 시나리오 실행 완료
+================================================================================
+
+생성된 결과:
+  - Shaheen (성장): outputs/scenarios_shaheen/
+  - 구조조정 25%: outputs/scenarios_restructure_25pct/
+  - 구조조정 40%: outputs/scenarios_restructure_40pct/
+
+다음 단계:
+  1. Streamlit 대시보드 업데이트
+  2. 한국어 Word 보고서 생성
+

@@ -1,27 +1,27 @@
 year,re_price_usd_per_mwh,source,notes
-2025,90,"Korea RE auctions 2024","Utility-scale solar/wind PPA prices in Korea - CORRECTED from $130"
-2026,88,"Interpolated","Continued cost decline"
-2027,86,"Interpolated","Scale effects and learning"
-2028,84,"Interpolated","Technology improvements"
-2029,82,"Interpolated","Pre-2030 decline"
-2030,75,"IRENA/BNEF 2024","2030 target for RE competitiveness - CORRECTED from $115"
-2031,73,"Interpolated","Mature market development"
-2032,72,"Interpolated","Grid parity approaching"
-2033,70,"Interpolated","Cost stabilization"
-2034,69,"Interpolated","Incremental improvements"
-2035,67,"Interpolated","Mid-point target"
-2036,66,"Interpolated","Slower decline phase"
-2037,65,"Interpolated","Approaching floor"
-2038,63,"Interpolated","Near-optimal efficiency"
-2039,62,"Interpolated","Market maturity"
-2040,60,"IRENA 2024","Long-term competitive price"
-2041,59,"Interpolated","Minimal further decline"
-2042,58,"Interpolated","Stable technology"
-2043,57,"Interpolated","Technical limits"
-2044,56,"Interpolated","Cost floor region"
-2045,55,"Interpolated","2045 milestone"
-2046,54,"Interpolated","Near-floor"
-2047,53,"Interpolated","Technical floor"
-2048,52,"Interpolated","Stable floor"
-2049,51,"Interpolated","Final state"
-2050,50,"Conservative estimate","Long-term floor for RE electricity - CORRECTED from $55"
+2025,129.28818444452443,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2026,134.45971182230542,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2027,139.83810029519762,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2028,145.43162430700554,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2029,151.24888927928578,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2030,157.2988448504572,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2031,163.59079864447548,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2032,170.1344305902545,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2033,176.93980781386472,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2034,184.01740012641926,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2035,191.37809613147607,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2036,191.37809613147607,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2037,191.37809613147607,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2038,191.37809613147607,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2039,191.37809613147607,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2040,191.37809613147607,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2041,191.37809613147607,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2042,191.37809613147607,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2043,191.37809613147607,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2044,191.37809613147607,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2045,191.37809613147607,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2046,191.37809613147607,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2047,191.37809613147607,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2048,191.37809613147607,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2049,191.37809613147607,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation
+2050,191.37809613147607,Excel assumption.xlsx,Updated from user Excel file - reflects grid electricity cost escalation

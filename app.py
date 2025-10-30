@@ -141,6 +141,32 @@ def load_data() -> dict:
     except FileNotFoundError:
         pass
 
+    # Production Scenarios Comparison (3 scenarios: Shaheen, 구조조정 25%, 구조조정 40%)
+    try:
+        data["production_scenarios_summary"] = pd.read_csv("outputs/scenarios_comparison/summary.csv")
+    except FileNotFoundError:
+        pass
+
+    # Load individual production scenario outputs
+    production_scenarios = {
+        'shaheen': 'Shaheen (성장)',
+        'restructure_25pct': '구조조정 25%',
+        'restructure_40pct': '구조조정 40%'
+    }
+    data["production_scenarios"] = {}
+    for slug, name in production_scenarios.items():
+        scenario_data = {}
+        base_path = Path(f"outputs/scenarios_{slug}")
+        try:
+            scenario_data["baseline"] = pd.read_csv(base_path / "module_01_baseline" / "baseline_2025_detailed.csv")
+            scenario_data["bau"] = pd.read_csv(base_path / "module_01_baseline" / "bau_trajectory_2025_2050.csv")
+            scenario_data["macc"] = pd.read_csv(base_path / "module_02_macc" / "macc_annual_2025_2050.csv")
+            scenario_data["deployment"] = pd.read_csv(base_path / "module_03_optimization" / "policy_target_deployment.csv")
+            scenario_data["facility_allocation"] = pd.read_csv(base_path / "module_03_optimization" / "policy_target_facility_allocation_2050.csv")
+            data["production_scenarios"][slug] = scenario_data
+        except FileNotFoundError:
+            pass  # Scenario not yet run
+
     return data
 
 
@@ -841,6 +867,175 @@ def show_data_catalog(data: dict) -> None:
             st.warning("Missing data/emission_factors.csv")
 
 
+def show_production_scenarios(data: dict) -> None:
+    """Display comparison of 3 production scenarios: Shaheen, 구조조정 25%, 구조조정 40%"""
+    st.header("🏭 Production Scenarios Comparison")
+    st.markdown("""
+    이 페이지는 한국 석유화학 산업의 3가지 생산 시나리오를 비교합니다:
+    - **Shaheen (성장)**: S-Oil Shaheen 프로젝트 완공 (+1.8 Mt, 2026)
+    - **구조조정 25%**: 2026년 25% 감축 (-3.7 Mt)
+    - **구조조정 40%**: 2040년까지 40% 감축
+    """)
+
+    summary = data.get("production_scenarios_summary")
+    production_scenarios = data.get("production_scenarios", {})
+
+    if summary is None or len(production_scenarios) == 0:
+        st.info("Run the 3-scenario analysis first: `python run_all_scenarios_v2.py`")
+        return
+
+    # Summary metrics
+    st.subheader("2050년 시나리오 비교")
+
+    col1, col2, col3 = st.columns(3)
+    scenarios_list = [
+        ('shaheen', 'Shaheen (성장)'),
+        ('restructure_25pct', '구조조정 25%'),
+        ('restructure_40pct', '구조조정 40%')
+    ]
+
+    for col, (slug, name) in zip([col1, col2, col3], scenarios_list):
+        scenario_row = summary[summary['scenario_key'] == slug]
+        if len(scenario_row) > 0:
+            row = scenario_row.iloc[0]
+            with col:
+                st.metric(
+                    label=name,
+                    value=f"{row['bau_emissions_2050_mt']:.1f} MtCO₂",
+                    delta=f"-{row['abatement_2050_mt']:.1f} Mt (감축)",
+                    delta_color="normal"
+                )
+                st.caption(f"💰 CAPEX: ${row['cost_2050_billion_usd']:.1f}B")
+                st.caption(f"🔥 H₂: {row['h2_consumption_kt']:.0f} kt/yr")
+
+    # BAU trajectory comparison
+    st.subheader("BAU 배출량 추이 비교 (2025-2050)")
+    fig_bau = go.Figure()
+    colors = {'shaheen': '#1f77b4', 'restructure_25pct': '#ff7f0e', 'restructure_40pct': '#2ca02c'}
+    names = {'shaheen': 'Shaheen (성장)', 'restructure_25pct': '구조조정 25%', 'restructure_40pct': '구조조정 40%'}
+
+    for slug, color in colors.items():
+        if slug in production_scenarios:
+            bau = production_scenarios[slug].get("bau")
+            if bau is not None:
+                fig_bau.add_trace(go.Scatter(
+                    x=bau['year'],
+                    y=bau['total_emissions_mt'],
+                    mode='lines+markers',
+                    name=names[slug],
+                    line=dict(width=3, color=color),
+                    marker=dict(size=4)
+                ))
+
+    fig_bau.update_layout(
+        xaxis_title="Year",
+        yaxis_title="BAU Emissions (MtCO₂/yr)",
+        template="plotly_white",
+        hovermode='x unified',
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    st.plotly_chart(fig_bau, use_container_width=True)
+
+    # Technology deployment comparison
+    st.subheader("2050년 기술 배치 비교")
+
+    tech_columns = ['ncc_h2_mt', 'ncc_elec_mt', 're_ppa_mt', 'heat_pump_mt']
+    tech_labels = {
+        'ncc_h2_mt': 'NCC-H2',
+        'ncc_elec_mt': 'NCC-Electricity',
+        're_ppa_mt': 'RE PPA',
+        'heat_pump_mt': 'Heat Pump'
+    }
+
+    fig_tech = go.Figure()
+    x_scenarios = []
+
+    for slug, name in scenarios_list:
+        scenario_row = summary[summary['scenario_key'] == slug]
+        if len(scenario_row) > 0:
+            x_scenarios.append(name)
+
+    for tech_col, tech_label in tech_labels.items():
+        y_values = []
+        for slug, name in scenarios_list:
+            scenario_row = summary[summary['scenario_key'] == slug]
+            if len(scenario_row) > 0:
+                y_values.append(scenario_row.iloc[0][tech_col])
+            else:
+                y_values.append(0)
+
+        fig_tech.add_trace(go.Bar(
+            name=tech_label,
+            x=x_scenarios,
+            y=y_values,
+            text=[f"{v:.1f}" if v > 0.1 else "" for v in y_values],
+            textposition='inside'
+        ))
+
+    fig_tech.update_layout(
+        barmode='stack',
+        xaxis_title="Scenario",
+        yaxis_title="Abatement Potential (MtCO₂/yr)",
+        template="plotly_white",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    st.plotly_chart(fig_tech, use_container_width=True)
+
+    # Cost comparison
+    st.subheader("누적 투자 비용 비교 (2025-2050)")
+
+    cost_data = []
+    for slug, name in scenarios_list:
+        if slug in production_scenarios:
+            deployment = production_scenarios[slug].get("deployment")
+            if deployment is not None:
+                cost_data.append({
+                    'scenario': name,
+                    'year': deployment['year'],
+                    'cumulative_capex_musd': deployment['cumulative_capex_musd']
+                })
+
+    if cost_data:
+        fig_cost = go.Figure()
+        for scenario_name in [name for _, name in scenarios_list]:
+            scenario_df = pd.DataFrame([d for d in cost_data if d['scenario'] == scenario_name])
+            if len(scenario_df) > 0:
+                scenario_df = pd.DataFrame(scenario_df[0])  # Unpack nested data
+                fig_cost.add_trace(go.Scatter(
+                    x=scenario_df['year'],
+                    y=scenario_df['cumulative_capex_musd'] / 1000,  # Convert to billion
+                    mode='lines+markers',
+                    name=scenario_name,
+                    line=dict(width=3)
+                ))
+
+        fig_cost.update_layout(
+            xaxis_title="Year",
+            yaxis_title="Cumulative CAPEX (Billion USD)",
+            template="plotly_white",
+            hovermode='x unified',
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+        st.plotly_chart(fig_cost, use_container_width=True)
+
+    # Detailed comparison table
+    st.subheader("상세 비교표")
+    if summary is not None:
+        display_summary = summary[[
+            'scenario', 'bau_emissions_2050_mt', 'emissions_2050_mt', 'abatement_2050_mt',
+            'cost_2050_billion_usd', 'h2_consumption_kt', 'electricity_increase_twh',
+            'ncc_h2_mt', 'ncc_elec_mt', 're_ppa_mt', 'heat_pump_mt'
+        ]].copy()
+
+        display_summary.columns = [
+            '시나리오', '2050 BAU (Mt)', '2050 실제 (Mt)', '감축량 (Mt)',
+            'CAPEX (B$)', 'H₂ 수요 (kt)', '전력 증가 (TWh)',
+            'NCC-H2', 'NCC-Elec', 'RE PPA', 'Heat Pump'
+        ]
+
+        st.dataframe(display_summary, use_container_width=True, hide_index=True)
+
+
 def show_about() -> None:
     st.header("ℹ️ About")
     st.markdown(
@@ -884,6 +1079,7 @@ def main() -> None:
         "Go to",
         [
             "Overview",
+            "Production Scenarios",
             "Baseline & BAU",
             "MACC Analysis",
             "Transition Outlook",
@@ -894,6 +1090,8 @@ def main() -> None:
 
     if page == "Overview":
         show_overview(data)
+    elif page == "Production Scenarios":
+        show_production_scenarios(data)
     elif page == "Baseline & BAU":
         show_baseline(data)
     elif page == "MACC Analysis":
