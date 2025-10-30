@@ -28,7 +28,8 @@
       "Bash(done)",
       "Bash(pkill:*)",
       "Bash(for id in 87c2e1 d32ecf 44c94f 857ebd 375a83)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(for id in 87c2e1 d32ecf 44c94f 857ebd 375a83 7da17f)"
     ],
     "deny": [],
     "ask": []

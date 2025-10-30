@@ -1048,28 +1048,6 @@ def show_cost_breakdown(data):
         st.metric("Average Cost", f"${avg_cost:.0f}/tCO₂")
         st.caption("Total cost / total abatement")
 
-    # Technology breakdown
-    tech_deployment = {
-        'NCC-H₂': df_2050['ncc_h2_mt'],
-        'NCC-Electricity': df_2050['ncc_elec_mt'],
-        'RE_PPA': df_2050['re_ppa_mt'],
-        'Heat Pump': df_2050['heat_pump_mt'],
-    }
-
-    df_tech_breakdown = pd.DataFrame({
-        'Technology': tech_deployment.keys(),
-        'Deployment (Mt)': tech_deployment.values(),
-    })
-
-    fig3 = px.pie(
-        df_tech_breakdown[df_tech_breakdown['Deployment (Mt)'] > 0],
-        values='Deployment (Mt)',
-        names='Technology',
-        title='Technology Mix (2050)',
-    )
-    fig3.update_layout(height=400)
-    st.plotly_chart(fig3, use_container_width=True)
-
 def show_price_trajectories(data):
     """Price trajectories visualization"""
 
@@ -1434,30 +1412,6 @@ def show_company_transition(data):
     fig.update_layout(height=500, xaxis_tickangle=-45)
     st.plotly_chart(fig, use_container_width=True)
 
-    # Technology mix by company
-    st.subheader("Technology Mix by Company (Top 10)")
-
-    # Prepare data for stacked bar chart
-    tech_cols = ['Heat Pump (%)', 'NCC-H2 (%)', 'NCC-Elec (%)', 'RE_PPA (%)']
-    df_tech = df_top10[['Company'] + tech_cols].melt(id_vars='Company', var_name='Technology', value_name='Percentage')
-
-    fig = px.bar(
-        df_tech,
-        x='Company',
-        y='Percentage',
-        color='Technology',
-        title='Technology Mix by Company (% of capacity)',
-        barmode='stack',
-        color_discrete_map={
-            'Heat Pump (%)': '#FF6B6B',
-            'NCC-H2 (%)': '#4ECDC4',
-            'NCC-Elec (%)': '#95E1D3',
-            'RE_PPA (%)': '#FFE66D',
-        }
-    )
-    fig.update_layout(height=500, xaxis_tickangle=-45)
-    st.plotly_chart(fig, use_container_width=True)
-
     # Emissions reduction visualization
     st.subheader("Emissions Reduction by Company (Top 10)")
 
@@ -1602,30 +1556,6 @@ def show_regional_transition(data):
         hole=0.4,
     )
     fig.update_traces(textposition='inside', textinfo='percent+label')
-    fig.update_layout(height=500)
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Technology mix by region
-    st.subheader("Technology Mix by Region")
-
-    # Prepare data for stacked bar chart
-    tech_cols = ['Heat Pump (%)', 'NCC-H2 (%)', 'NCC-Elec (%)', 'RE_PPA (%)']
-    df_tech = df_region[['Region'] + tech_cols].melt(id_vars='Region', var_name='Technology', value_name='Percentage')
-
-    fig = px.bar(
-        df_tech,
-        x='Region',
-        y='Percentage',
-        color='Technology',
-        title='Technology Mix by Region (% of capacity)',
-        barmode='stack',
-        color_discrete_map={
-            'Heat Pump (%)': '#FF6B6B',
-            'NCC-H2 (%)': '#4ECDC4',
-            'NCC-Elec (%)': '#95E1D3',
-            'RE_PPA (%)': '#FFE66D',
-        }
-    )
     fig.update_layout(height=500)
     st.plotly_chart(fig, use_container_width=True)
 
