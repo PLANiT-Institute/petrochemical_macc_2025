@@ -107,6 +107,8 @@ def main():
             "💰 Cost Breakdown",
             "📊 Price Trajectories",
             "🏭 Facility-Level Results",
+            "🏢 Company Transition Outlook",
+            "🌏 Regional Transition Outlook",
             "🧠 Model Logic",
             "📚 Data Catalog",
         ]
@@ -129,6 +131,10 @@ def main():
         show_price_trajectories(data)
     elif page == "🏭 Facility-Level Results":
         show_facility_results(data)
+    elif page == "🏢 Company Transition Outlook":
+        show_company_transition(data)
+    elif page == "🌏 Regional Transition Outlook":
+        show_regional_transition(data)
     elif page == "🧠 Model Logic":
         show_model_logic(data)
     elif page == "📚 Data Catalog":
@@ -1273,11 +1279,11 @@ def show_facility_results(data):
         st.metric("Total Abatement", f"{total_abatement:.1f} Mt")
 
     with col3:
-        ncc_facilities = len(df_facility[df_facility['ncc_applicable'] == True])
+        ncc_facilities = len(df_facility[(df_facility['tech_ncc_h2_pct'] > 0) | (df_facility['tech_ncc_elec_pct'] > 0)])
         st.metric("NCC Facilities", ncc_facilities)
 
     with col4:
-        hp_facilities = len(df_facility[df_facility['heat_pump_mt'] > 0])
+        hp_facilities = len(df_facility[df_facility['tech_heat_pump_pct'] > 0])
         st.metric("Heat Pump Facilities", hp_facilities)
 
     # Technology allocation by facility type
@@ -1286,13 +1292,16 @@ def show_facility_results(data):
     # Group by product
     df_by_product = df_facility.groupby('product').agg({
         'abatement_mt': 'sum',
-        'ncc_h2_mt': 'sum',
-        'ncc_elec_mt': 'sum',
-        're_ppa_mt': 'sum',
-        'heat_pump_mt': 'sum',
+        'tech_heat_pump_pct': 'mean',
+        'tech_ncc_h2_pct': 'mean',
+        'tech_ncc_elec_pct': 'mean',
+        'tech_re_ppa_pct': 'mean',
+        'company': 'count',
     }).reset_index()
 
-    df_by_product = df_by_product[df_by_product['abatement_mt'] > 0].sort_values('total_abatement_mt', ascending=False)
+    df_by_product.columns = ['Product', 'Total Abatement (Mt)', 'Heat Pump (%)', 'NCC-H2 (%)', 'NCC-Elec (%)', 'RE_PPA (%)', 'Facilities']
+
+    df_by_product = df_by_product[df_by_product['Total Abatement (Mt)'] > 0].sort_values('Total Abatement (Mt)', ascending=False)
 
     st.dataframe(df_by_product, use_container_width=True, height=400)
 
@@ -1327,6 +1336,385 @@ def show_facility_results(data):
         fig.update_traces(texttemplate='%{text:.1f}', textposition='outside')
         fig.update_layout(height=500)
         st.plotly_chart(fig, use_container_width=True)
+
+def show_company_transition(data):
+    """Company-level transition outlook"""
+
+    st.header("🏢 Company Transition Outlook")
+
+    st.markdown("""
+    This page shows the technology deployment pathway for each petrochemical company,
+    including total abatement, emissions reduction, and technology mix by 2050.
+    """)
+
+    if 'scenarios' not in data or len(data['scenarios']) == 0:
+        st.error("Scenario data not available")
+        return
+
+    # Scenario selector
+    scenario_ids = list(data['scenarios'].keys())
+    scenario_names = [data['scenarios'][sid]['name'] for sid in scenario_ids]
+
+    selected_scenario_name = st.selectbox("Select Scenario:", scenario_names, key='company_scenario')
+    selected_scenario_id = scenario_ids[scenario_names.index(selected_scenario_name)]
+
+    scenario_data = data['scenarios'][selected_scenario_id]
+
+    if 'facility_allocation' not in scenario_data:
+        st.error("Facility allocation data not available")
+        return
+
+    df_facility = scenario_data['facility_allocation'].copy()
+
+    # Company-level aggregation
+    st.subheader("📊 Company-Level Summary (2050)")
+
+    df_company = df_facility.groupby('company').agg({
+        'total_emissions_kt': 'sum',
+        'emissions_2050_kt': 'sum',
+        'abatement_mt': 'sum',
+        'tech_heat_pump_pct': 'mean',
+        'tech_ncc_h2_pct': 'mean',
+        'tech_ncc_elec_pct': 'mean',
+        'tech_re_ppa_pct': 'mean',
+        'facility_id': 'count',
+    }).reset_index()
+
+    df_company.columns = [
+        'Company',
+        'Baseline Emissions (kt)',
+        '2050 Emissions (kt)',
+        'Total Abatement (Mt)',
+        'Heat Pump (%)',
+        'NCC-H2 (%)',
+        'NCC-Elec (%)',
+        'RE_PPA (%)',
+        'Facilities'
+    ]
+
+    df_company['Emission Reduction (%)'] = (
+        (df_company['Baseline Emissions (kt)'] - df_company['2050 Emissions (kt)']) /
+        df_company['Baseline Emissions (kt)'] * 100
+    )
+
+    df_company = df_company.sort_values('Total Abatement (Mt)', ascending=False)
+
+    # Display summary table
+    st.dataframe(
+        df_company[[
+            'Company',
+            'Total Abatement (Mt)',
+            'Emission Reduction (%)',
+            'Facilities',
+            'Heat Pump (%)',
+            'NCC-H2 (%)',
+            'NCC-Elec (%)',
+            'RE_PPA (%)'
+        ]].round(2),
+        use_container_width=True,
+        height=500
+    )
+
+    # Top 10 companies by abatement
+    st.subheader("🏆 Top 10 Companies by Abatement")
+
+    df_top10 = df_company.head(10)
+
+    fig = px.bar(
+        df_top10,
+        x='Company',
+        y='Total Abatement (Mt)',
+        title='Top 10 Companies by Total Abatement (Mt)',
+        text='Total Abatement (Mt)',
+        color='Emission Reduction (%)',
+        color_continuous_scale='RdYlGn',
+    )
+    fig.update_traces(texttemplate='%{text:.2f}', textposition='outside')
+    fig.update_layout(height=500, xaxis_tickangle=-45)
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Technology mix by company
+    st.subheader("🔧 Technology Mix by Company (Top 10)")
+
+    # Prepare data for stacked bar chart
+    tech_cols = ['Heat Pump (%)', 'NCC-H2 (%)', 'NCC-Elec (%)', 'RE_PPA (%)']
+    df_tech = df_top10[['Company'] + tech_cols].melt(id_vars='Company', var_name='Technology', value_name='Percentage')
+
+    fig = px.bar(
+        df_tech,
+        x='Company',
+        y='Percentage',
+        color='Technology',
+        title='Technology Mix by Company (% of capacity)',
+        barmode='stack',
+        color_discrete_map={
+            'Heat Pump (%)': '#FF6B6B',
+            'NCC-H2 (%)': '#4ECDC4',
+            'NCC-Elec (%)': '#95E1D3',
+            'RE_PPA (%)': '#FFE66D',
+        }
+    )
+    fig.update_layout(height=500, xaxis_tickangle=-45)
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Emissions reduction visualization
+    st.subheader("📉 Emissions Reduction by Company (Top 10)")
+
+    # Prepare data for grouped bar chart
+    df_emissions = df_top10[['Company', 'Baseline Emissions (kt)', '2050 Emissions (kt)']].melt(
+        id_vars='Company',
+        var_name='Period',
+        value_name='Emissions (kt)'
+    )
+
+    fig = px.bar(
+        df_emissions,
+        x='Company',
+        y='Emissions (kt)',
+        color='Period',
+        title='Baseline vs 2050 Emissions by Company',
+        barmode='group',
+        color_discrete_map={
+            'Baseline Emissions (kt)': '#E74C3C',
+            '2050 Emissions (kt)': '#27AE60',
+        }
+    )
+    fig.update_layout(height=500, xaxis_tickangle=-45)
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Download option
+    st.subheader("💾 Download Data")
+
+    csv = df_company.to_csv(index=False)
+    st.download_button(
+        label="Download Company Transition Data (CSV)",
+        data=csv,
+        file_name=f"company_transition_{selected_scenario_id}.csv",
+        mime="text/csv",
+    )
+
+def show_regional_transition(data):
+    """Regional transition outlook"""
+
+    st.header("🌏 Regional Transition Outlook")
+
+    st.markdown("""
+    This page shows the technology deployment pathway for each major petrochemical region in Korea,
+    including total abatement, emissions reduction, and technology mix by 2050.
+    """)
+
+    if 'scenarios' not in data or len(data['scenarios']) == 0:
+        st.error("Scenario data not available")
+        return
+
+    # Scenario selector
+    scenario_ids = list(data['scenarios'].keys())
+    scenario_names = [data['scenarios'][sid]['name'] for sid in scenario_ids]
+
+    selected_scenario_name = st.selectbox("Select Scenario:", scenario_names, key='regional_scenario')
+    selected_scenario_id = scenario_ids[scenario_names.index(selected_scenario_name)]
+
+    scenario_data = data['scenarios'][selected_scenario_id]
+
+    if 'facility_allocation' not in scenario_data:
+        st.error("Facility allocation data not available")
+        return
+
+    df_facility = scenario_data['facility_allocation'].copy()
+
+    # Regional aggregation
+    st.subheader("📊 Regional Summary (2050)")
+
+    df_region = df_facility.groupby('location').agg({
+        'total_emissions_kt': 'sum',
+        'emissions_2050_kt': 'sum',
+        'abatement_mt': 'sum',
+        'tech_heat_pump_pct': 'mean',
+        'tech_ncc_h2_pct': 'mean',
+        'tech_ncc_elec_pct': 'mean',
+        'tech_re_ppa_pct': 'mean',
+        'facility_id': 'count',
+        'company': lambda x: x.nunique(),
+    }).reset_index()
+
+    df_region.columns = [
+        'Region',
+        'Baseline Emissions (kt)',
+        '2050 Emissions (kt)',
+        'Total Abatement (Mt)',
+        'Heat Pump (%)',
+        'NCC-H2 (%)',
+        'NCC-Elec (%)',
+        'RE_PPA (%)',
+        'Facilities',
+        'Companies'
+    ]
+
+    df_region['Emission Reduction (%)'] = (
+        (df_region['Baseline Emissions (kt)'] - df_region['2050 Emissions (kt)']) /
+        df_region['Baseline Emissions (kt)'] * 100
+    )
+
+    df_region = df_region.sort_values('Total Abatement (Mt)', ascending=False)
+
+    # Display summary table
+    st.dataframe(
+        df_region[[
+            'Region',
+            'Total Abatement (Mt)',
+            'Emission Reduction (%)',
+            'Facilities',
+            'Companies',
+            'Heat Pump (%)',
+            'NCC-H2 (%)',
+            'NCC-Elec (%)',
+            'RE_PPA (%)'
+        ]].round(2),
+        use_container_width=True,
+        height=400
+    )
+
+    # Regional abatement bar chart
+    st.subheader("🏭 Total Abatement by Region")
+
+    fig = px.bar(
+        df_region,
+        x='Region',
+        y='Total Abatement (Mt)',
+        title='Total Abatement by Region (Mt)',
+        text='Total Abatement (Mt)',
+        color='Emission Reduction (%)',
+        color_continuous_scale='RdYlGn',
+    )
+    fig.update_traces(texttemplate='%{text:.2f}', textposition='outside')
+    fig.update_layout(height=500)
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Regional pie chart
+    st.subheader("🥧 Regional Share of Total Abatement")
+
+    fig = px.pie(
+        df_region,
+        values='Total Abatement (Mt)',
+        names='Region',
+        title='Share of Total Abatement by Region',
+        hole=0.4,
+    )
+    fig.update_traces(textposition='inside', textinfo='percent+label')
+    fig.update_layout(height=500)
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Technology mix by region
+    st.subheader("🔧 Technology Mix by Region")
+
+    # Prepare data for stacked bar chart
+    tech_cols = ['Heat Pump (%)', 'NCC-H2 (%)', 'NCC-Elec (%)', 'RE_PPA (%)']
+    df_tech = df_region[['Region'] + tech_cols].melt(id_vars='Region', var_name='Technology', value_name='Percentage')
+
+    fig = px.bar(
+        df_tech,
+        x='Region',
+        y='Percentage',
+        color='Technology',
+        title='Technology Mix by Region (% of capacity)',
+        barmode='stack',
+        color_discrete_map={
+            'Heat Pump (%)': '#FF6B6B',
+            'NCC-H2 (%)': '#4ECDC4',
+            'NCC-Elec (%)': '#95E1D3',
+            'RE_PPA (%)': '#FFE66D',
+        }
+    )
+    fig.update_layout(height=500)
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Emissions reduction visualization
+    st.subheader("📉 Emissions Reduction by Region")
+
+    # Prepare data for grouped bar chart
+    df_emissions = df_region[['Region', 'Baseline Emissions (kt)', '2050 Emissions (kt)']].melt(
+        id_vars='Region',
+        var_name='Period',
+        value_name='Emissions (kt)'
+    )
+
+    fig = px.bar(
+        df_emissions,
+        x='Region',
+        y='Emissions (kt)',
+        color='Period',
+        title='Baseline vs 2050 Emissions by Region',
+        barmode='group',
+        color_discrete_map={
+            'Baseline Emissions (kt)': '#E74C3C',
+            '2050 Emissions (kt)': '#27AE60',
+        }
+    )
+    fig.update_layout(height=500)
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Regional infrastructure requirements
+    if 'deployment' in scenario_data:
+        st.subheader("⚡ Infrastructure Requirements by Region")
+
+        st.markdown("""
+        **Note**: H2 consumption and electricity increases are calculated at the facility level
+        and aggregated by region based on technology deployment.
+        """)
+
+        # Calculate regional infrastructure needs (approximation based on facility allocation)
+        df_region_infra = df_facility.groupby('location').agg({
+            'abatement_mt': 'sum',
+            'tech_ncc_h2_pct': 'sum',
+            'tech_ncc_elec_pct': 'sum',
+        }).reset_index()
+
+        # Get scenario-level H2 and electricity totals
+        df_deployment = scenario_data['deployment']
+        h2_total_2050 = df_deployment[df_deployment['year'] == 2050]['h2_consumption_kt'].values[0]
+        elec_total_2050 = df_deployment[df_deployment['year'] == 2050]['electricity_consumption_increase_twh'].values[0]
+
+        # Approximate regional distribution based on NCC deployment
+        total_ncc_h2 = df_region_infra['tech_ncc_h2_pct'].sum()
+        total_ncc_elec = df_region_infra['tech_ncc_elec_pct'].sum()
+
+        if total_ncc_h2 > 0:
+            df_region_infra['H2 Consumption (kt/yr)'] = (
+                df_region_infra['tech_ncc_h2_pct'] / total_ncc_h2 * h2_total_2050
+            )
+        else:
+            df_region_infra['H2 Consumption (kt/yr)'] = 0
+
+        if total_ncc_elec > 0:
+            df_region_infra['Electricity Increase (TWh)'] = (
+                df_region_infra['tech_ncc_elec_pct'] / total_ncc_elec * elec_total_2050
+            )
+        else:
+            df_region_infra['Electricity Increase (TWh)'] = 0
+
+        df_region_infra = df_region_infra.rename(columns={'location': 'Region'})
+
+        # Display infrastructure table
+        st.dataframe(
+            df_region_infra[[
+                'Region',
+                'H2 Consumption (kt/yr)',
+                'Electricity Increase (TWh)'
+            ]].round(2),
+            use_container_width=True,
+            height=300
+        )
+
+    # Download option
+    st.subheader("💾 Download Data")
+
+    csv = df_region.to_csv(index=False)
+    st.download_button(
+        label="Download Regional Transition Data (CSV)",
+        data=csv,
+        file_name=f"regional_transition_{selected_scenario_id}.csv",
+        mime="text/csv",
+    )
 
 def show_model_logic(data):
     """Model logic explanation"""
