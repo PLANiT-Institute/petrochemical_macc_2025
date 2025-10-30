@@ -1696,11 +1696,15 @@ def show_regional_transition(data):
         else:
             df_region_infra['NCC-Elec RE (TWh)'] = 0
 
-        # Renewable electricity for RE_PPA (approximate based on share)
-        if total_re_ppa > 0 and elec_total_2050 > 0:
-            # RE_PPA gets small amount of renewable electricity
+        # Renewable electricity for RE_PPA (converting existing grid to RE)
+        # RE_PPA is calculated from re_ppa_mt using grid EF
+        re_ppa_mt_2050 = df_deployment[df_deployment['year'] == 2050]['re_ppa_mt'].values[0]
+        grid_ef_2025 = 0.436  # tCO2/MWh (approximate)
+        re_ppa_twh = re_ppa_mt_2050 / grid_ef_2025  # Convert Mt abatement to TWh
+
+        if total_re_ppa > 0:
             df_region_infra['RE_PPA (TWh)'] = (
-                df_region_infra['tech_re_ppa_pct'] / total_re_ppa * elec_total_2050 * 0.05  # Approximate 5% of NCC-Elec
+                df_region_infra['tech_re_ppa_pct'] / total_re_ppa * re_ppa_twh
             )
         else:
             df_region_infra['RE_PPA (TWh)'] = 0
@@ -1771,7 +1775,11 @@ def show_regional_transition(data):
         with col2:
             st.markdown("#### Renewable Energy Infrastructure")
             total_re = df_region_infra['Total RE (TWh)'].sum()
+            total_ncc_elec_re = df_region_infra['NCC-Elec RE (TWh)'].sum()
+            total_reppa_re = df_region_infra['RE_PPA (TWh)'].sum()
+
             st.metric("Total RE Required", f"{total_re:.1f} TWh/year")
+            st.caption(f"💡 NCC-Elec: {total_ncc_elec_re:.1f} TWh | Grid→RE: {total_reppa_re:.1f} TWh")
 
             if total_re > 0:
                 fig_re = px.pie(
@@ -1782,6 +1790,85 @@ def show_regional_transition(data):
                 )
                 fig_re.update_traces(textposition='inside', textinfo='percent+label')
                 st.plotly_chart(fig_re, use_container_width=True)
+
+        # Timeline: Regional RE deployment over time
+        st.markdown("### 📈 Regional RE Deployment Timeline (2025-2050)")
+        st.markdown("""
+        **Note**: This shows how renewable electricity infrastructure grows over time in each region.
+        - **NCC-Elec RE**: New electricity for electric crackers (100% renewable)
+        - **Grid→RE**: Existing grid electricity converted to renewable sources
+        """)
+
+        # Get deployment timeline
+        df_timeline = df_deployment.copy()
+
+        # Calculate regional shares (use 2050 distribution as proxy for all years)
+        if total_ncc_elec > 0:
+            regional_ncc_share = df_region_infra[['location', 'tech_ncc_elec_pct']].copy()
+            regional_ncc_share['ncc_share'] = regional_ncc_share['tech_ncc_elec_pct'] / total_ncc_elec
+        else:
+            regional_ncc_share = df_region_infra[['location']].copy()
+            regional_ncc_share['ncc_share'] = 0
+
+        if total_re_ppa > 0:
+            regional_reppa_share = df_region_infra[['location', 'tech_re_ppa_pct']].copy()
+            regional_reppa_share['reppa_share'] = regional_reppa_share['tech_re_ppa_pct'] / total_re_ppa
+        else:
+            regional_reppa_share = df_region_infra[['location']].copy()
+            regional_reppa_share['reppa_share'] = 0
+
+        # Build timeline data for each region
+        timeline_data = []
+        for _, row in df_timeline.iterrows():
+            year = row['year']
+            ncc_elec_twh = row['electricity_consumption_increase_twh']
+            re_ppa_mt = row['re_ppa_mt']
+            re_ppa_twh = re_ppa_mt / grid_ef_2025  # Convert Mt to TWh
+
+            # Distribute to regions
+            for region in df_region_infra['location'].unique():
+                ncc_share = regional_ncc_share[regional_ncc_share['location'] == region]['ncc_share'].values
+                reppa_share = regional_reppa_share[regional_reppa_share['location'] == region]['reppa_share'].values
+
+                ncc_share = ncc_share[0] if len(ncc_share) > 0 else 0
+                reppa_share = reppa_share[0] if len(reppa_share) > 0 else 0
+
+                region_ncc_elec = ncc_elec_twh * ncc_share
+                region_reppa = re_ppa_twh * reppa_share
+
+                timeline_data.append({
+                    'Year': year,
+                    'Region': region,
+                    'NCC-Elec RE (TWh)': region_ncc_elec,
+                    'Grid→RE (TWh)': region_reppa,
+                    'Total RE (TWh)': region_ncc_elec + region_reppa
+                })
+
+        df_re_timeline = pd.DataFrame(timeline_data)
+
+        # Create stacked area chart
+        fig_timeline = px.area(
+            df_re_timeline,
+            x='Year',
+            y='Total RE (TWh)',
+            color='Region',
+            title='Regional Renewable Electricity Deployment Over Time',
+            labels={'Total RE (TWh)': 'RE Electricity (TWh/year)'}
+        )
+        fig_timeline.update_layout(height=500)
+        st.plotly_chart(fig_timeline, use_container_width=True)
+
+        # Show breakdown by type for key years
+        col1, col2, col3 = st.columns(3)
+        for col, year in zip([col1, col2, col3], [2030, 2040, 2050]):
+            with col:
+                df_year = df_re_timeline[df_re_timeline['Year'] == year]
+                total_year = df_year['Total RE (TWh)'].sum()
+                ncc_elec_year = df_year['NCC-Elec RE (TWh)'].sum()
+                reppa_year = df_year['Grid→RE (TWh)'].sum()
+
+                st.metric(f"{year}", f"{total_year:.1f} TWh")
+                st.caption(f"NCC-Elec: {ncc_elec_year:.1f} | Grid→RE: {reppa_year:.1f}")
 
     # Download option
     st.subheader("Download Data")
