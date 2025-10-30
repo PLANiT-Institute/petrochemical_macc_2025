@@ -2166,7 +2166,7 @@ def show_data_catalog(data):
                 # Show sample
                 st.markdown("**Sample (first 100 facilities):**")
                 st.dataframe(
-                    df_baseline.head(100)[['facility_name', 'product', 'location', 'capacity_kt', 'total_emissions_kt']],
+                    df_baseline.head(100)[['company', 'product', 'location', 'capacity_kt', 'total_emissions_kt']],
                     use_container_width=True,
                     height=600
                 )
