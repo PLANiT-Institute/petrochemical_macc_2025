@@ -2537,7 +2537,6 @@ def show_data_catalog(data):
         """)
 
         st.success("✅ All references validated and documented. Click expanders above to view details for each technology.")
-        """)
 
     with tab5:
         st.subheader("Model Updates (2025-10-30)")
