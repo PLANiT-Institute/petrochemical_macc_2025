@@ -20,7 +20,7 @@ from modules.utils import is_ncc_facility
 # =============================================================================
 st.set_page_config(
     page_title="Korea Petrochemical MACC Model - 6 Scenarios",
-    page_icon="🏭",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -85,7 +85,7 @@ def load_6scenario_data():
 # =============================================================================
 
 def main():
-    st.title("🏭 Korean Petrochemical MACC Model")
+    st.title("Korean Petrochemical MACC Model")
     st.markdown("### 6-Scenario Framework: 3 Production Pathways × 2 Technology Pathways")
     st.markdown("**Updated:** 2025-10-30 | **Model:** Energy-Based Cost Optimization")
 
@@ -95,49 +95,49 @@ def main():
         st.stop()
 
     # Sidebar navigation
-    st.sidebar.title("📊 Navigation")
+    st.sidebar.title("Navigation")
     page = st.sidebar.radio(
         "Select Page:",
         [
-            "🏠 Overview",
-            "📈 Scenario Comparison",
-            "🔧 Technology Details",
-            "⚡ NCC Technology Comparison",
-            "🏗️ Energy Infrastructure",
-            "💰 Cost Breakdown",
-            "📊 Price Trajectories",
-            "🏭 Facility-Level Results",
-            "🏢 Company Transition Outlook",
-            "🌏 Regional Transition Outlook",
-            "🧠 Model Logic",
-            "📚 Data Catalog",
+            "Overview",
+            "Scenario Comparison",
+            "Technology Details",
+            "NCC Technology Comparison",
+            "Energy Infrastructure",
+            "Cost Breakdown",
+            "Price Trajectories",
+            "Facility-Level Results",
+            "Company Transition Outlook",
+            "Regional Transition Outlook",
+            "Model Logic",
+            "Data Catalog",
         ]
     )
 
     # Route to pages
-    if page == "🏠 Overview":
+    if page == "Overview":
         show_overview(data)
-    elif page == "📈 Scenario Comparison":
+    elif page == "Scenario Comparison":
         show_scenario_comparison(data)
-    elif page == "🔧 Technology Details":
+    elif page == "Technology Details":
         show_technology_details(data)
-    elif page == "⚡ NCC Technology Comparison":
+    elif page == "NCC Technology Comparison":
         show_ncc_comparison(data)
-    elif page == "🏗️ Energy Infrastructure":
+    elif page == "Energy Infrastructure":
         show_energy_infrastructure(data)
-    elif page == "💰 Cost Breakdown":
+    elif page == "Cost Breakdown":
         show_cost_breakdown(data)
-    elif page == "📊 Price Trajectories":
+    elif page == "Price Trajectories":
         show_price_trajectories(data)
-    elif page == "🏭 Facility-Level Results":
+    elif page == "Facility-Level Results":
         show_facility_results(data)
-    elif page == "🏢 Company Transition Outlook":
+    elif page == "Company Transition Outlook":
         show_company_transition(data)
-    elif page == "🌏 Regional Transition Outlook":
+    elif page == "Regional Transition Outlook":
         show_regional_transition(data)
-    elif page == "🧠 Model Logic":
+    elif page == "Model Logic":
         show_model_logic(data)
-    elif page == "📚 Data Catalog":
+    elif page == "Data Catalog":
         show_data_catalog(data)
 
 # =============================================================================
@@ -147,10 +147,10 @@ def main():
 def show_overview(data):
     """Overview page with key highlights"""
 
-    st.header("📊 Model Overview")
+    st.header("Model Overview")
 
     # Key updates
-    st.markdown("### ✨ Key Model Updates (2025-10-30)")
+    st.markdown("### Key Model Updates (2025-10-30)")
 
     col1, col2 = st.columns(2)
 
@@ -180,10 +180,10 @@ def show_overview(data):
         - Clarified naphtha feedstock continues
 
         **5. Technology Applications**
-        - ✅ Heat Pump: BTX & Polymers only (<165°C processes)
-        - ✅ NCC-H₂: Naphtha Crackers only (H₂ combustion)
-        - ✅ NCC-Electricity: Naphtha Crackers only (Renewable elec)
-        - ✅ RE_PPA: Any facility using Grid electricity
+        - Heat Pump: BTX & Polymers only (<165°C processes)
+        - NCC-H₂: Naphtha Crackers only (H₂ combustion)
+        - NCC-Electricity: Naphtha Crackers only (Renewable elec)
+        - RE_PPA: Any facility using Grid electricity
 
         **6. Model Logic Verified**
         - Cost-optimal emission reduction pathway
@@ -192,7 +192,7 @@ def show_overview(data):
         """)
 
     # Quick comparison table
-    st.markdown("### 📊 6-Scenario Summary (2050)")
+    st.markdown("### 6-Scenario Summary (2050)")
 
     if 'summary' in data:
         df_summary = data['summary'].copy()
@@ -212,7 +212,7 @@ def show_overview(data):
         st.dataframe(display_df, use_container_width=True, height=280)
 
         # Key insights
-        st.markdown("### 💡 Key Insights")
+        st.markdown("### Key Insights")
 
         col1, col2, col3 = st.columns(3)
 
@@ -252,7 +252,7 @@ def show_overview(data):
 def show_scenario_comparison(data):
     """Detailed scenario comparison"""
 
-    st.header("📈 Scenario Comparison")
+    st.header("Scenario Comparison")
 
     if 'summary' not in data:
         st.error("Summary data not available")
@@ -281,7 +281,7 @@ def show_scenario_comparison(data):
         title_suffix = "(All Scenarios)"
 
     # Cost comparison
-    st.subheader(f"💰 Total Cost Comparison {title_suffix}")
+    st.subheader(f"Total Cost Comparison {title_suffix}")
 
     fig = px.bar(
         df_filtered,
@@ -297,7 +297,7 @@ def show_scenario_comparison(data):
     st.plotly_chart(fig, use_container_width=True)
 
     # Technology deployment
-    st.subheader(f"🔧 Technology Deployment {title_suffix}")
+    st.subheader(f"Technology Deployment {title_suffix}")
 
     # Reshape for stacked bar
     tech_cols = ['ncc_h2_mt', 'ncc_elec_mt', 're_ppa_mt', 'heat_pump_mt']
@@ -326,7 +326,7 @@ def show_scenario_comparison(data):
     st.plotly_chart(fig2, use_container_width=True)
 
     # Energy infrastructure comparison
-    st.subheader(f"⚡ Energy Infrastructure Requirements {title_suffix}")
+    st.subheader(f"Energy Infrastructure Requirements {title_suffix}")
 
     col1, col2 = st.columns(2)
 
@@ -361,7 +361,7 @@ def show_scenario_comparison(data):
 def show_technology_details(data):
     """Comprehensive technology details"""
 
-    st.header("🔧 Technology Details")
+    st.header("Technology Details")
 
     tech_tab = st.selectbox(
         "Select Technology:",
@@ -369,7 +369,7 @@ def show_technology_details(data):
     )
 
     if tech_tab == "Heat Pump":
-        st.subheader("🔥 Heat Pump")
+        st.subheader("Heat Pump")
 
         col1, col2 = st.columns(2)
 
@@ -423,20 +423,20 @@ def show_technology_details(data):
             - 2040: $186/tCO₂
             - 2050: $398/tCO₂
 
-            ⚠️ **Note:** MACC increases over time because grid decarbonization reduces abatement potential faster than costs decline.
+             **Note:** MACC increases over time because grid decarbonization reduces abatement potential faster than costs decline.
             """)
 
     elif tech_tab == "NCC-H₂":
-        st.subheader("⚡ NCC-H₂ (Hydrogen-Fueled Cracker)")
+        st.subheader("NCC-H₂ (Hydrogen-Fueled Cracker)")
 
         # Two types explanation
-        st.markdown("### ⚠️ IMPORTANT: Two Types of H₂-Based Approaches")
+        st.markdown("###  IMPORTANT: Two Types of H₂-Based Approaches")
 
         col1, col2 = st.columns(2)
 
         with col1:
             st.markdown("""
-            #### ✅ Type 1: H₂ as FUEL (We Use This)
+            #### Type 1: H₂ as FUEL (We Use This)
 
             **What it is:**
             - Keep existing naphtha feedstock (105 GJ/ton)
@@ -451,11 +451,11 @@ def show_technology_details(data):
             - Technology: Burner retrofit (existing crackers)
 
             **Why We Use This:**
-            - ✅ Realistic near-term (TRL 7-8)
-            - ✅ Low CAPEX: $1,700/t-C₂H₄/yr
-            - ✅ Demonstrated by ExxonMobil Baytown (2024-2025)
-            - ✅ Available from 2030 onwards
-            - ✅ Lower H₂ demand (0.2 ton/ton vs 4-8 ton/ton)
+            - Realistic near-term (TRL 7-8)
+            - Low CAPEX: $1,700/t-C₂H₄/yr
+            - Demonstrated by ExxonMobil Baytown (2024-2025)
+            - Available from 2030 onwards
+            - Lower H₂ demand (0.2 ton/ton vs 4-8 ton/ton)
 
             **Emissions:**
             - Baseline: 1.74 tCO₂/ton ethylene
@@ -465,7 +465,7 @@ def show_technology_details(data):
 
         with col2:
             st.markdown("""
-            #### ❌ Type 2: H₂ as FEEDSTOCK (Not Used)
+            #### Type 2: H₂ as FEEDSTOCK (Not Used)
 
             **What it is:**
             - **Replace naphtha** with hydrogen as primary feedstock
@@ -480,11 +480,11 @@ def show_technology_details(data):
             - Technology: **Completely new plants** required
 
             **Why We DON'T Use This:**
-            - ❌ Not commercially ready (TRL 3-5)
-            - ❌ Very high CAPEX: $5,000-10,000/t/yr
-            - ❌ High H₂ demand (4-8× more than Type 1)
-            - ❌ Availability: Not before 2040-2050
-            - ❌ Economic uncertainty (unproven at scale)
+            - Not commercially ready (TRL 3-5)
+            - Very high CAPEX: $5,000-10,000/t/yr
+            - High H₂ demand (4-8× more than Type 1)
+            - Availability: Not before 2040-2050
+            - Economic uncertainty (unproven at scale)
 
             **Emissions:**
             - Would eliminate naphtha feedstock emissions
@@ -495,7 +495,7 @@ def show_technology_details(data):
         st.markdown("---")
 
         # Type 1 details (what we use)
-        st.markdown("### 📊 Type 1 Details (Our Model)")
+        st.markdown("### Type 1 Details (Our Model)")
 
         col1, col2 = st.columns(2)
 
@@ -539,11 +539,11 @@ def show_technology_details(data):
             - 2040: $47/tCO₂
             - 2050: $35/tCO₂
 
-            ✅ **Result:** MACC decreases over time due to CAPEX learning and H₂ price reduction
+            **Result:** MACC decreases over time due to CAPEX learning and H₂ price reduction
             """)
 
     elif tech_tab == "NCC-Electricity":
-        st.subheader("⚡ NCC-Electricity (Electric Cracker with Renewable Electricity)")
+        st.subheader("NCC-Electricity (Electric Cracker with Renewable Electricity)")
 
         st.warning("**CRITICAL UPDATE (2025-10-30):** NCC-Electricity now uses RENEWABLE electricity (not Grid)")
 
@@ -606,11 +606,11 @@ def show_technology_details(data):
             - 2040: $80/tCO₂
             - 2050: $76/tCO₂
 
-            ⚠️ **Note:** Higher MACC than NCC-H₂ due to higher renewable electricity cost vs hydrogen cost
+             **Note:** Higher MACC than NCC-H₂ due to higher renewable electricity cost vs hydrogen cost
             """)
 
     elif tech_tab == "RE_PPA":
-        st.subheader("🌱 RE_PPA (Renewable Energy Power Purchase Agreement)")
+        st.subheader("RE_PPA (Renewable Energy Power Purchase Agreement)")
 
         col1, col2 = st.columns(2)
 
@@ -621,10 +621,10 @@ def show_technology_details(data):
             Optional switching from Grid electricity to Renewable electricity via Power Purchase Agreement (PPA). **No physical infrastructure change** – purely contractual/financial arrangement.
 
             **Applicability:**
-            - ✅ Naphtha Crackers (if using Grid electricity)
-            - ✅ BTX facilities (if using Heat Pump with Grid)
-            - ✅ Polymer facilities (if using Heat Pump with Grid)
-            - ❌ NOT applicable if already using renewable (NCC-Electricity)
+            - Naphtha Crackers (if using Grid electricity)
+            - BTX facilities (if using Heat Pump with Grid)
+            - Polymer facilities (if using Heat Pump with Grid)
+            - NOT applicable if already using renewable (NCC-Electricity)
 
             **Energy Flow:**
             - **Before:** Grid electricity (X MWh)
@@ -642,7 +642,7 @@ def show_technology_details(data):
             st.markdown("""
             ### Cost Calculation
 
-            ⚠️ **CRITICAL FIX (2025-10-30):** Now uses PRICE DIFFERENTIAL instead of full RE cost
+             **CRITICAL FIX (2025-10-30):** Now uses PRICE DIFFERENTIAL instead of full RE cost
 
             **MACC Formula:**
             ```
@@ -667,13 +667,13 @@ def show_technology_details(data):
             - 2040: $203/tCO₂
             - 2050: **$0/tCO₂** (prices converge!)
 
-            💡 **Key Insight:** RE_PPA becomes economically neutral by 2050 as Grid and RE prices converge
+            **Key Insight:** RE_PPA becomes economically neutral by 2050 as Grid and RE prices converge
             """)
 
 def show_ncc_comparison(data):
     """Compare NCC-H2 vs NCC-Electricity"""
 
-    st.header("⚡ NCC Technology Comparison: H₂ vs Electricity")
+    st.header("NCC Technology Comparison: H₂ vs Electricity")
 
     st.markdown("""
     Both NCC-H₂ and NCC-Electricity achieve the same goal (replace fossil fuel combustion in naphtha crackers)
@@ -684,20 +684,20 @@ def show_ncc_comparison(data):
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("### 🔵 NCC-H₂ (Hydrogen)")
+        st.markdown("### NCC-H₂ (Hydrogen)")
         st.markdown("""
         **Energy Carrier:** Hydrogen (0.2 ton/ton C₂H₄)
 
         **Pros:**
-        - ✅ Lower MACC ($35/tCO₂ in 2050)
-        - ✅ Lower fuel cost ($260/ton in 2050)
-        - ✅ Higher TRL (7-8, demonstrated)
-        - ✅ Smaller electricity infrastructure impact
+        - Lower MACC ($35/tCO₂ in 2050)
+        - Lower fuel cost ($260/ton in 2050)
+        - Higher TRL (7-8, demonstrated)
+        - Smaller electricity infrastructure impact
 
         **Cons:**
-        - ⚠️ Requires green H₂ production infrastructure
-        - ⚠️ H₂ storage and distribution challenges
-        - ⚠️ 33.6 kt/yr H₂ demand (Shaheen scenario)
+        -  Requires green H₂ production infrastructure
+        -  H₂ storage and distribution challenges
+        -  33.6 kt/yr H₂ demand (Shaheen scenario)
 
         **Key Numbers (Shaheen Scenario, 2050):**
         - Deployment: 60.05 MtCO₂ abatement
@@ -707,20 +707,20 @@ def show_ncc_comparison(data):
         """)
 
     with col2:
-        st.markdown("### 🔴 NCC-Electricity (Renewable Electricity)")
+        st.markdown("### NCC-Electricity (Renewable Electricity)")
         st.markdown("""
         **Energy Carrier:** Renewable electricity (5.0 MWh/ton C₂H₄)
 
         **Pros:**
-        - ✅ No H₂ infrastructure required
-        - ✅ Leverages existing electricity grid
-        - ✅ Zero emissions (renewable = 0 EF)
+        - No H₂ infrastructure required
+        - Leverages existing electricity grid
+        - Zero emissions (renewable = 0 EF)
 
         **Cons:**
-        - ⚠️ Higher MACC ($76/tCO₂ in 2050)
-        - ⚠️ Higher fuel cost ($957/ton in 2050)
-        - ⚠️ Lower TRL (6, pilot stage)
-        - ⚠️ Massive electricity demand (318 TWh for Shaheen)
+        -  Higher MACC ($76/tCO₂ in 2050)
+        -  Higher fuel cost ($957/ton in 2050)
+        -  Lower TRL (6, pilot stage)
+        -  Massive electricity demand (318 TWh for Shaheen)
 
         **Key Numbers (Shaheen Scenario, 2050):**
         - Deployment: 60.05 MtCO₂ abatement
@@ -730,7 +730,7 @@ def show_ncc_comparison(data):
         """)
 
     # Detailed comparison table
-    st.markdown("### 📊 Detailed Technical Comparison")
+    st.markdown("### Detailed Technical Comparison")
 
     comparison_data = {
         'Parameter': [
@@ -798,7 +798,7 @@ def show_ncc_comparison(data):
     st.dataframe(pd.DataFrame(comparison_data), use_container_width=True, height=500)
 
     # Economic comparison chart
-    st.markdown("### 💰 Economic Comparison Across Scenarios")
+    st.markdown("### Economic Comparison Across Scenarios")
 
     if 'summary' in data:
         df = data['summary'].copy()
@@ -852,7 +852,7 @@ def show_ncc_comparison(data):
 def show_energy_infrastructure(data):
     """Energy infrastructure requirements"""
 
-    st.header("🏗️ Energy Infrastructure Requirements")
+    st.header("Energy Infrastructure Requirements")
 
     st.markdown("""
     The choice between NCC-H₂ and NCC-Electricity has **drastically different** infrastructure implications
@@ -869,7 +869,7 @@ def show_energy_infrastructure(data):
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("### 🔵 H₂ Infrastructure (NCC-H₂ Pathway)")
+        st.markdown("### H₂ Infrastructure (NCC-H₂ Pathway)")
 
         h2_scenarios = df[df['technology_pathway'] == 'NCC-H2'].copy()
 
@@ -897,14 +897,14 @@ def show_energy_infrastructure(data):
         - **Distribution:** Pipeline network to petrochemical complexes
 
         **Challenges:**
-        - ⚠️ H₂ production infrastructure (electrolyzers)
-        - ⚠️ H₂ storage and compression
-        - ⚠️ Safety and regulatory framework
-        - ⚠️ Transportation infrastructure
+        -  H₂ production infrastructure (electrolyzers)
+        -  H₂ storage and compression
+        -  Safety and regulatory framework
+        -  Transportation infrastructure
         """)
 
     with col2:
-        st.markdown("### 🔴 Electricity Infrastructure (NCC-Electricity Pathway)")
+        st.markdown("### Electricity Infrastructure (NCC-Electricity Pathway)")
 
         elec_scenarios = df[df['technology_pathway'] == 'NCC-Electricity'].copy()
 
@@ -935,14 +935,14 @@ def show_energy_infrastructure(data):
         - **Grid upgrades:** Transmission and distribution expansion
 
         **Challenges:**
-        - ⚠️ Renewable generation capacity (solar/wind)
-        - ⚠️ Land use for renewable installations
-        - ⚠️ Grid stability and intermittency
-        - ⚠️ Transmission infrastructure upgrades
+        -  Renewable generation capacity (solar/wind)
+        -  Land use for renewable installations
+        -  Grid stability and intermittency
+        -  Transmission infrastructure upgrades
         """)
 
     # Direct comparison
-    st.markdown("### ⚖️ Infrastructure Comparison")
+    st.markdown("###  Infrastructure Comparison")
 
     comparison_df = pd.DataFrame({
         'Scenario': df['scenario'],
@@ -963,7 +963,7 @@ def show_energy_infrastructure(data):
 def show_cost_breakdown(data):
     """Detailed cost breakdown"""
 
-    st.header("💰 Cost Breakdown Analysis")
+    st.header("Cost Breakdown Analysis")
 
     if 'scenarios' not in data or len(data['scenarios']) == 0:
         st.error("Scenario data not available")
@@ -985,7 +985,7 @@ def show_cost_breakdown(data):
     df_deployment = scenario_data['deployment']
 
     # Time series plots
-    st.subheader("📈 Cost Evolution (2025-2050)")
+    st.subheader("Cost Evolution (2025-2050)")
 
     col1, col2 = st.columns(2)
 
@@ -1027,7 +1027,7 @@ def show_cost_breakdown(data):
         st.plotly_chart(fig2, use_container_width=True)
 
     # 2050 breakdown
-    st.subheader("📊 2050 Breakdown")
+    st.subheader("2050 Breakdown")
 
     df_2050 = df_deployment[df_deployment['year'] == 2050].iloc[0]
 
@@ -1072,14 +1072,14 @@ def show_cost_breakdown(data):
 def show_price_trajectories(data):
     """Price trajectories visualization"""
 
-    st.header("📊 Price Trajectories (2025-2050)")
+    st.header("Price Trajectories (2025-2050)")
 
     st.markdown("""
     This page shows how energy prices evolve over time, which directly impacts technology MACC and deployment decisions.
     """)
 
     # Grid vs RE electricity prices
-    st.subheader("⚡ Electricity Prices: Grid vs Renewable")
+    st.subheader("Electricity Prices: Grid vs Renewable")
 
     if 'grid_prices' in data and 're_prices' in data:
         df_grid = data['grid_prices'].copy()
@@ -1149,12 +1149,12 @@ def show_price_trajectories(data):
             )
 
         st.info(f"""
-        **💡 Key Insight:** Grid and RE prices **converge in 2050** at ${grid_2050:.2f}/MWh,
+        **Key Insight:** Grid and RE prices **converge in 2050** at ${grid_2050:.2f}/MWh,
         making RE_PPA switching economically neutral (MACC ≈ $0/tCO₂).
         """)
 
     # Hydrogen prices
-    st.subheader("💧 Hydrogen Prices")
+    st.subheader("Hydrogen Prices")
 
     if 'h2_prices' in data:
         df_h2 = data['h2_prices'].copy()
@@ -1202,7 +1202,7 @@ def show_price_trajectories(data):
             )
 
     # Grid emission factor
-    st.subheader("🌍 Grid Emission Factor")
+    st.subheader("Grid Emission Factor")
 
     if 'grid_ef' in data:
         df_ef = data['grid_ef'].copy()
@@ -1236,14 +1236,14 @@ def show_price_trajectories(data):
         **Grid Decarbonization:** Korean grid emission factor decreases by {ef_reduction:.1f}%
         from {ef_2025:.3f} (2025) to {ef_2050:.3f} (2050) tCO₂/MWh.
 
-        ⚠️ **Impact on MACC:** Grid-based technologies (Heat Pump, RE_PPA) see reduced abatement potential over time,
+         **Impact on MACC:** Grid-based technologies (Heat Pump, RE_PPA) see reduced abatement potential over time,
         which increases their MACC even as technology costs decline.
         """)
 
 def show_facility_results(data):
     """Facility-level results"""
 
-    st.header("🏭 Facility-Level Results")
+    st.header("Facility-Level Results")
 
     if 'scenarios' not in data or len(data['scenarios']) == 0:
         st.error("Scenario data not available")
@@ -1265,7 +1265,7 @@ def show_facility_results(data):
     df_facility = scenario_data['facility_allocation'].copy()
 
     # Summary stats
-    st.subheader("📊 Allocation Summary")
+    st.subheader("Allocation Summary")
 
     col1, col2, col3, col4 = st.columns(4)
 
@@ -1287,7 +1287,7 @@ def show_facility_results(data):
         st.metric("Heat Pump Facilities", hp_facilities)
 
     # Technology allocation by facility type
-    st.subheader("🔧 Technology Allocation by Product Group")
+    st.subheader("Technology Allocation by Product Group")
 
     # Group by product
     df_by_product = df_facility.groupby('product').agg({
@@ -1306,7 +1306,7 @@ def show_facility_results(data):
     st.dataframe(df_by_product, use_container_width=True, height=400)
 
     # Top facilities
-    st.subheader("🏆 Top 20 Facilities by Abatement")
+    st.subheader("Top 20 Facilities by Abatement")
 
     df_top = df_facility.nlargest(20, 'abatement_mt')[
         ['company', 'product', 'location', 'abatement_mt']
@@ -1315,7 +1315,7 @@ def show_facility_results(data):
     st.dataframe(df_top, use_container_width=True, height=600)
 
     # Regional breakdown
-    st.subheader("📍 Regional Distribution")
+    st.subheader("Regional Distribution")
 
     if 'location' in df_facility.columns:
         df_by_location = df_facility.groupby('location').agg({
@@ -1340,7 +1340,7 @@ def show_facility_results(data):
 def show_company_transition(data):
     """Company-level transition outlook"""
 
-    st.header("🏢 Company Transition Outlook")
+    st.header("Company Transition Outlook")
 
     st.markdown("""
     This page shows the technology deployment pathway for each petrochemical company,
@@ -1367,7 +1367,7 @@ def show_company_transition(data):
     df_facility = scenario_data['facility_allocation'].copy()
 
     # Company-level aggregation
-    st.subheader("📊 Company-Level Summary (2050)")
+    st.subheader("Company-Level Summary (2050)")
 
     df_company = df_facility.groupby('company').agg({
         'total_emissions_kt': 'sum',
@@ -1416,7 +1416,7 @@ def show_company_transition(data):
     )
 
     # Top 10 companies by abatement
-    st.subheader("🏆 Top 10 Companies by Abatement")
+    st.subheader("Top 10 Companies by Abatement")
 
     df_top10 = df_company.head(10)
 
@@ -1434,7 +1434,7 @@ def show_company_transition(data):
     st.plotly_chart(fig, use_container_width=True)
 
     # Technology mix by company
-    st.subheader("🔧 Technology Mix by Company (Top 10)")
+    st.subheader("Technology Mix by Company (Top 10)")
 
     # Prepare data for stacked bar chart
     tech_cols = ['Heat Pump (%)', 'NCC-H2 (%)', 'NCC-Elec (%)', 'RE_PPA (%)']
@@ -1458,7 +1458,7 @@ def show_company_transition(data):
     st.plotly_chart(fig, use_container_width=True)
 
     # Emissions reduction visualization
-    st.subheader("📉 Emissions Reduction by Company (Top 10)")
+    st.subheader("Emissions Reduction by Company (Top 10)")
 
     # Prepare data for grouped bar chart
     df_emissions = df_top10[['Company', 'Baseline Emissions (kt)', '2050 Emissions (kt)']].melt(
@@ -1483,7 +1483,7 @@ def show_company_transition(data):
     st.plotly_chart(fig, use_container_width=True)
 
     # Download option
-    st.subheader("💾 Download Data")
+    st.subheader("Download Data")
 
     csv = df_company.to_csv(index=False)
     st.download_button(
@@ -1496,7 +1496,7 @@ def show_company_transition(data):
 def show_regional_transition(data):
     """Regional transition outlook"""
 
-    st.header("🌏 Regional Transition Outlook")
+    st.header("Regional Transition Outlook")
 
     st.markdown("""
     This page shows the technology deployment pathway for each major petrochemical region in Korea,
@@ -1523,7 +1523,7 @@ def show_regional_transition(data):
     df_facility = scenario_data['facility_allocation'].copy()
 
     # Regional aggregation
-    st.subheader("📊 Regional Summary (2050)")
+    st.subheader("Regional Summary (2050)")
 
     df_region = df_facility.groupby('location').agg({
         'total_emissions_kt': 'sum',
@@ -1575,7 +1575,7 @@ def show_regional_transition(data):
     )
 
     # Regional abatement bar chart
-    st.subheader("🏭 Total Abatement by Region")
+    st.subheader("Total Abatement by Region")
 
     fig = px.bar(
         df_region,
@@ -1591,7 +1591,7 @@ def show_regional_transition(data):
     st.plotly_chart(fig, use_container_width=True)
 
     # Regional pie chart
-    st.subheader("🥧 Regional Share of Total Abatement")
+    st.subheader("Regional Share of Total Abatement")
 
     fig = px.pie(
         df_region,
@@ -1605,7 +1605,7 @@ def show_regional_transition(data):
     st.plotly_chart(fig, use_container_width=True)
 
     # Technology mix by region
-    st.subheader("🔧 Technology Mix by Region")
+    st.subheader("Technology Mix by Region")
 
     # Prepare data for stacked bar chart
     tech_cols = ['Heat Pump (%)', 'NCC-H2 (%)', 'NCC-Elec (%)', 'RE_PPA (%)']
@@ -1629,7 +1629,7 @@ def show_regional_transition(data):
     st.plotly_chart(fig, use_container_width=True)
 
     # Emissions reduction visualization
-    st.subheader("📉 Emissions Reduction by Region")
+    st.subheader("Emissions Reduction by Region")
 
     # Prepare data for grouped bar chart
     df_emissions = df_region[['Region', 'Baseline Emissions (kt)', '2050 Emissions (kt)']].melt(
@@ -1655,7 +1655,7 @@ def show_regional_transition(data):
 
     # Regional infrastructure requirements
     if 'deployment' in scenario_data:
-        st.subheader("⚡ Infrastructure Requirements by Region")
+        st.subheader("Infrastructure Requirements by Region")
 
         st.markdown("""
         **Note**: H2 consumption and electricity increases are calculated at the facility level
@@ -1706,7 +1706,7 @@ def show_regional_transition(data):
         )
 
     # Download option
-    st.subheader("💾 Download Data")
+    st.subheader("Download Data")
 
     csv = df_region.to_csv(index=False)
     st.download_button(
@@ -1719,7 +1719,7 @@ def show_regional_transition(data):
 def show_model_logic(data):
     """Model logic explanation"""
 
-    st.header("🧠 Model Logic & Methodology")
+    st.header("Model Logic & Methodology")
 
     st.markdown("""
     This page explains the complete model logic: how the cost-optimization works at the facility level
@@ -1727,7 +1727,7 @@ def show_model_logic(data):
     """)
 
     # Model objective
-    st.subheader("🎯 Model Objective")
+    st.subheader("Model Objective")
 
     st.markdown("""
     **Minimize total cost while achieving zero emissions by 2050**
@@ -1745,7 +1745,7 @@ def show_model_logic(data):
     """)
 
     # Three-module structure
-    st.subheader("📦 Three-Module Architecture")
+    st.subheader("Three-Module Architecture")
 
     col1, col2, col3 = st.columns(3)
 
@@ -1824,7 +1824,7 @@ def show_model_logic(data):
         """)
 
     # Detailed optimization logic
-    st.subheader("🔄 Optimization Logic (Year-by-Year)")
+    st.subheader("Optimization Logic (Year-by-Year)")
 
     st.code("""
 for year in range(2025, 2051):
@@ -1861,7 +1861,7 @@ for year in range(2025, 2051):
 """, language='python')
 
     # Technology application rules
-    st.subheader("🔧 Technology Application Rules")
+    st.subheader("Technology Application Rules")
 
     rules_data = {
         'Technology': ['Heat Pump', 'NCC-H₂', 'NCC-Electricity', 'RE_PPA'],
@@ -1884,17 +1884,17 @@ for year in range(2025, 2051):
             'None'
         ],
         'Irreversibility': [
-            '✅ Yes',
-            '✅ Yes',
-            '✅ Yes',
-            '✅ Yes'
+            'Yes',
+            'Yes',
+            'Yes',
+            'Yes'
         ]
     }
 
     st.dataframe(pd.DataFrame(rules_data), use_container_width=True)
 
     # Key constraints
-    st.subheader("⚠️ Key Constraints")
+    st.subheader("Key Constraints")
 
     col1, col2 = st.columns(2)
 
@@ -1938,13 +1938,13 @@ for year in range(2025, 2051):
         """)
 
     # Model strengths and limitations
-    st.subheader("✅ Model Strengths & ⚠️ Limitations")
+    st.subheader("Model Strengths &  Limitations")
 
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown("""
-        ### ✅ Strengths
+        ### Strengths
 
         1. **Energy-based methodology**
            - Explicit tracking of energy consumption changes
@@ -1971,7 +1971,7 @@ for year in range(2025, 2051):
 
     with col2:
         st.markdown("""
-        ### ⚠️ Limitations
+        ###  Limitations
 
         1. **No spatial optimization**
            - Assumes uniform technology deployment
@@ -2002,7 +2002,7 @@ for year in range(2025, 2051):
 def show_data_catalog(data):
     """Data catalog with all assumptions"""
 
-    st.header("📚 Data Catalog & Assumptions")
+    st.header("Data Catalog & Assumptions")
 
     st.markdown("""
     This page provides a comprehensive catalog of all data sources, assumptions, and parameters used in the model.
@@ -2018,7 +2018,7 @@ def show_data_catalog(data):
     ])
 
     with tab1:
-        st.subheader("🔧 Technology Parameters")
+        st.subheader("Technology Parameters")
 
         if 'tech_params' in data:
             df_tech = data['tech_params'].copy()
@@ -2036,7 +2036,7 @@ def show_data_catalog(data):
             """)
 
     with tab2:
-        st.subheader("💰 Price Trajectories")
+        st.subheader("Price Trajectories")
 
         col1, col2 = st.columns(2)
 
@@ -2061,7 +2061,7 @@ def show_data_catalog(data):
                 st.dataframe(df_h2_ef, use_container_width=True, height=600)
 
     with tab3:
-        st.subheader("🏭 Facility Database")
+        st.subheader("Facility Database")
 
         # Load first available scenario baseline
         if 'scenarios' in data and len(data['scenarios']) > 0:
@@ -2094,7 +2094,7 @@ def show_data_catalog(data):
                 )
 
     with tab4:
-        st.subheader("📖 Literature References")
+        st.subheader("Literature References")
 
         st.markdown("""
         ### NCC-Electricity
@@ -2103,17 +2103,17 @@ def show_data_catalog(data):
 
         | Source | Year | Value (MWh/ton) | Selected |
         |--------|------|-----------------|----------|
-        | **BASF/SABIC/Linde** | **2024** | **~5.0** | **✅ YES** |
-        | Coenen (ISPT) | 2021 | 7.0 | ❌ |
-        | Tijani et al. | 2022 | 7.2-8.6 | ❌ |
-        | Tian et al. | 2023 | 6.0-7.0 | ❌ |
-        | ICIS News | 2024 | 5.3-5.6 | ❌ |
+        | **BASF/SABIC/Linde** | **2024** | **~5.0** | **YES** |
+        | Coenen (ISPT) | 2021 | 7.0 | |
+        | Tijani et al. | 2022 | 7.2-8.6 | |
+        | Tian et al. | 2023 | 6.0-7.0 | |
+        | ICIS News | 2024 | 5.3-5.6 | |
 
         **CAPEX: $1,500-1,700/t-C₂H₄/yr**
 
         | Source | Year | Value ($/t/yr) | Selected |
         |--------|------|----------------|----------|
-        | **Toribio-Ramirez et al.** | **2025** | **$1,500** | **✅ YES** |
+        | **Toribio-Ramirez et al.** | **2025** | **$1,500** | **YES** |
 
         **Full Reference:**
         > BASF, SABIC, and Linde (2024). Joint electric steam cracker pilot project in Ludwigshafen, Germany. Announced February 2024.
@@ -2128,16 +2128,16 @@ def show_data_catalog(data):
 
         | Source | Year | Value (kg H₂/ton) | Selected |
         |--------|------|-------------------|----------|
-        | Ren et al. (Energy) | 2006 | 218–260 | ❌ |
-        | **Lummus Tech & John Zink** | **2023** | **~200** | **✅ YES** |
-        | ExxonMobil Baytown Demo | 2025 | Not reported | ⚠️ No data |
-        | Kwon & Im (Green Chem.) | 2025 | ~250 | ❌ |
+        | Ren et al. (Energy) | 2006 | 218–260 | |
+        | **Lummus Tech & John Zink** | **2023** | **~200** | **YES** |
+        | ExxonMobil Baytown Demo | 2025 | Not reported |  No data |
+        | Kwon & Im (Green Chem.) | 2025 | ~250 | |
 
         **CAPEX: $1,700/t-C₂H₄/yr**
 
         | Source | Year | Value ($/t/yr) | Selected |
         |--------|------|----------------|----------|
-        | **Thunder Said Energy** | **2023** | **$1,700** | **✅ YES** |
+        | **Thunder Said Energy** | **2023** | **$1,700** | **YES** |
 
         **Full Reference:**
         > Lummus Technology & John Zink team (2023). "Hydrogen & Ammonia: Zero-Carbon Fuels for Steam Crackers." Case study for 100% hydrogen fuel conversion, SRT-VII furnace analysis.
@@ -2155,7 +2155,7 @@ def show_data_catalog(data):
         - Coal phase-out and LNG transition
         - Nuclear and renewable capacity increase
 
-        ⚠️ **Note:** Grid does NOT reach zero emissions by 2050 (0.070 tCO₂/MWh residual)
+         **Note:** Grid does NOT reach zero emissions by 2050 (0.070 tCO₂/MWh residual)
 
         ---
 
@@ -2175,12 +2175,12 @@ def show_data_catalog(data):
         """)
 
     with tab5:
-        st.subheader("🔄 Model Updates (2025-10-30)")
+        st.subheader("Model Updates (2025-10-30)")
 
         st.markdown("""
         ### Critical Updates Made Today
 
-        #### 1. Grid Price Convergence ✅
+        #### 1. Grid Price Convergence 
 
         **BEFORE:**
         - Grid: $100 (2025) → $200 (2050)
@@ -2198,7 +2198,7 @@ def show_data_catalog(data):
 
         ---
 
-        #### 2. NCC-Electricity Update ✅
+        #### 2. NCC-Electricity Update 
 
         **BEFORE:**
         - Used Grid electricity
@@ -2219,7 +2219,7 @@ def show_data_catalog(data):
 
         ---
 
-        #### 3. 6-Scenario Framework ✅
+        #### 3. 6-Scenario Framework 
 
         **BEFORE:**
         - 3 scenarios (production levels only)
@@ -2237,7 +2237,7 @@ def show_data_catalog(data):
 
         ---
 
-        #### 4. NCC-H₂ Documentation ✅
+        #### 4. NCC-H₂ Documentation 
 
         **Added:**
         - Explanation of two types of H₂-based approaches
@@ -2251,7 +2251,7 @@ def show_data_catalog(data):
 
         ---
 
-        #### 5. RE_PPA Calculation Fix ✅
+        #### 5. RE_PPA Calculation Fix 
 
         **BEFORE (BUG):**
         ```python
@@ -2286,15 +2286,15 @@ def show_data_catalog(data):
 
         ### Verification Status
 
-        - ✅ All 6 scenarios completed successfully
-        - ✅ Grid and RE prices converge in 2050
-        - ✅ NCC-Electricity achieves zero emissions
-        - ✅ NCC-H₂ vs NCC-Electricity cost difference quantified
-        - ✅ Energy infrastructure requirements documented
-        - ✅ Model logic verified and documented
-        - ✅ All technology applications correct
+        - All 6 scenarios completed successfully
+        - Grid and RE prices converge in 2050
+        - NCC-Electricity achieves zero emissions
+        - NCC-H₂ vs NCC-Electricity cost difference quantified
+        - Energy infrastructure requirements documented
+        - Model logic verified and documented
+        - All technology applications correct
 
-        **Model Status:** ✅ Ready for analysis and reporting
+        **Model Status:** Ready for analysis and reporting
         """)
 
 # =============================================================================
