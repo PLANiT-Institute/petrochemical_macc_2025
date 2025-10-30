@@ -33,13 +33,14 @@ st.set_page_config(
 def load_6scenario_data():
     """Load all 6 scenario results"""
 
+    # NCC-Electricity scenarios first (main pathway)
     scenarios = {
-        'shaheen_ncc_h2': 'Shaheen + NCC-H₂',
         'shaheen_ncc_elec': 'Shaheen + NCC-Electricity',
-        'restructure_25pct_ncc_h2': '구조조정 25% + NCC-H₂',
+        'shaheen_ncc_h2': 'Shaheen + NCC-H₂',
         'restructure_25pct_ncc_elec': '구조조정 25% + NCC-Electricity',
-        'restructure_40pct_ncc_h2': '구조조정 40% + NCC-H₂',
+        'restructure_25pct_ncc_h2': '구조조정 25% + NCC-H₂',
         'restructure_40pct_ncc_elec': '구조조정 40% + NCC-Electricity',
+        'restructure_40pct_ncc_h2': '구조조정 40% + NCC-H₂',
     }
 
     data = {}
@@ -1871,6 +1872,58 @@ def show_regional_transition(data):
 
                 st.metric(f"{year}", f"{total_year:.1f} TWh")
                 st.caption(f"NCC-Elec: {ncc_elec_year:.1f} | Grid→RE: {reppa_year:.1f}")
+
+        # Individual regional timelines for top 4 regions
+        st.markdown("### 📊 Top 4 Regional RE Deployment Timelines")
+
+        # Get top 4 regions by total RE in 2050
+        df_2050 = df_re_timeline[df_re_timeline['Year'] == 2050].sort_values('Total RE (TWh)', ascending=False)
+        top_4_regions = df_2050.head(4)['Region'].tolist()
+
+        # Create 2x2 grid for regional charts
+        row1_col1, row1_col2 = st.columns(2)
+        row2_col1, row2_col2 = st.columns(2)
+
+        cols = [row1_col1, row1_col2, row2_col1, row2_col2]
+
+        for idx, (col, region) in enumerate(zip(cols, top_4_regions)):
+            with col:
+                df_region_timeline = df_re_timeline[df_re_timeline['Region'] == region].copy()
+
+                # Create line chart for this region
+                fig_region = go.Figure()
+
+                # Add NCC-Elec RE line
+                fig_region.add_trace(go.Scatter(
+                    x=df_region_timeline['Year'],
+                    y=df_region_timeline['NCC-Elec RE (TWh)'],
+                    name='NCC-Elec RE',
+                    line=dict(color='#95E1D3', width=3),
+                    stackgroup='one'
+                ))
+
+                # Add Grid→RE line
+                fig_region.add_trace(go.Scatter(
+                    x=df_region_timeline['Year'],
+                    y=df_region_timeline['Grid→RE (TWh)'],
+                    name='Grid→RE',
+                    line=dict(color='#FFE66D', width=3),
+                    stackgroup='one'
+                ))
+
+                # Get final value for annotation
+                final_value = df_region_timeline[df_region_timeline['Year'] == 2050]['Total RE (TWh)'].values[0]
+
+                fig_region.update_layout(
+                    title=f"{region}<br><sub>{final_value:.1f} TWh by 2050</sub>",
+                    xaxis_title="Year",
+                    yaxis_title="RE (TWh/year)",
+                    height=300,
+                    showlegend=(idx == 0),  # Only show legend on first chart
+                    hovermode='x unified'
+                )
+
+                st.plotly_chart(fig_region, use_container_width=True)
 
     # Download option
     st.subheader("Download Data")
