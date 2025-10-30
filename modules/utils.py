@@ -52,6 +52,10 @@ class DataLoader:
         """Load grid emission trajectory"""
         return pd.read_csv(self.data_dir / 'grid_emission_trajectory.csv')
 
+    def load_grid_prices(self):
+        """Load grid electricity price trajectory"""
+        return pd.read_csv(self.data_dir / 'grid_price_trajectory.csv')
+
     def load_technology_params(self):
         """Load technology parameters"""
         # Check both data_dir and output_dir for backwards compatibility

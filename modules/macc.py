@@ -47,6 +47,7 @@ class MACCAnalyzer:
         self.df_tech_params = loader.load_technology_params()
         self.df_h2_prices = loader.load_h2_prices()
         self.df_re_prices = loader.load_re_prices()
+        self.df_grid_prices = loader.load_grid_prices()
         self.df_hp_applicability = loader.load_heat_pump_applicability()
         self.df_fuel_prices = pd.read_csv(self.data_dir / 'fuel_price_trajectory.csv')
         self.df_grid_emission = pd.read_csv(self.data_dir / 'grid_emission_trajectory.csv')
@@ -88,24 +89,25 @@ class MACCAnalyzer:
             h2_price = self.price_calc.get_h2_price(year)  # $/kg
             re_price = self.price_calc.get_re_price(year)  # $/MWh
             naphtha_price = self.df_fuel_prices[self.df_fuel_prices['year'] == year]['naphtha_usd_per_gj'].iloc[0]
-            elec_price_kwh = self.df_fuel_prices[self.df_fuel_prices['year'] == year]['electricity_usd_per_kwh'].iloc[0]
-            elec_price = elec_price_kwh * 1000  # $/MWh
 
-            # 1. HEAT PUMPS
-            hp_macc = self._calculate_heat_pump_macc(year, h2_price, re_price, naphtha_price, elec_price)
+            # Get GRID electricity price and emission factor (Korean grid)
+            grid_price = self.df_grid_prices[self.df_grid_prices['year'] == year]['grid_price_usd_per_mwh'].iloc[0]
+            grid_ef = self.df_grid_emission[self.df_grid_emission['year'] == year]['grid_ef_tco2_per_mwh'].iloc[0]
+
+            # 1. HEAT PUMPS (uses GRID electricity)
+            hp_macc = self._calculate_heat_pump_macc(year, h2_price, re_price, naphtha_price, grid_price)
             macc_data.append(hp_macc)
 
             # 2. NCC-H2
             ncc_h2_macc = self._calculate_ncc_h2_macc(year, h2_price, naphtha_price)
             macc_data.append(ncc_h2_macc)
 
-            # 3. NCC-Electricity (uses RE electricity, not grid)
-            ncc_elec_macc = self._calculate_ncc_electricity_macc(year, re_price, naphtha_price)
+            # 3. NCC-Electricity (uses GRID electricity with Grid EF)
+            ncc_elec_macc = self._calculate_ncc_electricity_macc(year, grid_price, grid_ef, naphtha_price)
             macc_data.append(ncc_elec_macc)
 
-            # 4. RE PPA (NCC facilities only)
-            grid_ef = self.df_grid_emission[self.df_grid_emission['year'] == year]['grid_ef_tco2_per_mwh'].iloc[0]
-            re_ppa_macc = self._calculate_re_ppa_macc(year, re_price, elec_price, grid_ef)
+            # 4. RE Switching (converting grid electricity to RE)
+            re_ppa_macc = self._calculate_re_ppa_macc(year, re_price, grid_price, grid_ef)
             macc_data.append(re_ppa_macc)
 
         df_macc = pd.DataFrame(macc_data)
@@ -297,22 +299,28 @@ class MACCAnalyzer:
             'methodology': 'Energy-based'
         }
 
-    def _calculate_ncc_electricity_macc(self, year, elec_price, naphtha_price):
+    def _calculate_ncc_electricity_macc(self, year, grid_price, grid_ef, naphtha_price):
         """
-        Calculate NCC-Electricity MACC with electricity as energy source
+        Calculate NCC-Electricity MACC using GRID electricity
 
         Process Change:
-            Before: Naphtha cracking with LNG/Fuel Gas combustion (11.23 GJ/ton ethylene)
-            After:  Naphtha cracking with electricity (3.0 MWh/ton ethylene)
+            Before: Naphtha cracking with LNG/Fuel Gas combustion (~11 GJ/ton ethylene)
+            After:  Naphtha cracking with GRID electricity (5.5 MWh/ton ethylene)
 
         CRITICAL:
             - Naphtha feedstock (105 GJ) continues unchanged - still purchased!
-            - LNG/Fuel Gas combustion (11.23 GJ) is ELIMINATED
-            - Electricity provides energy instead
+            - LNG/Fuel Gas combustion (~11 GJ) is ELIMINATED
+            - GRID electricity provides energy instead (NOT RE electricity)
+            - Grid electricity has emissions: Grid EF × electricity consumption
             - NO fuel cost saving (naphtha not used as fuel before)
 
         Cost:
-            MACC = CAPEX_annual + OPEX_annual + Electricity_cost / tCO2_abated
+            MACC = CAPEX_annual + OPEX_annual + Grid_electricity_cost / tCO2_abated
+
+        Emissions:
+            Baseline: Fossil fuel combustion emissions
+            After: Grid electricity emissions (Grid EF × 5.5 MWh/ton)
+            Abatement: Baseline - Grid_elec_emissions
         """
         tech_costs = self.tech_cost_calc.get_technology_costs('NCC-Electricity', year)
         elec_mwh_per_ton = tech_costs['elec_mwh_per_ton_ethylene']
@@ -339,11 +347,10 @@ class MACCAnalyzer:
             # Fallback to typical value for ethylene
             emission_baseline_per_ton = 1.74  # tCO2/ton (typical for NCC)
 
-        # After NCC-Electricity: Uses RE electricity (assume RE lifecycle emissions ≈ 0.05 tCO2/MWh)
-        re_ef = 0.05  # tCO2/MWh (lifecycle emissions for renewable energy)
-        emission_elec_per_ton = elec_mwh_per_ton * re_ef  # tCO2/ton ethylene (≈0.15 tCO2)
+        # After NCC-Electricity: Uses GRID electricity with Grid EF
+        emission_elec_per_ton = elec_mwh_per_ton * grid_ef  # tCO2/ton ethylene
 
-        abatement_per_ton = emission_baseline_per_ton - emission_elec_per_ton  # ≈1.739 - 0.15 = 1.59 tCO2/ton
+        abatement_per_ton = emission_baseline_per_ton - emission_elec_per_ton
 
         # Total abatement potential
         abatement_mt = (ethylene_production_kt * 1000 * abatement_per_ton) / 1e6  # MtCO2
@@ -354,8 +361,8 @@ class MACCAnalyzer:
         capex_ann = capex_musd_per_mtco2 / lifetime  # Simple: CAPEX / lifetime
         opex_ann = capex_musd_per_mtco2 * (tech_costs['opex_pct_capex'] / 100)  # OPEX as % of CAPEX
 
-        # Fuel cost: Electricity cost only (no fossil fuel savings)
-        electricity_cost_per_ton = elec_mwh_per_ton * elec_price  # $/ton ethylene
+        # Fuel cost: GRID electricity cost only (no fossil fuel savings)
+        electricity_cost_per_ton = elec_mwh_per_ton * grid_price  # $/ton ethylene
 
         if abatement_per_ton > 0:
             fuel_cost_diff_per_tco2 = electricity_cost_per_ton / abatement_per_ton  # $/tCO2
@@ -379,7 +386,8 @@ class MACCAnalyzer:
             'baseline_combustion_emissions_tco2_per_ton': emission_baseline_per_ton,
             'ethylene_production_kt': ethylene_production_kt,
             'electricity_cost_per_ton_ethylene': electricity_cost_per_ton,
-            're_ef_tco2_per_mwh': re_ef,
+            'grid_ef_tco2_per_mwh': grid_ef,
+            'grid_price_usd_per_mwh': grid_price,
             'methodology': 'Energy-based'
         }
 
