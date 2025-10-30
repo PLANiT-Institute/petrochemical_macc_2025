@@ -1265,11 +1265,11 @@ def show_facility_results(data):
 
     with col1:
         total_facilities = len(df_facility)
-        facilities_with_tech = len(df_facility[df_facility['total_abatement_mt'] > 0])
+        facilities_with_tech = len(df_facility[df_facility['abatement_mt'] > 0])
         st.metric("Facilities with Technology", facilities_with_tech, f"out of {total_facilities}")
 
     with col2:
-        total_abatement = df_facility['total_abatement_mt'].sum()
+        total_abatement = df_facility['abatement_mt'].sum()
         st.metric("Total Abatement", f"{total_abatement:.1f} Mt")
 
     with col3:
@@ -1285,22 +1285,22 @@ def show_facility_results(data):
 
     # Group by product
     df_by_product = df_facility.groupby('product').agg({
-        'total_abatement_mt': 'sum',
+        'abatement_mt': 'sum',
         'ncc_h2_mt': 'sum',
         'ncc_elec_mt': 'sum',
         're_ppa_mt': 'sum',
         'heat_pump_mt': 'sum',
     }).reset_index()
 
-    df_by_product = df_by_product[df_by_product['total_abatement_mt'] > 0].sort_values('total_abatement_mt', ascending=False)
+    df_by_product = df_by_product[df_by_product['abatement_mt'] > 0].sort_values('total_abatement_mt', ascending=False)
 
     st.dataframe(df_by_product, use_container_width=True, height=400)
 
     # Top facilities
     st.subheader("🏆 Top 20 Facilities by Abatement")
 
-    df_top = df_facility.nlargest(20, 'total_abatement_mt')[
-        ['facility_name', 'product', 'location', 'total_abatement_mt', 'ncc_h2_mt', 'ncc_elec_mt', 're_ppa_mt', 'heat_pump_mt']
+    df_top = df_facility.nlargest(20, 'abatement_mt')[
+        ['company', 'product', 'location', 'abatement_mt']
     ].copy()
 
     st.dataframe(df_top, use_container_width=True, height=600)
@@ -1310,8 +1310,8 @@ def show_facility_results(data):
 
     if 'location' in df_facility.columns:
         df_by_location = df_facility.groupby('location').agg({
-            'total_abatement_mt': 'sum',
-            'facility_name': 'count',
+            'abatement_mt': 'sum',
+            'company': 'count',
         }).reset_index()
 
         df_by_location.columns = ['Location', 'Total Abatement (Mt)', 'Number of Facilities']
