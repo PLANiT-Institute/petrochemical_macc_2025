@@ -836,35 +836,309 @@ def show_transition_outlook(data: dict) -> None:
 
 def show_data_catalog(data: dict) -> None:
     st.header("📂 Data & Assumptions")
-    st.markdown(
-        """
-        - **Module 1 outputs (CORRECTED):** `outputs/module_01_corrected/*`
-        - **Module 2 outputs (CORRECTED):** `outputs/module_02_corrected/macc_annual_2025_2050.csv`
-        - **Module 3 outputs (CORRECTED):** `outputs/module_03_corrected/*.csv`
-        - **Assumption files (CORRECTED):** `data/technology_parameters.csv`, `data/h2_price_trajectory_corrected.csv`, `data/re_price_trajectory_corrected.csv`
-        - **Emission factors (CORRECTED):** `data/emission_factors.csv` (LNG: 0.0561 tCO2/GJ, Fuel Gas: 0.050 tCO2/GJ)
-        """
-    )
-    if st.checkbox("Preview technology parameters (first 10 rows)"):
+
+    # Tabs for different sections
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "📚 Literature References",
+        "💰 Cost & Performance",
+        "⚡ Electricity Model",
+        "📊 Model Outputs"
+    ])
+
+    with tab1:
+        st.subheader("Literature References & Validation")
+        st.markdown("""
+        All technology assumptions are **100% traceable** to peer-reviewed literature,
+        industry reports, or project assumption data.
+
+        📄 **Full documentation:** `docs/TECHNOLOGY_ASSUMPTIONS_REFERENCES.md`
+        """)
+
+        # NCC-Electricity
+        st.markdown("### 1️⃣ NCC-Electricity (Electric Cracker)")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Electricity Consumption", "5.0 MWh/ton C₂H₄")
+            st.caption("✅ BASF/SABIC/Linde (2024) - Commercial pilot")
+        with col2:
+            st.metric("CAPEX", "$1,500/t-C₂H₄/yr")
+            st.caption("✅ Toribio-Ramirez et al. (2025)")
+
+        with st.expander("📖 Literature Review - NCC-Electricity Energy Consumption"):
+            lit_data = {
+                "Source": [
+                    "BASF/SABIC/Linde",
+                    "Coenen (ISPT)",
+                    "Tijani et al.",
+                    "Tiggeloven et al.",
+                    "Kwon & Im"
+                ],
+                "Year": [2024, 2021, 2022, 2023, 2025],
+                "Value (MWh/ton)": ["~5.0", "7.0", "7.2-8.6", "8.1", "~4.2"],
+                "Type": ["Pilot", "Industry estimate", "Review", "Simulation", "Plasma (experimental)"],
+                "Selected": ["✅ YES", "❌", "❌", "❌", "❌ Too experimental"]
+            }
+            st.dataframe(pd.DataFrame(lit_data), use_container_width=True)
+            st.info("**Why BASF/SABIC/Linde?** Commercial-scale pilot (6 MW, 4 ton/hr) with actual 2024 operational data. More realistic than experimental plasma (4.2) or traditional baseline (7-8.6).")
+
+        # NCC-H2
+        st.markdown("### 2️⃣ NCC-H₂ (Hydrogen-Fueled Cracker)")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("H₂ Consumption", "0.2 ton/ton C₂H₄")
+            st.caption("✅ Lummus Tech (2023) - Engineering case study")
+        with col2:
+            st.metric("CAPEX", "$1,700/t-C₂H₄/yr")
+            st.caption("✅ Thunder Said Energy (2023)")
+
+        with st.expander("📖 Literature Review - NCC-H₂ Consumption"):
+            lit_h2 = {
+                "Source": [
+                    "Lummus Tech & John Zink",
+                    "Ren et al.",
+                    "ExxonMobil Baytown",
+                    "Kwon & Im (Plasma)"
+                ],
+                "Year": [2023, 2006, 2025, 2025],
+                "Value (kg H₂/ton)": ["~200", "218-260", "Not reported", "~250"],
+                "Type": ["Case study", "Industry average", "Demo (98% H₂)", "Different tech"],
+                "Selected": ["✅ YES", "❌ Conservative", "⚠️ No data", "❌"]
+            }
+            st.dataframe(pd.DataFrame(lit_h2), use_container_width=True)
+            st.info("**Why Lummus 2023?** Detailed engineering case for 1,000 kt/yr plant by leading licensor. Most optimistic but realistic (200 vs 218-260 kg/ton literature average).")
+
+        # Summary table
+        st.markdown("### ✅ Summary: All Assumptions vs Literature")
+        summary_table = {
+            "Technology": ["NCC-Electricity", "", "NCC-H₂", ""],
+            "Parameter": ["Electricity", "CAPEX", "H₂ consumption", "CAPEX"],
+            "Our Value": ["5.0 MWh/ton", "$1,500/t/yr", "0.2 ton/ton", "$1,700/t/yr"],
+            "Literature Source": [
+                "BASF/SABIC/Linde (2024)",
+                "Toribio-Ramirez (2025)",
+                "Lummus Tech (2023)",
+                "Thunder Said Energy (2023)"
+            ],
+            "Match": ["✅ Exact", "✅ Exact", "✅ Exact", "✅ Exact"]
+        }
+        st.dataframe(pd.DataFrame(summary_table), use_container_width=True, hide_index=True)
+
+    with tab2:
+        st.subheader("Technology Cost & Performance Parameters")
+
+        # Load and display technology parameters
         try:
-            st.dataframe(pd.read_csv("data/technology_parameters.csv").head(10))
+            df_tech = pd.read_csv("data/technology_parameters.csv")
+            st.dataframe(df_tech, use_container_width=True, hide_index=True)
+
+            # Download button
+            csv = df_tech.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                "📥 Download technology_parameters.csv",
+                csv,
+                "technology_parameters.csv",
+                "text/csv"
+            )
         except FileNotFoundError:
             st.warning("Missing data/technology_parameters.csv")
-    if st.checkbox("Preview hydrogen price trajectory (CORRECTED)"):
-        try:
-            st.dataframe(pd.read_csv("data/h2_price_trajectory_corrected.csv"))
-        except FileNotFoundError:
-            st.warning("Missing data/h2_price_trajectory_corrected.csv")
-    if st.checkbox("Preview renewable electricity price trajectory (CORRECTED)"):
-        try:
-            st.dataframe(pd.read_csv("data/re_price_trajectory_corrected.csv"))
-        except FileNotFoundError:
-            st.warning("Missing data/re_price_trajectory_corrected.csv")
-    if st.checkbox("Preview emission factors (CORRECTED)"):
-        try:
-            st.dataframe(pd.read_csv("data/emission_factors.csv"))
-        except FileNotFoundError:
-            st.warning("Missing data/emission_factors.csv")
+
+        # Fuel price trajectories
+        st.markdown("### Fuel Price Trajectories")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("**Hydrogen Price**")
+            try:
+                df_h2 = pd.read_csv("data/h2_price_trajectory.csv")
+                st.dataframe(df_h2.head(10), use_container_width=True)
+                st.caption("Source: Excel assumption file (assumption.xlsx)")
+
+                # Plot
+                fig_h2 = go.Figure()
+                fig_h2.add_trace(go.Scatter(
+                    x=df_h2['year'],
+                    y=df_h2['h2_price_usd_per_kg'],
+                    mode='lines+markers',
+                    name='H₂ Price',
+                    line=dict(color='#2ca02c', width=3)
+                ))
+                fig_h2.update_layout(
+                    xaxis_title="Year",
+                    yaxis_title="H₂ Price (USD/kg)",
+                    template="plotly_white",
+                    height=300
+                )
+                st.plotly_chart(fig_h2, use_container_width=True)
+            except FileNotFoundError:
+                st.warning("Missing data/h2_price_trajectory.csv")
+
+        with col2:
+            st.markdown("**Renewable Electricity Price**")
+            try:
+                df_re = pd.read_csv("data/re_price_trajectory.csv")
+                st.dataframe(df_re.head(10), use_container_width=True)
+                st.caption("Source: Excel assumption file (assumption.xlsx)")
+
+                # Plot
+                fig_re = go.Figure()
+                fig_re.add_trace(go.Scatter(
+                    x=df_re['year'],
+                    y=df_re['re_price_usd_per_mwh'],
+                    mode='lines+markers',
+                    name='RE Price',
+                    line=dict(color='#ff7f0e', width=3)
+                ))
+                fig_re.update_layout(
+                    xaxis_title="Year",
+                    yaxis_title="RE Price (USD/MWh)",
+                    template="plotly_white",
+                    height=300
+                )
+                st.plotly_chart(fig_re, use_container_width=True)
+            except FileNotFoundError:
+                st.warning("Missing data/re_price_trajectory.csv")
+
+    with tab3:
+        st.subheader("⚡ Electricity Model (Option C)")
+        st.markdown("""
+        ### Two Types of Electricity
+
+        The model uses **two distinct electricity types** with different prices and emission factors:
+        """)
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("#### 🔌 Grid Electricity")
+            st.info("""
+            **Price:** $80-100/MWh
+            **Emission Factor:** 0.436 → 0.070 tCO₂/MWh (2025 → 2050)
+            **Source:** Korea Power Exchange industrial tariff
+            **Used by:** NCC-Electricity, Heat Pump (default)
+            """)
+
+            # Load and plot grid price
+            try:
+                df_grid_price = pd.read_csv("data/grid_price_trajectory.csv")
+                df_grid_ef = pd.read_csv("data/grid_emission_trajectory.csv")
+
+                fig_grid = go.Figure()
+                fig_grid.add_trace(go.Scatter(
+                    x=df_grid_price['year'],
+                    y=df_grid_price['grid_price_usd_per_mwh'],
+                    mode='lines+markers',
+                    name='Grid Price',
+                    yaxis='y',
+                    line=dict(color='#1f77b4', width=3)
+                ))
+                fig_grid.add_trace(go.Scatter(
+                    x=df_grid_ef['year'],
+                    y=df_grid_ef['grid_ef_tco2_per_mwh'],
+                    mode='lines+markers',
+                    name='Grid EF',
+                    yaxis='y2',
+                    line=dict(color='#d62728', width=3, dash='dash')
+                ))
+                fig_grid.update_layout(
+                    xaxis_title="Year",
+                    yaxis=dict(title="Price (USD/MWh)", side="left"),
+                    yaxis2=dict(title="EF (tCO₂/MWh)", overlaying="y", side="right"),
+                    template="plotly_white",
+                    height=400,
+                    hovermode='x unified'
+                )
+                st.plotly_chart(fig_grid, use_container_width=True)
+
+                st.dataframe(df_grid_price, use_container_width=True)
+            except FileNotFoundError:
+                st.warning("Missing grid electricity data")
+
+        with col2:
+            st.markdown("#### ♻️ Renewable Electricity")
+            st.success("""
+            **Price:** $129-191/MWh (60-90% premium)
+            **Emission Factor:** 0.0 tCO₂/MWh (constant)
+            **Source:** Excel assumption file (PPA pricing)
+            **Used by:** RE_PPA (optional Grid→RE switching)
+            """)
+
+            # Load and plot RE price
+            try:
+                df_re = pd.read_csv("data/re_price_trajectory.csv")
+                df_grid_price = pd.read_csv("data/grid_price_trajectory.csv")
+
+                fig_compare = go.Figure()
+                fig_compare.add_trace(go.Scatter(
+                    x=df_grid_price['year'],
+                    y=df_grid_price['grid_price_usd_per_mwh'],
+                    mode='lines+markers',
+                    name='Grid',
+                    line=dict(color='#1f77b4', width=3),
+                    fill='tozeroy',
+                    fillcolor='rgba(31, 119, 180, 0.2)'
+                ))
+                fig_compare.add_trace(go.Scatter(
+                    x=df_re['year'],
+                    y=df_re['re_price_usd_per_mwh'],
+                    mode='lines+markers',
+                    name='Renewable',
+                    line=dict(color='#2ca02c', width=3),
+                    fill='tonexty',
+                    fillcolor='rgba(44, 160, 44, 0.2)'
+                ))
+                fig_compare.update_layout(
+                    title="Grid vs Renewable Electricity Price",
+                    xaxis_title="Year",
+                    yaxis_title="Price (USD/MWh)",
+                    template="plotly_white",
+                    height=400,
+                    hovermode='x unified'
+                )
+                st.plotly_chart(fig_compare, use_container_width=True)
+
+                # Calculate premium
+                merged = pd.merge(df_grid_price[['year', 'grid_price_usd_per_mwh']],
+                                  df_re[['year', 're_price_usd_per_mwh']], on='year')
+                merged['premium_pct'] = ((merged['re_price_usd_per_mwh'] / merged['grid_price_usd_per_mwh']) - 1) * 100
+                st.dataframe(merged, use_container_width=True)
+            except FileNotFoundError:
+                st.warning("Missing RE electricity data")
+
+        st.markdown("---")
+        st.markdown("### Key Points")
+        st.markdown("""
+        - ✅ **All technologies use Grid electricity by default** (NCC-Electricity, Heat Pump)
+        - ✅ **Grid EF does NOT go to zero** in 2050 (realistic 0.070 tCO₂/MWh due to grid stability)
+        - ✅ **RE_PPA** represents optional switching from Grid → Renewable at premium cost
+        - ✅ **Grid decarbonization** makes NCC-Electricity more attractive over time (MACC decreases)
+        - ⚠️ **RE premium increases** while Grid EF decreases → Very high RE_PPA MACC in 2050
+        """)
+
+    with tab4:
+        st.subheader("Model Outputs")
+        st.markdown("""
+        ### Output Directory Structure
+        - **Baseline:** `outputs/scenarios_{scenario}/module_01_baseline/`
+        - **MACC:** `outputs/scenarios_{scenario}/module_02_macc/`
+        - **Optimization:** `outputs/scenarios_{scenario}/module_03_optimization/`
+        - **Comparison:** `outputs/scenarios_comparison/summary.csv`
+        """)
+
+        # File previews
+        if st.checkbox("Preview scenario comparison summary"):
+            try:
+                df_summary = pd.read_csv("outputs/scenarios_comparison/summary.csv")
+                st.dataframe(df_summary, use_container_width=True)
+            except FileNotFoundError:
+                st.warning("Run scenarios first: python run_all_scenarios_v2.py")
+
+        if st.checkbox("Preview emission factors"):
+            try:
+                df_ef = pd.read_csv("data/emission_factors.csv")
+                st.dataframe(df_ef, use_container_width=True)
+                st.caption("Key values: LNG: 0.0561 tCO₂/GJ, Fuel Gas: 0.050 tCO₂/GJ")
+            except FileNotFoundError:
+                st.warning("Missing data/emission_factors.csv")
 
 
 def show_production_scenarios(data: dict) -> None:
