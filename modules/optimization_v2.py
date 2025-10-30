@@ -564,21 +564,35 @@ class CostOptimizerV2:
                 df_facilities['abatement_mt'] += df_facilities['ncc_elec_abatement_mt']
                 print(f"   Allocated NCC-Electricity: {deploy_2050['ncc_elec_mt']:.2f} Mt to NCC facilities")
 
-        # Allocate RE PPA (only NCC facilities with electricity consumption)
+        # Allocate Renewable Electricity (all facilities EXCEPT those with NCC-Electricity)
+        # CRITICAL FIX: NCC-Electricity already uses 100% RE, so exclude those facilities
         if deploy_2050['re_ppa_mt'] > 0:
-            from .utils import is_ncc_facility
-            df_facilities['is_ncc'] = df_facilities['product'].apply(is_ncc_facility)
-            ncc_elec_emissions = df_facilities[df_facilities['is_ncc']]['emissions_electricity_kt'].sum() / 1000
+            # Determine which facilities are eligible for RE
+            # If NCC-Electricity is deployed, exclude NCC facilities (they already use RE)
+            # Otherwise, all facilities with electricity consumption can switch to RE
 
-            if ncc_elec_emissions > 0:
+            if ncc_deployed == 'NCC-Electricity':
+                # Exclude NCC facilities (they already use 100% RE via NCC-Electricity)
+                re_eligible = ~df_facilities['is_ncc']
+                print(f"   RE allocation: Excluding NCC facilities (already using RE via NCC-Electricity)")
+            else:
+                # All facilities can switch grid electricity to RE
+                re_eligible = df_facilities['emissions_electricity_kt'] > 0
+                print(f"   RE allocation: All facilities with electricity consumption")
+
+            # Calculate total eligible electricity emissions
+            eligible_elec_emissions = df_facilities[re_eligible]['emissions_electricity_kt'].sum() / 1000
+
+            if eligible_elec_emissions > 0:
                 df_facilities['re_ppa_abatement_mt'] = 0.0
-                df_facilities.loc[df_facilities['is_ncc'], 're_ppa_abatement_mt'] = (
-                    df_facilities.loc[df_facilities['is_ncc'], 'emissions_electricity_kt'] / 1000 / ncc_elec_emissions * deploy_2050['re_ppa_mt']
+                df_facilities.loc[re_eligible, 're_ppa_abatement_mt'] = (
+                    df_facilities.loc[re_eligible, 'emissions_electricity_kt'] / 1000 / eligible_elec_emissions * deploy_2050['re_ppa_mt']
                 )
                 df_facilities['tech_re_ppa_pct'] = (
                     df_facilities['re_ppa_abatement_mt'] / (df_facilities['emissions_electricity_kt'] / 1000) * 100
                 ).fillna(0)
                 df_facilities['abatement_mt'] += df_facilities['re_ppa_abatement_mt']
+                print(f"   Allocated Renewable Electricity: {deploy_2050['re_ppa_mt']:.2f} Mt to {re_eligible.sum()} eligible facilities")
 
         # Add facility ID
         df_facilities['facility_id'] = range(1, len(df_facilities) + 1)

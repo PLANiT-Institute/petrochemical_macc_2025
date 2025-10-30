@@ -27,7 +27,8 @@
       "Bash(do pkill -f \"run_all_scenarios\")",
       "Bash(done)",
       "Bash(pkill:*)",
-      "Bash(for id in 87c2e1 d32ecf 44c94f 857ebd 375a83)"
+      "Bash(for id in 87c2e1 d32ecf 44c94f 857ebd 375a83)",
+      "Bash(awk:*)"
     ],
     "deny": [],
     "ask": []

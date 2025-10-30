@@ -393,14 +393,15 @@ class MACCAnalyzer:
 
     def _calculate_re_ppa_macc(self, year, re_price, grid_price, grid_ef):
         """
-        Calculate RE PPA MACC (NCC facilities only)
+        Calculate Renewable Electricity MACC (ALL facilities)
 
-        RE PPA = Renewable Power Purchase Agreement
-        Simply switching from grid electricity to RE electricity for NCC facilities
-        No infrastructure needed - just procurement contract
+        Renewable Electricity = Switching from grid electricity to renewable energy
+        Simply switching from grid electricity to RE electricity for ALL facilities
+        No infrastructure needed - just procurement contract (PPA)
         No energy consumption change - just price differential
 
-        User specified: "RE is only applied to NCC"
+        CRITICAL FIX: Applied to ALL facilities with electricity consumption,
+        not just NCC. (NCC-Electricity scenario will exclude NCC in optimization)
 
         Cost:
             MACC = Price_Diff / Abatement_per_MWh
@@ -413,13 +414,11 @@ class MACCAnalyzer:
             self.df_demand_growth['year'] == year
         ]['cumulative_capacity_multiplier'].iloc[0]
 
-        # Filter NCC facilities only (user constraint)
-        ncc_facilities = self.df_baseline[
-            self.df_baseline['product'].apply(is_ncc_facility)
-        ]
+        # Use ALL facilities with electricity consumption
+        all_facilities = self.df_baseline.copy()
 
-        # Calculate total electricity emissions for NCC facilities
-        total_elec_emissions_mt = ncc_facilities['emissions_electricity_kt'].sum() / 1000  # MtCO2
+        # Calculate total electricity emissions for ALL facilities
+        total_elec_emissions_mt = all_facilities['emissions_electricity_kt'].sum() / 1000  # MtCO2
         total_elec_emissions_mt *= capacity_multiplier
 
         # Emission factors
@@ -428,7 +427,7 @@ class MACCAnalyzer:
         # Abatement per MWh
         abatement_per_mwh = grid_ef - re_ef
 
-        # Abatement potential: all NCC electricity could switch to RE
+        # Abatement potential: all facility electricity could switch to RE
         abatement_potential_mt = total_elec_emissions_mt * (1 - re_ef / grid_ef)
 
         # Cost: Price differential between RE and Grid (Option A - Switching)
