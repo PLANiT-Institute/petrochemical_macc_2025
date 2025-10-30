@@ -1,27 +1,27 @@
 year,grid_price_usd_per_mwh,source,notes
-2025,80,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2026,82,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2027,84,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2028,86,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2029,88,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2030,90,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2031,91,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2032,92,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2033,93,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2034,94,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2035,95,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2036,96,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2037,97,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2038,98,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2039,99,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2040,100,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2041,100,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2042,100,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2043,100,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2044,100,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2045,100,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2046,100,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2047,100,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2048,100,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2049,100,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
-2050,100,Korea industrial electricity tariff,"Based on Korea Power Exchange tariff structure, relatively stable"
+2025,100.0,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2026,103.66,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2027,107.31,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2028,110.97,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2029,114.62,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2030,118.28,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2031,121.93,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2032,125.59,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2033,129.24,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2034,132.9,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2035,136.55,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2036,140.21,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2037,143.86,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2038,147.52,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2039,151.17,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2040,154.83,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2041,158.48,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2042,162.14,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2043,165.79,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2044,169.45,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2045,173.1,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2046,176.76,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2047,180.41,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2048,184.07,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2049,187.72,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price
+2050,191.38,User-specified trajectory,Linear increase from $100/MWh (2025) to $191.38/MWh (2050) - converges with RE_PPA price

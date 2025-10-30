@@ -102,7 +102,82 @@ Electric naphtha cracker using **Grid electricity** instead of fossil fuel combu
 
 ## 2️⃣ NCC-H₂ (Hydrogen-Fueled Cracker)
 
-### Technology Description
+### ⚠️ IMPORTANT: Two Types of Hydrogen-Based Decarbonization
+
+There are **two fundamentally different approaches** to using hydrogen for ethylene production:
+
+#### **Type 1: Hydrogen as FUEL (H₂ Combustion) ← WE USE THIS**
+
+**What it is:**
+- Keep existing naphtha feedstock (105 GJ/ton ethylene)
+- Replace fossil fuel combustion (LNG/Fuel Gas) with hydrogen combustion
+- Hydrogen provides process heat for steam cracking (~11 GJ/ton ethylene)
+- **Chemical process unchanged**: C₁₀H₂₂ (naphtha) → C₂H₄ (ethylene) + byproducts
+
+**Key Parameters:**
+- Naphtha feedstock: **UNCHANGED** (105 GJ/ton, still purchased)
+- H₂ consumption: **0.2 ton H₂/ton ethylene** (200 kg/ton)
+- H₂ use: Combustion fuel only (H₂ + O₂ → H₂O + heat)
+- Technology: Existing crackers with **burner retrofit**
+
+**Why We Use This:**
+- ✅ **Realistic near-term**: TRL 7-8, demonstrated by ExxonMobil Baytown (2024-2025)
+- ✅ **Low CAPEX**: Only burner modification (~$1,700/t-C₂H₄/yr)
+- ✅ **Existing infrastructure**: Leverages current naphtha crackers
+- ✅ **Commercial readiness**: Available from 2030 onwards
+
+**Emissions Reduction:**
+- Baseline: 1.74 tCO₂/ton ethylene (from fossil fuel combustion)
+- After H₂: 0 tCO₂ direct emissions (assumes green H₂)
+- Abatement: 100% of combustion emissions
+
+---
+
+#### **Type 2: Hydrogen as FEEDSTOCK (H₂-to-Ethylene) ← WE DON'T USE THIS**
+
+**What it is:**
+- **Replace naphtha** with hydrogen as the primary feedstock
+- Produce ethylene through alternative chemical pathways:
+  - **MTO (Methanol-to-Olefins)**: H₂ → CH₃OH → C₂H₄
+  - **Fischer-Tropsch**: H₂ + CO → hydrocarbons → C₂H₄
+  - **Direct synthesis**: Experimental catalytic processes
+
+**Key Parameters:**
+- Naphtha feedstock: **ELIMINATED** (fundamentally different chemistry)
+- H₂ consumption: **Much higher** (~4-8 ton H₂/ton ethylene depending on pathway)
+- Technology: **Completely new plants** required
+
+**Why We DON'T Use This:**
+- ❌ **Not commercially ready**: TRL 3-5, mostly R&D stage
+- ❌ **Very high CAPEX**: New plant construction ($5,000-10,000/t-C₂H₄/yr)
+- ❌ **High H₂ demand**: 4-8× more H₂ than fuel-only approach
+- ❌ **Availability**: Not expected before 2040-2050
+- ❌ **Economic uncertainty**: Unproven at commercial scale
+
+**Emissions Reduction:**
+- Would eliminate naphtha feedstock emissions (108 kg CO₂/ton from naphtha production)
+- But requires massive H₂ volumes (economic viability unclear)
+
+---
+
+### ✅ OUR MODEL: Type 1 (Hydrogen as Fuel)
+
+We model **Type 1: Hydrogen as Fuel** because:
+1. **Commercial readiness**: TRL 7-8 with real-world demonstrations
+2. **Economic feasibility**: Low retrofit cost vs. new plant construction
+3. **Near-term deployment**: Available from 2030 onwards
+4. **Industry adoption path**: Most likely pathway for Korean petrochemical sector
+5. **H₂ infrastructure**: Lower H₂ demand (~200 kg/ton vs. 4,000-8,000 kg/ton)
+
+**Critical Understanding:**
+- Naphtha feedstock **continues to be purchased** (105 GJ/ton ethylene)
+- H₂ only replaces **combustion fuel** (~11 GJ/ton ethylene)
+- This is a **partial decarbonization** (eliminates combustion emissions only)
+- Full decarbonization would require addressing naphtha feedstock emissions separately
+
+---
+
+### Technology Description (Type 1: H₂ as Fuel)
 Naphtha cracker using hydrogen fuel instead of natural gas/fuel gas for combustion heating. Naphtha feedstock unchanged; only fuel source changes from fossil to hydrogen.
 
 ### Hydrogen Consumption

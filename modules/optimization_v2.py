@@ -29,9 +29,11 @@ class CostOptimizerV2:
     """
 
     def __init__(self, baseline_output='outputs/module_01', macc_output='outputs/module_02',
-                 output_dir='outputs/module_03', scenario_file='data/emission_scenarios_clean.csv'):
+                 output_dir='outputs/module_03', scenario_file='data/emission_scenarios_clean.csv',
+                 force_ncc_technology=None):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.force_ncc_technology = force_ncc_technology  # 'NCC-H2', 'NCC-Electricity', or None
 
         print("="*80)
         print("MODULE 3: COST OPTIMIZATION")
@@ -128,7 +130,11 @@ class CostOptimizerV2:
 
         # NEW: Track NCC technology choice (mutually exclusive)
         # Once chosen (H2 or Electricity), this persists for all future years
-        ncc_choice = None  # Will be 'NCC-H2' or 'NCC-Electricity' once selected
+        # Can be forced via initialization parameter (for scenario analysis)
+        ncc_choice = self.force_ncc_technology  # 'NCC-H2', 'NCC-Electricity', or None for auto-select
+
+        if ncc_choice:
+            print(f"   🔒 NCC Technology FORCED: {ncc_choice}")
 
         # Interpolate missing years in emission path
         years_with_targets = sorted([y for y in emission_path.keys()])

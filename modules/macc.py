@@ -102,8 +102,8 @@ class MACCAnalyzer:
             ncc_h2_macc = self._calculate_ncc_h2_macc(year, h2_price, naphtha_price)
             macc_data.append(ncc_h2_macc)
 
-            # 3. NCC-Electricity (uses GRID electricity with Grid EF)
-            ncc_elec_macc = self._calculate_ncc_electricity_macc(year, grid_price, grid_ef, naphtha_price)
+            # 3. NCC-Electricity (uses RENEWABLE electricity - RE_PPA)
+            ncc_elec_macc = self._calculate_ncc_electricity_macc(year, re_price, naphtha_price)
             macc_data.append(ncc_elec_macc)
 
             # 4. RE Switching (converting grid electricity to RE)
@@ -299,28 +299,28 @@ class MACCAnalyzer:
             'methodology': 'Energy-based'
         }
 
-    def _calculate_ncc_electricity_macc(self, year, grid_price, grid_ef, naphtha_price):
+    def _calculate_ncc_electricity_macc(self, year, re_price, naphtha_price):
         """
-        Calculate NCC-Electricity MACC using GRID electricity
+        Calculate NCC-Electricity MACC using RENEWABLE electricity (RE_PPA)
 
         Process Change:
             Before: Naphtha cracking with LNG/Fuel Gas combustion (~11 GJ/ton ethylene)
-            After:  Naphtha cracking with GRID electricity (5.5 MWh/ton ethylene)
+            After:  Naphtha cracking with RENEWABLE electricity (5.0 MWh/ton ethylene)
 
         CRITICAL:
             - Naphtha feedstock (105 GJ) continues unchanged - still purchased!
             - LNG/Fuel Gas combustion (~11 GJ) is ELIMINATED
-            - GRID electricity provides energy instead (NOT RE electricity)
-            - Grid electricity has emissions: Grid EF × electricity consumption
+            - RENEWABLE electricity provides energy (RE_PPA pricing)
+            - Renewable electricity has ZERO emissions (no EF penalty)
             - NO fuel cost saving (naphtha not used as fuel before)
 
         Cost:
-            MACC = CAPEX_annual + OPEX_annual + Grid_electricity_cost / tCO2_abated
+            MACC = CAPEX_annual + OPEX_annual + RE_electricity_cost / tCO2_abated
 
         Emissions:
             Baseline: Fossil fuel combustion emissions
-            After: Grid electricity emissions (Grid EF × 5.5 MWh/ton)
-            Abatement: Baseline - Grid_elec_emissions
+            After: ZERO emissions (renewable electricity)
+            Abatement: Baseline emissions (100% abatement)
         """
         tech_costs = self.tech_cost_calc.get_technology_costs('NCC-Electricity', year)
         elec_mwh_per_ton = tech_costs['elec_mwh_per_ton_ethylene']
@@ -347,10 +347,10 @@ class MACCAnalyzer:
             # Fallback to typical value for ethylene
             emission_baseline_per_ton = 1.74  # tCO2/ton (typical for NCC)
 
-        # After NCC-Electricity: Uses GRID electricity with Grid EF
-        emission_elec_per_ton = elec_mwh_per_ton * grid_ef  # tCO2/ton ethylene
+        # After NCC-Electricity: Uses RENEWABLE electricity (ZERO emissions)
+        emission_elec_per_ton = 0.0  # tCO2/ton ethylene (renewable = zero emissions)
 
-        abatement_per_ton = emission_baseline_per_ton - emission_elec_per_ton
+        abatement_per_ton = emission_baseline_per_ton  # 100% abatement (baseline - 0)
 
         # Total abatement potential
         abatement_mt = (ethylene_production_kt * 1000 * abatement_per_ton) / 1e6  # MtCO2
@@ -361,8 +361,8 @@ class MACCAnalyzer:
         capex_ann = capex_musd_per_mtco2 / lifetime  # Simple: CAPEX / lifetime
         opex_ann = capex_musd_per_mtco2 * (tech_costs['opex_pct_capex'] / 100)  # OPEX as % of CAPEX
 
-        # Fuel cost: GRID electricity cost only (no fossil fuel savings)
-        electricity_cost_per_ton = elec_mwh_per_ton * grid_price  # $/ton ethylene
+        # Fuel cost: RENEWABLE electricity cost only (no fossil fuel savings)
+        electricity_cost_per_ton = elec_mwh_per_ton * re_price  # $/ton ethylene
 
         if abatement_per_ton > 0:
             fuel_cost_diff_per_tco2 = electricity_cost_per_ton / abatement_per_ton  # $/tCO2
@@ -380,14 +380,14 @@ class MACCAnalyzer:
             'opex_ann_usd_per_tco2': opex_ann,
             'fuel_cost_diff_usd_per_tco2': fuel_cost_diff_per_tco2,
             'total_cost_usd_per_tco2': total_cost,
-            're_price_usd_per_mwh': np.nan,
+            're_price_usd_per_mwh': re_price,
             'h2_price_usd_per_kg': np.nan,
             'electricity_consumption_mwh_per_ton_ethylene': elec_mwh_per_ton,
             'baseline_combustion_emissions_tco2_per_ton': emission_baseline_per_ton,
             'ethylene_production_kt': ethylene_production_kt,
             'electricity_cost_per_ton_ethylene': electricity_cost_per_ton,
-            'grid_ef_tco2_per_mwh': grid_ef,
-            'grid_price_usd_per_mwh': grid_price,
+            'grid_ef_tco2_per_mwh': 0.0,
+            'grid_price_usd_per_mwh': np.nan,
             'methodology': 'Energy-based'
         }
 
@@ -431,13 +431,18 @@ class MACCAnalyzer:
         # Abatement potential: all NCC electricity could switch to RE
         abatement_potential_mt = total_elec_emissions_mt * (1 - re_ef / grid_ef)
 
-        # Cost: RE electricity price only (no grid price subtraction - grid continues anyway)
-        # Calculate total RE electricity cost for NCC facilities
+        # Cost: Price differential between RE and Grid (Option A - Switching)
+        # When switching from Grid to RE:
+        #   - Stop paying Grid price
+        #   - Start paying RE price
+        #   - Net cost = (RE price - Grid price) × electricity
+        #   - This can be NEGATIVE if RE is cheaper than Grid!
         total_elec_mwh = total_elec_emissions_mt * 1e6 / grid_ef  # MWh (from emissions back to energy)
-        total_re_cost = total_elec_mwh * re_price  # Total RE cost
+        price_diff = re_price - grid_price  # Can be negative!
+        total_cost_diff = total_elec_mwh * price_diff  # Total incremental cost (can be negative!)
 
         if abatement_potential_mt > 0:
-            cost_per_tco2 = total_re_cost / (abatement_potential_mt * 1e6)  # $/tCO2
+            cost_per_tco2 = total_cost_diff / (abatement_potential_mt * 1e6)  # $/tCO2 (can be negative!)
         else:
             cost_per_tco2 = 1e9
 

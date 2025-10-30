@@ -22,7 +22,10 @@
       "Bash(cat SIMPLE_RE_IMPLEMENTATION.md)",
       "Bash(cat:*)",
       "Bash(tee:*)",
-      "Bash(awk '{print $9, \"\"\"\"(\"\"\"\" $5 \"\"\"\")\"\"\"\"}')"
+      "Bash(awk '{print $9, \"\"\"\"(\"\"\"\" $5 \"\"\"\")\"\"\"\"}')",
+      "Bash(for id in 87c2e1 d32ecf 44c94f 857ebd)",
+      "Bash(do pkill -f \"run_all_scenarios\")",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []
