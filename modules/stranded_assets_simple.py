@@ -17,7 +17,6 @@ Methodology:
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 from pathlib import Path
 from .utils import save_csv_output, save_plot, identify_product_group
 

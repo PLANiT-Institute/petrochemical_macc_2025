@@ -16,7 +16,6 @@ Components:
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 from pathlib import Path
 from .utils import save_csv_output, save_plot, identify_product_group, is_ncc_facility
 
@@ -399,7 +398,25 @@ class StrandedAssetAnalyzer:
             )
 
             fig, ax = plt.subplots(figsize=(12, 8))
-            sns.heatmap(pivot_data, annot=True, fmt='.1f', cmap='YlOrRd', ax=ax, cbar_kws={'label': 'Stranding Rate (%)'})
+            # Use matplotlib instead of seaborn for heatmap
+            im = ax.imshow(pivot_data.values, cmap='YlOrRd', aspect='auto')
+
+            # Set ticks and labels
+            ax.set_xticks(np.arange(len(pivot_data.columns)))
+            ax.set_yticks(np.arange(len(pivot_data.index)))
+            ax.set_xticklabels(pivot_data.columns, rotation=45, ha='right')
+            ax.set_yticklabels(pivot_data.index)
+
+            # Add text annotations
+            for i in range(len(pivot_data.index)):
+                for j in range(len(pivot_data.columns)):
+                    text = ax.text(j, i, f'{pivot_data.values[i, j]:.1f}',
+                                 ha="center", va="center", color="black", fontsize=8)
+
+            # Add colorbar
+            cbar = plt.colorbar(im, ax=ax)
+            cbar.set_label('Stranding Rate (%)', fontsize=11)
+
             ax.set_xlabel('Scenario', fontsize=13, fontweight='bold')
             ax.set_ylabel('Location', fontsize=13, fontweight='bold')
             ax.set_title('Regional Stranding Rate Heatmap', fontsize=15, fontweight='bold')
