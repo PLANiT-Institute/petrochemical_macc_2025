@@ -1,0 +1,5 @@
+technology,applies_to,cop,h2_ton_per_ton_ethylene,elec_mwh_per_ton_ethylene,energy_conversion_efficiency,trl,available_year,capex_2025_musd_per_mtco2,capex_2030_musd_per_mtco2,capex_2040_musd_per_mtco2,capex_2050_musd_per_mtco2,opex_pct_capex,lifetime_years,notes
+Heat_Pump,All processes <165C,4.0,,,0.95,9.0,2025,900,720,540,450,3.0,20,Heat pump for <165C processes using GRID electricity | COP=4.0 | Grid EF applied | Applicable to BTX/Polymer only
+NCC-H2,Naphtha crackers only,,0.2,,0.85,7.0,2030,1725,1440,1035,863,4.0,25,"H2 consumption: 0.2 ton/ton C2H4 (Lummus Tech 2023) | CAPEX $1,700/t-C2H4/yr (Thunder Said Energy 2023) | OPEX 4%"
+NCC-Electricity,Naphtha crackers only,,,5.0,0.95,6.0,2030,1840,1560,1150,940,4.0,25,"Electric cracking using GRID electricity | 5.0 MWh/ton (BASF/SABIC/Linde 2024) | Grid EF applied | CAPEX $1,500/t-C2H4/yr (Toribio-Ramirez 2025) | OPEX 4%"
+RE_PPA,NCC electricity only,,,,1.0,,2025,0,0,0,0,0.0,99,Renewable PPA: contract-based approach | No CAPEX/OPEX

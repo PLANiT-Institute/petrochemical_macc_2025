@@ -29,7 +29,18 @@
       "Bash(pkill:*)",
       "Bash(for id in 87c2e1 d32ecf 44c94f 857ebd 375a83)",
       "Bash(awk:*)",
-      "Bash(for id in 87c2e1 d32ecf 44c94f 857ebd 375a83 7da17f)"
+      "Bash(for id in 87c2e1 d32ecf 44c94f 857ebd 375a83 7da17f)",
+      "WebFetch(domain:link.springer.com)",
+      "Bash(pdflatex:*)",
+      "Bash(bibtex:*)",
+      "Bash(/dev/null)",
+      "Bash(pdfinfo:*)",
+      "WebFetch(domain:carbonneutrality.springeropen.com)",
+      "WebFetch(domain:www.springer.com)",
+      "WebFetch(domain:support.springer.com)",
+      "WebFetch(domain:www.springernature.com)",
+      "Bash(zip:*)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,27 @@
+Dear Editor-in-Chief,
+
+I am pleased to submit our manuscript entitled "Beyond Partial Equilibrium: Why Technology Costs and Energy System Constraints Diverge in Industrial Decarbonization Pathways" for consideration for publication in Carbon Neutrality.
+
+This research addresses a critical gap in industrial decarbonization analysis: the disconnect between technology cost assessments and energy system feasibility. Through facility-level modeling of South Korea's petrochemical sector (248 facilities, 66.2 MtCO₂/year), we demonstrate that hydrogen and electricity pathways show near-identical costs ($31.4B vs $33.3B, 6% difference) yet diverge by orders of magnitude in system integration requirements. The electricity pathway requires 164.5 TWh annually—consuming 97% of Korea's 2036 renewable target for one sector alone—while the hydrogen pathway requires 7.7 Mt H₂ (28% of 2050 target).
+
+This work makes three key contributions aligned with Carbon Neutrality's mission:
+
+1. **Methodological**: We extend MACC analysis beyond partial equilibrium to explicitly quantify aggregate energy demands, revealing that grid capacity—not technology cost—emerges as the binding constraint for industrial decarbonization.
+
+2. **Empirical**: Facility-level resolution (11 naphtha cracking complexes) enables precise energy demand quantification, contrasting with sector-aggregated studies that systematically underestimate infrastructure constraints.
+
+3. **Policy**: Our findings validate hydrogen infrastructure as necessary rather than optional for heavy industry, with implications extending to EU, Japan, and resource-constrained OECD economies. This directly supports carbon neutrality pathway planning by demonstrating that achieving net-zero requires configuring national energy systems to accommodate sectoral demands within infrastructure constraints.
+
+The manuscript presents original research not under consideration elsewhere. All data and code are publicly available on GitHub (https://github.com/justjinsu/korea_petrochemical) to ensure reproducibility. The research was conducted independently with no funding sources or competing interests.
+
+We believe this work will be of significant interest to Carbon Neutrality's readership, particularly researchers and policymakers engaged in industrial decarbonization strategy, energy system planning, and carbon neutrality pathway development.
+
+Thank you for considering our manuscript. I look forward to your response.
+
+Sincerely,
+
+Jinsu Park
+Plan/It Institute
+Seoul, South Korea
+Email: jinsu@planit.institute
+ORCID: [to be added during submission]
