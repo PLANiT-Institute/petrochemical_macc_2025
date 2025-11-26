@@ -1,7 +1,0 @@
-technology,applies_to_product,h2_consumption_ton_per_ton_product,electricity_consumption_mwh_per_ton_product,thermal_efficiency,naphtha_becomes_feedstock_only,fuel_combustion_eliminated,description,literature_source
-NCC-H2,Ethylene,0.20,,0.85,TRUE,TRUE,Hydrogen replaces all fuel combustion; naphtha becomes feedstock only,Estimated from 23 GJ/ton thermal requirement (RSC 2025) and H2 LHV 120 MJ/kg
-NCC-Electricity,Ethylene,,3.0,0.95,TRUE,TRUE,Electricity replaces all fuel combustion; naphtha becomes feedstock only,RSC Green Chemistry 2025 (2.86 MWh/ton rounded to 3.0)
-NCC-H2,Propylene,0.18,,0.85,TRUE,TRUE,Hydrogen replaces fuel combustion for propylene,Scaled from ethylene based on thermal requirements
-NCC-Electricity,Propylene,,2.7,0.95,TRUE,TRUE,Electric cracking for propylene,Scaled from ethylene based on thermal requirements
-Heat_Pump,All processes (T<165C),,,0.95,FALSE,TRUE,Heat pump replaces fossil fuel combustion with electricity,COP=4.0 industrial heat pump specification
-RE_PPA,NCC facilities,,,,FALSE,FALSE,Renewable electricity contract - emissions reduction only,Contract-based approach

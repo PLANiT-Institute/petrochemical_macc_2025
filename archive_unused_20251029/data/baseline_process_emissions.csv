@@ -1,4 +1,0 @@
-product,process,naphtha_fuel_gj_per_ton,lng_gj_per_ton,fuel_gas_gj_per_ton,byproduct_gas_gj_per_ton,total_fuel_gj_per_ton,total_emissions_tco2_per_ton,description
-Ethylene,Naphtha Cracker,29.0,4.49,5.62,1.12,40.23,1.739,Baseline fuel consumption for ethylene (naphtha FUEL only - 29 GJ/ton)
-Propylene,Naphtha Cracker,25.39,3.93,5.16,1.23,35.71,1.53,Baseline fuel consumption for propylene
-Butadiene,Naphtha Cracker,29.0,4.17,5.32,1.16,39.65,1.73,Baseline fuel consumption for butadiene
