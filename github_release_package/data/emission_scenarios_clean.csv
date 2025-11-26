@@ -1,7 +1,0 @@
-scenario_name,constraint_type,year,target_mt,description
-Policy_Target,annual_path,2025,66.2,Current baseline (2025)
-Policy_Target,annual_path,2030,53.3,Reduction trajectory (non-increasing)
-Policy_Target,annual_path,2035,40.3,30% reduction relative to 2018 baseline (57.6 MtCO2)
-Policy_Target,annual_path,2040,26.9,Continued reduction trajectory
-Policy_Target,annual_path,2045,13.4,Approaching net zero
-Policy_Target,annual_path,2050,0.0,Net zero target

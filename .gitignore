@@ -1,0 +1,13 @@
+# OS artifacts
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# Generated outputs (keep release figures)
+outputs/*
+!outputs/figures/
+!outputs/figures/**

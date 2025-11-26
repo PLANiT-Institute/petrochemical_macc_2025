@@ -27,19 +27,26 @@ The model analyzes decarbonization pathways for South Korea's petrochemical sect
 ```
 petrochemical_macc_2025/
 ├── data/                           # Input parameters
-│   ├── technology_parameters.csv   # Technology CAPEX, OPEX, efficiency
-│   ├── energy_prices.csv          # Electricity, H₂, fuel price trajectories
-│   └── policy_targets.csv         # Korea energy policy targets
+│   ├── facility_database.csv       # 248 facilities with product/capacity
+│   ├── energy_intensities.csv      # Process energy intensities
+│   ├── emission_factors.csv        # Fuel emission factors
+│   ├── fuel_price_trajectory.csv   # Naphtha/LNG/electricity prices
+│   ├── h2_price_trajectory.csv     # Hydrogen price trajectory
+│   ├── re_price_trajectory.csv     # Renewable electricity price trajectory
+│   ├── grid_emission_trajectory.csv# Grid decarbonization pathway
+│   ├── demand_growth_trajectory_scenarios.csv # Production pathways
+│   ├── technology_parameters.csv   # CAPEX/OPEX/efficiency/availability
+│   └── MACC_Model_Assumptions_v2.xlsx # Combined assumption workbook (EN/KR)
 │
 ├── modules/                        # Core model modules
-│   ├── macc.py                    # MACC calculation engine
-│   ├── energy_demand.py           # Aggregate energy demand quantification
-│   └── scenario_runner.py         # Scenario execution framework
+│   ├── baseline.py                 # Baseline emissions
+│   ├── macc.py                     # MACC calculation engine
+│   ├── optimization_v2.py          # Cost optimization (mutually exclusive NCC tech)
+│   ├── data_manager.py             # Centralized data loading/validation
+│   └── utils.py                    # Shared helpers (plots, loaders, calculators)
 │
 ├── outputs/                        # Model results
-│   ├── figures/                   # Publication-quality figures
-│   ├── tables/                    # CSV result tables
-│   └── sensitivity/               # Sensitivity analysis results
+│   └── figures/                    # Publication-quality figures (v1.0 release)
 │
 ├── run_all_scenarios_v3.py        # Main execution script
 ├── generate_professional_figures.py  # Figure generation
