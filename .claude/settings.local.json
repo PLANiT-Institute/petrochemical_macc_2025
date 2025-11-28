@@ -40,7 +40,8 @@
       "WebFetch(domain:support.springer.com)",
       "WebFetch(domain:www.springernature.com)",
       "Bash(zip:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
