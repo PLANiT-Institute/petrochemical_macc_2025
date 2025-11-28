@@ -52,38 +52,98 @@ def load_technology_params():
 # ============================================================================
 # Calculation Functions
 # ============================================================================
-def calculate_lcoh(elec_price, capex, efficiency=0.70, lifetime=20, capacity_factor=0.90, opex_pct=0.02):
+def calculate_crf(discount_rate, lifetime):
     """
-    Calculate Levelized Cost of Hydrogen
+    Calculate Capital Recovery Factor (CRF)
+
+    CRF = i(1+i)^n / ((1+i)^n - 1)
+
+    Parameters:
+    - discount_rate: Annual discount rate (e.g., 0.08 for 8%)
+    - lifetime: Project lifetime in years
+
+    Returns:
+    - CRF value
+    """
+    i = discount_rate
+    n = lifetime
+    return (i * (1 + i)**n) / ((1 + i)**n - 1)
+
+
+def calculate_lcoh(elec_price, capex, efficiency=0.70, lifetime=20, capacity_factor=0.90,
+                   opex_pct=0.02, discount_rate=0.08, stack_replacement_cost=0.15, stack_lifetime=10):
+    """
+    Calculate Levelized Cost of Hydrogen (LCOH) using precise formula
+
+    LCOH = (CAPEX × CRF + Fixed_OPEX + Stack_Replacement) / Annual_H2_Production + Variable_Electricity_Cost
 
     Parameters:
     - elec_price: Electricity price ($/MWh)
     - capex: Electrolyzer CAPEX ($/kW)
-    - efficiency: Electrolyzer efficiency (HHV basis)
+    - efficiency: Electrolyzer efficiency (HHV basis, 0.70 = 70%)
     - lifetime: System lifetime (years)
     - capacity_factor: Annual capacity factor
-    - opex_pct: OPEX as % of CAPEX
+    - opex_pct: Fixed OPEX as % of CAPEX per year
+    - discount_rate: WACC/discount rate for CRF calculation
+    - stack_replacement_cost: Stack replacement as % of CAPEX
+    - stack_lifetime: Years between stack replacements
 
     Returns:
-    - LCOH in $/kg H2
+    - Dictionary with LCOH breakdown in $/kg H2
     """
-    h2_hhv = 39.4  # kWh/kg (Higher Heating Value)
-    elec_per_kg = h2_hhv / efficiency  # kWh electricity per kg H2
+    # Constants
+    H2_HHV = 39.4  # kWh/kg (Higher Heating Value of H2)
+    HOURS_PER_YEAR = 8760
 
-    annual_hours = 8760 * capacity_factor
+    # Electricity consumption per kg H2
+    elec_per_kg_kwh = H2_HHV / efficiency  # kWh/kg H2
 
-    # CAPEX component ($/kg)
-    capex_per_kg = capex / (annual_hours * lifetime) * elec_per_kg
+    # Annual operating hours
+    operating_hours = HOURS_PER_YEAR * capacity_factor
 
-    # OPEX component ($/kg)
-    opex_per_kg = capex_per_kg * opex_pct * lifetime
+    # H2 production per kW of electrolyzer capacity
+    # 1 kW electrolyzer * operating_hours / elec_per_kg = kg H2/year/kW
+    h2_per_kw_year = operating_hours / elec_per_kg_kwh  # kg H2/year per kW capacity
 
-    # Electricity cost ($/kg)
-    elec_cost_per_kg = elec_price * elec_per_kg / 1000  # Convert $/MWh to $/kWh
+    # Capital Recovery Factor
+    crf = calculate_crf(discount_rate, lifetime)
 
-    lcoh = capex_per_kg + opex_per_kg + elec_cost_per_kg
+    # CAPEX component ($/kg H2)
+    # CAPEX ($/kW) × CRF / H2 production (kg/kW/year)
+    capex_component = (capex * crf) / h2_per_kw_year
 
-    return lcoh
+    # Fixed OPEX component ($/kg H2)
+    # OPEX ($/kW/year) / H2 production (kg/kW/year)
+    fixed_opex_component = (capex * opex_pct) / h2_per_kw_year
+
+    # Stack replacement component ($/kg H2) - annualized
+    # Number of replacements over lifetime
+    num_replacements = max(0, (lifetime // stack_lifetime) - 1)
+    if num_replacements > 0:
+        # NPV of stack replacements
+        stack_npv = sum([stack_replacement_cost * capex / ((1 + discount_rate)**(stack_lifetime * (i+1)))
+                         for i in range(int(num_replacements))])
+        stack_component = (stack_npv * crf) / h2_per_kw_year
+    else:
+        stack_component = 0
+
+    # Electricity cost component ($/kg H2)
+    # elec_price ($/MWh) × elec_per_kg (kWh) / 1000
+    elec_component = elec_price * elec_per_kg_kwh / 1000
+
+    # Total LCOH
+    lcoh = capex_component + fixed_opex_component + stack_component + elec_component
+
+    return {
+        'lcoh': lcoh,
+        'capex_component': capex_component,
+        'opex_component': fixed_opex_component,
+        'stack_component': stack_component,
+        'elec_component': elec_component,
+        'elec_per_kg': elec_per_kg_kwh,
+        'h2_per_kw_year': h2_per_kw_year,
+        'crf': crf
+    }
 
 def get_electrolyzer_capex(year):
     """Get interpolated electrolyzer CAPEX for a given year"""
@@ -99,7 +159,7 @@ def get_electrolyzer_capex(year):
         return 300
 
 def get_ncc_capex(year, tech='NCC-H2'):
-    """Get interpolated NCC technology CAPEX"""
+    """Get interpolated NCC technology CAPEX ($/t/yr capacity)"""
     if tech == 'NCC-H2':
         capex_schedule = {2025: 1550, 2030: 1300, 2040: 935, 2050: 780}
     else:  # NCC-Electricity
@@ -115,6 +175,92 @@ def get_ncc_capex(year, tech='NCC-H2'):
         return capex_schedule[2040] - (capex_schedule[2040] - capex_schedule[2050]) * (year - 2040) / 10
     else:
         return capex_schedule[2050]
+
+
+# ============================================================================
+# Cost Calculation Functions (aligned with optimization_v2.py and macc.py)
+# ============================================================================
+# Key parameters from the original model
+BASELINE_EF = 1.9  # tCO2/ton ethylene (baseline combustion emissions)
+H2_INTENSITY = 0.56  # ton H2/ton ethylene (from Lummus Tech 2023)
+ELEC_INTENSITY = 5.0  # MWh/ton ethylene (from BASF/SABIC/Linde 2024)
+MWH_PER_TCO2_NCC_ELEC = 5.3  # TWh per MtCO2 (from optimization_v2.py: 5300 MWh/tCO2)
+LIFETIME = 25  # years (technology lifetime)
+OPEX_PCT = 0.04  # 4% of CAPEX
+
+
+def calculate_macc(year, h2_price, re_price, tech='NCC-H2'):
+    """
+    Calculate MACC ($/tCO2) aligned with macc.py
+
+    MACC = CAPEX_annual + OPEX_annual + Fuel_Cost_Diff
+
+    Where:
+    - CAPEX_annual = CAPEX / lifetime (simple, no CRF)
+    - OPEX_annual = CAPEX * opex_pct / lifetime
+    - Fuel_Cost_Diff = Fuel_cost_per_ton / abatement_per_ton
+    """
+    capex = get_ncc_capex(year, tech)
+
+    # CAPEX and OPEX per tCO2 (from CAPEX $/t/yr)
+    # CAPEX per ton ethylene = capex, divide by baseline EF to get per tCO2
+    capex_ann_per_tco2 = capex / LIFETIME / BASELINE_EF  # $/tCO2/year
+    opex_ann_per_tco2 = capex * OPEX_PCT / LIFETIME / BASELINE_EF  # $/tCO2/year
+
+    if tech == 'NCC-H2':
+        # H2 cost per ton ethylene
+        h2_cost_per_ton = H2_INTENSITY * 1000 * h2_price  # $/ton ethylene
+        fuel_cost_per_tco2 = h2_cost_per_ton / BASELINE_EF
+    else:  # NCC-Electricity
+        # Electricity cost per ton ethylene
+        elec_cost_per_ton = ELEC_INTENSITY * re_price  # $/ton ethylene
+        fuel_cost_per_tco2 = elec_cost_per_ton / BASELINE_EF
+
+    macc = capex_ann_per_tco2 + opex_ann_per_tco2 + fuel_cost_per_tco2
+
+    return {
+        'macc': macc,
+        'capex_ann': capex_ann_per_tco2,
+        'opex_ann': opex_ann_per_tco2,
+        'fuel_cost': fuel_cost_per_tco2
+    }
+
+
+def calculate_annual_cost(year, ethylene_kt, h2_price, re_price, tech='NCC-H2'):
+    """
+    Calculate annual costs aligned with optimization_v2.py
+
+    Returns costs in $B/year
+    """
+    capex = get_ncc_capex(year, tech)  # $/t/yr capacity
+
+    # CAPEX: Total investment amortized over lifetime
+    # Total CAPEX = CAPEX ($/t/yr) * capacity (kt) * 1000 (t/kt)
+    total_capex_musd = capex * ethylene_kt * 1000 / 1e6  # Million USD
+    capex_ann_bn = total_capex_musd / LIFETIME / 1000  # $B/year
+
+    # OPEX: % of total CAPEX
+    opex_ann_bn = total_capex_musd * OPEX_PCT / LIFETIME / 1000  # $B/year
+
+    if tech == 'NCC-H2':
+        # H2 demand and cost
+        h2_demand_kt = ethylene_kt * H2_INTENSITY
+        fuel_cost_bn = h2_demand_kt * 1000 * h2_price / 1e9  # $B/year
+    else:  # NCC-Electricity
+        # Electricity demand (using MtCO2-based approach from optimization_v2.py)
+        bau_emissions_mt = ethylene_kt * BASELINE_EF / 1000
+        elec_demand_twh = bau_emissions_mt * MWH_PER_TCO2_NCC_ELEC  # TWh
+        fuel_cost_bn = elec_demand_twh * re_price / 1000  # $B/year
+
+    total_cost_bn = capex_ann_bn + opex_ann_bn + fuel_cost_bn
+
+    return {
+        'capex_ann_bn': capex_ann_bn,
+        'opex_ann_bn': opex_ann_bn,
+        'fuel_cost_bn': fuel_cost_bn,
+        'total_ann_bn': total_cost_bn,
+        'total_capex_musd': total_capex_musd
+    }
 
 def calculate_scenario_results(scenario_mult, h2_intensity=0.56, elec_intensity=5.0,
                                baseline_ethylene=11962, baseline_ef=1.9):
@@ -154,7 +300,8 @@ st.sidebar.title("🏭 Navigation")
 page = st.sidebar.radio(
     "Select Page",
     ["📊 Overview", "⚡ 6-Scenario Summary", "🔬 LCOH Calculator",
-     "🗺️ Regional Analysis", "💰 Cost Analysis", "📈 MACC Curves"]
+     "🗺️ Regional Analysis", "💰 Cost Analysis", "📈 MACC Curves",
+     "🔄 Facility Transition"]
 )
 
 st.sidebar.markdown("---")
@@ -334,22 +481,46 @@ elif page == "⚡ 6-Scenario Summary":
 # ============================================================================
 elif page == "🔬 LCOH Calculator":
     st.title("🔬 Levelized Cost of Hydrogen (LCOH) Calculator")
-    st.markdown("### Calculate green hydrogen production cost from electrolysis")
+    st.markdown("### Precise LCOH calculation with Capital Recovery Factor (CRF)")
+
+    # Formula explanation
+    with st.expander("📐 LCOH Formula Details"):
+        st.markdown("""
+        **Precise LCOH Formula:**
+
+        ```
+        LCOH = (CAPEX × CRF + Fixed_OPEX + Stack_Replacement) / H₂_Production + Electricity_Cost
+        ```
+
+        **Where:**
+        - **CRF** = Capital Recovery Factor = `i(1+i)^n / ((1+i)^n - 1)`
+        - **i** = Discount rate (WACC)
+        - **n** = Project lifetime (years)
+        - **H₂ Production** = Operating hours × Electrolyzer capacity / Electricity consumption per kg H₂
+        - **Electricity per kg H₂** = H₂ HHV (39.4 kWh/kg) / Efficiency
+
+        **Stack Replacement:**
+        - Electrolyzers require stack replacement every ~10 years
+        - Cost ~15% of original CAPEX, discounted to NPV
+        """)
 
     # Load price data
     df_h2, df_re, df_grid = load_price_trajectories()
 
     # User inputs
     st.markdown("#### Electrolyzer Parameters")
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         efficiency = st.slider("Efficiency (HHV)", 0.50, 0.85, 0.70, 0.01)
-        lifetime = st.slider("Lifetime (years)", 10, 30, 20, 1)
+        lifetime = st.slider("Project Lifetime (years)", 15, 30, 20, 1)
     with col2:
         capacity_factor = st.slider("Capacity Factor", 0.50, 0.98, 0.90, 0.01)
-        opex_pct = st.slider("OPEX (% of CAPEX)", 0.01, 0.05, 0.02, 0.005)
+        opex_pct = st.slider("Fixed OPEX (% of CAPEX/yr)", 0.01, 0.05, 0.02, 0.005)
     with col3:
+        discount_rate = st.slider("Discount Rate (WACC)", 0.04, 0.12, 0.08, 0.01)
+        stack_lifetime = st.slider("Stack Lifetime (years)", 7, 15, 10, 1)
+    with col4:
         year = st.slider("Year", 2025, 2050, 2030)
         custom_elec_price = st.checkbox("Use Custom Electricity Price")
 
@@ -358,9 +529,13 @@ elif page == "🔬 LCOH Calculator":
     else:
         elec_price = df_re[df_re['year'] == year]['re_price_usd_per_mwh'].iloc[0]
 
-    # Calculate LCOH
+    # Calculate LCOH with new precise formula
     capex = get_electrolyzer_capex(year)
-    lcoh = calculate_lcoh(elec_price, capex, efficiency, lifetime, capacity_factor, opex_pct)
+    lcoh_result = calculate_lcoh(
+        elec_price, capex, efficiency, lifetime, capacity_factor,
+        opex_pct, discount_rate, stack_replacement_cost=0.15, stack_lifetime=stack_lifetime
+    )
+    lcoh = lcoh_result['lcoh']
     market_h2 = df_h2[df_h2['year'] == year]['h2_price_usd_per_kg'].iloc[0]
 
     st.markdown("---")
@@ -369,42 +544,57 @@ elif page == "🔬 LCOH Calculator":
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Electrolyzer CAPEX", f"${capex:,.0f}/kW")
+        st.metric("CRF", f"{lcoh_result['crf']:.4f}")
     with col2:
         st.metric("Electricity Price", f"${elec_price:.1f}/MWh")
+        st.metric("Elec per kg H₂", f"{lcoh_result['elec_per_kg']:.1f} kWh")
     with col3:
         st.metric("**LCOH**", f"${lcoh:.2f}/kg",
                   delta=f"vs Market: ${lcoh - market_h2:+.2f}")
     with col4:
         st.metric("Market H2 Price", f"${market_h2:.2f}/kg")
+        st.metric("H₂/kW/year", f"{lcoh_result['h2_per_kw_year']:.0f} kg")
 
     # Recommendation
     if lcoh < market_h2:
-        st.success(f"✅ **Make H2**: LCOH (${lcoh:.2f}/kg) is cheaper than buying (${market_h2:.2f}/kg)")
+        st.success(f"✅ **Make H₂**: LCOH (${lcoh:.2f}/kg) is cheaper than buying (${market_h2:.2f}/kg)")
     else:
-        st.warning(f"⚠️ **Buy H2**: Market price (${market_h2:.2f}/kg) is cheaper than LCOH (${lcoh:.2f}/kg)")
+        st.warning(f"⚠️ **Buy H₂**: Market price (${market_h2:.2f}/kg) is cheaper than LCOH (${lcoh:.2f}/kg)")
 
     st.markdown("---")
 
     # LCOH breakdown
     st.markdown("#### LCOH Cost Breakdown")
 
-    h2_hhv = 39.4
-    elec_per_kg = h2_hhv / efficiency
-    annual_hours = 8760 * capacity_factor
+    col1, col2 = st.columns([1, 1])
 
-    capex_component = capex / (annual_hours * lifetime) * elec_per_kg
-    opex_component = capex_component * opex_pct * lifetime
-    elec_component = elec_price * elec_per_kg / 1000
+    with col1:
+        breakdown = pd.DataFrame({
+            'Component': ['CAPEX (annualized)', 'Fixed OPEX', 'Stack Replacement', 'Electricity'],
+            'Cost ($/kg)': [
+                lcoh_result['capex_component'],
+                lcoh_result['opex_component'],
+                lcoh_result['stack_component'],
+                lcoh_result['elec_component']
+            ]
+        })
 
-    breakdown = pd.DataFrame({
-        'Component': ['CAPEX', 'OPEX', 'Electricity'],
-        'Cost ($/kg)': [capex_component, opex_component, elec_component]
-    })
+        fig = px.pie(breakdown, values='Cost ($/kg)', names='Component',
+                     color_discrete_sequence=['#3498DB', '#2ECC71', '#9B59B6', '#E74C3C'])
+        fig.update_layout(height=350)
+        st.plotly_chart(fig, use_container_width=True)
 
-    fig = px.pie(breakdown, values='Cost ($/kg)', names='Component',
-                 color_discrete_sequence=['#3498DB', '#2ECC71', '#E74C3C'])
-    fig.update_layout(height=350)
-    st.plotly_chart(fig, use_container_width=True)
+    with col2:
+        st.markdown("##### Cost Components")
+        st.dataframe(breakdown.round(3), use_container_width=True, hide_index=True)
+
+        st.markdown("##### Key Parameters")
+        params_df = pd.DataFrame({
+            'Parameter': ['Efficiency', 'Capacity Factor', 'Discount Rate', 'Lifetime', 'Stack Life'],
+            'Value': [f"{efficiency:.0%}", f"{capacity_factor:.0%}", f"{discount_rate:.0%}",
+                     f"{lifetime} years", f"{stack_lifetime} years"]
+        })
+        st.dataframe(params_df, use_container_width=True, hide_index=True)
 
     # LCOH trajectory
     st.markdown("---")
@@ -417,7 +607,9 @@ elif page == "🔬 LCOH Calculator":
     for y in years:
         cap = get_electrolyzer_capex(y)
         ep = df_re[df_re['year'] == y]['re_price_usd_per_mwh'].iloc[0]
-        lcoh_trajectory.append(calculate_lcoh(ep, cap, efficiency, lifetime, capacity_factor, opex_pct))
+        result = calculate_lcoh(ep, cap, efficiency, lifetime, capacity_factor,
+                               opex_pct, discount_rate, 0.15, stack_lifetime)
+        lcoh_trajectory.append(result['lcoh'])
         market_trajectory.append(df_h2[df_h2['year'] == y]['h2_price_usd_per_kg'].iloc[0])
 
     fig = go.Figure()
@@ -436,31 +628,45 @@ elif page == "🔬 LCOH Calculator":
     # Breakeven analysis
     st.markdown("---")
     st.markdown("#### Breakeven Electricity Price")
-    st.markdown("*At what electricity price does LCOH equal market H2 price?*")
+    st.markdown("*At what electricity price does LCOH equal market H₂ price?*")
+
+    H2_HHV = 39.4
+    elec_per_kg = H2_HHV / efficiency
 
     breakeven_data = []
     for y in [2025, 2030, 2040, 2050]:
         cap = get_electrolyzer_capex(y)
         mkt = df_h2[df_h2['year'] == y]['h2_price_usd_per_kg'].iloc[0]
 
-        capex_per_kg = cap / (8760 * capacity_factor * lifetime) * (h2_hhv / efficiency)
-        opex_per_kg = capex_per_kg * opex_pct * lifetime
+        # Calculate fixed costs using CRF
+        crf = calculate_crf(discount_rate, lifetime)
+        h2_per_kw_year = (8760 * capacity_factor) / elec_per_kg
+        fixed_costs = (cap * crf + cap * opex_pct) / h2_per_kw_year
 
-        # LCOH = capex + opex + elec_price * elec_per_kg / 1000
-        # mkt = capex + opex + elec_price * elec_per_kg / 1000
-        # elec_price = (mkt - capex - opex) * 1000 / elec_per_kg
+        # Add stack replacement
+        num_replacements = max(0, (lifetime // stack_lifetime) - 1)
+        if num_replacements > 0:
+            stack_npv = sum([0.15 * cap / ((1 + discount_rate)**(stack_lifetime * (i+1)))
+                             for i in range(int(num_replacements))])
+            fixed_costs += (stack_npv * crf) / h2_per_kw_year
 
-        breakeven_elec = (mkt - capex_per_kg - opex_per_kg) * 1000 / (h2_hhv / efficiency)
+        # Breakeven: mkt = fixed_costs + elec_price * elec_per_kg / 1000
+        breakeven_elec = (mkt - fixed_costs) * 1000 / elec_per_kg
         current_re = df_re[df_re['year'] == y]['re_price_usd_per_mwh'].iloc[0]
 
         breakeven_data.append({
             'Year': y,
-            'Breakeven Elec ($/MWh)': round(breakeven_elec, 1),
+            'Market H₂ ($/kg)': round(mkt, 2),
+            'Fixed Costs ($/kg)': round(fixed_costs, 2),
+            'Breakeven Elec ($/MWh)': round(max(0, breakeven_elec), 1),
             'Current RE ($/MWh)': round(current_re, 1),
-            'Gap': round(current_re - breakeven_elec, 1)
+            'Gap': round(current_re - max(0, breakeven_elec), 1)
         })
 
     st.dataframe(pd.DataFrame(breakeven_data), use_container_width=True, hide_index=True)
+
+    st.info("**Note:** Negative breakeven prices indicate that even with free electricity, "
+            "the CAPEX/OPEX costs exceed market H₂ price. Gap = Current RE - Breakeven (positive = RE too expensive)")
 
 # ============================================================================
 # Page: Regional Analysis
@@ -567,7 +773,28 @@ elif page == "🗺️ Regional Analysis":
 # ============================================================================
 elif page == "💰 Cost Analysis":
     st.title("💰 Cost Analysis")
-    st.markdown("### CAPEX, OPEX, and Fuel Costs")
+    st.markdown("### CAPEX, OPEX, and Fuel Costs (Aligned with optimization_v2.py)")
+
+    # Show key parameters
+    with st.expander("📐 Cost Calculation Parameters"):
+        st.markdown(f"""
+        **Key Parameters (from original model):**
+        - **Baseline EF**: {BASELINE_EF} tCO₂/ton ethylene
+        - **H₂ Intensity**: {H2_INTENSITY} ton H₂/ton ethylene
+        - **Elec Intensity**: {ELEC_INTENSITY} MWh/ton ethylene
+        - **MWh per tCO₂** (NCC-Elec): {MWH_PER_TCO2_NCC_ELEC} TWh/MtCO₂
+        - **Lifetime**: {LIFETIME} years
+        - **OPEX**: {OPEX_PCT*100:.0f}% of CAPEX/year
+
+        **MACC Formula:**
+        ```
+        MACC = CAPEX_ann + OPEX_ann + Fuel_Cost_Diff
+        Where:
+        - CAPEX_ann = CAPEX / lifetime / baseline_EF
+        - OPEX_ann = CAPEX × OPEX% / lifetime / baseline_EF
+        - Fuel_Cost = (H2_price × H2_intensity × 1000) / baseline_EF  [for NCC-H2]
+        ```
+        """)
 
     # Load data
     df_h2, df_re, df_grid = load_price_trajectories()
@@ -592,52 +819,43 @@ elif page == "💰 Cost Analysis":
         mult = df_scenarios[df_scenarios['year'] == y][scenario_col].iloc[0]
         ethylene_kt = 11962 * mult
 
-        # NCC-H2 costs
-        capex_h2 = get_ncc_capex(y, 'NCC-H2')
-        capex_h2_bn = capex_h2 * ethylene_kt * 1000 / 1e9 / 25
-        opex_h2_bn = capex_h2 * ethylene_kt * 1000 / 1e9 * 0.04 / 25
-
         h2_price = df_h2[df_h2['year'] == y]['h2_price_usd_per_kg'].iloc[0]
-        h2_demand_kt = ethylene_kt * h2_intensity
-        fuel_h2_bn = h2_demand_kt * 1000 * h2_price / 1e9
-
-        total_h2 = capex_h2_bn + opex_h2_bn + fuel_h2_bn
-
-        # NCC-Elec costs
-        capex_elec = get_ncc_capex(y, 'NCC-Electricity')
-        capex_elec_bn = capex_elec * ethylene_kt * 1000 / 1e9 / 25
-        opex_elec_bn = capex_elec * ethylene_kt * 1000 / 1e9 * 0.04 / 25
-
         re_price = df_re[df_re['year'] == y]['re_price_usd_per_mwh'].iloc[0]
-        elec_demand_twh = ethylene_kt * elec_intensity / 1e6
-        fuel_elec_bn = elec_demand_twh * 1e6 * re_price / 1e9
 
-        total_elec = capex_elec_bn + opex_elec_bn + fuel_elec_bn
+        # Use aligned cost calculation functions
+        h2_costs = calculate_annual_cost(y, ethylene_kt, h2_price, re_price, 'NCC-H2')
+        elec_costs = calculate_annual_cost(y, ethylene_kt, h2_price, re_price, 'NCC-Electricity')
 
         cost_data.append({
             'Year': y,
-            'H2_CAPEX': capex_h2_bn,
-            'H2_OPEX': opex_h2_bn,
-            'H2_Fuel': fuel_h2_bn,
-            'H2_Total': total_h2,
-            'Elec_CAPEX': capex_elec_bn,
-            'Elec_OPEX': opex_elec_bn,
-            'Elec_Fuel': fuel_elec_bn,
-            'Elec_Total': total_elec
+            'H2_CAPEX': h2_costs['capex_ann_bn'],
+            'H2_OPEX': h2_costs['opex_ann_bn'],
+            'H2_Fuel': h2_costs['fuel_cost_bn'],
+            'H2_Total': h2_costs['total_ann_bn'],
+            'H2_Total_CAPEX_MUSD': h2_costs['total_capex_musd'],
+            'Elec_CAPEX': elec_costs['capex_ann_bn'],
+            'Elec_OPEX': elec_costs['opex_ann_bn'],
+            'Elec_Fuel': elec_costs['fuel_cost_bn'],
+            'Elec_Total': elec_costs['total_ann_bn'],
+            'Elec_Total_CAPEX_MUSD': elec_costs['total_capex_musd']
         })
 
     df_costs = pd.DataFrame(cost_data)
 
+    # Calculate cumulative costs
+    df_costs['H2_Cumulative'] = df_costs['H2_Total'].cumsum()
+    df_costs['Elec_Cumulative'] = df_costs['Elec_Total'].cumsum()
+
     # Cost trajectory chart
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df_costs['Year'], y=df_costs['H2_Total'],
-                             name='NCC-H2 Total', line=dict(color='#3498DB', width=3)))
+                             name='NCC-H2 Annual', line=dict(color='#3498DB', width=3)))
     fig.add_trace(go.Scatter(x=df_costs['Year'], y=df_costs['Elec_Total'],
-                             name='NCC-Elec Total', line=dict(color='#E74C3C', width=3)))
+                             name='NCC-Elec Annual', line=dict(color='#E74C3C', width=3)))
 
     fig.update_layout(
         xaxis_title='Year',
-        yaxis_title='Annual Cost ($B)',
+        yaxis_title='Annual Cost ($B/year)',
         height=400,
         legend=dict(orientation='h', yanchor='bottom', y=1.02)
     )
@@ -654,107 +872,183 @@ elif page == "💰 Cost Analysis":
     with col1:
         st.markdown("##### NCC-H2")
         h2_breakdown = pd.DataFrame({
-            'Component': ['CAPEX', 'OPEX', 'Fuel (H2)'],
-            'Cost ($B)': [cost_2050['H2_CAPEX'], cost_2050['H2_OPEX'], cost_2050['H2_Fuel']]
+            'Component': ['CAPEX (annualized)', 'OPEX', 'Fuel (H₂)'],
+            'Cost ($B/yr)': [cost_2050['H2_CAPEX'], cost_2050['H2_OPEX'], cost_2050['H2_Fuel']]
         })
-        fig = px.pie(h2_breakdown, values='Cost ($B)', names='Component',
+        fig = px.pie(h2_breakdown, values='Cost ($B/yr)', names='Component',
                      color_discrete_sequence=['#3498DB', '#2ECC71', '#E74C3C'])
         st.plotly_chart(fig, use_container_width=True)
-        st.metric("Total Annual Cost", f"${cost_2050['H2_Total']:.2f}B")
+        st.metric("Annual Cost (2050)", f"${cost_2050['H2_Total']:.2f}B/yr")
+        st.metric("Total CAPEX Investment", f"${cost_2050['H2_Total_CAPEX_MUSD']:,.0f}M")
 
     with col2:
         st.markdown("##### NCC-Electricity")
         elec_breakdown = pd.DataFrame({
-            'Component': ['CAPEX', 'OPEX', 'Fuel (Elec)'],
-            'Cost ($B)': [cost_2050['Elec_CAPEX'], cost_2050['Elec_OPEX'], cost_2050['Elec_Fuel']]
+            'Component': ['CAPEX (annualized)', 'OPEX', 'Fuel (Elec)'],
+            'Cost ($B/yr)': [cost_2050['Elec_CAPEX'], cost_2050['Elec_OPEX'], cost_2050['Elec_Fuel']]
         })
-        fig = px.pie(elec_breakdown, values='Cost ($B)', names='Component',
+        fig = px.pie(elec_breakdown, values='Cost ($B/yr)', names='Component',
                      color_discrete_sequence=['#3498DB', '#2ECC71', '#E74C3C'])
         st.plotly_chart(fig, use_container_width=True)
-        st.metric("Total Annual Cost", f"${cost_2050['Elec_Total']:.2f}B")
+        st.metric("Annual Cost (2050)", f"${cost_2050['Elec_Total']:.2f}B/yr")
+        st.metric("Total CAPEX Investment", f"${cost_2050['Elec_Total_CAPEX_MUSD']:,.0f}M")
 
-    # Cumulative costs
+    # ========================================
+    # ACCUMULATED COST ANALYSIS
+    # ========================================
     st.markdown("---")
-    st.markdown("#### Cumulative Cost (2030-2050)")
+    st.markdown("### 📊 Accumulated (Cumulative) Cost Analysis")
 
-    df_2030_2050 = df_costs[df_costs['Year'] >= 2030]
+    # Cumulative cost chart
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df_costs['Year'], y=df_costs['H2_Cumulative'],
+                             name='NCC-H2 Cumulative', line=dict(color='#3498DB', width=3),
+                             fill='tozeroy', fillcolor='rgba(52, 152, 219, 0.2)'))
+    fig.add_trace(go.Scatter(x=df_costs['Year'], y=df_costs['Elec_Cumulative'],
+                             name='NCC-Elec Cumulative', line=dict(color='#E74C3C', width=3),
+                             fill='tozeroy', fillcolor='rgba(231, 76, 60, 0.2)'))
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("NCC-H2 Cumulative", f"${df_2030_2050['H2_Total'].sum():.1f}B")
-    with col2:
-        st.metric("NCC-Elec Cumulative", f"${df_2030_2050['Elec_Total'].sum():.1f}B")
-    with col3:
-        diff = df_2030_2050['H2_Total'].sum() - df_2030_2050['Elec_Total'].sum()
+    fig.update_layout(
+        xaxis_title='Year',
+        yaxis_title='Cumulative Cost ($B)',
+        height=450,
+        legend=dict(orientation='h', yanchor='bottom', y=1.02),
+        title='Accumulated Costs Over Time (2025-2050)'
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Cumulative cost table by periods
+    st.markdown("#### Cumulative Costs by Period")
+
+    periods = [
+        ('2025-2030', 2025, 2030),
+        ('2030-2040', 2030, 2040),
+        ('2040-2050', 2040, 2050),
+        ('2025-2050 (Total)', 2025, 2050)
+    ]
+
+    period_data = []
+    for period_name, start, end in periods:
+        df_period = df_costs[(df_costs['Year'] >= start) & (df_costs['Year'] <= end)]
+        h2_cum = df_period['H2_Total'].sum()
+        elec_cum = df_period['Elec_Total'].sum()
+        diff = h2_cum - elec_cum
         cheaper = "NCC-H2" if diff < 0 else "NCC-Elec"
-        st.metric("Cheaper Option", cheaper, f"Saves ${abs(diff):.1f}B")
+        period_data.append({
+            'Period': period_name,
+            'NCC-H2 ($B)': round(h2_cum, 2),
+            'NCC-Elec ($B)': round(elec_cum, 2),
+            'Difference ($B)': round(diff, 2),
+            'Cheaper Option': cheaper
+        })
+
+    df_periods = pd.DataFrame(period_data)
+    st.dataframe(df_periods, use_container_width=True, hide_index=True)
+
+    # Summary metrics
+    col1, col2, col3, col4 = st.columns(4)
+
+    total_h2 = df_costs['H2_Total'].sum()
+    total_elec = df_costs['Elec_Total'].sum()
+    diff = total_h2 - total_elec
+
+    with col1:
+        st.metric("NCC-H2 Total (2025-2050)", f"${total_h2:.1f}B")
+    with col2:
+        st.metric("NCC-Elec Total (2025-2050)", f"${total_elec:.1f}B")
+    with col3:
+        cheaper = "NCC-H2" if diff < 0 else "NCC-Elec"
+        st.metric("Cheaper Option", cheaper)
+    with col4:
+        st.metric("Savings", f"${abs(diff):.1f}B")
+
+    # Cost per tCO2 comparison
+    st.markdown("---")
+    st.markdown("#### MACC Comparison ($/tCO₂)")
+
+    macc_data = []
+    for y in [2025, 2030, 2040, 2050]:
+        h2_price = df_h2[df_h2['year'] == y]['h2_price_usd_per_kg'].iloc[0]
+        re_price = df_re[df_re['year'] == y]['re_price_usd_per_mwh'].iloc[0]
+
+        h2_macc = calculate_macc(y, h2_price, re_price, 'NCC-H2')
+        elec_macc = calculate_macc(y, h2_price, re_price, 'NCC-Electricity')
+
+        macc_data.append({
+            'Year': y,
+            'H₂ Price ($/kg)': round(h2_price, 2),
+            'RE Price ($/MWh)': round(re_price, 1),
+            'NCC-H2 MACC ($/tCO₂)': round(h2_macc['macc'], 1),
+            'NCC-Elec MACC ($/tCO₂)': round(elec_macc['macc'], 1),
+            'Cheaper': 'NCC-H2' if h2_macc['macc'] < elec_macc['macc'] else 'NCC-Elec'
+        })
+
+    df_macc = pd.DataFrame(macc_data)
+    st.dataframe(df_macc, use_container_width=True, hide_index=True)
 
 # ============================================================================
 # Page: MACC Curves
 # ============================================================================
 elif page == "📈 MACC Curves":
     st.title("📈 Marginal Abatement Cost Curves")
-    st.markdown("### Technology cost per tCO2 abated")
+    st.markdown("### Technology cost per tCO₂ abated (Aligned with macc.py)")
 
     # Load data
     df_h2, df_re, df_grid = load_price_trajectories()
 
     year = st.slider("Select Year", 2025, 2050, 2030)
 
-    # Calculate MACC for each technology
+    # Calculate MACC using aligned function
     h2_price = df_h2[df_h2['year'] == year]['h2_price_usd_per_kg'].iloc[0]
     re_price = df_re[df_re['year'] == year]['re_price_usd_per_mwh'].iloc[0]
 
-    # NCC-H2 MACC
-    capex_h2 = get_ncc_capex(year, 'NCC-H2')
-    capex_ann_h2 = capex_h2 / 25 / baseline_ef
-    opex_ann_h2 = capex_h2 * 0.04 / 25 / baseline_ef
-    fuel_cost_h2 = h2_intensity * 1000 * h2_price / baseline_ef
-    macc_h2 = capex_ann_h2 + opex_ann_h2 + fuel_cost_h2
-
-    # NCC-Elec MACC
-    capex_elec = get_ncc_capex(year, 'NCC-Electricity')
-    capex_ann_elec = capex_elec / 25 / baseline_ef
-    opex_ann_elec = capex_elec * 0.04 / 25 / baseline_ef
-    fuel_cost_elec = elec_intensity * re_price / baseline_ef
-    macc_elec = capex_ann_elec + opex_ann_elec + fuel_cost_elec
+    h2_macc = calculate_macc(year, h2_price, re_price, 'NCC-H2')
+    elec_macc = calculate_macc(year, h2_price, re_price, 'NCC-Electricity')
 
     # Abatement potential (simplified)
     # Ethylene capacity = 11962 kt, EF = 1.9 tCO2/t
-    abatement_mt = 11962 * baseline_ef / 1000
+    abatement_mt = 11962 * BASELINE_EF / 1000
 
     st.markdown(f"#### MACC for {year}")
 
     # MACC bar chart
     macc_data = pd.DataFrame({
         'Technology': ['NCC-H2', 'NCC-Electricity'],
-        'MACC ($/tCO2)': [macc_h2, macc_elec],
-        'Abatement (MtCO2)': [abatement_mt, abatement_mt]
+        'MACC ($/tCO₂)': [h2_macc['macc'], elec_macc['macc']],
+        'Abatement (MtCO₂)': [abatement_mt, abatement_mt]
     })
 
     col1, col2 = st.columns(2)
 
     with col1:
-        fig = px.bar(macc_data, x='Technology', y='MACC ($/tCO2)',
+        fig = px.bar(macc_data, x='Technology', y='MACC ($/tCO₂)',
                      color='Technology', color_discrete_sequence=['#3498DB', '#E74C3C'])
         fig.update_layout(showlegend=False, height=400)
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        st.markdown("##### MACC Breakdown")
+        st.markdown("##### MACC Breakdown ($/tCO₂)")
         breakdown = pd.DataFrame({
-            'Component': ['CAPEX', 'OPEX', 'Fuel'],
-            'NCC-H2': [capex_ann_h2, opex_ann_h2, fuel_cost_h2],
-            'NCC-Elec': [capex_ann_elec, opex_ann_elec, fuel_cost_elec]
+            'Component': ['CAPEX (annualized)', 'OPEX', 'Fuel Cost'],
+            'NCC-H2': [h2_macc['capex_ann'], h2_macc['opex_ann'], h2_macc['fuel_cost']],
+            'NCC-Elec': [elec_macc['capex_ann'], elec_macc['opex_ann'], elec_macc['fuel_cost']]
         })
         st.dataframe(breakdown.round(1), use_container_width=True, hide_index=True)
 
         st.markdown("##### Summary")
-        st.metric("NCC-H2 MACC", f"${macc_h2:.1f}/tCO2")
-        st.metric("NCC-Elec MACC", f"${macc_elec:.1f}/tCO2")
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.metric("NCC-H2 MACC", f"${h2_macc['macc']:.1f}/tCO₂")
+        with col_b:
+            st.metric("NCC-Elec MACC", f"${elec_macc['macc']:.1f}/tCO₂")
 
-        cheaper = "NCC-H2" if macc_h2 < macc_elec else "NCC-Electricity"
+        cheaper = "NCC-H2" if h2_macc['macc'] < elec_macc['macc'] else "NCC-Electricity"
         st.success(f"**{cheaper}** is more cost-effective in {year}")
+
+        # Show input prices
+        st.markdown("##### Input Prices")
+        st.write(f"- H₂ Price: ${h2_price:.2f}/kg")
+        st.write(f"- RE Price: ${re_price:.1f}/MWh")
 
     # MACC trajectory
     st.markdown("---")
@@ -767,29 +1061,305 @@ elif page == "📈 MACC Curves":
         hp = df_h2[df_h2['year'] == y]['h2_price_usd_per_kg'].iloc[0]
         rp = df_re[df_re['year'] == y]['re_price_usd_per_mwh'].iloc[0]
 
-        ch2 = get_ncc_capex(y, 'NCC-H2')
-        ce = get_ncc_capex(y, 'NCC-Electricity')
+        h2_m = calculate_macc(y, hp, rp, 'NCC-H2')
+        elec_m = calculate_macc(y, hp, rp, 'NCC-Electricity')
 
-        m_h2 = ch2/25/baseline_ef + ch2*0.04/25/baseline_ef + h2_intensity*1000*hp/baseline_ef
-        m_elec = ce/25/baseline_ef + ce*0.04/25/baseline_ef + elec_intensity*rp/baseline_ef
+        macc_trajectory.append({
+            'Year': y,
+            'NCC-H2': h2_m['macc'],
+            'NCC-Electricity': elec_m['macc']
+        })
 
-        macc_trajectory.append({'Year': y, 'NCC-H2': m_h2, 'NCC-Electricity': m_elec})
-
-    df_macc = pd.DataFrame(macc_trajectory)
+    df_macc_traj = pd.DataFrame(macc_trajectory)
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df_macc['Year'], y=df_macc['NCC-H2'],
+    fig.add_trace(go.Scatter(x=df_macc_traj['Year'], y=df_macc_traj['NCC-H2'],
                              name='NCC-H2', line=dict(color='#3498DB', width=3)))
-    fig.add_trace(go.Scatter(x=df_macc['Year'], y=df_macc['NCC-Electricity'],
+    fig.add_trace(go.Scatter(x=df_macc_traj['Year'], y=df_macc_traj['NCC-Electricity'],
                              name='NCC-Electricity', line=dict(color='#E74C3C', width=3)))
 
     fig.update_layout(
         xaxis_title='Year',
-        yaxis_title='MACC ($/tCO2)',
+        yaxis_title='MACC ($/tCO₂)',
         height=400,
         legend=dict(orientation='h', yanchor='bottom', y=1.02)
     )
     st.plotly_chart(fig, use_container_width=True)
+
+    # MACC data table
+    st.markdown("---")
+    st.markdown("#### MACC Data Table")
+
+    macc_table = []
+    for y in [2025, 2030, 2035, 2040, 2045, 2050]:
+        hp = df_h2[df_h2['year'] == y]['h2_price_usd_per_kg'].iloc[0]
+        rp = df_re[df_re['year'] == y]['re_price_usd_per_mwh'].iloc[0]
+
+        h2_m = calculate_macc(y, hp, rp, 'NCC-H2')
+        elec_m = calculate_macc(y, hp, rp, 'NCC-Electricity')
+
+        macc_table.append({
+            'Year': y,
+            'H₂ Price ($/kg)': round(hp, 2),
+            'RE Price ($/MWh)': round(rp, 1),
+            'NCC-H2 MACC': round(h2_m['macc'], 1),
+            'NCC-Elec MACC': round(elec_m['macc'], 1),
+            'Difference': round(h2_m['macc'] - elec_m['macc'], 1),
+            'Cheaper': 'NCC-H2' if h2_m['macc'] < elec_m['macc'] else 'NCC-Elec'
+        })
+
+    st.dataframe(pd.DataFrame(macc_table), use_container_width=True, hide_index=True)
+
+# ============================================================================
+# Page: Facility Transition
+# ============================================================================
+elif page == "🔄 Facility Transition":
+    st.title("🔄 Facility Transition Timeline")
+    st.markdown("### How 248 Facilities Transition to Clean Technology")
+
+    # Load facility data
+    df_fac = load_facility_data()
+
+    # Key stats
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Total Facilities", len(df_fac))
+    with col2:
+        st.metric("Average Age (2025)", f"{df_fac['age_2025'].mean():.1f} years")
+    with col3:
+        past_40 = len(df_fac[df_fac['age_2025'] > 40])
+        st.metric("Past 40-yr Lifespan", past_40)
+    with col4:
+        oldest = df_fac['year_built'].min()
+        st.metric("Oldest Facility", f"{oldest} ({2025-oldest} yrs)")
+
+    st.markdown("---")
+
+    # Transition assumption selection
+    st.markdown("#### Transition Assumptions")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        lifespan = st.slider("Facility Lifespan (years)", 30, 50, 40, 5)
+        st.info(f"Facilities retire after {lifespan} years of operation")
+
+    with col2:
+        transition_tech = st.selectbox(
+            "Transition Technology",
+            ["NCC-H2 (Hydrogen Cracker)", "NCC-Electricity (Electric Cracker)", "Mixed (Optimized)"]
+        )
+
+    # Calculate retirement years based on selected lifespan
+    df_fac['retirement_year'] = df_fac['year_built'] + lifespan
+    df_fac['retirement_year'] = df_fac['retirement_year'].clip(lower=2025)
+
+    st.markdown("---")
+
+    # Retirement timeline by complex
+    st.markdown("#### Cumulative Retirement Timeline by Complex")
+
+    years = list(range(2025, 2061))
+    complex_order = ['Ulsan Complex', 'Yeosu Complex', 'Daesan Complex', 'Other Regions']
+    complex_colors = {
+        'Ulsan Complex': '#E74C3C',
+        'Yeosu Complex': '#3498DB',
+        'Daesan Complex': '#2ECC71',
+        'Other Regions': '#9B59B6'
+    }
+
+    retirement_data = []
+    for y in years:
+        row = {'Year': y}
+        for complex_name in complex_order:
+            subset = df_fac[df_fac['complex'] == complex_name]
+            retired = len(subset[subset['retirement_year'] <= y])
+            row[complex_name] = retired
+        row['Total'] = len(df_fac[df_fac['retirement_year'] <= y])
+        retirement_data.append(row)
+
+    df_retirement = pd.DataFrame(retirement_data)
+
+    # Stacked area chart
+    fig = go.Figure()
+    for complex_name in complex_order:
+        fig.add_trace(go.Scatter(
+            x=df_retirement['Year'],
+            y=df_retirement[complex_name],
+            name=complex_name,
+            mode='lines',
+            stackgroup='one',
+            line=dict(color=complex_colors[complex_name])
+        ))
+
+    fig.add_hline(y=248, line_dash="dash", line_color="black",
+                  annotation_text="Total: 248 facilities")
+    fig.update_layout(
+        xaxis_title='Year',
+        yaxis_title='Cumulative Facilities Retired/Transitioned',
+        height=450,
+        legend=dict(orientation='h', yanchor='bottom', y=1.02)
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Key milestones
+    st.markdown("---")
+    st.markdown("#### Key Transition Milestones")
+
+    milestones = []
+    for pct in [25, 50, 75, 100]:
+        target = int(248 * pct / 100)
+        year_reached = df_retirement[df_retirement['Total'] >= target]['Year'].min()
+        milestones.append({
+            'Milestone': f"{pct}% Transitioned",
+            'Facilities': target,
+            'Year Reached': year_reached if pd.notna(year_reached) else '>2060'
+        })
+
+    st.dataframe(pd.DataFrame(milestones), use_container_width=True, hide_index=True)
+
+    st.markdown("---")
+
+    # Annual transition schedule
+    st.markdown("#### Annual Transition Schedule (First 15 years)")
+
+    # Calculate new retirements per year
+    annual_schedule = []
+    for y in range(2025, 2041):
+        new_retirements = len(df_fac[df_fac['retirement_year'] == y])
+        cum_retired = len(df_fac[df_fac['retirement_year'] <= y])
+        remaining = 248 - cum_retired
+        annual_schedule.append({
+            'Year': y,
+            'New Transitions': new_retirements,
+            'Cumulative': cum_retired,
+            'Remaining': remaining,
+            'Progress (%)': round(cum_retired / 248 * 100, 1)
+        })
+
+    df_schedule = pd.DataFrame(annual_schedule)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        fig = px.bar(df_schedule, x='Year', y='New Transitions',
+                     color='New Transitions', color_continuous_scale='Reds')
+        fig.update_layout(height=350, title='New Transitions per Year')
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col2:
+        fig = px.line(df_schedule, x='Year', y='Cumulative',
+                      markers=True, line_shape='linear')
+        fig.add_hline(y=248, line_dash="dash", line_color="gray")
+        fig.update_layout(height=350, title='Cumulative Transitions')
+        st.plotly_chart(fig, use_container_width=True)
+
+    st.dataframe(df_schedule, use_container_width=True, hide_index=True)
+
+    st.markdown("---")
+
+    # Capacity transition
+    st.markdown("#### Capacity Transition by Process Type")
+
+    # Filter NCC products
+    ncc_products = ['Ethylene', 'Propylene', 'Butadiene']
+    df_ncc = df_fac[df_fac['product'].isin(ncc_products)]
+
+    capacity_transition = []
+    for y in range(2025, 2056, 5):
+        ncc_retired_cap = df_ncc[df_ncc['retirement_year'] <= y]['capacity_kt'].sum()
+        ncc_total_cap = df_ncc['capacity_kt'].sum()
+        btx_retired_cap = df_fac[df_fac['process'] == 'BTX Plant'][df_fac['retirement_year'] <= y]['capacity_kt'].sum()
+        btx_total_cap = df_fac[df_fac['process'] == 'BTX Plant']['capacity_kt'].sum()
+
+        capacity_transition.append({
+            'Year': y,
+            'NCC Transitioned (kt)': round(ncc_retired_cap),
+            'NCC Total (kt)': round(ncc_total_cap),
+            'NCC (%)': round(ncc_retired_cap / ncc_total_cap * 100, 1) if ncc_total_cap > 0 else 0,
+            'BTX Transitioned (kt)': round(btx_retired_cap),
+            'BTX Total (kt)': round(btx_total_cap),
+            'BTX (%)': round(btx_retired_cap / btx_total_cap * 100, 1) if btx_total_cap > 0 else 0
+        })
+
+    df_cap_trans = pd.DataFrame(capacity_transition)
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=df_cap_trans['Year'], y=df_cap_trans['NCC (%)'],
+                         name='NCC Facilities', marker_color='#E74C3C'))
+    fig.add_trace(go.Bar(x=df_cap_trans['Year'], y=df_cap_trans['BTX (%)'],
+                         name='BTX Facilities', marker_color='#3498DB'))
+    fig.update_layout(
+        xaxis_title='Year',
+        yaxis_title='Capacity Transitioned (%)',
+        barmode='group',
+        height=400,
+        legend=dict(orientation='h', yanchor='bottom', y=1.02)
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.dataframe(df_cap_trans, use_container_width=True, hide_index=True)
+
+    st.markdown("---")
+
+    # Facility detail table
+    st.markdown("#### Facility Transition Detail")
+
+    show_filter = st.selectbox("Filter by", ["All", "Ulsan Complex", "Yeosu Complex", "Daesan Complex", "Other Regions"])
+
+    if show_filter == "All":
+        df_display = df_fac
+    else:
+        df_display = df_fac[df_fac['complex'] == show_filter]
+
+    # Sort by retirement year
+    df_display = df_display.sort_values('retirement_year')
+
+    # Select columns to display
+    display_cols = ['product', 'company', 'location', 'complex', 'capacity_kt',
+                    'year_built', 'age_2025', 'retirement_year']
+    df_display = df_display[display_cols].copy()
+    df_display.columns = ['Product', 'Company', 'Location', 'Complex', 'Capacity (kt)',
+                          'Year Built', 'Age (2025)', 'Transition Year']
+
+    st.dataframe(df_display, use_container_width=True, hide_index=True, height=400)
+
+    # Summary stats
+    st.markdown("---")
+    st.markdown("#### Summary Statistics")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown("##### By Complex")
+        complex_summary = df_fac.groupby('complex').agg({
+            'capacity_kt': 'sum',
+            'product': 'count',
+            'age_2025': 'mean'
+        }).round(1)
+        complex_summary.columns = ['Capacity (kt)', 'Facilities', 'Avg Age']
+        st.dataframe(complex_summary, use_container_width=True)
+
+    with col2:
+        st.markdown("##### By Process")
+        process_summary = df_fac.groupby('process').agg({
+            'capacity_kt': 'sum',
+            'product': 'count',
+            'age_2025': 'mean'
+        }).round(1)
+        process_summary.columns = ['Capacity (kt)', 'Facilities', 'Avg Age']
+        st.dataframe(process_summary, use_container_width=True)
+
+    with col3:
+        st.markdown("##### Transition Technology Impact")
+        total_capacity = df_ncc['capacity_kt'].sum()
+        h2_demand = total_capacity * 0.56  # kt H2
+        elec_demand = total_capacity * 5.0 / 1000  # TWh
+
+        tech_impact = pd.DataFrame({
+            'Metric': ['Total NCC Capacity', 'H₂ Demand (NCC-H2)', 'Elec Demand (NCC-Elec)'],
+            'Value': [f"{total_capacity:,.0f} kt", f"{h2_demand:,.0f} kt/yr", f"{elec_demand:,.1f} TWh/yr"]
+        })
+        st.dataframe(tech_impact, use_container_width=True, hide_index=True)
 
 # ============================================================================
 # Footer
@@ -805,7 +1375,8 @@ pathways for Korea's petrochemical industry.
 - 248 facilities analyzed
 - 3 production scenarios
 - 2 technology pathways
-- LCOH calculator included
+- LCOH calculator with CRF
+- Facility transition timeline
 
-*Version 2.0 - November 2025*
+*Version 2.1 - November 2025*
 """)
