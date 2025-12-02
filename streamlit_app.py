@@ -161,8 +161,10 @@ def get_electrolyzer_capex(year):
 def get_ncc_capex(year, tech='NCC-H2'):
     """Get interpolated NCC technology CAPEX ($/t/yr capacity)"""
     if tech == 'NCC-H2':
-        capex_schedule = {2025: 1550, 2030: 1300, 2040: 935, 2050: 780}
+        # Thunder Said Energy 2023: $1,700/t-C2H4/yr
+        capex_schedule = {2025: 1700, 2030: 1300, 2040: 935, 2050: 780}
     else:  # NCC-Electricity
+        # Toribio-Ramirez et al. 2025: $1,500/t-C2H4/yr
         capex_schedule = {2025: 1500, 2030: 1350, 2040: 1050, 2050: 900}
 
     if year <= 2025:
@@ -178,13 +180,13 @@ def get_ncc_capex(year, tech='NCC-H2'):
 
 
 # ============================================================================
-# Cost Calculation Functions (aligned with optimization_v2.py and macc.py)
+# Cost Calculation Functions (aligned with MODEL_DOCUMENTATION.md)
 # ============================================================================
-# Key parameters from the original model
+# Key parameters from the documentation (validated against literature)
 BASELINE_EF = 1.9  # tCO2/ton ethylene (baseline combustion emissions)
-H2_INTENSITY = 0.56  # ton H2/ton ethylene (from Lummus Tech 2023)
-ELEC_INTENSITY = 5.0  # MWh/ton ethylene (from BASF/SABIC/Linde 2024)
-MWH_PER_TCO2_NCC_ELEC = 5.3  # TWh per MtCO2 (from optimization_v2.py: 5300 MWh/tCO2)
+H2_INTENSITY = 0.2  # ton H2/ton ethylene (Lummus Tech 2023: 200 kg/ton)
+ELEC_INTENSITY = 5.0  # MWh/ton ethylene (BASF/SABIC/Linde 2024)
+MWH_PER_TCO2_NCC_ELEC = 2.63  # MWh per tCO2 = 5.0 MWh/ton / 1.9 tCO2/ton
 LIFETIME = 25  # years (technology lifetime)
 OPEX_PCT = 0.04  # 4% of CAPEX
 
@@ -228,9 +230,13 @@ def calculate_macc(year, h2_price, re_price, tech='NCC-H2'):
 
 def calculate_annual_cost(year, ethylene_kt, h2_price, re_price, tech='NCC-H2'):
     """
-    Calculate annual costs aligned with optimization_v2.py
+    Calculate annual costs aligned with MODEL_DOCUMENTATION.md
 
     Returns costs in $B/year
+
+    Parameters:
+    - H2_INTENSITY = 0.2 ton H2/ton ethylene
+    - ELEC_INTENSITY = 5.0 MWh/ton ethylene
     """
     capex = get_ncc_capex(year, tech)  # $/t/yr capacity
 
@@ -247,9 +253,8 @@ def calculate_annual_cost(year, ethylene_kt, h2_price, re_price, tech='NCC-H2'):
         h2_demand_kt = ethylene_kt * H2_INTENSITY
         fuel_cost_bn = h2_demand_kt * 1000 * h2_price / 1e9  # $B/year
     else:  # NCC-Electricity
-        # Electricity demand (using MtCO2-based approach from optimization_v2.py)
-        bau_emissions_mt = ethylene_kt * BASELINE_EF / 1000
-        elec_demand_twh = bau_emissions_mt * MWH_PER_TCO2_NCC_ELEC  # TWh
+        # Electricity demand = Ethylene (kt) * 5.0 MWh/ton / 1000 = TWh
+        elec_demand_twh = ethylene_kt * ELEC_INTENSITY / 1000
         fuel_cost_bn = elec_demand_twh * re_price / 1000  # $B/year
 
     total_cost_bn = capex_ann_bn + opex_ann_bn + fuel_cost_bn
@@ -262,15 +267,18 @@ def calculate_annual_cost(year, ethylene_kt, h2_price, re_price, tech='NCC-H2'):
         'total_capex_musd': total_capex_musd
     }
 
-def calculate_scenario_results(scenario_mult, h2_intensity=0.56, elec_intensity=5.0,
+def calculate_scenario_results(scenario_mult, h2_intensity=0.2, elec_intensity=5.0,
                                baseline_ethylene=11962, baseline_ef=1.9):
     """Calculate H2 and electricity demand for a production scenario
 
-    Note: Electricity uses the MtCO2-based approach from optimization_v2.py
-    to match the Streamlit values (164.5 TWh for Shaheen)
+    Parameters (from MODEL_DOCUMENTATION.md):
+    - h2_intensity: 0.2 ton H2/ton ethylene (Lummus Tech 2023)
+    - elec_intensity: 5.0 MWh/ton ethylene (BASF/SABIC/Linde 2024)
+    - baseline_ef: 1.9 tCO2/ton ethylene (baseline combustion emissions)
 
-    Formula: Electricity (TWh) = Deployed_MtCO2 * 5.3 TWh/MtCO2
-    Where 5.3 = 10 MWh/ton / 1.9 tCO2/ton (from the original model)
+    Calculation:
+    - H2 demand (kt) = Ethylene (kt) × H2 intensity
+    - Electricity (TWh) = Ethylene (kt) × Elec intensity / 1000
     """
     ethylene_kt = baseline_ethylene * scenario_mult
 
@@ -280,11 +288,8 @@ def calculate_scenario_results(scenario_mult, h2_intensity=0.56, elec_intensity=
     # BAU emissions (MtCO2) = Ethylene (kt) * baseline EF / 1000
     bau_emissions_mt = ethylene_kt * baseline_ef / 1000
 
-    # Electricity demand (TWh) using MtCO2-based approach
-    # From optimization_v2.py: mwh_per_tco2_ncc_elec = 5300
-    # This gives 164.5 TWh for Shaheen scenario (matching original)
-    mwh_per_tco2 = 5.3  # TWh per MtCO2
-    elec_demand_twh = bau_emissions_mt * mwh_per_tco2
+    # Electricity demand (TWh) = Ethylene (kt) * Elec intensity (MWh/ton) / 1000
+    elec_demand_twh = ethylene_kt * elec_intensity / 1000
 
     return {
         'ethylene_kt': ethylene_kt,
@@ -307,10 +312,13 @@ page = st.sidebar.radio(
 st.sidebar.markdown("---")
 st.sidebar.markdown("### Model Parameters")
 
-# Editable parameters in sidebar
-h2_intensity = st.sidebar.slider("H2 Intensity (t/t C2H4)", 0.4, 0.8, 0.56, 0.01)
-elec_intensity = st.sidebar.slider("Elec Intensity (MWh/t C2H4)", 4.0, 7.0, 5.0, 0.1)
-baseline_ef = st.sidebar.slider("Baseline EF (tCO2/t C2H4)", 1.5, 2.5, 1.9, 0.1)
+# Editable parameters in sidebar (defaults from MODEL_DOCUMENTATION.md)
+h2_intensity = st.sidebar.slider("H2 Intensity (t/t C2H4)", 0.1, 0.4, 0.2, 0.01,
+                                  help="Lummus Tech 2023: 0.2 ton H2/ton ethylene")
+elec_intensity = st.sidebar.slider("Elec Intensity (MWh/t C2H4)", 4.0, 7.0, 5.0, 0.1,
+                                    help="BASF/SABIC/Linde 2024: 5.0 MWh/ton")
+baseline_ef = st.sidebar.slider("Baseline EF (tCO2/t C2H4)", 1.5, 2.5, 1.9, 0.1,
+                                 help="Baseline combustion emissions")
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("**Data Sources:**")
@@ -773,26 +781,31 @@ elif page == "🗺️ Regional Analysis":
 # ============================================================================
 elif page == "💰 Cost Analysis":
     st.title("💰 Cost Analysis")
-    st.markdown("### CAPEX, OPEX, and Fuel Costs (Aligned with optimization_v2.py)")
+    st.markdown("### CAPEX, OPEX, and Fuel Costs (Aligned with MODEL_DOCUMENTATION.md)")
 
     # Show key parameters
-    with st.expander("📐 Cost Calculation Parameters"):
+    with st.expander("📐 Cost Calculation Parameters (from MODEL_DOCUMENTATION.md)"):
         st.markdown(f"""
-        **Key Parameters (from original model):**
+        **Key Parameters (validated against literature):**
         - **Baseline EF**: {BASELINE_EF} tCO₂/ton ethylene
-        - **H₂ Intensity**: {H2_INTENSITY} ton H₂/ton ethylene
-        - **Elec Intensity**: {ELEC_INTENSITY} MWh/ton ethylene
-        - **MWh per tCO₂** (NCC-Elec): {MWH_PER_TCO2_NCC_ELEC} TWh/MtCO₂
+        - **H₂ Intensity**: {H2_INTENSITY} ton H₂/ton ethylene (Lummus Tech 2023)
+        - **Elec Intensity**: {ELEC_INTENSITY} MWh/ton ethylene (BASF/SABIC/Linde 2024)
         - **Lifetime**: {LIFETIME} years
         - **OPEX**: {OPEX_PCT*100:.0f}% of CAPEX/year
 
+        **CAPEX ($/t-C₂H₄/yr):**
+        - NCC-H₂: $1,700 (2025) → $780 (2050) [Thunder Said Energy 2023]
+        - NCC-Elec: $1,500 (2025) → $900 (2050) [Toribio-Ramirez 2025]
+
         **MACC Formula:**
         ```
-        MACC = CAPEX_ann + OPEX_ann + Fuel_Cost_Diff
-        Where:
-        - CAPEX_ann = CAPEX / lifetime / baseline_EF
-        - OPEX_ann = CAPEX × OPEX% / lifetime / baseline_EF
-        - Fuel_Cost = (H2_price × H2_intensity × 1000) / baseline_EF  [for NCC-H2]
+        MACC ($/tCO₂) = CAPEX_ann + OPEX_ann + Fuel_Cost_Diff
+
+        For NCC-H₂:
+          Fuel_Cost = H₂_price ($/kg) × 0.2 (t H₂/t) × 1000 / 1.9 (tCO₂/t)
+
+        For NCC-Elec:
+          Fuel_Cost = RE_price ($/MWh) × 5.0 (MWh/t) / 1.9 (tCO₂/t)
         ```
         """)
 
@@ -991,7 +1004,7 @@ elif page == "💰 Cost Analysis":
 # ============================================================================
 elif page == "📈 MACC Curves":
     st.title("📈 Marginal Abatement Cost Curves")
-    st.markdown("### Technology cost per tCO₂ abated (Aligned with macc.py)")
+    st.markdown("### Technology cost per tCO₂ abated (Aligned with MODEL_DOCUMENTATION.md)")
 
     # Load data
     df_h2, df_re, df_grid = load_price_trajectories()
