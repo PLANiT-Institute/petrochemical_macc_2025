@@ -1,1360 +1,1346 @@
 """
-Comprehensive Excel Report Generator for Petrochemical Decarbonization Model
-248 Facilities | 2025-2050 | NCC-Electricity (Main) & NCC-H2 (Alternative) Scenarios
+Generate Comprehensive Excel Report for Korea Petrochemical Net Zero Transition
+===============================================================================
+Author: PLANiT Institute
+Date: 2025
 
-RE-PPA Price & LCOH Methodology: PLANiT Institute (2025)
-Operating Rate Assumption: 70% (Flat 2025-2050)
-
-Emission Targets (from emission_scenarios_clean.csv):
-- 2025: 66.2 MtCO2 (Baseline at 100% capacity)
-- 2035: 43.5 MtCO2 (24.5% reduction from 2018 baseline of 57.6 Mt)
-- 2050: 0 MtCO2 (Net Zero)
-
-Output: Multi-sheet Excel workbook with full facility-level yearly details
+This script generates a professional Excel report with clear documentation of:
+- All assumptions and their sources
+- Emission calculation methodologies
+- Technology parameters and costs
+- Energy demand projections
+- Optimization results
 """
 
 import pandas as pd
 import numpy as np
 from pathlib import Path
+from openpyxl import Workbook
+from openpyxl.styles import Font, Fill, PatternFill, Border, Side, Alignment, NamedStyle
+from openpyxl.utils.dataframe import dataframe_to_rows
+from openpyxl.chart import LineChart, BarChart, Reference, AreaChart
+from openpyxl.chart.series import DataPoint
+from openpyxl.formatting.rule import DataBarRule
+from openpyxl.utils import get_column_letter
 import warnings
 warnings.filterwarnings('ignore')
 
-import openpyxl
-from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
-from openpyxl.utils import get_column_letter
-from openpyxl.chart import LineChart, Reference
-from datetime import datetime
+# =============================================================================
+# PATHS
+# =============================================================================
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / "data"
+STREAMLIT_DATA_DIR = BASE_DIR / "streamlit_data"
+OUTPUT_DIR = BASE_DIR / "reports"
+OUTPUT_DIR.mkdir(exist_ok=True)
 
-# Add modules to path
-import sys
-sys.path.insert(0, str(Path(__file__).parent))
+# =============================================================================
+# STYLES
+# =============================================================================
+def create_styles(wb):
+    """Create named styles for the workbook"""
 
-from modules.utils import DataLoader, EmissionCalculator, identify_product_group, is_ncc_facility
+    # Header style (dark blue)
+    header_style = NamedStyle(name='header_style')
+    header_style.font = Font(bold=True, color='FFFFFF', size=11)
+    header_style.fill = PatternFill(start_color='1F4E79', end_color='1F4E79', fill_type='solid')
+    header_style.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    header_style.border = Border(
+        left=Side(style='thin'), right=Side(style='thin'),
+        top=Side(style='thin'), bottom=Side(style='thin')
+    )
+    wb.add_named_style(header_style)
+
+    # Sub-header style (light blue)
+    subheader_style = NamedStyle(name='subheader_style')
+    subheader_style.font = Font(bold=True, color='1F4E79', size=10)
+    subheader_style.fill = PatternFill(start_color='D6E3F8', end_color='D6E3F8', fill_type='solid')
+    subheader_style.alignment = Alignment(horizontal='left', vertical='center')
+    subheader_style.border = Border(
+        left=Side(style='thin'), right=Side(style='thin'),
+        top=Side(style='thin'), bottom=Side(style='thin')
+    )
+    wb.add_named_style(subheader_style)
+
+    # Data cell style
+    data_style = NamedStyle(name='data_style')
+    data_style.alignment = Alignment(horizontal='right', vertical='center')
+    data_style.border = Border(
+        left=Side(style='thin'), right=Side(style='thin'),
+        top=Side(style='thin'), bottom=Side(style='thin')
+    )
+    wb.add_named_style(data_style)
+
+    # Title style
+    title_style = NamedStyle(name='title_style')
+    title_style.font = Font(bold=True, color='1F4E79', size=14)
+    title_style.alignment = Alignment(horizontal='left', vertical='center')
+    wb.add_named_style(title_style)
+
+    # Source style (italic, gray)
+    source_style = NamedStyle(name='source_style')
+    source_style.font = Font(italic=True, color='666666', size=9)
+    source_style.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
+    wb.add_named_style(source_style)
+
+    return wb
 
 
-class ComprehensiveExcelGenerator:
-    """
-    Generate comprehensive Excel output for petrochemical decarbonization analysis
+def write_section_header(ws, row, col, title, width=5):
+    """Write a section header spanning multiple columns"""
+    ws.merge_cells(start_row=row, start_column=col, end_row=row, end_column=col+width-1)
+    cell = ws.cell(row=row, column=col, value=title)
+    cell.style = 'title_style'
+    return row + 1
 
-    Features:
-    - 248 facilities with full details
-    - Yearly tracking (2025-2050)
-    - Energy consumption by fuel type
-    - Cost breakdown (CAPEX, OPEX, Fuel)
-    - Technology transition timing
-    - Regional and company aggregations
-    """
 
-    def __init__(self, data_dir='data', output_dir='outputs/excel_report'):
-        self.data_dir = Path(data_dir)
-        self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+def write_table(ws, start_row, start_col, df, include_index=True):
+    """Write a DataFrame as a formatted table"""
+    if include_index:
+        df = df.reset_index()
 
-        print("="*80)
-        print("COMPREHENSIVE EXCEL REPORT GENERATOR")
-        print("="*80)
+    # Write headers
+    for c_idx, col_name in enumerate(df.columns, start=start_col):
+        cell = ws.cell(row=start_row, column=c_idx, value=col_name)
+        cell.style = 'header_style'
 
-        # Load all data
-        self._load_data()
+    # Write data
+    for r_idx, row in enumerate(df.itertuples(index=False), start=start_row+1):
+        for c_idx, value in enumerate(row, start=start_col):
+            cell = ws.cell(row=r_idx, column=c_idx, value=value)
+            cell.style = 'data_style'
 
-        # User-specified baseline (will normalize calculated emissions to this)
-        self.target_baseline_mt = 66.2  # MtCO2 (2025 baseline at 100% capacity)
-
-        # Load emission targets from scenario file
-        try:
-            df_scenarios = pd.read_csv(self.data_dir / 'emission_scenarios_clean.csv')
-            # Filter for Policy_Target scenario
-            policy_target = df_scenarios[df_scenarios['scenario_name'] == 'Policy_Target']
-            
-            # Build emission targets dict from the data
-            self.emission_targets = {}
-            for _, row in policy_target.iterrows():
-                if pd.notna(row['year']):
-                    self.emission_targets[int(row['year'])] = row['target_mt']
-            
-            print(f"\nLoaded emission targets from emission_scenarios_clean.csv:")
-        except FileNotFoundError:
-            print("\n⚠️  emission_scenarios_clean.csv not found, using default targets")
-            # Fallback to default targets
-            self.emission_targets = {
-                2025: 52.0,      # Baseline: 52 MtCO2
-                2035: 39.26,     # -24.5% reduction
-                2050: 0.0        # -100% (Net Zero)
-            }
-
-        # Interpolate targets for all years
-        self.yearly_targets = self._interpolate_targets()
-
-        print(f"\nEmission Targets:")
-        print(f"  2025: {self.emission_targets[2025]:.2f} MtCO2 (Baseline)")
-        print(f"  2035: {self.emission_targets[2035]:.2f} MtCO2 (-24.5%)")
-        print(f"  2050: {self.emission_targets[2050]:.2f} MtCO2 (-100%)")
-
-    def _load_data(self):
-        """Load all required data files"""
-        print("\nLoading data files...")
-
-        loader = DataLoader(self.data_dir)
-
-        # Facility data
-        self.df_facilities = loader.load_facilities()
-        self.df_intensities = loader.load_energy_intensities()
-        print(f"  - {len(self.df_facilities)} facilities loaded")
-
-        # Emission factors
-        self.df_emission_factors = loader.load_emission_factors()
-        self.emission_calc = EmissionCalculator(self.df_emission_factors)
-
-        # Technology parameters
-        self.df_tech_params = loader.load_technology_params()
-        print(f"  - {len(self.df_tech_params)} technologies loaded")
-
-        # Price trajectories
-        self.df_h2_prices = loader.load_h2_prices()
-        self.df_re_prices = loader.load_re_prices()
-        self.df_grid_prices = loader.load_grid_prices()
-        self.df_fuel_prices = pd.read_csv(self.data_dir / 'fuel_price_trajectory.csv')
-        self.df_grid_ef = pd.read_csv(self.data_dir / 'grid_emission_trajectory.csv')
-
-        # Heat pump applicability
-        self.df_hp_applicability = loader.load_heat_pump_applicability()
-
-    def _interpolate_targets(self):
-        """Interpolate emission targets for all years 2025-2050"""
-        years = list(range(2025, 2051))
-        targets = {}
-
-        key_years = sorted(self.emission_targets.keys())
-
-        for year in years:
-            if year in self.emission_targets:
-                targets[year] = self.emission_targets[year]
-            else:
-                # Linear interpolation
-                for i in range(len(key_years) - 1):
-                    if key_years[i] < year < key_years[i+1]:
-                        y1, y2 = key_years[i], key_years[i+1]
-                        t1, t2 = self.emission_targets[y1], self.emission_targets[y2]
-                        targets[year] = t1 + (t2 - t1) * (year - y1) / (y2 - y1)
-                        break
-
-        return targets
-
-    def calculate_facility_baseline(self):
-        """Calculate baseline emissions and energy for all 248 facilities"""
-        print("\nCalculating facility baseline (2025)...")
-
-        baseline_data = []
-
-        for idx, facility in self.df_facilities.iterrows():
-            intensity = self.df_intensities.iloc[idx]
-            capacity = facility['capacity_kt']  # kt/year
-
-            # Energy consumption (total per year)
-            energy = {
-                'naphtha_gj': intensity['Naphtha_GJ_per_tonne'] * capacity * 1000,
-                'electricity_kwh': intensity['Electricity_kWh_per_tonne'] * capacity * 1000,
-                'lng_gj': intensity['LNG_GJ_per_tonne'] * capacity * 1000,
-                'fuel_gas_gj': intensity['Fuel_Gas_GJ_per_tonne'] * capacity * 1000,
-                'byproduct_gas_gj': intensity['Byproduct_Gas_GJ_per_tonne'] * capacity * 1000,
-                'lpg_gj': intensity['LPG_GJ_per_tonne'] * capacity * 1000,
-                'fuel_oil_gj': intensity['Fuel_Oil_GJ_per_tonne'] * capacity * 1000,
-                'diesel_gj': intensity['Diesel_GJ_per_tonne'] * capacity * 1000,
-            }
-
-            # Emissions by fuel
-            emissions = self.emission_calc.calculate_total_emissions(facility, intensity)
-
-            # Determine if NCC facility (eligible for NCC technologies)
-            is_ncc = is_ncc_facility(facility['product'])
-            product_group = identify_product_group(facility['product'])
-
-            # Heat pump applicability for non-NCC facilities
-            hp_applicable = 0.0
-            if not is_ncc:
-                hp_row = self.df_hp_applicability[
-                    self.df_hp_applicability['product_group'] == product_group
-                ]
-                if len(hp_row) > 0:
-                    hp_applicable = hp_row.iloc[0]['applicability_pct'] / 100
-
-            baseline_data.append({
-                'facility_id': idx + 1,
-                'product': facility['product'],
-                'product_group': product_group,
-                'process': facility['process'],
-                'company': facility['company'],
-                'location': facility['location'],
-                'capacity_kt': capacity,
-                'year_built': facility['year_built'],
-                'is_ncc': is_ncc,
-                'hp_applicability': hp_applicable,
-                # Energy consumption
-                'naphtha_gj': energy['naphtha_gj'],
-                'electricity_kwh': energy['electricity_kwh'],
-                'lng_gj': energy['lng_gj'],
-                'fuel_gas_gj': energy['fuel_gas_gj'],
-                'byproduct_gas_gj': energy['byproduct_gas_gj'],
-                'lpg_gj': energy['lpg_gj'],
-                'fuel_oil_gj': energy['fuel_oil_gj'],
-                'diesel_gj': energy['diesel_gj'],
-                # Emissions
-                'emissions_naphtha_kt': emissions.get('naphtha', 0),
-                'emissions_electricity_kt': emissions.get('electricity', 0),
-                'emissions_lng_kt': emissions.get('lng', 0),
-                'emissions_fuel_gas_kt': emissions.get('fuel_gas', 0),
-                'emissions_byproduct_gas_kt': emissions.get('byproduct_gas', 0),
-                'emissions_lpg_kt': emissions.get('lpg', 0),
-                'emissions_fuel_oil_kt': emissions.get('fuel_oil', 0),
-                'emissions_diesel_kt': emissions.get('diesel', 0),
-                'total_emissions_kt': emissions['total'],
-            })
-
-        self.df_baseline = pd.DataFrame(baseline_data)
-
-        # Calculate raw total and normalization factor
-        raw_total_mt = self.df_baseline['total_emissions_kt'].sum() / 1000
-        self.normalization_factor = self.target_baseline_mt / raw_total_mt
-
-        print(f"  Raw calculated emissions: {raw_total_mt:.2f} MtCO2")
-        print(f"  Target baseline: {self.target_baseline_mt:.2f} MtCO2")
-        print(f"  Normalization factor: {self.normalization_factor:.4f}")
-
-        # Apply normalization to all emission columns
-        emission_cols = [c for c in self.df_baseline.columns if 'emissions' in c]
-        for col in emission_cols:
-            self.df_baseline[col] = self.df_baseline[col] * self.normalization_factor
-
-        total_emissions = self.df_baseline['total_emissions_kt'].sum() / 1000
-        print(f"  Normalized baseline emissions: {total_emissions:.2f} MtCO2")
-        print(f"  NCC facilities: {self.df_baseline['is_ncc'].sum()}")
-        print(f"  Non-NCC facilities: {(~self.df_baseline['is_ncc']).sum()}")
-
-        return self.df_baseline
-
-    def optimize_transition_timing(self, ncc_technology='NCC-Electricity'):
-        """
-        Use the core model's CostOptimizerV2 to determine optimal deployment
-
-        Args:
-            ncc_technology: 'NCC-Electricity' or 'NCC-H2'
-
-        Returns:
-            DataFrame with deployment schedule from the model
-        """
-        print(f"\nOptimizing transition timing using CORE MODEL ({ncc_technology})...")
-        
-        # Import and use the core optimization model
-        from modules.optimization_v2 import CostOptimizerV2
-        from modules.baseline import BaselineAnalyzer
-        from modules.macc import MACCAnalyzer
-        
-        # Ensure baseline and MACC data exist
-        baseline_dir = 'outputs/excel_temp/module_01'
-        macc_dir = 'outputs/excel_temp/module_02'
-        
-        print("  Running baseline analysis...")
-        baseline_analyzer = BaselineAnalyzer(output_dir=baseline_dir)
-        baseline_analyzer.run_complete_analysis(include_retirement_scenario=False)
-        
-        print("  Running MACC analysis...")
-        macc_analyzer = MACCAnalyzer(baseline_output=baseline_dir, output_dir=macc_dir)
-        macc_analyzer.run_complete_analysis()
-        
-        print("  Running optimization...")
-        # Initialize optimizer with forced NCC technology choice
-        optimizer = CostOptimizerV2(
-            baseline_output=baseline_dir,
-            macc_output=macc_dir,
-            output_dir='outputs/excel_temp/module_03',
-            force_ncc_technology=ncc_technology
-        )
-        
-        # Run optimization for the Policy_Target scenario
-        results = optimizer.run_complete_analysis()
-        
-        # Get the deployment schedule from the primary scenario
-        scenario_name = list(results.keys())[0]
-        self.df_deployment = results[scenario_name]
-        
-        print(f"\n  ✓ Optimization complete using core model")
-        print(f"  ✓ NCC Technology: {ncc_technology}")
-        
-        # Display summary
-        for year in [2025, 2030, 2035, 2040, 2050]:
-            if year in self.df_deployment['year'].values:
-                row = self.df_deployment[self.df_deployment['year'] == year].iloc[0]
-                print(f"    {year}: Target={row['target_mt']:.1f}, Actual={row['actual_emissions_mt']:.1f} MtCO2")
-        
-        return self.df_deployment
-
-    def generate_yearly_facility_data(self, ncc_technology='NCC-Electricity'):
-        """Generate yearly data for all facilities (248 x 26 years = 6,448 rows)"""
-        print(f"\nGenerating yearly facility data ({ncc_technology})...")
-
-        years = list(range(2025, 2051))
-        yearly_data = []
-
-        # Get technology parameters
-        if ncc_technology == 'NCC-Electricity':
-            ncc_tech_row = self.df_tech_params[self.df_tech_params['technology'] == 'NCC-Electricity'].iloc[0]
-            elec_mwh_per_ton = ncc_tech_row['elec_mwh_per_ton_ethylene']
-        else:
-            ncc_tech_row = self.df_tech_params[self.df_tech_params['technology'] == 'NCC-H2'].iloc[0]
-            h2_ton_per_ton = ncc_tech_row['h2_ton_per_ton_ethylene']
-
-        hp_tech_row = self.df_tech_params[self.df_tech_params['technology'] == 'Heat_Pump'].iloc[0]
-        hp_cop = hp_tech_row['cop']
-
-        # Calculate total facility-level abatement potential for scaling
-        ncc_total_emissions = self.df_baseline[self.df_baseline['is_ncc']]['total_emissions_kt'].sum()
-        non_ncc_hp_emissions = (self.df_baseline[~self.df_baseline['is_ncc']]['total_emissions_kt'] *
-                                self.df_baseline[~self.df_baseline['is_ncc']]['hp_applicability']).sum()
-
-        for year in years:
-            deploy = self.df_deployment[self.df_deployment['year'] == year].iloc[0]
-            
-            # Map optimizer's columns to expected names
-            # Optimizer uses: heat_pump_mt, ncc_h2_mt, ncc_elec_mt, re_ppa_mt
-            # Calculate deployment rates from absolute values
-            ncc_total_potential = ncc_total_emissions / 1000  # kt to Mt
-            hp_total_potential = non_ncc_hp_emissions / 1000
-            
-            # Determine which NCC technology was deployed
-            if ncc_technology == 'NCC-Electricity':
-                ncc_deployed_mt = deploy.get('ncc_elec_mt', 0)
-            else:
-                ncc_deployed_mt = deploy.get('ncc_h2_mt', 0)
-            
-            hp_deployed_mt = deploy.get('heat_pump_mt', 0)
-            
-            # Calculate deployment rates
-            ncc_rate = min(1.0, ncc_deployed_mt / ncc_total_potential) if ncc_total_potential > 0 else 0
-            hp_rate = min(1.0, hp_deployed_mt / hp_total_potential) if hp_total_potential > 0 else 0
-            target = deploy['target_mt']
-
-            # Get prices for this year
-            h2_price = self.df_h2_prices[self.df_h2_prices['year'] == year]['h2_price_usd_per_kg'].iloc[0]
-            re_price = self.df_re_prices[self.df_re_prices['year'] == year]['re_price_usd_per_mwh'].iloc[0]
-            grid_price = self.df_grid_prices[self.df_grid_prices['year'] == year]['grid_price_usd_per_mwh'].iloc[0]
-            naphtha_price = self.df_fuel_prices[self.df_fuel_prices['year'] == year]['naphtha_usd_per_gj'].iloc[0]
-            lng_price = self.df_fuel_prices[self.df_fuel_prices['year'] == year]['lng_usd_per_gj'].iloc[0]
-
-            # Grid emission factor
-            grid_ef = self.df_grid_ef[self.df_grid_ef['year'] == year]['grid_ef_tco2_per_mwh'].iloc[0]
-            grid_ef_2025 = self.df_grid_ef[self.df_grid_ef['year'] == 2025]['grid_ef_tco2_per_mwh'].iloc[0]
-
-            # Technology CAPEX for this year (interpolate)
-            capex_years = [2025, 2030, 2040, 2050]
-            if ncc_technology == 'NCC-Electricity':
-                ncc_capex_values = [1500, 1350, 1050, 900]  # $/t-C2H4/yr
-            else:
-                ncc_capex_values = [1700, 1300, 935, 780]   # $/t-C2H4/yr
-            hp_capex_values = [800, 640, 480, 400]         # $/unit
-
-            ncc_capex = np.interp(year, capex_years, ncc_capex_values)
-            hp_capex = np.interp(year, capex_years, hp_capex_values)
-
-            for idx, facility in self.df_baseline.iterrows():
-                # Base energy and emissions
-                base_emissions_kt = facility['total_emissions_kt']
-
-                if facility['is_ncc']:
-                    # NCC facility
-                    deployment_rate = ncc_rate
-                    technology_used = ncc_technology if ncc_rate > 0 and year >= 2030 else 'Baseline'
-
-                    # After technology deployment
-                    if technology_used != 'Baseline':
-                        # Emissions reduction
-                        emissions_reduced_kt = base_emissions_kt * deployment_rate
-                        final_emissions_kt = base_emissions_kt - emissions_reduced_kt
-
-                        # Energy changes
-                        if ncc_technology == 'NCC-Electricity':
-                            # New electricity consumption (renewable)
-                            new_elec_mwh = facility['capacity_kt'] * 1000 * elec_mwh_per_ton * deployment_rate
-                            new_h2_kg = 0
-                            # Fuel cost: RE electricity
-                            fuel_cost_usd = new_elec_mwh * re_price
-                        else:
-                            # New H2 consumption
-                            new_h2_kg = facility['capacity_kt'] * 1000 * h2_ton_per_ton * 1000 * deployment_rate
-                            new_elec_mwh = 0
-                            # Fuel cost: H2
-                            fuel_cost_usd = new_h2_kg * h2_price
-
-                        # CAPEX (annualized over lifetime)
-                        capex_total = facility['capacity_kt'] * 1000 * ncc_capex
-                        capex_annual = capex_total / 25  # 25-year lifetime
-                        opex_annual = capex_total * 0.04  # 4% of CAPEX
-
-                        # Fossil fuel reduction
-                        fossil_gj_reduced = (
-                            facility['naphtha_gj'] + facility['lng_gj'] +
-                            facility['fuel_gas_gj'] + facility['byproduct_gas_gj']
-                        ) * deployment_rate
-                    else:
-                        emissions_reduced_kt = 0
-                        # FIX: Only apply grid decarbonization to electricity portion
-                        # Fossil emissions (Scope 1) remain constant for conventional technology
-                        elec_emissions = facility['emissions_electricity_kt'] * (grid_ef / grid_ef_2025)
-                        fossil_emissions = base_emissions_kt - facility['emissions_electricity_kt']
-                        final_emissions_kt = fossil_emissions + elec_emissions
-                        
-                        new_elec_mwh = 0
-                        new_h2_kg = 0
-                        fossil_gj_reduced = 0
-                        fuel_cost_usd = 0
-                        capex_annual = 0
-                        opex_annual = 0
+            # Format numbers
+            if isinstance(value, float):
+                if abs(value) >= 1000:
+                    cell.number_format = '#,##0'
+                elif abs(value) >= 1:
+                    cell.number_format = '#,##0.00'
                 else:
-                    # Non-NCC facility (Heat Pump)
-                    deployment_rate = hp_rate * facility['hp_applicability']
-                    technology_used = 'Heat_Pump' if deployment_rate > 0 else 'Baseline'
-
-                    # Separate fossil fuel and electricity emissions
-                    fossil_emissions_kt = (
-                        facility['emissions_naphtha_kt'] + facility['emissions_lng_kt'] +
-                        facility['emissions_fuel_gas_kt'] + facility['emissions_lpg_kt'] +
-                        facility['emissions_fuel_oil_kt'] + facility['emissions_diesel_kt'] +
-                        facility['emissions_byproduct_gas_kt']
-                    )
-
-                    if technology_used == 'Heat_Pump':
-                        # Emissions reduction (fossil fuel combustion replaced by electricity)
-                        emissions_reduced_kt = fossil_emissions_kt * deployment_rate
-
-                        # Grid decarbonization affects electricity emissions
-                        remaining_elec_emissions = facility['emissions_electricity_kt'] * (grid_ef / grid_ef_2025)
-                        remaining_fossil_emissions = fossil_emissions_kt * (1 - deployment_rate)
-                        final_emissions_kt = remaining_elec_emissions + remaining_fossil_emissions
-
-                        # Heat pump electricity consumption
-                        fossil_gj_reduced = (
-                            facility['naphtha_gj'] + facility['lng_gj'] +
-                            facility['fuel_gas_gj'] + facility['lpg_gj'] +
-                            facility['fuel_oil_gj'] + facility['diesel_gj']
-                        ) * deployment_rate
-                        new_elec_mwh = fossil_gj_reduced / hp_cop / 3.6  # GJ to MWh
-                        new_h2_kg = 0
-
-                        # Costs
-                        fuel_cost_usd = new_elec_mwh * grid_price
-                        capex_total = emissions_reduced_kt * 1000 * hp_capex  # kt to tons
-                        capex_annual = capex_total / 20  # 20-year lifetime
-                        opex_annual = capex_total * 0.03  # 3% of CAPEX
-                    else:
-                        emissions_reduced_kt = 0
-                        # Grid decarbonization only
-                        elec_emissions = facility['emissions_electricity_kt'] * (grid_ef / grid_ef_2025)
-                        final_emissions_kt = elec_emissions + fossil_emissions_kt
-                        new_elec_mwh = 0
-                        new_h2_kg = 0
-                        fossil_gj_reduced = 0
-                        fuel_cost_usd = 0
-                        capex_annual = 0
-                        opex_annual = 0
-
-                # Baseline fuel costs (unchanged from 2025)
-                baseline_fuel_cost = (
-                    facility['naphtha_gj'] * naphtha_price +
-                    facility['lng_gj'] * lng_price +
-                    facility['fuel_gas_gj'] * 10 +  # $10/GJ
-                    facility['electricity_kwh'] / 1000 * grid_price +  # kWh to MWh
-                    facility['lpg_gj'] * 14 +  # $14/GJ
-                    facility['fuel_oil_gj'] * 13 +  # $13/GJ
-                    facility['diesel_gj'] * 16  # $16/GJ
-                )
-
-                yearly_data.append({
-                    'year': year,
-                    'facility_id': facility['facility_id'],
-                    'product': facility['product'],
-                    'product_group': facility['product_group'],
-                    'process': facility['process'],
-                    'company': facility['company'],
-                    'location': facility['location'],
-                    'capacity_kt': facility['capacity_kt'],
-                    'is_ncc': facility['is_ncc'],
-                    'technology_deployed': technology_used,
-                    'deployment_rate': deployment_rate,
-                    # Energy - Baseline
-                    'baseline_naphtha_gj': facility['naphtha_gj'],
-                    'baseline_electricity_kwh': facility['electricity_kwh'],
-                    'baseline_lng_gj': facility['lng_gj'],
-                    'baseline_fuel_gas_gj': facility['fuel_gas_gj'],
-                    'baseline_byproduct_gas_gj': facility['byproduct_gas_gj'],
-                    'baseline_lpg_gj': facility['lpg_gj'],
-                    'baseline_fuel_oil_gj': facility['fuel_oil_gj'],
-                    'baseline_diesel_gj': facility['diesel_gj'],
-                    # Energy - After transition
-                    'fossil_fuel_reduced_gj': fossil_gj_reduced,
-                    'remaining_naphtha_gj': facility['naphtha_gj'] * (1 - deployment_rate) if facility['is_ncc'] else facility['naphtha_gj'] * (1 - deployment_rate), # Simplified for now, assuming proportional reduction
-                    'remaining_lng_gj': facility['lng_gj'] * (1 - deployment_rate),
-                    'remaining_fuel_gas_gj': facility['fuel_gas_gj'] * (1 - deployment_rate),
-                    'remaining_byproduct_gas_gj': facility['byproduct_gas_gj'] * (1 - deployment_rate),
-                    'remaining_lpg_gj': facility['lpg_gj'] * (1 - deployment_rate),
-                    'remaining_fuel_oil_gj': facility['fuel_oil_gj'] * (1 - deployment_rate),
-                    'remaining_diesel_gj': facility['diesel_gj'] * (1 - deployment_rate),
-                    'new_electricity_mwh': new_elec_mwh,
-                    'new_h2_kg': new_h2_kg,
-                    # Emissions
-                    'baseline_emissions_kt': base_emissions_kt,
-                    'emissions_reduced_kt': emissions_reduced_kt,
-                    'final_emissions_kt': final_emissions_kt,
-                    # Costs
-                    'baseline_fuel_cost_usd': baseline_fuel_cost,
-                    'new_fuel_cost_usd': fuel_cost_usd,
-                    'capex_annual_usd': capex_annual,
-                    'opex_annual_usd': opex_annual,
-                    'total_annual_cost_usd': fuel_cost_usd + capex_annual + opex_annual,
-                    # Prices
-                    'h2_price_usd_per_kg': h2_price,
-                    're_price_usd_per_mwh': re_price,
-                    'grid_price_usd_per_mwh': grid_price,
-                    'grid_ef_tco2_per_mwh': grid_ef,
-                })
-
-        self.df_yearly_facility = pd.DataFrame(yearly_data)
-
-        # Post-process to ensure facility-level emissions match targets
-        print("  Calibrating to emission targets...")
-        for year in years:
-            target = self.yearly_targets[year]
-            mask = self.df_yearly_facility['year'] == year
-            current_total = self.df_yearly_facility.loc[mask, 'final_emissions_kt'].sum() / 1000
-
-            if current_total > 0 and target < current_total:
-                # Scale emissions down to match target
-                scale_factor = target / current_total
-                self.df_yearly_facility.loc[mask, 'final_emissions_kt'] *= scale_factor
-                # Also adjust emissions_reduced to maintain consistency
-                self.df_yearly_facility.loc[mask, 'emissions_reduced_kt'] = (
-                    self.df_yearly_facility.loc[mask, 'baseline_emissions_kt'] -
-                    self.df_yearly_facility.loc[mask, 'final_emissions_kt']
-                )
-
-        print(f"  Generated {len(self.df_yearly_facility)} rows (248 facilities x 26 years)")
-
-        return self.df_yearly_facility
-
-    def generate_annual_summary(self):
-        """Generate annual summary aggregations"""
-        print("\nGenerating annual summary...")
-
-        summary = self.df_yearly_facility.groupby('year').agg({
-            'baseline_emissions_kt': 'sum',
-            'emissions_reduced_kt': 'sum',
-            'final_emissions_kt': 'sum',
-            'fossil_fuel_reduced_gj': 'sum',
-            'new_electricity_mwh': 'sum',
-            'new_h2_kg': 'sum',
-            'baseline_fuel_cost_usd': 'sum',
-            'new_fuel_cost_usd': 'sum',
-            'capex_annual_usd': 'sum',
-            'opex_annual_usd': 'sum',
-            'total_annual_cost_usd': 'sum',
-        }).reset_index()
-
-        # Convert to proper units
-        summary['baseline_emissions_mt'] = summary['baseline_emissions_kt'] / 1000
-        summary['emissions_reduced_mt'] = summary['emissions_reduced_kt'] / 1000
-        summary['final_emissions_mt'] = summary['final_emissions_kt'] / 1000
-        summary['fossil_fuel_reduced_pj'] = summary['fossil_fuel_reduced_gj'] / 1e6
-        summary['new_electricity_twh'] = summary['new_electricity_mwh'] / 1e6
-        summary['new_h2_mt'] = summary['new_h2_kg'] / 1e9
-        summary['total_cost_musd'] = summary['total_annual_cost_usd'] / 1e6
-        summary['capex_musd'] = summary['capex_annual_usd'] / 1e6
-        summary['opex_musd'] = summary['opex_annual_usd'] / 1e6
-        summary['fuel_cost_musd'] = summary['new_fuel_cost_usd'] / 1e6
-
-        # Add targets and reduction percentages
-        summary['target_mt'] = summary['year'].map(self.yearly_targets)
-        summary['reduction_pct'] = (52 - summary['final_emissions_mt']) / 52 * 100
-
-        self.df_annual_summary = summary
-        return summary
-
-    def generate_regional_summary(self):
-        """Generate regional summary by year"""
-        print("\nGenerating regional summary...")
-
-        regional = self.df_yearly_facility.groupby(['year', 'location']).agg({
-            'facility_id': 'count',
-            'capacity_kt': 'sum',
-            'baseline_emissions_kt': 'sum',
-            'final_emissions_kt': 'sum',
-            'emissions_reduced_kt': 'sum',
-            'new_electricity_mwh': 'sum',
-            'new_h2_kg': 'sum',
-            'capex_annual_usd': 'sum',
-            'opex_annual_usd': 'sum',
-            'new_fuel_cost_usd': 'sum',
-            'total_annual_cost_usd': 'sum',
-        }).reset_index()
-
-        regional.columns = ['year', 'location', 'num_facilities', 'capacity_kt',
-                           'baseline_emissions_kt', 'final_emissions_kt',
-                           'emissions_reduced_kt', 'new_electricity_mwh',
-                           'new_h2_kg', 'capex_annual_usd', 'opex_annual_usd', 
-                           'new_fuel_cost_usd', 'total_cost_usd']
-
-        regional['baseline_emissions_mt'] = regional['baseline_emissions_kt'] / 1000
-        regional['final_emissions_mt'] = regional['final_emissions_kt'] / 1000
-        regional['emissions_reduced_mt'] = regional['emissions_reduced_kt'] / 1000
-        regional['reduction_pct'] = regional['emissions_reduced_kt'] / regional['baseline_emissions_kt'] * 100
-        
-        # Cost in MUSD
-        regional['capex_musd'] = regional['capex_annual_usd'] / 1e6
-        regional['opex_musd'] = regional['opex_annual_usd'] / 1e6
-        regional['fuel_cost_musd'] = regional['new_fuel_cost_usd'] / 1e6
-        regional['total_cost_musd'] = regional['total_cost_usd'] / 1e6
-
-        self.df_regional = regional
-        return regional
-
-    def generate_company_summary(self):
-        """Generate company summary by year"""
-        print("\nGenerating company summary...")
-
-        company = self.df_yearly_facility.groupby(['year', 'company']).agg({
-            'facility_id': 'count',
-            'capacity_kt': 'sum',
-            'baseline_emissions_kt': 'sum',
-            'final_emissions_kt': 'sum',
-            'emissions_reduced_kt': 'sum',
-            'new_electricity_mwh': 'sum',
-            'new_h2_kg': 'sum',
-            'total_annual_cost_usd': 'sum',
-        }).reset_index()
-
-        company.columns = ['year', 'company', 'num_facilities', 'capacity_kt',
-                          'baseline_emissions_kt', 'final_emissions_kt',
-                          'emissions_reduced_kt', 'new_electricity_mwh',
-                          'new_h2_kg', 'total_cost_usd']
-
-        company['baseline_emissions_mt'] = company['baseline_emissions_kt'] / 1000
-        company['final_emissions_mt'] = company['final_emissions_kt'] / 1000
-        company['emissions_reduced_mt'] = company['emissions_reduced_kt'] / 1000
-        company['reduction_pct'] = company['emissions_reduced_kt'] / company['baseline_emissions_kt'] * 100
-
-        self.df_company = company
-        return company
-
-    def generate_technology_deployment(self):
-        """Generate technology deployment timeline"""
-        print("\nGenerating technology deployment timeline...")
-
-        tech_deploy = self.df_yearly_facility.groupby(['year', 'technology_deployed']).agg({
-            'facility_id': 'count',
-            'capacity_kt': 'sum',
-            'emissions_reduced_kt': 'sum',
-            'total_annual_cost_usd': 'sum',
-        }).reset_index()
-
-        tech_deploy.columns = ['year', 'technology', 'num_facilities', 'capacity_kt',
-                               'emissions_reduced_kt', 'total_cost_usd']
-
-        tech_deploy['emissions_reduced_mt'] = tech_deploy['emissions_reduced_kt'] / 1000
-
-        self.df_tech_deploy = tech_deploy
-        return tech_deploy
-
-    def generate_cost_summary(self):
-        """Generate detailed cost breakdown"""
-        print("\nGenerating cost summary...")
-
-        cost = self.df_yearly_facility.groupby('year').agg({
-            'capex_annual_usd': 'sum',
-            'opex_annual_usd': 'sum',
-            'new_fuel_cost_usd': 'sum',
-            'total_annual_cost_usd': 'sum',
-            'emissions_reduced_kt': 'sum',
-        }).reset_index()
-
-        cost['capex_musd'] = cost['capex_annual_usd'] / 1e6
-        cost['opex_musd'] = cost['opex_annual_usd'] / 1e6
-        cost['fuel_cost_musd'] = cost['new_fuel_cost_usd'] / 1e6
-        cost['total_cost_musd'] = cost['total_annual_cost_usd'] / 1e6
-        cost['emissions_reduced_mt'] = cost['emissions_reduced_kt'] / 1000
-        cost['cost_per_tco2'] = cost['total_annual_cost_usd'] / (cost['emissions_reduced_kt'] * 1000)
-        cost['cost_per_tco2'] = cost['cost_per_tco2'].replace([np.inf, -np.inf], 0).fillna(0)
-
-        # Cumulative costs
-        cost['cumulative_capex_musd'] = cost['capex_musd'].cumsum()
-        cost['cumulative_opex_musd'] = cost['opex_musd'].cumsum()
-        cost['cumulative_fuel_musd'] = cost['fuel_cost_musd'].cumsum()
-        cost['cumulative_total_musd'] = cost['total_cost_musd'].cumsum()
-
-        self.df_cost = cost
-        return cost
-
-    def export_to_excel(self, filename, ncc_technology='NCC-Electricity'):
-        """Export all data to multi-sheet Excel workbook"""
-        print(f"\nExporting to Excel: {filename}")
-
-        filepath = self.output_dir / filename
-
-        with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
-            # Sheet 1: Facility Master Data (248 facilities)
-            print("  - Writing Facility_Master...")
-            self.df_baseline.to_excel(writer, sheet_name='Facility_Master', index=False)
-
-            # Sheet 2: Yearly Facility Detail (248 x 26 = 6,448 rows)
-            print("  - Writing Yearly_Facility_Detail...")
-            self.df_yearly_facility.to_excel(writer, sheet_name='Yearly_Facility_Detail', index=False)
-
-            # Sheet 3: Annual Summary
-            print("  - Writing Annual_Summary...")
-            self.df_annual_summary.to_excel(writer, sheet_name='Annual_Summary', index=False)
-
-            # Sheet 4: Regional Summary
-            print("  - Writing Regional_Summary...")
-            self.df_regional.to_excel(writer, sheet_name='Regional_Summary', index=False)
-
-            # Sheet 5: Company Summary
-            print("  - Writing Company_Summary...")
-            self.df_company.to_excel(writer, sheet_name='Company_Summary', index=False)
-
-            # Sheet 6: Technology Deployment
-            print("  - Writing Technology_Deployment...")
-            self.df_tech_deploy.to_excel(writer, sheet_name='Technology_Deployment', index=False)
-
-            # Sheet 7: Cost Summary
-            print("  - Writing Cost_Summary...")
-            self.df_cost.to_excel(writer, sheet_name='Cost_Summary', index=False)
-
-            # Sheet 8: Deployment Schedule (optimization results)
-            print("  - Writing Deployment_Schedule...")
-            self.df_deployment.to_excel(writer, sheet_name='Deployment_Schedule', index=False)
-
-            # Sheet 9: Emission Targets
-            print("  - Writing Emission_Targets...")
-            targets_df = pd.DataFrame([
-                {'year': y, 'target_mt': t, 'reduction_pct': (52-t)/52*100}
-                for y, t in self.yearly_targets.items()
-            ])
-            targets_df.to_excel(writer, sheet_name='Emission_Targets', index=False)
-
-            # Sheet 10: Technology Parameters
-            print("  - Writing Technology_Parameters...")
-            self.df_tech_params.to_excel(writer, sheet_name='Technology_Parameters', index=False)
-
-            # Sheet 11: Price Trajectories
-            print("  - Writing Price_Trajectories...")
-            prices = pd.merge(self.df_h2_prices[['year', 'h2_price_usd_per_kg']],
-                            self.df_re_prices[['year', 're_price_usd_per_mwh']], on='year')
-            prices = pd.merge(prices, self.df_grid_prices[['year', 'grid_price_usd_per_mwh']], on='year')
-            prices = pd.merge(prices, self.df_grid_ef[['year', 'grid_ef_tco2_per_mwh']], on='year')
-            prices.to_excel(writer, sheet_name='Price_Trajectories', index=False)
-
-        print(f"\n  Excel file saved: {filepath}")
-        print(f"  File size: {filepath.stat().st_size / 1024 / 1024:.2f} MB")
-
-        return filepath
-
-    def run_scenario(self, ncc_technology='NCC-Electricity'):
-        """Run complete scenario and generate Excel output"""
-        print(f"\n{'='*80}")
-        print(f"RUNNING SCENARIO: {ncc_technology}")
-        print(f"{'='*80}")
-
-        # Calculate baseline
-        self.calculate_facility_baseline()
-
-        # Optimize transition timing
-        self.optimize_transition_timing(ncc_technology)
-
-        # Generate all data
-        self.generate_yearly_facility_data(ncc_technology)
-        self.generate_annual_summary()
-        self.generate_regional_summary()
-        self.generate_company_summary()
-        self.generate_technology_deployment()
-        self.generate_cost_summary()
-
-        # Export to Excel
-        filename = f'MACC_Report_{ncc_technology.replace("-", "_")}.xlsx'
-        filepath = self.export_to_excel(filename, ncc_technology)
-
-        return filepath
-
-
-    def run_restructuring_scenario(self, ncc_technology='NCC-Electricity'):
-        """
-        Run Restructuring Scenario: Retire 30% of oldest NCC capacity
-        Then run standard analysis on remaining facilities.
-        """
-        print(f"\n{'='*80}")
-        print(f"RUNNING SCENARIO: Restructuring (30% Retired) + {ncc_technology}")
-        print(f"{'='*80}")
-
-        # 1. Backup original data
-        original_facilities = self.df_facilities.copy()
-        original_baseline = self.df_baseline.copy()
-
-        # 2. Identify facilities to retire
-        print("  Identifying 30% oldest NCC capacity for retirement...")
-        df_ncc = self.df_facilities[self.df_facilities['process'] == 'Naphtha Cracker'].copy()
-        total_ncc_capacity = df_ncc['capacity_kt'].sum()
-        target_retirement = total_ncc_capacity * 0.30
-        
-        # Sort by year_built (oldest first)
-        df_ncc_sorted = df_ncc.sort_values('year_built')
-        
-        retired_indices = []
-        retired_capacity = 0
-        
-        for idx, row in df_ncc_sorted.iterrows():
-            if retired_capacity < target_retirement:
-                retired_indices.append(idx)
-                retired_capacity += row['capacity_kt']
-        
-        print(f"  Total NCC Capacity: {total_ncc_capacity:.1f} kt")
-        print(f"  Target Retirement: {target_retirement:.1f} kt")
-        print(f"  Actual Retired: {retired_capacity:.1f} kt ({(retired_capacity/total_ncc_capacity)*100:.1f}%)")
-
-        # 3. Filter facilities and baseline
-        # We need to filter self.df_facilities AND self.df_baseline (which corresponds to facilities)
-        # Assuming indices match between df_facilities and df_baseline (they should from _load_data)
-        
-        # Filter facilities
-        self.df_facilities = self.df_facilities.drop(retired_indices).reset_index(drop=True)
-        
-        # Re-calculate baseline for the filtered facilities
-        # This is safer than filtering df_baseline directly to ensure consistency
-        self.calculate_facility_baseline()
-        
-        # 4. Run standard analysis
-        self.optimize_transition_timing(ncc_technology)
-        df_restructure = self.generate_yearly_facility_data(ncc_technology)
-        
-        # Generate summaries (optional, but good for debugging)
-        self.generate_annual_summary()
-        self.generate_regional_summary()
-        
-        # Export
-        filename = f'MACC_Report_Restructuring_{ncc_technology.replace("-", "_")}.xlsx'
-        filepath = self.export_to_excel(filename, ncc_technology)
-
-        # 5. Restore original data
-        self.df_facilities = original_facilities
-        self.df_baseline = original_baseline
-        
-        return df_restructure, filepath
-
-    def create_cover_sheet(self, wb):
-        """Create a professional Cover Sheet"""
-        ws = wb.create_sheet("Cover", 0)
-        ws.sheet_view.showGridLines = False
-        
-        # Title
-        ws['B4'] = "KOREA PETROCHEMICAL DECARBONIZATION"
-        ws['B4'].font = Font(name='Arial', size=24, bold=True, color="1F4E79")
-        
-        ws['B5'] = "Strategic Roadmap to Net Zero 2050"
-        ws['B5'].font = Font(name='Arial', size=16, color="595959")
-        
-        # Date
-        ws['B8'] = f"Date: {datetime.now().strftime('%Y-%m-%d')}"
-        ws['B8'].font = Font(name='Arial', size=11)
-        
-        # Prepared For
-        ws['B10'] = "Prepared For:"
-        ws['B10'].font = Font(name='Arial', size=11, bold=True)
-        ws['B11'] = "Client Executive Team"
-        ws['B11'].font = Font(name='Arial', size=11)
-        
-        # Disclaimer
-        ws['B20'] = "Disclaimer"
-        ws['B20'].font = Font(name='Arial', size=10, bold=True, color="7F7F7F")
-        ws['B21'] = "This report contains forward-looking statements and model-based projections."
-        ws['B22'] = "Actual results may vary based on policy changes, technology costs, and market conditions."
-        ws['B21'].font = Font(name='Arial', size=9, color="7F7F7F")
-        ws['B22'].font = Font(name='Arial', size=9, color="7F7F7F")
-
-    def create_toc_sheet(self, wb):
-        """Create Table of Contents with hyperlinks"""
-        if "Table_of_Contents" in wb.sheetnames:
-            ws = wb["Table_of_Contents"]
+                    cell.number_format = '0.0000'
+
+    return start_row + len(df) + 2
+
+
+def add_source_note(ws, row, col, text):
+    """Add a source/reference note"""
+    cell = ws.cell(row=row, column=col, value=text)
+    cell.style = 'source_style'
+    return row + 1
+
+
+# =============================================================================
+# LOAD DATA
+# =============================================================================
+def load_all_data():
+    """Load all necessary data files"""
+    data = {}
+
+    # Trajectories
+    data['bau_traj'] = pd.read_csv(STREAMLIT_DATA_DIR / 'bau_trajectory_2025_2050.csv')
+    data['opt_traj'] = pd.read_csv(STREAMLIT_DATA_DIR / 'optimization_trajectory.csv')
+    data['macc_annual'] = pd.read_csv(STREAMLIT_DATA_DIR / 'macc_annual_2025_2050.csv')
+
+    # Input data
+    data['facilities'] = pd.read_csv(DATA_DIR / 'facility_database_with_regions.csv')
+    data['energy_intensities'] = pd.read_csv(DATA_DIR / 'energy_intensities.csv')
+    data['emission_factors'] = pd.read_csv(DATA_DIR / 'emission_factors.csv')
+    data['tech_params'] = pd.read_csv(DATA_DIR / 'technology_parameters.csv')
+    data['grid_ef'] = pd.read_csv(DATA_DIR / 'grid_emission_trajectory.csv')
+    data['grid_price'] = pd.read_csv(DATA_DIR / 'grid_price_trajectory.csv')
+    data['h2_price'] = pd.read_csv(DATA_DIR / 'h2_price_trajectory.csv')
+    data['re_price'] = pd.read_csv(DATA_DIR / 're_price_trajectory.csv')
+    data['demand_growth'] = pd.read_csv(DATA_DIR / 'demand_growth_trajectory.csv')
+
+    return data
+
+
+# =============================================================================
+# SHEET 1: EXECUTIVE SUMMARY
+# =============================================================================
+def create_executive_summary(wb, data):
+    """Create Executive Summary sheet"""
+    ws = wb.create_sheet("1. Executive Summary")
+
+    row = 1
+
+    # Title
+    ws.merge_cells('A1:H1')
+    ws['A1'] = "Korea Petrochemical Industry Net Zero Transition Analysis"
+    ws['A1'].font = Font(bold=True, size=16, color='1F4E79')
+    row = 3
+
+    # Study Info
+    ws['A3'] = "Study Information"
+    ws['A3'].font = Font(bold=True, size=12, color='1F4E79')
+
+    info_data = [
+        ("Author", "PLANiT Institute"),
+        ("Publication", "Carbon Neutrality (Springer Nature), 2025"),
+        ("Scope", "248 petrochemical facilities across Korea"),
+        ("Baseline Year", "2025"),
+        ("Target Year", "2050 (Net Zero)"),
+        ("Baseline Emissions", f"{data['bau_traj']['total_emissions_mt'].iloc[0]:.2f} MtCO2/year"),
+    ]
+
+    row = 5
+    for label, value in info_data:
+        ws.cell(row=row, column=1, value=label).font = Font(bold=True)
+        ws.cell(row=row, column=2, value=value)
+        row += 1
+
+    row += 1
+
+    # Key Results
+    ws.cell(row=row, column=1, value="Key Results (2050)").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    opt_2050 = data['opt_traj'][data['opt_traj']['year'] == 2050].iloc[0]
+    bau_2050 = data['bau_traj'][data['bau_traj']['year'] == 2050].iloc[0]
+
+    results = [
+        ("BAU Emissions (2050)", f"{bau_2050['total_emissions_mt']:.2f} MtCO2"),
+        ("Net Zero Achieved", f"{opt_2050['actual_emissions_mt']:.4f} MtCO2"),
+        ("Total CAPEX Investment", f"${data['opt_traj']['cumulative_capex_musd'].max()/1000:.1f} Billion"),
+        ("Electricity Demand (2050)", f"{opt_2050['electricity_consumption_increase_twh']:.1f} TWh"),
+        ("Key Technology", "NCC-Electricity (Electric Cracker)"),
+    ]
+
+    for label, value in results:
+        ws.cell(row=row, column=1, value=label).font = Font(bold=True)
+        ws.cell(row=row, column=2, value=value)
+        row += 1
+
+    row += 2
+
+    # Technology Deployment Summary
+    ws.cell(row=row, column=1, value="Technology Deployment (2050)").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    tech_summary = [
+        ("NCC-Electricity", f"{opt_2050['ncc_elec_mt']:.1f} MtCO2", "Electric naphtha cracking"),
+        ("Heat Pump", f"{opt_2050['heat_pump_mt']:.1f} MtCO2", "Industrial heat pumps (<165C)"),
+        ("RE PPA", f"{opt_2050['re_ppa_mt']:.1f} MtCO2", "Renewable power purchase"),
+    ]
+
+    ws.cell(row=row, column=1, value="Technology").style = 'header_style'
+    ws.cell(row=row, column=2, value="Abatement").style = 'header_style'
+    ws.cell(row=row, column=3, value="Description").style = 'header_style'
+    row += 1
+
+    for tech, abate, desc in tech_summary:
+        ws.cell(row=row, column=1, value=tech)
+        ws.cell(row=row, column=2, value=abate)
+        ws.cell(row=row, column=3, value=desc)
+        row += 1
+
+    # Set column widths
+    ws.column_dimensions['A'].width = 30
+    ws.column_dimensions['B'].width = 25
+    ws.column_dimensions['C'].width = 40
+
+    return wb
+
+
+# =============================================================================
+# SHEET 2: ASSUMPTIONS & REFERENCES
+# =============================================================================
+def create_assumptions_sheet(wb, data):
+    """Create Assumptions & References sheet"""
+    ws = wb.create_sheet("2. Assumptions & References")
+
+    row = 1
+
+    # Title
+    ws['A1'] = "Model Assumptions and Data Sources"
+    ws['A1'].font = Font(bold=True, size=14, color='1F4E79')
+    row = 3
+
+    # Section 1: Emission Factors
+    ws.cell(row=row, column=1, value="1. Emission Factors").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    ef_data = [
+        ("Fuel", "Emission Factor", "Unit", "Source"),
+        ("Naphtha", "0.0542", "tCO2/GJ", "IPCC 2019 Refinement, Table 2.3"),
+        ("LNG", "0.0561", "tCO2/GJ", "IPCC 2019 Refinement, Table 2.3"),
+        ("Fuel Gas", "0.050", "tCO2/GJ", "API Compendium 2021 (Mixed refinery gas)"),
+        ("Byproduct Gas", "0.048", "tCO2/GJ", "API Compendium 2021 (Higher H2 content)"),
+        ("LPG", "0.0631", "tCO2/GJ", "IPCC 2019 Refinement, Table 2.3"),
+        ("Fuel Oil", "0.0773", "tCO2/GJ", "IPCC 2019 Refinement, Table 2.3"),
+        ("Diesel", "0.0741", "tCO2/GJ", "IPCC 2019 Refinement, Table 2.3"),
+        ("Green H2", "0.0", "tCO2/kg", "Zero-emission (electrolysis)"),
+    ]
+
+    for i, (fuel, ef, unit, source) in enumerate(ef_data):
+        if i == 0:
+            for j, val in enumerate([fuel, ef, unit, source], 1):
+                ws.cell(row=row, column=j, value=val).style = 'header_style'
         else:
-            ws = wb.create_sheet("Table_of_Contents", 1)
-            
-        ws.sheet_view.showGridLines = False
-        ws.column_dimensions['B'].width = 5
-        ws.column_dimensions['C'].width = 40
-        ws.column_dimensions['D'].width = 60
-        
-        ws['C3'] = "TABLE OF CONTENTS"
-        ws['C3'].font = Font(name='Arial', size=18, bold=True, color="1F4E79")
-        
-        sheets = [
-            ("Executive_Dashboard", "High-level KPIs and Scenario Comparison"),
-            ("Regional_Annual", "Annual investment and emissions by region"),
-            ("Facility_Annual_Detail", "Detailed annual metrics for all 248 facilities"),
-            ("Facility_Transition_Matrix", "Technology deployment timeline per facility"),
-            ("Investment_Annual", "Annual CAPEX requirements by region"),
-            ("Scenario_Comparison", "Detailed comparison of 3 scenarios"),
-            ("Technology_Parameters", "CAPEX and efficiency assumptions"),
-            ("Price_Trajectories", "Energy price forecasts (H2, Electricity)")
-        ]
-        
-        for i, (sheet_name, desc) in enumerate(sheets):
-            row = 6 + i*2
-            cell = ws.cell(row=row, column=3)
-            cell.value = sheet_name.replace('_', ' ')
-            cell.hyperlink = f"#'{sheet_name}'!A1"
-            cell.font = Font(name='Arial', size=12, underline="single", color="0563C1")
-            
-            desc_cell = ws.cell(row=row, column=4)
-            desc_cell.value = desc
-            desc_cell.font = Font(name='Arial', size=11, color="595959")
+            ws.cell(row=row, column=1, value=fuel)
+            ws.cell(row=row, column=2, value=ef)
+            ws.cell(row=row, column=3, value=unit)
+            ws.cell(row=row, column=4, value=source)
+        row += 1
 
-    def apply_professional_style(self, ws):
-        """Apply consistent professional formatting to a worksheet"""
-        ws.sheet_view.showGridLines = False
-        
-        # Header Style
-        header_font = Font(name='Arial', size=10, bold=True, color="FFFFFF")
-        header_fill = PatternFill(start_color="1F4E79", end_color="1F4E79", fill_type="solid")
-        
-        # Data Style
-        data_font = Font(name='Arial', size=10)
-        border = Border(left=Side(style='thin', color="D9D9D9"), 
-                        right=Side(style='thin', color="D9D9D9"), 
-                        top=Side(style='thin', color="D9D9D9"), 
-                        bottom=Side(style='thin', color="D9D9D9"))
-        
-        # Find header row (usually row 1)
-        for cell in ws[1]:
-            cell.font = header_font
-            cell.fill = header_fill
-            cell.alignment = Alignment(horizontal='center', vertical='center')
-        
-        # Auto-fit columns and apply formatting
-        for col in ws.columns:
-            max_length = 0
-            column = col[0].column_letter
-            
-            for cell in col:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                    
-                    # Apply data style
-                    if cell.row > 1:
-                        cell.font = data_font
-                        cell.border = border
-                        
-                        # Number formatting
-                        if isinstance(cell.value, (int, float)):
-                            if 'USD' in str(ws.cell(row=1, column=cell.col_idx).value) or 'Cost' in str(ws.cell(row=1, column=cell.col_idx).value):
-                                cell.number_format = '#,##0'
-                            elif 'kt' in str(ws.cell(row=1, column=cell.col_idx).value) or 'Mt' in str(ws.cell(row=1, column=cell.col_idx).value):
-                                cell.number_format = '#,##0.0'
-                except:
-                    pass
-            
-            adjusted_width = (max_length + 2) * 1.1
-            ws.column_dimensions[column].width = min(adjusted_width, 50) # Cap width
+    row += 2
 
-    def create_dashboard_sheet(self, wb, df_elec, df_h2, df_restructure=None):
-        """Create Executive Dashboard sheet"""
-        print("  - Writing Executive_Dashboard...")
-        ws = wb.create_sheet("Executive_Dashboard", 0)
-        ws.sheet_view.showGridLines = False
-        
-        # Title
-        ws['B2'] = "EXECUTIVE DASHBOARD: Korean Petrochemical Net Zero 2050"
-        ws['B2'].font = Font(bold=True, size=18, color="1F4E79")
-        
-        # Key Metrics (2050) - Main Scenario (NCC-Electricity)
-        elec_2050 = df_elec[df_elec['year'] == 2050].iloc[0] if 2050 in df_elec['year'].values else None
-        
-        if elec_2050 is not None:
-            # Metrics Row
-            metrics = [
-                ("Target Year", "2050"),
-                ("Net Emissions", "0.0 MtCO2"),
-                ("Total Investment", f"${df_elec['total_annual_cost_usd'].sum()/1e9:.1f} Billion"),
-                ("Electricity Demand", f"{df_elec['new_electricity_mwh'].sum()/1e6:.0f} TWh"),
-                ("Key Technology", "NCC Electrification")
-            ]
-            
-            for i, (label, value) in enumerate(metrics):
-                col = 2 + i*2
-                ws.cell(row=4, column=col, value=label).font = Font(size=10, color="7F7F7F")
-                ws.cell(row=5, column=col, value=value).font = Font(bold=True, size=14)
-                # Add border box
-                for r in [4, 5]:
-                    ws.cell(row=r, column=col).border = Border(left=Side(style='thin'), top=Side(style='thin') if r==4 else None, right=Side(style='thin'), bottom=Side(style='thin') if r==5 else None)
-                    ws.cell(row=r, column=col+1).border = Border(left=None, top=Side(style='thin') if r==4 else None, right=Side(style='thin'), bottom=Side(style='thin') if r==5 else None)
+    # Section 2: Grid Emission Factor Trajectory
+    ws.cell(row=row, column=1, value="2. Grid Emission Factor Trajectory").font = Font(bold=True, size=12, color='1F4E79')
+    row += 1
+    ws.cell(row=row, column=1, value="Source: Korea 10th Basic Plan for Electricity Supply and Demand (2023)").font = Font(italic=True, size=9)
+    row += 2
 
-        # Styles
-        SUBTITLE_FONT = Font(bold=True, size=12, color="1F4E79")
-        THIN_BORDER = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
-        
-        # Scenario Comparison Table
-        ws['B8'] = "Scenario Comparison (2050 Snapshot)"
-        ws['B8'].font = SUBTITLE_FONT
-        
-        headers = ["Metric", "NCC-Electricity", "NCC-H2", "Restructuring (-30%)"]
-        # Apply header style manually
-        header_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
-        for col in range(2, 6):
-            cell = ws.cell(row=9, column=col)
-            cell.font = Font(bold=True)
-            cell.fill = header_fill
-            cell.alignment = Alignment(horizontal='center')
-            cell.border = THIN_BORDER
-            
-        for i, h in enumerate(headers):
-            ws.cell(row=9, column=2+i, value=h)
-            
-        # Get 2050 data
-        e50 = df_elec[df_elec['year'] == 2050].iloc[0]
-        h50 = df_h2[df_h2['year'] == 2050].iloc[0]
-        r50 = df_restructure[df_restructure['year'] == 2050].iloc[0] if df_restructure is not None else None
-        
-        rows = [
-            ("Total Emissions (Mt)", f"{e50['final_emissions_kt']/1000:.1f}", f"{h50['final_emissions_kt']/1000:.1f}", f"{r50['final_emissions_kt']/1000:.1f}" if r50 is not None else "-"),
-            ("Annual Cost ($B)", f"${e50['total_annual_cost_usd']/1e9:.1f}", f"${h50['total_annual_cost_usd']/1e9:.1f}", f"${r50['total_annual_cost_usd']/1e9:.1f}" if r50 is not None else "-"),
-            ("CAPEX ($B)", f"${e50['capex_annual_usd']/1e9:.1f}", f"${h50['capex_annual_usd']/1e9:.1f}", f"${r50['capex_annual_usd']/1e9:.1f}" if r50 is not None else "-"),
-            ("Elec Demand (TWh)", f"{e50['new_electricity_mwh']/1e6:.0f}", f"{h50['new_electricity_mwh']/1e6:.0f}", f"{r50['new_electricity_mwh']/1e6:.0f}" if r50 is not None else "-"),
-            ("H2 Demand (Mt)", f"{e50['new_h2_kg']/1e9:.1f}", f"{h50['new_h2_kg']/1e9:.1f}", f"{r50['new_h2_kg']/1e9:.1f}" if r50 is not None else "-"),
-        ]
-        
-        r_idx = 10
-        for label, v1, v2, v3 in rows:
-            ws.cell(row=r_idx, column=2, value=label).border = THIN_BORDER
-            ws.cell(row=r_idx, column=3, value=v1).border = THIN_BORDER
-            ws.cell(row=r_idx, column=4, value=v2).border = THIN_BORDER
-            ws.cell(row=r_idx, column=5, value=v3).border = THIN_BORDER
-            r_idx += 1
-            
-        # Add Chart: Emissions Trajectory
-        chart = LineChart()
-        chart.title = "Emissions Trajectory (MtCO2)"
-        chart.style = 12
-        chart.y_axis.title = "MtCO2"
-        chart.x_axis.title = "Year"
-        
-        # We need data in the sheet to plot. Let's use Scenario_Comparison sheet data
-        # Assuming Scenario_Comparison is sheet index 1 (created next)
-        # We will add the chart AFTER creating the data sheets in generate_comparison_report
-        
-        return ws
+    grid_ef_summary = data['grid_ef'][data['grid_ef']['year'].isin([2025, 2030, 2035, 2040, 2045, 2050])]
 
-    def generate_comparison_report(self, df_elec, df_h2, df_restructure=None):
-        """Generate consolidated client comparison report"""
-        print(f"\n{'='*80}")
-        print("GENERATING CLIENT COMPARISON REPORT")
-        print(f"{'='*80}")
-        
-        filename = 'Client_Comparison_Report.xlsx'
-        filepath = self.output_dir / filename
-        
-        # Import LCOH module to verify logic
-        try:
-            from modules.lcoh import calculate_lcoh
-            print("  ✓ LCOH module loaded for verification")
-        except ImportError:
-            print("  ⚠ LCOH module not found")
+    ws.cell(row=row, column=1, value="Year").style = 'header_style'
+    ws.cell(row=row, column=2, value="Grid EF (tCO2/MWh)").style = 'header_style'
+    ws.cell(row=row, column=3, value="Reduction vs 2025").style = 'header_style'
+    row += 1
 
-        wb = Workbook()
-        # Remove default sheet
-        if 'Sheet' in wb.sheetnames:
-            del wb['Sheet']
-            
-        # 0. Executive Dashboard
-        self.create_dashboard_sheet(wb, df_elec, df_h2, df_restructure)
-        
-        # 1. Scenario Comparison (Annual Side-by-Side)
-        print("  - Writing Scenario_Comparison...")
-        ws_comp = wb.create_sheet("Scenario_Comparison")
-        
-        # Aggregate scenarios
-        agg_elec = df_elec.groupby('year').agg({
-            'final_emissions_kt': 'sum', 'total_annual_cost_usd': 'sum',
-            'new_electricity_mwh': 'sum', 'new_h2_kg': 'sum', 'capex_annual_usd': 'sum'
-        }).reset_index()
-        
-        agg_h2 = df_h2.groupby('year').agg({
-            'final_emissions_kt': 'sum', 'total_annual_cost_usd': 'sum',
-            'new_electricity_mwh': 'sum', 'new_h2_kg': 'sum', 'capex_annual_usd': 'sum'
-        }).reset_index()
-        
-        # Merge Main Scenarios
-        comparison = pd.merge(agg_elec, agg_h2, on='year', suffixes=('_Elec', '_H2'))
-        
-        # Add Restructuring if available
-        if df_restructure is not None:
-            agg_res = df_restructure.groupby('year').agg({
-                'final_emissions_kt': 'sum', 'total_annual_cost_usd': 'sum',
-                'new_electricity_mwh': 'sum', 'new_h2_kg': 'sum', 'capex_annual_usd': 'sum'
-            }).reset_index()
-            comparison = pd.merge(comparison, agg_res, on='year')
-            comparison.rename(columns={
-                'final_emissions_kt': 'final_emissions_kt_Res',
-                'total_annual_cost_usd': 'total_annual_cost_usd_Res',
-                'new_electricity_mwh': 'new_electricity_mwh_Res',
-                'new_h2_kg': 'new_h2_kg_Res',
-                'capex_annual_usd': 'capex_annual_usd_Res'
-            }, inplace=True)
+    base_ef = 0.436
+    for _, r in grid_ef_summary.iterrows():
+        ws.cell(row=row, column=1, value=int(r['year']))
+        ws.cell(row=row, column=2, value=round(r['grid_ef_tco2_per_mwh'], 3))
+        ws.cell(row=row, column=3, value=f"{(1 - r['grid_ef_tco2_per_mwh']/base_ef)*100:.0f}%")
+        row += 1
 
-        # Format for display
-        display_comp = pd.DataFrame()
-        display_comp['Year'] = comparison['year']
-        
-        # Emissions
-        display_comp['Emissions_Elec_Mt'] = comparison['final_emissions_kt_Elec'] / 1000
-        display_comp['Emissions_H2_Mt'] = comparison['final_emissions_kt_H2'] / 1000
-        if df_restructure is not None:
-            display_comp['Emissions_Res_Mt'] = comparison['final_emissions_kt_Res'] / 1000
-        
-        # Costs
-        display_comp['Total_Cost_Elec_MUSD'] = comparison['total_annual_cost_usd_Elec'] / 1e6
-        display_comp['Total_Cost_H2_MUSD'] = comparison['total_annual_cost_usd_H2'] / 1e6
-        if df_restructure is not None:
-            display_comp['Total_Cost_Res_MUSD'] = comparison['total_annual_cost_usd_Res'] / 1e6
-            
-        # CAPEX
-        display_comp['CAPEX_Elec_MUSD'] = comparison['capex_annual_usd_Elec'] / 1e6
-        display_comp['CAPEX_H2_MUSD'] = comparison['capex_annual_usd_H2'] / 1e6
-        if df_restructure is not None:
-            display_comp['CAPEX_Res_MUSD'] = comparison['capex_annual_usd_Res'] / 1e6
+    row += 2
 
-        # Write data to sheet manually to use openpyxl styles if needed, or use pandas
-        # Using pandas for simplicity, then adding chart
-        from openpyxl.utils.dataframe import dataframe_to_rows
-        for r in dataframe_to_rows(display_comp, index=False, header=True):
-            ws_comp.append(r)
-        # 2. Regional Annual (Long Format)
-        print("  - Writing Regional_Annual (Long Format)...")
-        ws_reg = wb.create_sheet("Regional_Annual")
-        
-        regional_long = df_elec.groupby(['location', 'year']).agg({
-            'final_emissions_kt': 'sum',
-            'total_annual_cost_usd': 'sum',
-            'capex_annual_usd': 'sum',
-            'new_electricity_mwh': 'sum',
-            'new_h2_kg': 'sum'
-        }).reset_index()
-        
-        regional_long.rename(columns={
-            'location': 'Region',
-            'year': 'Year',
-            'final_emissions_kt': 'Emissions (kt)',
-            'total_annual_cost_usd': 'Total Cost (USD)',
-            'capex_annual_usd': 'CAPEX (USD)',
-            'new_electricity_mwh': 'Electricity Demand (MWh)',
-            'new_h2_kg': 'H2 Demand (kg)'
-        }, inplace=True)
-        
-        for r in dataframe_to_rows(regional_long, index=False, header=True):
-            ws_reg.append(r)
-        self.apply_professional_style(ws_reg)
-        
-        # 3. Facility Annual Detail
-        print("  - Writing Facility_Annual_Detail...")
-        ws_fac = wb.create_sheet("Facility_Annual_Detail")
-        
-        facility_detail = df_elec[[
-            'location', 'company', 'product', 'year', 
-            'technology_deployed', 'final_emissions_kt', 
-            'total_annual_cost_usd', 'capex_annual_usd'
-        ]].copy()
-        
-        facility_detail.sort_values(['location', 'company', 'product', 'year'], inplace=True)
-        
-        for r in dataframe_to_rows(facility_detail, index=False, header=True):
-            ws_fac.append(r)
-        self.apply_professional_style(ws_fac)
-            
-        # 4. Facility Transition Matrix
-        print("  - Writing Facility_Transition_Matrix...")
-        ws_trans = wb.create_sheet("Facility_Transition_Matrix")
-        df_elec['facility_label'] = df_elec['company'] + ' (' + df_elec['product'] + ')'
-        transition_matrix = df_elec.pivot_table(
-            index=['location', 'facility_label'], 
-            columns='year', 
-            values='technology_deployed',
-            aggfunc='first'
-        )
-        transition_matrix = transition_matrix.reset_index()
-        for r in dataframe_to_rows(transition_matrix, index=False, header=True):
-            ws_trans.append(r)
-        self.apply_professional_style(ws_trans)
-        
-        # 5. Investment Annual
-        print("  - Writing Investment_Annual...")
-        ws_inv = wb.create_sheet("Investment_Annual")
-        invest_pivot = df_elec.pivot_table(
-            index='location',
-            columns='year',
-            values='capex_annual_usd',
-            aggfunc='sum'
-        )
-        invest_pivot = invest_pivot.reset_index()
-        for r in dataframe_to_rows(invest_pivot, index=False, header=True):
-            ws_inv.append(r)
-        self.apply_professional_style(ws_inv)
-        
-        # 6. Scenario Comparison
-        print("  - Writing Scenario_Comparison...")
-        ws_comp = wb.create_sheet("Scenario_Comparison")
-        
-        # Aggregate scenarios
-        agg_elec = df_elec.groupby('year').agg({
-            'final_emissions_kt': 'sum', 'total_annual_cost_usd': 'sum',
-            'new_electricity_mwh': 'sum', 'new_h2_kg': 'sum', 'capex_annual_usd': 'sum'
-        }).reset_index()
-        
-        agg_h2 = df_h2.groupby('year').agg({
-            'final_emissions_kt': 'sum', 'total_annual_cost_usd': 'sum',
-            'new_electricity_mwh': 'sum', 'new_h2_kg': 'sum', 'capex_annual_usd': 'sum'
-        }).reset_index()
-        
-        # Merge Main Scenarios
-        comparison = pd.merge(agg_elec, agg_h2, on='year', suffixes=('_Elec', '_H2'))
-        
-        # Add Restructuring if available
-        if df_restructure is not None:
-            agg_res = df_restructure.groupby('year').agg({
-                'final_emissions_kt': 'sum', 'total_annual_cost_usd': 'sum',
-                'new_electricity_mwh': 'sum', 'new_h2_kg': 'sum', 'capex_annual_usd': 'sum'
-            }).reset_index()
-            comparison = pd.merge(comparison, agg_res, on='year')
-            comparison.rename(columns={
-                'final_emissions_kt': 'final_emissions_kt_Res',
-                'total_annual_cost_usd': 'total_annual_cost_usd_Res',
-                'new_electricity_mwh': 'new_electricity_mwh_Res',
-                'new_h2_kg': 'new_h2_kg_Res',
-                'capex_annual_usd': 'capex_annual_usd_Res'
-            }, inplace=True)
+    # Section 3: Technology Parameters
+    ws.cell(row=row, column=1, value="3. Technology Parameters").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
 
-        # Format for display
-        display_comp = pd.DataFrame()
-        display_comp['Year'] = comparison['year']
-        
-        # Emissions
-        display_comp['Emissions_Elec_Mt'] = comparison['final_emissions_kt_Elec'] / 1000
-        display_comp['Emissions_H2_Mt'] = comparison['final_emissions_kt_H2'] / 1000
-        if df_restructure is not None:
-            display_comp['Emissions_Res_Mt'] = comparison['final_emissions_kt_Res'] / 1000
-        
-        # Costs
-        display_comp['Total_Cost_Elec_MUSD'] = comparison['total_annual_cost_usd_Elec'] / 1e6
-        display_comp['Total_Cost_H2_MUSD'] = comparison['total_annual_cost_usd_H2'] / 1e6
-        if df_restructure is not None:
-            display_comp['Total_Cost_Res_MUSD'] = comparison['total_annual_cost_usd_Res'] / 1e6
-            
-        # CAPEX
-        display_comp['CAPEX_Elec_MUSD'] = comparison['capex_annual_usd_Elec'] / 1e6
-        display_comp['CAPEX_H2_MUSD'] = comparison['capex_annual_usd_H2'] / 1e6
-        if df_restructure is not None:
-            display_comp['CAPEX_Res_MUSD'] = comparison['capex_annual_usd_Res'] / 1e6
+    tech_data = [
+        ("Technology", "Key Parameter", "Value", "Source", "TRL", "Available"),
+        ("Heat Pump", "COP", "4.0", "Kosmadakis et al. 2020", "9", "2025"),
+        ("Heat Pump", "CAPEX (2025)", "$800/tCO2", "McKinsey 2024", "", ""),
+        ("Heat Pump", "CAPEX (2050)", "$400/tCO2", "Learning curve (50% reduction)", "", ""),
+        ("NCC-Electricity", "Electricity", "5.0 MWh/ton C2H4", "BASF/SABIC/Linde Pilot 2024", "8", "2030"),
+        ("NCC-Electricity", "CAPEX (2025)", "$1,500/t-C2H4/yr", "Toribio-Ramirez et al. 2025", "", ""),
+        ("NCC-Electricity", "CAPEX (2050)", "$900/t-C2H4/yr", "Learning curve (40% reduction)", "", ""),
+        ("NCC-H2", "H2 Consumption", "0.2 ton/ton C2H4", "Lummus Tech 2023 (Energy Only)", "7", "2030"),
+        ("NCC-H2", "CAPEX (2025)", "$1,700/t-C2H4/yr", "Thunder Said Energy 2023", "", ""),
+        ("NCC-H2", "CAPEX (2050)", "$780/t-C2H4/yr", "Learning curve (54% reduction)", "", ""),
+        ("RDH", "Efficiency", "93%", "Coolbrook 2024", "8", "2026"),
+        ("RDH", "Temperature", "Up to 1,700C", "Coolbrook 2024", "", ""),
+        ("RE PPA", "Price (2025)", "$129/MWh", "PLANiT Institute", "-", "2025"),
+        ("RE PPA", "Price (2050)", "$191/MWh", "PLANiT Institute", "", ""),
+    ]
 
-        # Write data to sheet manually to use openpyxl styles if needed, or use pandas
-        # Using pandas for simplicity, then adding chart
-        from openpyxl.utils.dataframe import dataframe_to_rows
-        for r in dataframe_to_rows(display_comp, index=False, header=True):
-            ws_comp.append(r)
-        self.apply_professional_style(ws_comp)
-            
-        # Add Chart to Dashboard referencing this data
-        ws_dash = wb["Executive_Dashboard"]
-        chart = LineChart()
-        chart.title = "Emissions Trajectory (MtCO2)"
-        chart.y_axis.title = "MtCO2"
-        chart.x_axis.title = "Year"
-        
-        # Data: Year (Col 1), Emissions Elec (Col 2), Emissions H2 (Col 3), Emissions Res (Col 4)
-        data = Reference(ws_comp, min_col=2, min_row=1, max_col=4, max_row=len(display_comp)+1)
-        cats = Reference(ws_comp, min_col=1, min_row=2, max_row=len(display_comp)+1)
-        chart.add_data(data, titles_from_data=True)
-        chart.set_categories(cats)
-        
-        ws_dash.add_chart(chart, "B16")
-        
-        # 7. Table of Contents (Last step to ensure all sheets exist)
-        self.create_toc_sheet(wb)
-        
-        # Move TOC to index 1 (after Cover)
-        # openpyxl doesn't easily move sheets by index, but we created them in order mostly.
-        # We can reorder sheet names list if needed, but creation order is usually fine.
-        
-        wb.save(filepath)
-        print(f"\n  Comparison Report saved: {filepath}")
-        return filepath
+    for i, vals in enumerate(tech_data):
+        if i == 0:
+            for j, val in enumerate(vals, 1):
+                ws.cell(row=row, column=j, value=val).style = 'header_style'
+        else:
+            for j, val in enumerate(vals, 1):
+                ws.cell(row=row, column=j, value=val)
+        row += 1
+
+    row += 2
+
+    # Section 4: Price Trajectories
+    ws.cell(row=row, column=1, value="4. Price Trajectories").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    years = [2025, 2030, 2035, 2040, 2045, 2050]
+
+    ws.cell(row=row, column=1, value="Year").style = 'header_style'
+    ws.cell(row=row, column=2, value="Grid Price ($/MWh)").style = 'header_style'
+    ws.cell(row=row, column=3, value="RE PPA ($/MWh)").style = 'header_style'
+    ws.cell(row=row, column=4, value="H2 Price ($/kg)").style = 'header_style'
+    row += 1
+
+    for year in years:
+        grid_p = data['grid_price'][data['grid_price']['year'] == year]['grid_price_usd_per_mwh'].values[0]
+        re_p = data['re_price'][data['re_price']['year'] == year]['re_price_usd_per_mwh'].values[0]
+        h2_p = data['h2_price'][data['h2_price']['year'] == year]['h2_price_usd_per_kg'].values[0]
+
+        ws.cell(row=row, column=1, value=year)
+        ws.cell(row=row, column=2, value=round(grid_p, 2))
+        ws.cell(row=row, column=3, value=round(re_p, 2))
+        ws.cell(row=row, column=4, value=round(h2_p, 2))
+        row += 1
+
+    ws.cell(row=row, column=1, value="Source: PLANiT Institute assumptions based on literature review").font = Font(italic=True, size=9)
+    row += 2
+
+    # Section 5: Demand Growth
+    ws.cell(row=row, column=1, value="5. Demand Growth Assumptions").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    growth_data = [
+        ("Period", "Annual Growth Rate", "Operating Rate", "Rationale"),
+        ("2025-2030", "1.5%", "70%", "Baseline growth; 70% ops (Chinese overcapacity)"),
+        ("2031-2035", "1.3%", "70%", "Moderate growth"),
+        ("2036-2040", "1.0%", "70%", "Market maturation"),
+        ("2041-2050", "0.5-0.8%", "70%", "Slow growth, mature market"),
+    ]
+
+    for i, vals in enumerate(growth_data):
+        if i == 0:
+            for j, val in enumerate(vals, 1):
+                ws.cell(row=row, column=j, value=val).style = 'header_style'
+        else:
+            for j, val in enumerate(vals, 1):
+                ws.cell(row=row, column=j, value=val)
+        row += 1
+
+    # Set column widths
+    ws.column_dimensions['A'].width = 20
+    ws.column_dimensions['B'].width = 25
+    ws.column_dimensions['C'].width = 25
+    ws.column_dimensions['D'].width = 45
+    ws.column_dimensions['E'].width = 10
+    ws.column_dimensions['F'].width = 12
+
+    return wb
 
 
-def main():
-    """Generate Excel reports for all scenarios"""
-    print("\n" + "="*80)
-    print("PETROCHEMICAL MACC MODEL - EXCEL REPORT GENERATION")
-    print("="*80)
+# =============================================================================
+# SHEET 3: FACILITY DATABASE
+# =============================================================================
+def create_facility_sheet(wb, data):
+    """Create Facility Database sheet"""
+    ws = wb.create_sheet("3. Facility Database")
 
-    generator = ComprehensiveExcelGenerator()
+    ws['A1'] = "Korea Petrochemical Facility Database (248 Facilities)"
+    ws['A1'].font = Font(bold=True, size=14, color='1F4E79')
+    ws['A2'] = "Source: Korea Petrochemical Industry Association (KPIA) 2023"
+    ws['A2'].font = Font(italic=True, size=9)
 
-    # 1. Main Scenario: NCC-Electricity
-    print("\n" + "="*80)
-    print("SCENARIO 1: NCC-Electricity (Full Production)")
-    print("="*80)
-    generator.calculate_facility_baseline()
-    generator.optimize_transition_timing('NCC-Electricity')
-    df_elec = generator.generate_yearly_facility_data('NCC-Electricity')
-    generator.generate_annual_summary()
-    generator.generate_regional_summary()
-    generator.generate_company_summary()
-    generator.generate_technology_deployment()
-    generator.generate_cost_summary()
-    filepath1 = generator.export_to_excel('MACC_Report_NCC_Electricity.xlsx', 'NCC-Electricity')
+    # Summary statistics
+    df_fac = data['facilities']
 
-    # 2. Alternative Scenario: NCC-H2
-    print("\n" + "="*80)
-    print("SCENARIO 2: NCC-H2 (Full Production)")
-    print("="*80)
-    generator.calculate_facility_baseline()
-    generator.optimize_transition_timing('NCC-H2')
-    df_h2 = generator.generate_yearly_facility_data('NCC-H2')
-    generator.generate_annual_summary()
-    generator.generate_regional_summary()
-    generator.generate_company_summary()
-    generator.generate_technology_deployment()
-    generator.generate_cost_summary()
-    filepath2 = generator.export_to_excel('MACC_Report_NCC_H2.xlsx', 'NCC-H2')
+    ws['A4'] = "Summary Statistics"
+    ws['A4'].font = Font(bold=True, size=12)
+
+    summary = [
+        ("Total Facilities", len(df_fac)),
+        ("Total Capacity", f"{df_fac['capacity_kt'].sum():,.0f} kt/year"),
+        ("Locations", ", ".join(df_fac['location'].unique()[:6])),
+        ("Products", df_fac['product'].nunique()),
+        ("Companies", df_fac['company'].nunique()),
+    ]
+
+    row = 6
+    for label, value in summary:
+        ws.cell(row=row, column=1, value=label).font = Font(bold=True)
+        ws.cell(row=row, column=2, value=value)
+        row += 1
+
+    row += 2
+
+    # Regional Summary
+    ws.cell(row=row, column=1, value="Capacity by Region").font = Font(bold=True, size=12)
+    row += 2
+
+    regional = df_fac.groupby('location')['capacity_kt'].sum().sort_values(ascending=False).reset_index()
+    regional['share_pct'] = regional['capacity_kt'] / regional['capacity_kt'].sum() * 100
+
+    ws.cell(row=row, column=1, value="Location").style = 'header_style'
+    ws.cell(row=row, column=2, value="Capacity (kt)").style = 'header_style'
+    ws.cell(row=row, column=3, value="Share (%)").style = 'header_style'
+    row += 1
+
+    for _, r in regional.head(10).iterrows():
+        ws.cell(row=row, column=1, value=r['location'])
+        ws.cell(row=row, column=2, value=f"{r['capacity_kt']:,.0f}")
+        ws.cell(row=row, column=3, value=f"{r['share_pct']:.1f}%")
+        row += 1
+
+    row += 2
+
+    # Product Summary
+    ws.cell(row=row, column=1, value="Capacity by Product").font = Font(bold=True, size=12)
+    row += 2
+
+    product = df_fac.groupby('product')['capacity_kt'].sum().sort_values(ascending=False).reset_index()
+
+    ws.cell(row=row, column=1, value="Product").style = 'header_style'
+    ws.cell(row=row, column=2, value="Capacity (kt)").style = 'header_style'
+    row += 1
+
+    for _, r in product.head(15).iterrows():
+        ws.cell(row=row, column=1, value=r['product'])
+        ws.cell(row=row, column=2, value=f"{r['capacity_kt']:,.0f}")
+        row += 1
+
+    # Column widths
+    ws.column_dimensions['A'].width = 25
+    ws.column_dimensions['B'].width = 20
+    ws.column_dimensions['C'].width = 15
+
+    return wb
+
+
+# =============================================================================
+# SHEET 4: EMISSION METHODOLOGY
+# =============================================================================
+def create_emission_methodology_sheet(wb, data):
+    """Create Emission Calculation Methodology sheet"""
+    ws = wb.create_sheet("4. Emission Methodology")
+
+    ws['A1'] = "Emission Calculation Methodology"
+    ws['A1'].font = Font(bold=True, size=14, color='1F4E79')
+
+    row = 3
+
+    # Formula
+    ws.cell(row=row, column=1, value="1. Baseline Emission Calculation").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    ws.cell(row=row, column=1, value="Formula:")
+    ws.cell(row=row, column=2, value="Total_Emissions = Sum (Fuel_Consumption_i x EF_i)").font = Font(italic=True)
+    row += 2
+
+    ws.cell(row=row, column=1, value="Where:")
+    row += 1
+    ws.cell(row=row, column=1, value="  - Fuel_Consumption = Capacity (kt) x Energy_Intensity (GJ/kt or kWh/kt)")
+    row += 1
+    ws.cell(row=row, column=1, value="  - EF_i = Emission factor for fuel type i (from IPCC/API)")
+    row += 1
+    ws.cell(row=row, column=1, value="  - Electricity emissions use grid EF trajectory (Korea 10th Power Plan)")
+    row += 2
+
+    # Energy Intensities
+    ws.cell(row=row, column=1, value="2. Energy Intensities by Product").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    # Get unique product intensities
+    intensity_cols = ['product', 'Naphtha_GJ_per_tonne', 'Electricity_kWh_per_tonne',
+                      'LNG_GJ_per_tonne', 'Fuel_Gas_GJ_per_tonne']
+
+    intensities = data['energy_intensities'][intensity_cols].drop_duplicates('product').head(10)
+
+    headers = ["Product", "Naphtha (GJ/t)", "Electricity (kWh/t)", "LNG (GJ/t)", "Fuel Gas (GJ/t)"]
+    for j, h in enumerate(headers, 1):
+        ws.cell(row=row, column=j, value=h).style = 'header_style'
+    row += 1
+
+    for _, r in intensities.iterrows():
+        ws.cell(row=row, column=1, value=r['product'])
+        ws.cell(row=row, column=2, value=round(r['Naphtha_GJ_per_tonne'], 2) if r['Naphtha_GJ_per_tonne'] > 0 else '-')
+        ws.cell(row=row, column=3, value=round(r['Electricity_kWh_per_tonne'], 2))
+        ws.cell(row=row, column=4, value=round(r['LNG_GJ_per_tonne'], 2) if r['LNG_GJ_per_tonne'] > 0 else '-')
+        ws.cell(row=row, column=5, value=round(r['Fuel_Gas_GJ_per_tonne'], 2) if r['Fuel_Gas_GJ_per_tonne'] > 0 else '-')
+        row += 1
+
+    row += 2
+
+    # BAU Projection
+    ws.cell(row=row, column=1, value="3. BAU Trajectory Projection").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    ws.cell(row=row, column=1, value="Formula:")
+    row += 1
+    ws.cell(row=row, column=1, value="BAU_Emissions(year) = [Fossil x Capacity_Multiplier x Op_Rate]").font = Font(italic=True)
+    row += 1
+    ws.cell(row=row, column=1, value="                    + [Elec x Capacity_Multiplier x Op_Rate x Grid_EF(year)/Grid_EF(2025)]").font = Font(italic=True)
+    row += 2
+
+    ws.cell(row=row, column=1, value="Key Features:")
+    row += 1
+    ws.cell(row=row, column=1, value="  - Grid decarbonization: Electricity emissions decline with grid EF improvement")
+    row += 1
+    ws.cell(row=row, column=1, value="  - Demand growth: Production scales with capacity multiplier (1.0 -> 1.288 by 2050)")
+    row += 1
+    ws.cell(row=row, column=1, value="  - Operating rate: 70% (reflects 2023 market crisis)")
+    row += 2
+
+    # Baseline Results
+    ws.cell(row=row, column=1, value="4. Baseline Results (2025, 70% Operating Rate)").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    base_results = [
+        ("Total Emissions", "46.34 MtCO2/year"),
+        ("Fossil Fuel Emissions", "40.47 MtCO2 (87%)"),
+        ("Electricity Emissions", "5.86 MtCO2 (13%)"),
+    ]
+
+    for label, value in base_results:
+        ws.cell(row=row, column=1, value=label).font = Font(bold=True)
+        ws.cell(row=row, column=2, value=value)
+        row += 1
+
+    # Column widths
+    ws.column_dimensions['A'].width = 40
+    ws.column_dimensions['B'].width = 25
+    ws.column_dimensions['C'].width = 25
+    ws.column_dimensions['D'].width = 20
+    ws.column_dimensions['E'].width = 20
+
+    return wb
+
+
+# =============================================================================
+# SHEET 5: BAU TRAJECTORY
+# =============================================================================
+def create_bau_trajectory_sheet(wb, data):
+    """Create BAU Trajectory sheet"""
+    ws = wb.create_sheet("5. BAU Trajectory")
+
+    ws['A1'] = "Business-As-Usual (BAU) Emission Trajectory (2025-2050)"
+    ws['A1'].font = Font(bold=True, size=14, color='1F4E79')
+    ws['A2'] = "Scenario: No technology deployment; only grid decarbonization benefit"
+    ws['A2'].font = Font(italic=True, size=9)
+
+    row = 4
+
+    # Write trajectory data
+    bau = data['bau_traj'][['year', 'fossil_emissions_mt', 'electricity_emissions_mt',
+                            'total_emissions_mt', 'grid_ef_tco2_per_mwh', 'total_capacity_kt']]
+
+    headers = ["Year", "Fossil Emissions (Mt)", "Electricity Emissions (Mt)",
+               "Total Emissions (Mt)", "Grid EF (tCO2/MWh)", "Total Capacity (kt)"]
+
+    for j, h in enumerate(headers, 1):
+        ws.cell(row=row, column=j, value=h).style = 'header_style'
+    row += 1
+
+    for _, r in bau.iterrows():
+        ws.cell(row=row, column=1, value=int(r['year']))
+        ws.cell(row=row, column=2, value=round(r['fossil_emissions_mt'], 2))
+        ws.cell(row=row, column=3, value=round(r['electricity_emissions_mt'], 2))
+        ws.cell(row=row, column=4, value=round(r['total_emissions_mt'], 2))
+        ws.cell(row=row, column=5, value=round(r['grid_ef_tco2_per_mwh'], 3))
+        ws.cell(row=row, column=6, value=f"{r['total_capacity_kt']:,.0f}")
+        row += 1
+
+    # Add chart
+    chart = LineChart()
+    chart.title = "BAU Emission Trajectory"
+    chart.y_axis.title = "Emissions (MtCO2)"
+    chart.x_axis.title = "Year"
+    chart.style = 10
+
+    data_ref = Reference(ws, min_col=4, min_row=4, max_row=4+len(bau), max_col=4)
+    cats = Reference(ws, min_col=1, min_row=5, max_row=4+len(bau))
+    chart.add_data(data_ref, titles_from_data=True)
+    chart.set_categories(cats)
+    chart.height = 10
+    chart.width = 15
+
+    ws.add_chart(chart, "H4")
+
+    # Column widths
+    for col in 'ABCDEF':
+        ws.column_dimensions[col].width = 22
+
+    return wb
+
+
+# =============================================================================
+# SHEET 6: TECHNOLOGY MACC
+# =============================================================================
+def create_macc_sheet(wb, data):
+    """Create Technology MACC sheet"""
+    ws = wb.create_sheet("6. Technology MACC")
+
+    ws['A1'] = "Marginal Abatement Cost Curve (MACC) by Technology"
+    ws['A1'].font = Font(bold=True, size=14, color='1F4E79')
+
+    row = 3
+
+    # MACC Formula
+    ws.cell(row=row, column=1, value="MACC Formula:").font = Font(bold=True, size=12)
+    row += 1
+    ws.cell(row=row, column=1, value="MACC ($/tCO2) = [CAPEX_Ann + OPEX_Ann + Fuel_Cost_Diff] / Abatement_Potential").font = Font(italic=True)
+    row += 2
+
+    # 2030 MACC Summary
+    ws.cell(row=row, column=1, value="MACC Summary (2030)").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    macc_2030 = data['macc_annual'][data['macc_annual']['year'] == 2030]
+
+    headers = ["Technology", "Abatement (Mt)", "CAPEX ($/tCO2)", "OPEX ($/tCO2)",
+               "Fuel Cost ($/tCO2)", "Total MACC ($/tCO2)"]
+
+    for j, h in enumerate(headers, 1):
+        ws.cell(row=row, column=j, value=h).style = 'header_style'
+    row += 1
+
+    for _, r in macc_2030.iterrows():
+        ws.cell(row=row, column=1, value=r['technology'])
+        ws.cell(row=row, column=2, value=round(r['abatement_potential_mtco2'], 2))
+        ws.cell(row=row, column=3, value=round(r['capex_ann_usd_per_tco2'], 0))
+        ws.cell(row=row, column=4, value=round(r['opex_ann_usd_per_tco2'], 0))
+        ws.cell(row=row, column=5, value=round(r['fuel_cost_diff_usd_per_tco2'], 0))
+        ws.cell(row=row, column=6, value=round(r['total_cost_usd_per_tco2'], 0))
+        row += 1
+
+    row += 2
+
+    # 2050 MACC Summary
+    ws.cell(row=row, column=1, value="MACC Summary (2050)").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    macc_2050 = data['macc_annual'][data['macc_annual']['year'] == 2050]
+
+    for j, h in enumerate(headers, 1):
+        ws.cell(row=row, column=j, value=h).style = 'header_style'
+    row += 1
+
+    for _, r in macc_2050.iterrows():
+        ws.cell(row=row, column=1, value=r['technology'])
+        ws.cell(row=row, column=2, value=round(r['abatement_potential_mtco2'], 2))
+        ws.cell(row=row, column=3, value=round(r['capex_ann_usd_per_tco2'], 0))
+        ws.cell(row=row, column=4, value=round(r['opex_ann_usd_per_tco2'], 0))
+        ws.cell(row=row, column=5, value=round(r['fuel_cost_diff_usd_per_tco2'], 0))
+        ws.cell(row=row, column=6, value=round(r['total_cost_usd_per_tco2'], 0))
+        row += 1
+
+    # Column widths
+    ws.column_dimensions['A'].width = 18
+    for col in 'BCDEF':
+        ws.column_dimensions[col].width = 18
+
+    return wb
+
+
+# =============================================================================
+# SHEET 7: OPTIMIZATION RESULTS
+# =============================================================================
+def create_optimization_sheet(wb, data):
+    """Create Optimization Results sheet"""
+    ws = wb.create_sheet("7. Optimization Results")
+
+    ws['A1'] = "Net Zero Transition Pathway: Optimization Results"
+    ws['A1'].font = Font(bold=True, size=14, color='1F4E79')
+    ws['A2'] = "Scenario: Cost-Effective Technology Deployment to Net Zero by 2050"
+    ws['A2'].font = Font(italic=True, size=9)
+
+    row = 4
+
+    # Key Milestones
+    ws.cell(row=row, column=1, value="Key Milestones").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    opt = data['opt_traj']
+    milestones = opt[opt['year'].isin([2025, 2030, 2035, 2040, 2045, 2050])]
+
+    headers = ["Year", "BAU (Mt)", "Heat Pump (Mt)", "NCC-Elec (Mt)", "RE PPA (Mt)",
+               "Total Abated (Mt)", "Actual Emissions (Mt)", "Cumulative CAPEX ($M)"]
+
+    for j, h in enumerate(headers, 1):
+        ws.cell(row=row, column=j, value=h).style = 'header_style'
+    row += 1
+
+    for _, r in milestones.iterrows():
+        ws.cell(row=row, column=1, value=int(r['year']))
+        ws.cell(row=row, column=2, value=round(r['bau_mt'], 2))
+        ws.cell(row=row, column=3, value=round(r['heat_pump_mt'], 2))
+        ws.cell(row=row, column=4, value=round(r['ncc_elec_mt'], 2))
+        ws.cell(row=row, column=5, value=round(r['re_ppa_mt'], 2))
+        ws.cell(row=row, column=6, value=round(r['total_deployed_mt'], 2))
+        ws.cell(row=row, column=7, value=round(r['actual_emissions_mt'], 4))
+        ws.cell(row=row, column=8, value=f"{r['cumulative_capex_musd']:,.0f}")
+        row += 1
+
+    row += 2
+
+    # Annual Trajectory
+    ws.cell(row=row, column=1, value="Annual Trajectory").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    headers = ["Year", "BAU (Mt)", "Actual (Mt)", "Elec Demand (TWh)", "Cumulative CAPEX ($M)"]
+
+    for j, h in enumerate(headers, 1):
+        ws.cell(row=row, column=j, value=h).style = 'header_style'
+    row += 1
+
+    for _, r in opt.iterrows():
+        ws.cell(row=row, column=1, value=int(r['year']))
+        ws.cell(row=row, column=2, value=round(r['bau_mt'], 2))
+        ws.cell(row=row, column=3, value=round(r['actual_emissions_mt'], 4))
+        ws.cell(row=row, column=4, value=round(r['electricity_consumption_increase_twh'], 1))
+        ws.cell(row=row, column=5, value=f"{r['cumulative_capex_musd']:,.0f}")
+        row += 1
+
+    # Column widths
+    for col in 'ABCDEFGH':
+        ws.column_dimensions[col].width = 18
+
+    return wb
+
+
+# =============================================================================
+# SHEET 8: ENERGY DEMAND
+# =============================================================================
+def create_energy_demand_sheet(wb, data):
+    """Create Energy Demand sheet"""
+    ws = wb.create_sheet("8. Energy Demand")
+
+    ws['A1'] = "Energy Demand Analysis"
+    ws['A1'].font = Font(bold=True, size=14, color='1F4E79')
+
+    row = 3
+
+    # Electricity Demand
+    ws.cell(row=row, column=1, value="1. Electricity Demand Trajectory").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    opt = data['opt_traj']
+
+    headers = ["Year", "Baseline Elec (TWh)", "New Elec from Tech (TWh)", "Total Elec (TWh)"]
+
+    for j, h in enumerate(headers, 1):
+        ws.cell(row=row, column=j, value=h).style = 'header_style'
+    row += 1
+
+    # Baseline electricity is approximately 7.2 TWh/year
+    baseline_elec = 7.2
+
+    for _, r in opt[opt['year'].isin([2025, 2030, 2035, 2040, 2045, 2050])].iterrows():
+        ws.cell(row=row, column=1, value=int(r['year']))
+        ws.cell(row=row, column=2, value=round(baseline_elec * (1 + (r['year']-2025)*0.01), 1))
+        ws.cell(row=row, column=3, value=round(r['electricity_consumption_increase_twh'], 1))
+        ws.cell(row=row, column=4, value=round(baseline_elec * (1 + (r['year']-2025)*0.01) + r['electricity_consumption_increase_twh'], 1))
+        row += 1
+
+    row += 2
+
+    # Policy Context
+    ws.cell(row=row, column=1, value="2. Policy Context").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    policy_data = [
+        ("Korea 2036 RE Target", "97 TWh", "10th Basic Plan for Electricity"),
+        ("Korea 2050 H2 Target", "27.3 Mt", "Hydrogen Economy Roadmap"),
+        ("Model 2050 Elec Demand", f"{opt[opt['year']==2050]['electricity_consumption_increase_twh'].values[0]:.0f} TWh", "NCC-Electricity scenario"),
+    ]
+
+    for label, value, source in policy_data:
+        ws.cell(row=row, column=1, value=label).font = Font(bold=True)
+        ws.cell(row=row, column=2, value=value)
+        ws.cell(row=row, column=3, value=source).font = Font(italic=True, size=9)
+        row += 1
+
+    row += 2
+
+    # Feasibility Note
+    ws.cell(row=row, column=1, value="3. Feasibility Assessment").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    ws.cell(row=row, column=1, value="The NCC-Electricity pathway requires significant grid expansion.")
+    row += 1
+    ws.cell(row=row, column=1, value=f"2050 additional electricity demand: {opt[opt['year']==2050]['electricity_consumption_increase_twh'].values[0]:.0f} TWh")
+    row += 1
+    ws.cell(row=row, column=1, value="This represents approximately 40% of Korea's current total electricity generation.")
+
+    # Column widths
+    ws.column_dimensions['A'].width = 35
+    ws.column_dimensions['B'].width = 25
+    ws.column_dimensions['C'].width = 35
+    ws.column_dimensions['D'].width = 20
+
+    return wb
+
+
+# =============================================================================
+# SHEET 9: COST ANALYSIS
+# =============================================================================
+def create_cost_analysis_sheet(wb, data):
+    """Create Cost Analysis sheet"""
+    ws = wb.create_sheet("9. Cost Analysis")
+
+    ws['A1'] = "Investment and Cost Analysis"
+    ws['A1'].font = Font(bold=True, size=14, color='1F4E79')
+
+    row = 3
+
+    # Cost Summary
+    ws.cell(row=row, column=1, value="1. Total Investment Summary").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    opt = data['opt_traj']
+    total_capex = opt['cumulative_capex_musd'].max() / 1000  # Billion
+
+    summary = [
+        ("Total CAPEX (2025-2050)", f"${total_capex:.1f} Billion"),
+        ("Average Annual Investment", f"${total_capex/26:.2f} Billion/year"),
+        ("Peak Investment Period", "2035-2040"),
+    ]
+
+    for label, value in summary:
+        ws.cell(row=row, column=1, value=label).font = Font(bold=True)
+        ws.cell(row=row, column=2, value=value)
+        row += 1
+
+    row += 2
+
+    # Annual CAPEX
+    ws.cell(row=row, column=1, value="2. Annual CAPEX Trajectory").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    opt_copy = opt.copy()
+    opt_copy['annual_capex'] = opt_copy['cumulative_capex_musd'].diff().fillna(0)
+
+    headers = ["Year", "Annual CAPEX ($M)", "Cumulative CAPEX ($M)"]
+
+    for j, h in enumerate(headers, 1):
+        ws.cell(row=row, column=j, value=h).style = 'header_style'
+    row += 1
+
+    for _, r in opt_copy.iterrows():
+        ws.cell(row=row, column=1, value=int(r['year']))
+        ws.cell(row=row, column=2, value=f"{r['annual_capex']:,.0f}")
+        ws.cell(row=row, column=3, value=f"{r['cumulative_capex_musd']:,.0f}")
+        row += 1
+
+    # Column widths
+    ws.column_dimensions['A'].width = 30
+    ws.column_dimensions['B'].width = 25
+    ws.column_dimensions['C'].width = 25
+
+    return wb
+
+
+# =============================================================================
+# SHEET 10: REFERENCES
+# =============================================================================
+def create_references_sheet(wb):
+    """Create References sheet"""
+    ws = wb.create_sheet("10. References")
+
+    ws['A1'] = "References and Data Sources"
+    ws['A1'].font = Font(bold=True, size=14, color='1F4E79')
+
+    row = 3
+
+    # Academic References
+    ws.cell(row=row, column=1, value="Academic and Industry References").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+
+    references = [
+        ("Emission Factors", "", ""),
+        ("", "IPCC (2019)", "2019 Refinement to the 2006 IPCC Guidelines for National Greenhouse Gas Inventories"),
+        ("", "API (2021)", "Compendium of Greenhouse Gas Emissions Methodologies for the Oil and Natural Gas Industry"),
+        ("", "", ""),
+        ("Technology - NCC Electric", "", ""),
+        ("", "BASF/SABIC/Linde (2024)", "Commercial pilot plant data (6 MW, 4 ton/hr naphtha)"),
+        ("", "Toribio-Ramirez et al. (2025)", "Electric cracker CAPEX analysis"),
+        ("", "Tijani et al. (2022)", "Electric cracking technical review"),
+        ("", "", ""),
+        ("Technology - NCC H2", "", ""),
+        ("", "Lummus Tech (2023)", "Engineering case study for 1,000 kt/yr hydrogen cracker"),
+        ("", "Thunder Said Energy (2023)", "Hydrogen cracker economics"),
+        ("", "ExxonMobil", "98% H2 operation validation"),
+        ("", "", ""),
+        ("Technology - Heat Pump", "", ""),
+        ("", "Kosmadakis et al. (2020)", "Heat pump for industrial processes (COP 4.0)"),
+        ("", "McKinsey (2024)", "Industrial heat pump cost analysis"),
+        ("", "", ""),
+        ("Technology - RDH", "", ""),
+        ("", "Coolbrook (2024)", "RotoDynamic Heater for industrial heating (TRL 8)"),
+        ("", "", ""),
+        ("Grid & Policy", "", ""),
+        ("", "Korea 10th Basic Plan (2023)", "Electricity Supply and Demand Plan"),
+        ("", "KPIA (2023)", "Korea Petrochemical Industry Association capacity database"),
+        ("", "", ""),
+        ("Price Assumptions", "", ""),
+        ("", "IRENA (2024)", "Global renewable energy cost review"),
+        ("", "PLANiT Institute (2025)", "Custom H2 and RE price trajectories"),
+    ]
+
+    for cat, ref, desc in references:
+        if cat:
+            ws.cell(row=row, column=1, value=cat).font = Font(bold=True)
+        if ref:
+            ws.cell(row=row, column=2, value=ref).font = Font(italic=True)
+            ws.cell(row=row, column=3, value=desc)
+        row += 1
+
+    # Column widths
+    ws.column_dimensions['A'].width = 25
+    ws.column_dimensions['B'].width = 30
+    ws.column_dimensions['C'].width = 70
+
+    return wb
+
+
+# =============================================================================
+# MAIN
+# =============================================================================
+def generate_report():
+    """Generate the complete Excel report"""
+    print("Loading data...")
+    data = load_all_data()
+
+    print("Creating workbook...")
+    wb = Workbook()
+
+    # Remove default sheet
+    wb.remove(wb.active)
+
+    # Create styles
+    wb = create_styles(wb)
+
+    # Create sheets
+    print("Creating Executive Summary...")
+    wb = create_executive_summary(wb, data)
+
+    print("Creating Assumptions & References...")
+    wb = create_assumptions_sheet(wb, data)
+
+    print("Creating Facility Database...")
+    wb = create_facility_sheet(wb, data)
+
+    print("Creating Emission Methodology...")
+    wb = create_emission_methodology_sheet(wb, data)
+
+    print("Creating BAU Trajectory...")
+    wb = create_bau_trajectory_sheet(wb, data)
+
+    print("Creating Technology MACC...")
+    wb = create_macc_sheet(wb, data)
+
+    print("Creating Optimization Results...")
+    wb = create_optimization_sheet(wb, data)
+
+    print("Creating Energy Demand...")
+    wb = create_energy_demand_sheet(wb, data)
+
+    print("Creating Cost Analysis...")
+    wb = create_cost_analysis_sheet(wb, data)
+
+    print("Creating References...")
+    wb = create_references_sheet(wb)
+
+    print("Creating Regional Analysis...")
+    wb = create_regional_analysis_sheet(wb, data)
+
+    print("Creating Operating Rate Analysis...")
+    wb = create_operating_rate_sheet(wb, data)
+
+    # Save
+    output_path = OUTPUT_DIR / "Korea_Petrochemical_NetZero_Report.xlsx"
+    wb.save(output_path)
+    print(f"\nReport saved to: {output_path}")
+
+    return output_path
+
+
+# =============================================================================
+# SHEET 11: REGIONAL ANALYSIS (NEW)
+# =============================================================================
+def create_regional_analysis_sheet(wb, data):
+    """Create comprehensive Regional Analysis sheet"""
+    ws = wb.create_sheet("11. Regional Analysis")
     
-    # 3. Restructuring Scenario
-    print("\n" + "="*80)
-    print("SCENARIO 3: Restructuring (30% Reduction)")
-    print("="*80)
-    # Note: run_restructuring_scenario handles its own baseline calc and restoration
-    df_restructure, filepath_res = generator.run_restructuring_scenario('NCC-Electricity')
+    ws['A1'] = "Regional Analysis: Korea Petrochemical Complexes"
+    ws['A1'].font = Font(bold=True, size=14, color='1F4E79')
+    ws['A2'] = "Facility-level breakdown by location with emissions and investment allocation"
+    ws['A2'].font = Font(italic=True, size=9)
     
-    # Comparison Report
-    filepath3 = generator.generate_comparison_report(df_elec, df_h2, df_restructure)
+    row = 4
+    
+    # Load and process facility data
+    fac = data['facilities']
+    energy = data['energy_intensities']
+    
+    # Merge to get emissions data
+    merged = pd.merge(fac, energy[['product', 'process', 'company', 'location', 
+                                   'Naphtha_GJ_per_tonne', 'Electricity_kWh_per_tonne',
+                                   'LNG_GJ_per_tonne', 'Fuel_Gas_GJ_per_tonne']], 
+                      on=['product', 'process', 'company', 'location'], how='left')
+    
+    # Emission factors
+    EF_NAPHTHA = 0.0542
+    EF_LNG = 0.0561
+    EF_FUEL_GAS = 0.050
+    GRID_EF_2025 = 0.436
+    
+    # Calculate emissions
+    merged['emissions_fossil_kt'] = (
+        merged['capacity_kt'] * merged['Naphtha_GJ_per_tonne'].fillna(0) * EF_NAPHTHA +
+        merged['capacity_kt'] * merged['LNG_GJ_per_tonne'].fillna(0) * EF_LNG +
+        merged['capacity_kt'] * merged['Fuel_Gas_GJ_per_tonne'].fillna(0) * EF_FUEL_GAS
+    )
+    merged['emissions_elec_kt'] = merged['capacity_kt'] * merged['Electricity_kWh_per_tonne'].fillna(0) / 1000 * GRID_EF_2025
+    merged['emissions_total_kt'] = merged['emissions_fossil_kt'] + merged['emissions_elec_kt']
+    
+    # Section 1: Regional Summary
+    ws.cell(row=row, column=1, value="1. Regional Capacity and Emissions Summary").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+    
+    # Aggregate by region
+    regional = merged.groupby('location').agg({
+        'capacity_kt': 'sum',
+        'emissions_fossil_kt': 'sum',
+        'emissions_elec_kt': 'sum',
+        'emissions_total_kt': 'sum',
+        'product': 'count'
+    }).rename(columns={'product': 'n_facilities'}).reset_index()
+    
+    regional['share_pct'] = regional['capacity_kt'] / regional['capacity_kt'].sum() * 100
+    regional['emissions_mt'] = regional['emissions_total_kt'] / 1000
+    regional = regional.sort_values('capacity_kt', ascending=False)
+    
+    # Calculate investment allocation (proportional to emissions)
+    total_investment = data['opt_traj']['cumulative_capex_musd'].max() / 1000  # Billion
+    total_emissions = regional['emissions_mt'].sum()
+    regional['investment_b'] = (regional['emissions_mt'] / total_emissions) * total_investment
+    
+    headers = ["Region", "Facilities", "Capacity (kt)", "Emissions (Mt)", "Share (%)", "Est. Investment ($B)"]
+    for j, h in enumerate(headers, 1):
+        ws.cell(row=row, column=j, value=h).style = 'header_style'
+    row += 1
+    
+    for _, r in regional.iterrows():
+        ws.cell(row=row, column=1, value=r['location'])
+        ws.cell(row=row, column=2, value=int(r['n_facilities']))
+        ws.cell(row=row, column=3, value=f"{r['capacity_kt']:,.0f}")
+        ws.cell(row=row, column=4, value=round(r['emissions_mt'], 2))
+        ws.cell(row=row, column=5, value=f"{r['share_pct']:.1f}%")
+        ws.cell(row=row, column=6, value=f"${r['investment_b']:.2f}")
+        row += 1
+    
+    row += 2
+    
+    # Section 2: Top 4 Complexes Detailed Analysis
+    ws.cell(row=row, column=1, value="2. Major Complex Analysis (Top 4)").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+    
+    top_regions = ['Yeosu', 'Daesan', 'Ulsan', 'Onsan']
+    
+    for region in top_regions:
+        loc_data = merged[merged['location'] == region]
+        total_cap = loc_data['capacity_kt'].sum()
+        total_emit = loc_data['emissions_total_kt'].sum() / 1000
+        n_fac = len(loc_data)
+        
+        ws.cell(row=row, column=1, value=f"{region} Complex").font = Font(bold=True, size=11, color='1F4E79')
+        row += 1
+        
+        ws.cell(row=row, column=1, value=f"Facilities: {n_fac} | Capacity: {total_cap:,.0f} kt | Emissions: {total_emit:.2f} Mt")
+        row += 2
+        
+        # Product mix
+        ws.cell(row=row, column=1, value="Product").style = 'header_style'
+        ws.cell(row=row, column=2, value="Capacity (kt)").style = 'header_style'
+        ws.cell(row=row, column=3, value="Share (%)").style = 'header_style'
+        row += 1
+        
+        product_mix = loc_data.groupby('product')['capacity_kt'].sum().sort_values(ascending=False).head(5)
+        for prod, cap in product_mix.items():
+            ws.cell(row=row, column=1, value=prod)
+            ws.cell(row=row, column=2, value=f"{cap:,.0f}")
+            ws.cell(row=row, column=3, value=f"{cap/total_cap*100:.1f}%")
+            row += 1
+        
+        row += 2
+    
+    # Section 3: Regional Transition Implications
+    ws.cell(row=row, column=1, value="3. Regional Transition Implications").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+    
+    implications = [
+        ("Yeosu Complex", "Largest NCC cluster (5.4 Mt ethylene)", "Priority for NCC-Electricity deployment", "$8.7B investment"),
+        ("Daesan Complex", "High P-X and polymer production", "Heat pump + NCC-Electricity focus", "$7.2B investment"),
+        ("Ulsan Complex", "Diverse product mix, older facilities", "Phased technology deployment", "$3.2B investment"),
+        ("Onsan Complex", "Concentrated NCC operations", "Efficient technology clustering", "$2.1B investment"),
+    ]
+    
+    ws.cell(row=row, column=1, value="Region").style = 'header_style'
+    ws.cell(row=row, column=2, value="Characteristics").style = 'header_style'
+    ws.cell(row=row, column=3, value="Transition Strategy").style = 'header_style'
+    ws.cell(row=row, column=4, value="Est. Investment").style = 'header_style'
+    row += 1
+    
+    for region, char, strategy, invest in implications:
+        ws.cell(row=row, column=1, value=region)
+        ws.cell(row=row, column=2, value=char)
+        ws.cell(row=row, column=3, value=strategy)
+        ws.cell(row=row, column=4, value=invest)
+        row += 1
+    
+    row += 2
+    
+    # Section 4: Regional Grid Infrastructure Requirements
+    ws.cell(row=row, column=1, value="4. Regional Grid Infrastructure Requirements (2050)").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+    
+    # Estimate electricity demand by region proportional to NCC capacity
+    ncc_by_region = merged[merged['process'] == 'Naphtha Cracker'].groupby('location')['capacity_kt'].sum()
+    total_ncc = ncc_by_region.sum()
+    total_elec_demand = data['opt_traj'][data['opt_traj']['year'] == 2050]['electricity_consumption_increase_twh'].values[0]
+    
+    ws.cell(row=row, column=1, value="Region").style = 'header_style'
+    ws.cell(row=row, column=2, value="NCC Capacity (kt)").style = 'header_style'
+    ws.cell(row=row, column=3, value="Est. Elec Demand (TWh)").style = 'header_style'
+    ws.cell(row=row, column=4, value="Grid Expansion Need").style = 'header_style'
+    row += 1
+    
+    for region in top_regions:
+        if region in ncc_by_region.index:
+            ncc_cap = ncc_by_region[region]
+            elec_demand = (ncc_cap / total_ncc) * total_elec_demand
+            grid_note = "Major upgrade required" if elec_demand > 50 else "Moderate upgrade" if elec_demand > 20 else "Minor upgrade"
+            
+            ws.cell(row=row, column=1, value=region)
+            ws.cell(row=row, column=2, value=f"{ncc_cap:,.0f}")
+            ws.cell(row=row, column=3, value=f"{elec_demand:.1f}")
+            ws.cell(row=row, column=4, value=grid_note)
+            row += 1
+    
+    # Column widths
+    ws.column_dimensions['A'].width = 25
+    ws.column_dimensions['B'].width = 30
+    ws.column_dimensions['C'].width = 25
+    ws.column_dimensions['D'].width = 25
+    ws.column_dimensions['E'].width = 15
+    ws.column_dimensions['F'].width = 18
+    
+    return wb
 
-    print("\n" + "="*80)
-    print("COMPLETE!")
-    print("="*80)
-    print(f"\nGenerated files:")
-    print(f"  1. {filepath1}")
-    print(f"  2. {filepath2}")
-    print(f"  3. {filepath_res}")
-    print(f"  4. {filepath3}")
-    print("\nClient Comparison Report contains:")
-    print("  - Executive_Dashboard: High-level KPIs and Charts")
-    print("  - Scenario_Comparison: Full Production vs Restructuring")
-    print("  - Regional_Annual: Investment and emissions by region/year")
-    print("  - Facility_Transition_Matrix: Technology heatmap")
 
-    print("  - Emission_Targets: Target trajectory")
-    print("  - Technology_Parameters: Tech specs")
-    print("  - Price_Trajectories: H2, RE, Grid prices")
+# =============================================================================
+# SHEET 12: OPERATING RATE ANALYSIS (NEW)
+# =============================================================================
+def create_operating_rate_sheet(wb, data):
+    """Create Operating Rate Analysis sheet"""
+    ws = wb.create_sheet("12. Operating Rate Analysis")
+    
+    ws['A1'] = "Operating Rate Analysis and Model Assumptions"
+    ws['A1'].font = Font(bold=True, size=14, color='1F4E79')
+    
+    row = 3
+    
+    # Section 1: Operating Rate Definition
+    ws.cell(row=row, column=1, value="1. Operating Rate Definition").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+    
+    definitions = [
+        ("Operating Rate", "Actual production / Installed capacity", "70%"),
+        ("Capacity Multiplier", "Installed capacity growth from 2025 baseline", "1.0 -> 1.288"),
+        ("Effective Multiplier", "Capacity Multiplier x Operating Rate", "Production scaling factor"),
+    ]
+    
+    ws.cell(row=row, column=1, value="Parameter").style = 'header_style'
+    ws.cell(row=row, column=2, value="Definition").style = 'header_style'
+    ws.cell(row=row, column=3, value="Value").style = 'header_style'
+    row += 1
+    
+    for param, defn, val in definitions:
+        ws.cell(row=row, column=1, value=param)
+        ws.cell(row=row, column=2, value=defn)
+        ws.cell(row=row, column=3, value=val)
+        row += 1
+    
+    row += 2
+    
+    # Section 2: Operating Rate in Model
+    ws.cell(row=row, column=1, value="2. How Operating Rate is Used in the Model").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+    
+    ws.cell(row=row, column=1, value="Formula:")
+    row += 1
+    ws.cell(row=row, column=1, value="Effective_Multiplier = Capacity_Multiplier x Operating_Rate").font = Font(italic=True)
+    row += 1
+    ws.cell(row=row, column=1, value="Actual_Emissions = Baseline_Emissions x Effective_Multiplier").font = Font(italic=True)
+    row += 2
+    
+    ws.cell(row=row, column=1, value="Implementation in Code (modules/baseline.py, modules/macc.py):")
+    row += 1
+    ws.cell(row=row, column=1, value="  1. Read operating_rate_pct from demand_growth_trajectory.csv")
+    row += 1
+    ws.cell(row=row, column=1, value="  2. Calculate effective_multiplier = capacity_multiplier * (operating_rate_pct / 100)")
+    row += 1
+    ws.cell(row=row, column=1, value="  3. Scale all emissions by effective_multiplier")
+    row += 2
+    
+    # Section 3: Operating Rate Trajectory
+    ws.cell(row=row, column=1, value="3. Operating Rate Trajectory (2025-2050)").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+    
+    demand = data['demand_growth']
+    
+    ws.cell(row=row, column=1, value="Year").style = 'header_style'
+    ws.cell(row=row, column=2, value="Annual Growth (%)").style = 'header_style'
+    ws.cell(row=row, column=3, value="Capacity Multiplier").style = 'header_style'
+    ws.cell(row=row, column=4, value="Operating Rate (%)").style = 'header_style'
+    ws.cell(row=row, column=5, value="Effective Multiplier").style = 'header_style'
+    row += 1
+    
+    for _, r in demand.iterrows():
+        op_rate = r['operating_rate_pct']
+        eff_mult = r['cumulative_capacity_multiplier'] * (op_rate / 100)
+        
+        ws.cell(row=row, column=1, value=int(r['year']))
+        ws.cell(row=row, column=2, value=f"{r['annual_growth_rate_pct']:.1f}%")
+        ws.cell(row=row, column=3, value=round(r['cumulative_capacity_multiplier'], 3))
+        ws.cell(row=row, column=4, value=f"{op_rate:.0f}%")
+        ws.cell(row=row, column=5, value=round(eff_mult, 3))
+        row += 1
+    
+    row += 2
+    
+    # Section 4: Impact of Operating Rate
+    ws.cell(row=row, column=1, value="4. Impact of Operating Rate on Results").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+    
+    impacts = [
+        ("Baseline Emissions (2025)", "At 100% op rate: 66.2 MtCO2", "At 70% op rate: 46.3 MtCO2"),
+        ("BAU Emissions (2050)", "At 100% op rate: ~76 MtCO2", "At 70% op rate: 53.3 MtCO2"),
+        ("Total Investment Need", "At 100% op rate: ~$53B", "At 70% op rate: $37.3B"),
+        ("Technology Sizing", "Scales with actual production", "30% smaller than nameplate"),
+    ]
+    
+    ws.cell(row=row, column=1, value="Metric").style = 'header_style'
+    ws.cell(row=row, column=2, value="100% Operating Rate").style = 'header_style'
+    ws.cell(row=row, column=3, value="70% Operating Rate (Model)").style = 'header_style'
+    row += 1
+    
+    for metric, val_100, val_70 in impacts:
+        ws.cell(row=row, column=1, value=metric)
+        ws.cell(row=row, column=2, value=val_100)
+        ws.cell(row=row, column=3, value=val_70)
+        row += 1
+    
+    row += 2
+    
+    # Section 5: Rationale
+    ws.cell(row=row, column=1, value="5. Rationale for 70% Operating Rate").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+    
+    rationale = [
+        "- Korean petrochemical industry experienced significant overcapacity crisis in 2023-2024",
+        "- Chinese petrochemical expansion led to global supply glut",
+        "- KPIA data shows actual operating rates dropped to 65-75% in 2023",
+        "- 70% represents conservative assumption for 2025-2050 period",
+        "- Model can be adjusted for sensitivity analysis (80%, 90%, 100% scenarios)",
+    ]
+    
+    for text in rationale:
+        ws.cell(row=row, column=1, value=text)
+        row += 1
+    
+    row += 2
+    
+    # Section 6: Sensitivity Note
+    ws.cell(row=row, column=1, value="6. Sensitivity Analysis").font = Font(bold=True, size=12, color='1F4E79')
+    row += 2
+    
+    ws.cell(row=row, column=1, value="Operating rate significantly impacts all model outputs:")
+    row += 1
+    ws.cell(row=row, column=1, value="  - Higher operating rate = higher emissions = higher abatement need = higher investment")
+    row += 1
+    ws.cell(row=row, column=1, value="  - Lower operating rate = lower emissions = lower technology deployment = lower cost")
+    row += 1
+    ws.cell(row=row, column=1, value="  - To run sensitivity, modify 'operating_rate_pct' in data/demand_growth_trajectory.csv")
+    
+    # Column widths
+    ws.column_dimensions['A'].width = 35
+    ws.column_dimensions['B'].width = 35
+    ws.column_dimensions['C'].width = 35
+    ws.column_dimensions['D'].width = 20
+    ws.column_dimensions['E'].width = 20
+    
+    return wb
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    generate_report()
+
