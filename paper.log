@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.5.5)  5 DEC 2025 10:55
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.5.5)  5 DEC 2025 11:23
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -494,7 +494,7 @@ Package caption Info: End \AtBeginDocument code.
 
 {/usr/local/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/loc
 al/texlive/2023/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}] [2]
-<outputs/figures/fig_emissions_pathway.png, id=85, 722.7pt x 433.62pt>
+<outputs/figures/fig_emissions_pathway.png, id=89, 722.7pt x 433.62pt>
 File: outputs/figures/fig_emissions_pathway.png Graphic file (type png)
 <use outputs/figures/fig_emissions_pathway.png>
 Package pdftex.def Info: outputs/figures/fig_emissions_pathway.png  used on inp
@@ -502,14 +502,14 @@ ut line 151.
 (pdftex.def)             Requested size: 409.71692pt x 245.82944pt.
  [3{/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.en
 c}]
-<outputs/figures/fig_scenario_comparison.png, id=98, 867.24pt x 361.35pt>
+<outputs/figures/fig_scenario_comparison.png, id=102, 867.24pt x 361.35pt>
 File: outputs/figures/fig_scenario_comparison.png Graphic file (type png)
 <use outputs/figures/fig_scenario_comparison.png>
 Package pdftex.def Info: outputs/figures/fig_scenario_comparison.png  used on i
 nput line 180.
 (pdftex.def)             Requested size: 455.24411pt x 189.68402pt.
  [4 <./outputs/figures/fig_emissions_pathway.png>]
-<outputs/figures/fig_cost_waterfall.png, id=106, 578.16pt x 433.62pt>
+<outputs/figures/fig_cost_waterfall.png, id=110, 578.16pt x 433.62pt>
 File: outputs/figures/fig_cost_waterfall.png Graphic file (type png)
 <use outputs/figures/fig_cost_waterfall.png>
 Package pdftex.def Info: outputs/figures/fig_cost_waterfall.png  used on input 
@@ -524,23 +524,14 @@ nol-ogy Spec-i-fi-ca-tion\T1/cmr/m/n/12 . Tech-ni-cal Whitepa-
  []
 
 [7] (./paper.aux)
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-
-Package rerunfilecheck Warning: File `paper.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `paper.out':
-(rerunfilecheck)             Before: A601CA3A6BAFD19E50331AC595E21612;2366
-(rerunfilecheck)             After:  FADF856468089DE31D39FABC23A70076;2460.
+Package rerunfilecheck Info: File `paper.out' has not changed.
+(rerunfilecheck)             Checksum: FADF856468089DE31D39FABC23A70076;2460.
  ) 
 Here is how much of TeX's memory you used:
- 15127 strings out of 476025
- 297145 string characters out of 5790018
+ 15128 strings out of 476025
+ 297156 string characters out of 5790018
  1862388 words of memory out of 5000000
- 35382 multiletter control sequences out of 15000+600000
+ 35383 multiletter control sequences out of 15000+600000
  525034 words of font info for 60 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  75i,9n,77p,526b,957s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -557,10 +548,10 @@ live/2023/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/local/texli
 ve/2023/texmf-dist/fonts/type1/public/cm-super/sfrm1440.pfb></usr/local/texlive
 /2023/texmf-dist/fonts/type1/public/cm-super/sfrm2074.pfb></usr/local/texlive/2
 023/texmf-dist/fonts/type1/public/cm-super/sfti1200.pfb>
-Output written on paper.pdf (7 pages, 648798 bytes).
+Output written on paper.pdf (7 pages, 648737 bytes).
 PDF statistics:
- 203 PDF objects out of 1000 (max. 8388607)
- 159 compressed objects within 2 object streams
+ 206 PDF objects out of 1000 (max. 8388607)
+ 162 compressed objects within 2 object streams
  39 named destinations out of 1000 (max. 500000)
- 136 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 144 words of extra memory for PDF output out of 10000 (max. 10000000)
 
