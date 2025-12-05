@@ -125,12 +125,42 @@ def load_all_data():
     # Emission scenarios (for 2035 target)
     data['emission_scenarios'] = pd.read_csv(DATA_DIR / 'emission_scenarios_clean.csv')
 
-    # 6 Scenarios comparison (if available)
-    scenarios_path = OUTPUTS_DIR / 'scenarios_comparison_6scenarios' / 'summary.csv'
+    # 6 Scenarios comparison - use new verified data
+    scenarios_path = OUTPUTS_DIR / 'scenario_summary_final.csv'
     if scenarios_path.exists():
         data['scenarios_6'] = pd.read_csv(scenarios_path)
     else:
-        data['scenarios_6'] = None
+        # Fallback to old path
+        scenarios_path_old = OUTPUTS_DIR / 'scenarios_comparison_6scenarios' / 'summary.csv'
+        if scenarios_path_old.exists():
+            data['scenarios_6'] = pd.read_csv(scenarios_path_old)
+        else:
+            data['scenarios_6'] = None
+
+    # Load retired facilities info
+    retired_25_path = OUTPUTS_DIR / 'restructure_25pct_retired_facilities.csv'
+    retired_40_path = OUTPUTS_DIR / 'restructure_40pct_retired_facilities.csv'
+    if retired_25_path.exists():
+        data['retired_25'] = pd.read_csv(retired_25_path)
+    else:
+        data['retired_25'] = None
+    if retired_40_path.exists():
+        data['retired_40'] = pd.read_csv(retired_40_path)
+    else:
+        data['retired_40'] = None
+
+    # Load scenario-specific facility data
+    data['scenario_facilities'] = {}
+    for scenario_id in ['shaheen_ncc_h2', 'shaheen_ncc_electricity',
+                        'restructure_25pct_ncc_h2', 'restructure_25pct_ncc_electricity',
+                        'restructure_40pct_ncc_h2', 'restructure_40pct_ncc_electricity']:
+        scenario_dir = OUTPUTS_DIR / f'scenario_{scenario_id}'
+        if scenario_dir.exists():
+            data['scenario_facilities'][scenario_id] = {
+                'facilities': pd.read_csv(scenario_dir / 'scenario_facilities.csv') if (scenario_dir / 'scenario_facilities.csv').exists() else None,
+                'emissions': pd.read_csv(scenario_dir / 'facility_emissions_2050.csv') if (scenario_dir / 'facility_emissions_2050.csv').exists() else None,
+                'deployment': pd.read_csv(scenario_dir / 'deployment_trajectory.csv') if (scenario_dir / 'deployment_trajectory.csv').exists() else None,
+            }
 
     return data
 
@@ -1219,25 +1249,27 @@ def create_ncc_h2_scenario_sheet(wb, data):
         ws.cell(row=row, column=1, value="4. 6 Scenario Comparison Results (2050)").font = Font(bold=True, size=12, color='1F4E79')
         row += 2
 
-        headers = ["Scenario", "Emissions (Mt)", "Cost ($B)", "Elec (TWh)", "H2 (kt)"]
+        headers = ["Scenario", "Tech", "Net (Mt)", "Cost ($B)", "Elec (TWh)", "H2 (kt)"]
         for j, h in enumerate(headers, 1):
             ws.cell(row=row, column=j, value=h).style = 'header_style'
         row += 1
 
         for _, r in data['scenarios_6'].iterrows():
             ws.cell(row=row, column=1, value=r['scenario'])
-            ws.cell(row=row, column=2, value=round(r['emissions_2050_mt'], 2))
-            ws.cell(row=row, column=3, value=f"${r['cost_2050_billion_usd']:.1f}")
-            ws.cell(row=row, column=4, value=round(r['electricity_increase_twh'], 1))
-            ws.cell(row=row, column=5, value=f"{r['h2_consumption_kt']:,.0f}")
+            ws.cell(row=row, column=2, value=r['technology'])
+            ws.cell(row=row, column=3, value=round(r['net_2050_mt'], 2))
+            ws.cell(row=row, column=4, value=f"${r['capex_billion_usd']:.1f}")
+            ws.cell(row=row, column=5, value=round(r['electricity_twh'], 1))
+            ws.cell(row=row, column=6, value=f"{r['h2_kt']:,.0f}")
             row += 1
 
     # Column widths
-    ws.column_dimensions['A'].width = 40
-    ws.column_dimensions['B'].width = 30
-    ws.column_dimensions['C'].width = 30
+    ws.column_dimensions['A'].width = 25
+    ws.column_dimensions['B'].width = 18
+    ws.column_dimensions['C'].width = 15
     ws.column_dimensions['D'].width = 15
     ws.column_dimensions['E'].width = 15
+    ws.column_dimensions['F'].width = 15
 
     return wb
 
@@ -1264,9 +1296,9 @@ def create_scenario_comparison_sheet(wb, data):
     row += 1
 
     prod_scenarios = [
-        ("Shaheen (성장)", "S-Oil Shaheen project adds 6 NEW facilities (1.8Mt ethylene + downstream), +3.95Mt capacity"),
-        ("구조조정 25%", "Retire oldest 25% of facilities (62 facilities, 21.8kt capacity retired)"),
-        ("구조조정 40%", "Retire oldest 40% of facilities (99 facilities, 39.9kt capacity retired)"),
+        ("Shaheen (성장)", "S-Oil Shaheen project adds 6 NEW facilities (254 total), +3,950 kt capacity, 44 NCC"),
+        ("구조조정 25%", "Retire oldest 9 NCC facilities (239 total), 6,774 kt NCC capacity retired, 32 NCC"),
+        ("구조조정 40%", "Retire oldest 16 NCC facilities (232 total), 10,854 kt NCC capacity retired, 25 NCC"),
     ]
 
     for name, desc in prod_scenarios:
@@ -1293,47 +1325,78 @@ def create_scenario_comparison_sheet(wb, data):
     row += 2
 
     if data['scenarios_6'] is not None:
-        headers = ["Scenario", "BAU (Mt)", "Net (Mt)", "Cost ($B)", "NCC-H2 (Mt)", "NCC-Elec (Mt)", "Elec (TWh)", "H2 (kt)"]
+        headers = ["Scenario", "Tech", "Facilities", "NCC", "BAU (Mt)", "Net (Mt)", "Cost ($B)", "Elec (TWh)", "H2 (kt)"]
         for j, h in enumerate(headers, 1):
             ws.cell(row=row, column=j, value=h).style = 'header_style'
         row += 1
 
         for _, r in data['scenarios_6'].iterrows():
             ws.cell(row=row, column=1, value=r['scenario'])
-            ws.cell(row=row, column=2, value=round(r['bau_emissions_2050_mt'], 1))
-            ws.cell(row=row, column=3, value=round(r['emissions_2050_mt'], 1))
-            ws.cell(row=row, column=4, value=f"${r['cost_2050_billion_usd']:.1f}")
-            ws.cell(row=row, column=5, value=round(r['ncc_h2_mt'], 1))
-            ws.cell(row=row, column=6, value=round(r['ncc_elec_mt'], 1))
-            ws.cell(row=row, column=7, value=round(r['electricity_increase_twh'], 1))
-            ws.cell(row=row, column=8, value=f"{r['h2_consumption_kt']:,.0f}")
+            ws.cell(row=row, column=2, value=r['technology'])
+            ws.cell(row=row, column=3, value=int(r['n_facilities']))
+            ws.cell(row=row, column=4, value=int(r['n_ncc_facilities']))
+            ws.cell(row=row, column=5, value=round(r['bau_2050_mt'], 1))
+            ws.cell(row=row, column=6, value=round(r['net_2050_mt'], 2))
+            ws.cell(row=row, column=7, value=f"${r['capex_billion_usd']:.1f}")
+            ws.cell(row=row, column=8, value=round(r['electricity_twh'], 1))
+            ws.cell(row=row, column=9, value=f"{r['h2_kt']:,.0f}")
             row += 1
 
         row += 2
 
-        # Section 3: Key Insights
-        ws.cell(row=row, column=1, value="3. Key Insights").font = Font(bold=True, size=12, color='1F4E79')
+        # Section 3: Retired Facilities Detail
+        ws.cell(row=row, column=1, value="3. Retired NCC Facilities (Restructuring Scenarios)").font = Font(bold=True, size=12, color='1F4E79')
+        row += 2
+
+        if data.get('retired_25') is not None:
+            ws.cell(row=row, column=1, value="구조조정 25% - Retired 9 NCC facilities:").font = Font(bold=True)
+            row += 1
+            for _, fac in data['retired_25'].iterrows():
+                ws.cell(row=row, column=1, value=f"  - {fac['company']} {fac['product']} ({fac['location']}): {fac['capacity_kt']:,.0f} kt, built {int(fac['year_built'])}")
+                row += 1
+            row += 1
+
+        if data.get('retired_40') is not None:
+            additional_retired = len(data['retired_40']) - len(data.get('retired_25', []))
+            ws.cell(row=row, column=1, value=f"구조조정 40% - Additional {additional_retired} NCC facilities retired:").font = Font(bold=True)
+            row += 1
+            retired_25_idx = set(data['retired_25'].index) if data.get('retired_25') is not None else set()
+            for idx, fac in data['retired_40'].iterrows():
+                if idx >= len(data.get('retired_25', [])):  # Only show additional facilities
+                    ws.cell(row=row, column=1, value=f"  - {fac['company']} {fac['product']} ({fac['location']}): {fac['capacity_kt']:,.0f} kt, built {int(fac['year_built'])}")
+                    row += 1
+
+        row += 2
+
+        # Section 4: Key Insights
+        ws.cell(row=row, column=1, value="4. Key Insights").font = Font(bold=True, size=12, color='1F4E79')
         row += 2
 
         insights = [
-            "1. 구조조정 40% + NCC-Electricity achieves Net Zero at lowest cost ($14.5B)",
-            "2. Shaheen (growth) scenarios require highest investment ($31-33B)",
-            "3. NCC-Electricity scenarios consistently cheaper than NCC-H2 scenarios",
-            "4. H2 scenarios have significantly lower electricity demand but require H2 infrastructure",
-            "5. 25% restructuring offers middle-ground between cost and production volume",
+            "1. 구조조정 40% + NCC-Electricity achieves near Net Zero at lowest cost ($34.1B)",
+            "2. Shaheen (growth) scenarios require highest investment ($58.9-64.7B) but maintain production",
+            "3. NCC-H2 scenarios are ~10% cheaper than NCC-Electricity but require H2 infrastructure",
+            "4. Restructuring reduces BAU emissions significantly: 25% saves 19.7 Mt, 40% saves 28.0 Mt",
+            "5. All scenarios achieve <4 Mt net emissions by 2050 through technology deployment",
         ]
 
         for insight in insights:
             ws.cell(row=row, column=1, value=insight)
             row += 1
     else:
-        ws.cell(row=row, column=1, value="Run run_all_scenarios_v3.py to generate 6 scenario comparison data")
+        ws.cell(row=row, column=1, value="Run run_scenarios_complete.py to generate 6 scenario comparison data")
         ws.cell(row=row, column=1).font = Font(italic=True, color='FF0000')
 
     # Column widths
-    ws.column_dimensions['A'].width = 35
-    for col in 'BCDEFGH':
-        ws.column_dimensions[col].width = 15
+    ws.column_dimensions['A'].width = 25
+    ws.column_dimensions['B'].width = 15
+    ws.column_dimensions['C'].width = 10
+    ws.column_dimensions['D'].width = 8
+    ws.column_dimensions['E'].width = 12
+    ws.column_dimensions['F'].width = 12
+    ws.column_dimensions['G'].width = 12
+    ws.column_dimensions['H'].width = 12
+    ws.column_dimensions['I'].width = 12
 
     return wb
 
@@ -1556,6 +1619,9 @@ def generate_report():
     print("Creating Sheet 20: 2050 Facility Allocation (NEW)...")
     wb = create_facility_allocation_sheet(wb, data)
 
+    print("Creating Sheets 21-26: Detailed Scenario Facility Sheets...")
+    wb = create_scenario_facility_sheets(wb, data)
+
     # Save
     output_path = OUTPUT_DIR / "Korea_Petrochemical_NetZero_Report_v2.xlsx"
     wb.save(output_path)
@@ -1581,10 +1647,16 @@ def generate_report():
     print("  14. Scenario Comparison (6 scenarios)")
     print("  15. 2035 Target Analysis")
     print("  16. Learning Curve Sensitivity")
-    print("  17. Facility Transition Details (NEW)")
-    print("  18. Full Facility Database (NEW)")
-    print("  19. Annual MACC Data (NEW)")
-    print("  20. 2050 Facility Allocation (NEW)")
+    print("  17. Facility Transition Details")
+    print("  18. Full Facility Database")
+    print("  19. Annual MACC Data")
+    print("  20. 2050 Facility Allocation")
+    print("  21. Scenario: Shaheen + NCC-H2 (Facility Details)")
+    print("  22. Scenario: Shaheen + NCC-Electricity (Facility Details)")
+    print("  23. Scenario: Restructure 25% + NCC-H2 (Facility Details)")
+    print("  24. Scenario: Restructure 25% + NCC-Electricity (Facility Details)")
+    print("  25. Scenario: Restructure 40% + NCC-H2 (Facility Details)")
+    print("  26. Scenario: Restructure 40% + NCC-Electricity (Facility Details)")
 
     return output_path
 
@@ -2139,6 +2211,156 @@ def create_facility_allocation_sheet(wb, data):
     ws.column_dimensions['E'].width = 18
     ws.column_dimensions['F'].width = 15
     ws.column_dimensions['G'].width = 18
+
+    return wb
+
+
+# =============================================================================
+# SHEET 21-26: DETAILED SCENARIO FACILITY SHEETS
+# =============================================================================
+def create_scenario_facility_sheets(wb, data):
+    """Create detailed facility sheets for all 6 scenarios"""
+
+    scenario_configs = [
+        ('shaheen_ncc_h2', 'Shaheen + NCC-H2', '21'),
+        ('shaheen_ncc_electricity', 'Shaheen + NCC-Elec', '22'),
+        ('restructure_25pct_ncc_h2', 'Restructure 25% + NCC-H2', '23'),
+        ('restructure_25pct_ncc_electricity', 'Restructure 25% + NCC-Elec', '24'),
+        ('restructure_40pct_ncc_h2', 'Restructure 40% + NCC-H2', '25'),
+        ('restructure_40pct_ncc_electricity', 'Restructure 40% + NCC-Elec', '26'),
+    ]
+
+    for scenario_id, scenario_name, sheet_num in scenario_configs:
+        ws = wb.create_sheet(f"{sheet_num}. {scenario_name[:20]}")
+
+        ws['A1'] = f"Scenario: {scenario_name}"
+        ws['A1'].font = Font(bold=True, size=14, color='1F4E79')
+
+        row = 3
+
+        # Get scenario data
+        scenario_data = data.get('scenario_facilities', {}).get(scenario_id, {})
+
+        if scenario_data and scenario_data.get('facilities') is not None:
+            facilities = scenario_data['facilities']
+            emissions = scenario_data.get('emissions')
+            deployment = scenario_data.get('deployment')
+
+            # Section 1: Scenario Summary
+            ws.cell(row=row, column=1, value="1. Scenario Summary").font = Font(bold=True, size=12, color='1F4E79')
+            row += 2
+
+            n_facilities = len(facilities)
+            n_ncc = len(facilities[facilities['process'] == 'Naphtha Cracker'])
+            total_cap = facilities['capacity_kt'].sum()
+            ncc_cap = facilities[facilities['process'] == 'Naphtha Cracker']['capacity_kt'].sum()
+
+            summary = [
+                ("Total Facilities", n_facilities),
+                ("NCC Facilities", n_ncc),
+                ("Total Capacity (kt)", f"{total_cap:,.0f}"),
+                ("NCC Capacity (kt)", f"{ncc_cap:,.0f}"),
+            ]
+
+            # Get results from scenarios_6 if available
+            if data.get('scenarios_6') is not None:
+                scenario_result = data['scenarios_6'][data['scenarios_6']['scenario_id'] == scenario_id]
+                if len(scenario_result) > 0:
+                    r = scenario_result.iloc[0]
+                    summary.extend([
+                        ("BAU Emissions 2050 (Mt)", f"{r['bau_2050_mt']:.2f}"),
+                        ("Net Emissions 2050 (Mt)", f"{r['net_2050_mt']:.2f}"),
+                        ("CAPEX ($B)", f"${r['capex_billion_usd']:.1f}"),
+                    ])
+
+            for label, value in summary:
+                ws.cell(row=row, column=1, value=label).font = Font(bold=True)
+                ws.cell(row=row, column=2, value=value)
+                row += 1
+
+            row += 2
+
+            # Section 2: NCC Facilities in this scenario
+            ws.cell(row=row, column=1, value="2. NCC Facilities in Scenario").font = Font(bold=True, size=12, color='1F4E79')
+            row += 2
+
+            ncc_fac = facilities[facilities['process'] == 'Naphtha Cracker'].copy()
+            ncc_fac = ncc_fac.sort_values('capacity_kt', ascending=False)
+
+            headers = ["#", "Product", "Company", "Location", "Capacity (kt)", "Year Built", "Age (2025)"]
+            for j, h in enumerate(headers, 1):
+                ws.cell(row=row, column=j, value=h).style = 'header_style'
+            row += 1
+
+            for i, (_, fac) in enumerate(ncc_fac.iterrows(), 1):
+                ws.cell(row=row, column=1, value=i)
+                ws.cell(row=row, column=2, value=fac['product'])
+                ws.cell(row=row, column=3, value=fac['company'])
+                ws.cell(row=row, column=4, value=fac['location'])
+                ws.cell(row=row, column=5, value=f"{fac['capacity_kt']:,.0f}")
+                ws.cell(row=row, column=6, value=int(fac['year_built']) if pd.notna(fac['year_built']) else "-")
+                ws.cell(row=row, column=7, value=int(fac['age_2025']) if pd.notna(fac['age_2025']) else "-")
+                row += 1
+
+            row += 2
+
+            # Section 3: Deployment Trajectory
+            if deployment is not None:
+                ws.cell(row=row, column=1, value="3. Annual Deployment Trajectory").font = Font(bold=True, size=12, color='1F4E79')
+                row += 2
+
+                headers = ["Year", "BAU (Mt)", "Deployed (Mt)", "Net (Mt)", "Grid EF"]
+                for j, h in enumerate(headers, 1):
+                    ws.cell(row=row, column=j, value=h).style = 'header_style'
+                row += 1
+
+                # Show every 5 years
+                for year in [2025, 2030, 2035, 2040, 2045, 2050]:
+                    year_data = deployment[deployment['year'] == year]
+                    if len(year_data) > 0:
+                        d = year_data.iloc[0]
+                        ws.cell(row=row, column=1, value=year)
+                        ws.cell(row=row, column=2, value=f"{d['bau_mt']:.2f}")
+                        ws.cell(row=row, column=3, value=f"{d['deployed_abatement_mt']:.2f}")
+                        ws.cell(row=row, column=4, value=f"{d['actual_emissions_mt']:.2f}")
+                        ws.cell(row=row, column=5, value=f"{d['grid_ef']:.3f}")
+                        row += 1
+
+            row += 2
+
+            # Section 4: Facility Emissions (Top 20)
+            if emissions is not None:
+                ws.cell(row=row, column=1, value="4. Top 20 Facilities by Emissions (2050)").font = Font(bold=True, size=12, color='1F4E79')
+                row += 2
+
+                emissions_sorted = emissions.sort_values('total_emissions_kt', ascending=False).head(20)
+
+                headers = ["#", "Product", "Company", "Location", "Capacity (kt)", "Emissions (kt)"]
+                for j, h in enumerate(headers, 1):
+                    ws.cell(row=row, column=j, value=h).style = 'header_style'
+                row += 1
+
+                for i, (_, em) in enumerate(emissions_sorted.iterrows(), 1):
+                    ws.cell(row=row, column=1, value=i)
+                    ws.cell(row=row, column=2, value=em['product'])
+                    ws.cell(row=row, column=3, value=em['company'])
+                    ws.cell(row=row, column=4, value=em['location'])
+                    ws.cell(row=row, column=5, value=f"{em['capacity_kt']:,.0f}")
+                    ws.cell(row=row, column=6, value=f"{em['total_emissions_kt']:,.0f}")
+                    row += 1
+
+        else:
+            ws.cell(row=row, column=1, value=f"Scenario data not found. Run run_scenarios_complete.py first.")
+            ws.cell(row=row, column=1).font = Font(italic=True, color='FF0000')
+
+        # Column widths
+        ws.column_dimensions['A'].width = 12
+        ws.column_dimensions['B'].width = 15
+        ws.column_dimensions['C'].width = 25
+        ws.column_dimensions['D'].width = 12
+        ws.column_dimensions['E'].width = 14
+        ws.column_dimensions['F'].width = 12
+        ws.column_dimensions['G'].width = 12
 
     return wb
 

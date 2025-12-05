@@ -42,7 +42,15 @@
       "Bash(zip:*)",
       "WebFetch(domain:github.com)",
       "Bash(curl:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(for dir in scenarios_shaheen_ncc_h2 scenarios_shaheen_ncc_elec scenarios_restructure_25pct_ncc_h2 scenarios_restructure_25pct_ncc_elec scenarios_restructure_40pct_ncc_h2 scenarios_restructure_40pct_ncc_elec)",
+      "Bash(do fac_file=\"/Users/jinsupark/jinsu-coding/petrochemical_macc_2025/outputs/$dir/module_01_baseline/facility_summary.csv\")",
+      "Bash(echo:*)",
+      "Bash(if [ -f \"$fac_file\" ])",
+      "Bash(then head -5 \"$fac_file\")",
+      "Bash(else echo \"facility_summary.csv NOT FOUND\")",
+      "Bash(fi)",
+      "Bash(timeout 5 streamlit run:*)"
     ],
     "deny": [],
     "ask": []

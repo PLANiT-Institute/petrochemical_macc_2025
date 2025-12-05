@@ -1,16 +1,28 @@
 """
-6개 시나리오 실행 스크립트 (v3)
-Run all 6 scenarios: 3 production levels × 2 technology pathways
-- Production pathways: Shaheen, 구조조정 25%, 구조조정 40%
-- Technology pathways: NCC-H2, NCC-Electricity
+Complete Scenario Runner v3 - Correct Facility-Level Implementation
+====================================================================
+This script properly implements all 6 scenarios:
+
+1. Shaheen (Growth) + NCC-H2: Add 6 new Shaheen facilities (254 total)
+2. Shaheen (Growth) + NCC-Electricity: Add 6 new Shaheen facilities (254 total)
+3. Restructure 25% + NCC-H2: Retire oldest NCC facilities = 25% NCC capacity (239 total)
+4. Restructure 25% + NCC-Electricity: Retire oldest NCC facilities = 25% NCC capacity (239 total)
+5. Restructure 40% + NCC-H2: Retire oldest NCC facilities = 40% NCC capacity (232 total)
+6. Restructure 40% + NCC-Electricity: Retire oldest NCC facilities = 40% NCC capacity (232 total)
+
+Key Changes from Previous Versions:
+- Restructuring applies ONLY to NCC (Naphtha Cracker) facilities
+- Retire oldest NCC facilities until reaching 25% or 40% of NCC capacity
+- Actually modifies facility and energy intensity databases
+- Properly syncs both databases to maintain index alignment
 """
 
 import pandas as pd
+import numpy as np
 import shutil
 from pathlib import Path
 import sys
 
-# Add modules to path
 sys.path.insert(0, str(Path.cwd()))
 
 from modules.baseline import BaselineAnalyzer
@@ -18,207 +30,336 @@ from modules.macc import MACCAnalyzer
 from modules.optimization_v2 import CostOptimizerV2
 
 print("="*80)
-print("한국 석유화학 MACC 모델 - 6개 시나리오 실행")
-print("3개 생산량 시나리오 × 2개 기술 경로")
+print("한국 석유화학 MACC 모델 - Complete Scenario Runner v3")
 print("="*80)
-print()
 
-# Load scenario data
-df_scenarios = pd.read_csv('data/demand_growth_trajectory_scenarios.csv')
+# =============================================================================
+# PATHS
+# =============================================================================
+DATA_DIR = Path('data')
+OUTPUT_DIR = Path('outputs')
 
-# Define production scenarios
-production_scenarios = {
-    'shaheen': {
-        'name': 'Shaheen (성장)',
-        'column': 'scenario_shaheen',
-        'description': 'S-Oil Shaheen project (+1.8Mt, 2026), then fixed'
-    },
-    'restructure_25pct': {
-        'name': '구조조정 25%',
-        'column': 'scenario_restructure_25pct',
-        'description': '2026: -3.7Mt (25% reduction), then fixed'
-    },
-    'restructure_40pct': {
-        'name': '구조조정 40%',
-        'column': 'scenario_restructure_40pct',
-        'description': '2040: Gradual 40% reduction'
+# =============================================================================
+# LOAD AND BACKUP ORIGINAL DATA
+# =============================================================================
+print("\nLoading original data...")
+
+df_fac_orig = pd.read_csv(DATA_DIR / 'facility_database_with_regions.csv')
+df_energy_orig = pd.read_csv(DATA_DIR / 'energy_intensities.csv')
+
+# Backup
+backup_fac = DATA_DIR / 'facility_database_with_regions.csv.backup'
+backup_energy = DATA_DIR / 'energy_intensities.csv.backup'
+
+df_fac_orig.to_csv(backup_fac, index=False)
+df_energy_orig.to_csv(backup_energy, index=False)
+print(f"  ✓ Backed up original files")
+
+print(f"\nOriginal: {len(df_fac_orig)} facilities, {df_fac_orig['capacity_kt'].sum():,.0f} kt capacity")
+
+# Verify NCC facilities
+ncc_orig = df_fac_orig[df_fac_orig['process'] == 'Naphtha Cracker']
+print(f"NCC facilities: {len(ncc_orig)}, {ncc_orig['capacity_kt'].sum():,.0f} kt capacity")
+
+# =============================================================================
+# SHAHEEN PROJECT - NEW FACILITIES
+# =============================================================================
+SHAHEEN_NEW = [
+    # (product, process, company, location, complex, capacity, year, naphtha, elec, lng, fuel_gas, byproduct)
+    ("Ethylene", "Naphtha Cracker", "S-Oil Shaheen", "Onsan", "Ulsan Complex", 1800, 2026, 29.0, 21.8, 4.5, 5.6, 1.1),
+    ("Propylene", "Naphtha Cracker", "S-Oil Shaheen", "Onsan", "Ulsan Complex", 770, 2026, 25.4, 48.8, 3.9, 5.2, 1.2),
+    ("Butadiene", "Naphtha Cracker", "S-Oil Shaheen", "Onsan", "Ulsan Complex", 200, 2026, 24.5, 100.0, 3.0, 4.0, 0.8),
+    ("Benzene", "BTX Plant", "S-Oil Shaheen", "Onsan", "Ulsan Complex", 280, 2026, 0.0, 9.3, 2.5, 3.2, 0.6),
+    ("HDPE", "Utility", "S-Oil Shaheen", "Onsan", "Ulsan Complex", 400, 2026, 0.0, 200.0, 0.0, 0.0, 0.0),
+    ("PP", "Utility", "S-Oil Shaheen", "Onsan", "Ulsan Complex", 500, 2026, 0.0, 1.4, 0.0, 0.0, 0.0),
+]
+
+print("\n" + "="*80)
+print("SHAHEEN PROJECT (S-Oil, 2026)")
+print("="*80)
+shaheen_capacity = sum([x[5] for x in SHAHEEN_NEW])
+print(f"New capacity: {shaheen_capacity:,} kt")
+for prod, proc, comp, loc, cpx, cap, yr, *_ in SHAHEEN_NEW:
+    print(f"  - {prod} ({proc}): {cap:,} kt")
+
+
+# =============================================================================
+# SCENARIO GENERATORS
+# =============================================================================
+
+def create_shaheen_scenario():
+    """Add Shaheen facilities to baseline"""
+    df_fac = df_fac_orig.copy()
+    df_energy = df_energy_orig.copy()
+
+    new_facilities = []
+    new_energies = []
+
+    for prod, proc, comp, loc, cpx, cap, yr, naphtha, elec, lng, fg, bp in SHAHEEN_NEW:
+        new_fac = {
+            'product': prod,
+            'process': proc,
+            'company': comp,
+            'location': loc,
+            'complex': cpx,
+            'capacity_kt': cap,
+            'year_built': yr,
+            'age_2025': -1,  # Not yet built in 2025
+            'remaining_life': 41,
+            'retirement_year_40yr': 2066
+        }
+        new_facilities.append(new_fac)
+
+        new_energy = {
+            'product': prod,
+            'process': proc,
+            'company': comp,
+            'location': loc,
+            'capacity_kt': cap,
+            'year_built': yr,
+            'Naphtha_GJ_per_tonne': naphtha,
+            'Electricity_kWh_per_tonne': elec,
+            'LNG_GJ_per_tonne': lng,
+            'Fuel_Gas_GJ_per_tonne': fg,
+            'Byproduct_Gas_GJ_per_tonne': bp,
+            'LPG_GJ_per_tonne': 0.0,
+            'Fuel_Oil_GJ_per_tonne': 0.0,
+            'Diesel_GJ_per_tonne': 0.0
+        }
+        new_energies.append(new_energy)
+
+    df_fac = pd.concat([df_fac, pd.DataFrame(new_facilities)], ignore_index=True)
+    df_energy = pd.concat([df_energy, pd.DataFrame(new_energies)], ignore_index=True)
+
+    return df_fac, df_energy, "Shaheen (성장)", len(df_fac)
+
+
+def create_restructure_scenario(retire_pct):
+    """Retire oldest NCC facilities representing X% of NCC capacity"""
+    df_fac = df_fac_orig.copy()
+    df_energy = df_energy_orig.copy()
+
+    # Find NCC facilities
+    ncc_mask = df_fac['process'] == 'Naphtha Cracker'
+    ncc_fac = df_fac[ncc_mask].copy()
+    ncc_fac = ncc_fac.sort_values('age_2025', ascending=False)  # oldest first
+
+    total_ncc_cap = ncc_fac['capacity_kt'].sum()
+    target_cap = total_ncc_cap * retire_pct
+
+    # Find facilities to retire
+    cumsum = 0
+    retire_indices = []
+    for idx, row in ncc_fac.iterrows():
+        if cumsum < target_cap:
+            retire_indices.append(idx)
+            cumsum += row['capacity_kt']
+        else:
+            break
+
+    retired_cap = df_fac.loc[retire_indices, 'capacity_kt'].sum()
+
+    print(f"\n  Restructure {retire_pct*100:.0f}% NCC:")
+    print(f"    Target: {target_cap:,.0f} kt ({retire_pct*100:.0f}% of {total_ncc_cap:,.0f} kt NCC)")
+    print(f"    Retired: {len(retire_indices)} NCC facilities, {retired_cap:,.0f} kt ({retired_cap/total_ncc_cap*100:.1f}%)")
+    print(f"    Oldest retired:")
+    for idx in retire_indices[:5]:
+        row = df_fac.loc[idx]
+        print(f"      - {row['company']} {row['product']} ({row['location']}): {row['capacity_kt']:.0f} kt, built {int(row['year_built'])}")
+
+    # Remove retired facilities from both dataframes
+    df_fac_remain = df_fac.drop(retire_indices).reset_index(drop=True)
+    df_energy_remain = df_energy.drop(retire_indices).reset_index(drop=True)
+
+    name = f"구조조정 {retire_pct*100:.0f}%"
+    return df_fac_remain, df_energy_remain, name, len(df_fac_remain)
+
+
+# =============================================================================
+# RUN SCENARIO
+# =============================================================================
+
+def run_scenario(scenario_name, scenario_id, df_fac, df_energy, force_tech):
+    """Run single scenario through all modules"""
+
+    print(f"\n{'='*80}")
+    print(f"SCENARIO: {scenario_name} + {force_tech}")
+    print(f"{'='*80}")
+    print(f"  Facilities: {len(df_fac)}")
+    print(f"  Capacity: {df_fac['capacity_kt'].sum():,.0f} kt")
+
+    ncc_count = len(df_fac[df_fac['process'] == 'Naphtha Cracker'])
+    ncc_cap = df_fac[df_fac['process'] == 'Naphtha Cracker']['capacity_kt'].sum()
+    print(f"  NCC Facilities: {ncc_count}, {ncc_cap:,.0f} kt")
+
+    # Output directories
+    output_base = OUTPUT_DIR / f'scenario_{scenario_id}'
+    dirs = {
+        'baseline': output_base / 'module_01_baseline',
+        'macc': output_base / 'module_02_macc',
+        'opt': output_base / 'module_03_optimization'
     }
-}
+    for d in dirs.values():
+        d.mkdir(parents=True, exist_ok=True)
 
-# Define technology pathways
-technology_pathways = {
-    'ncc_h2': {
-        'name': 'NCC-H2',
-        'force_tech': 'NCC-H2',
-        'description': 'Hydrogen-fueled cracker (0.2 ton H2/ton C2H4)'
-    },
-    'ncc_elec': {
-        'name': 'NCC-Electricity',
-        'force_tech': 'NCC-Electricity',
-        'description': 'Electric cracker with renewable electricity (5.0 MWh/ton C2H4)'
-    }
-}
+    # Write scenario-specific data
+    df_fac.to_csv(DATA_DIR / 'facility_database_with_regions.csv', index=False)
+    df_energy.to_csv(DATA_DIR / 'energy_intensities.csv', index=False)
 
-# Backup original demand growth file
-original_file = Path('data/demand_growth_trajectory.csv')
-backup_file = Path('data/demand_growth_trajectory_original_backup.csv')
+    # Also save scenario facility list
+    df_fac.to_csv(output_base / 'scenario_facilities.csv', index=False)
 
-if original_file.exists():
-    shutil.copy(original_file, backup_file)
-    print(f"✓ 원본 백업: {backup_file}")
-    print()
+    try:
+        # Module 1: Baseline
+        print("  >>> Module 1: Baseline")
+        baseline = BaselineAnalyzer(str(DATA_DIR), str(dirs['baseline']))
+        baseline.run_complete_analysis()
 
-# Run each scenario combination
-results_summary = []
+        # Module 2: MACC
+        print("  >>> Module 2: MACC")
+        macc = MACCAnalyzer(str(dirs['baseline']), str(DATA_DIR), str(dirs['macc']))
+        macc.run_complete_analysis()
 
-for prod_key, prod_info in production_scenarios.items():
-    for tech_key, tech_info in technology_pathways.items():
-        scenario_id = f"{prod_key}_{tech_key}"
-        scenario_name = f"{prod_info['name']} + {tech_info['name']}"
+        # Module 3: Optimization
+        print(f"  >>> Module 3: Optimization ({force_tech})")
+        opt = CostOptimizerV2(str(dirs['baseline']), str(dirs['macc']), str(dirs['opt']), force_tech)
+        opt.run_complete_analysis()
 
-        print("="*80)
-        print(f"시나리오 실행: {scenario_name}")
-        print(f"생산량: {prod_info['description']}")
-        print(f"기술 경로: {tech_info['description']}")
-        print("="*80)
-        print()
+        # Read results
+        deploy = pd.read_csv(dirs['opt'] / 'policy_target_deployment.csv')
+        r2050 = deploy[deploy['year'] == 2050].iloc[0]
 
-        # Create scenario-specific demand growth file
-        df_scenario = df_scenarios[['year', prod_info['column']]].copy()
-        df_scenario.columns = ['year', 'cumulative_capacity_multiplier']
-        df_scenario.to_csv('data/demand_growth_trajectory.csv', index=False)
+        # Read facility allocation
+        alloc_path = dirs['opt'] / 'policy_target_facility_allocation_2050.csv'
+        if alloc_path.exists():
+            alloc = pd.read_csv(alloc_path)
+            n_alloc = len(alloc)
+        else:
+            n_alloc = 0
 
-        print(f"✓ 수요 성장 파일 업데이트: {prod_info['column']}")
-        print(f"  2025: {df_scenario[df_scenario['year']==2025]['cumulative_capacity_multiplier'].iloc[0]:.3f}")
-        print(f"  2030: {df_scenario[df_scenario['year']==2030]['cumulative_capacity_multiplier'].iloc[0]:.3f}")
-        print(f"  2050: {df_scenario[df_scenario['year']==2050]['cumulative_capacity_multiplier'].iloc[0]:.3f}")
-        print()
-
-        # Create scenario-specific output directories
-        output_base = Path('outputs') / f'scenarios_{scenario_id}'
-        output_dirs = {
-            'baseline': output_base / 'module_01_baseline',
-            'macc': output_base / 'module_02_macc',
-            'optimization': output_base / 'module_03_optimization'
+        result = {
+            'scenario': scenario_name,
+            'technology': force_tech,
+            'scenario_id': scenario_id,
+            'n_facilities': len(df_fac),
+            'n_ncc_facilities': ncc_count,
+            'total_capacity_kt': df_fac['capacity_kt'].sum(),
+            'ncc_capacity_kt': ncc_cap,
+            'bau_2050_mt': r2050['bau_mt'],
+            'net_2050_mt': r2050['actual_emissions_mt'],
+            'capex_billion_usd': r2050['cumulative_capex_musd'] / 1000,
+            'ncc_h2_mt': r2050['ncc_h2_mt'],
+            'ncc_elec_mt': r2050['ncc_elec_mt'],
+            'heat_pump_mt': r2050['heat_pump_mt'],
+            're_ppa_mt': r2050['re_ppa_mt'],
+            'electricity_twh': r2050['electricity_consumption_increase_twh'],
+            'h2_kt': r2050['h2_consumption_kt'],
+            'n_facilities_allocated': n_alloc
         }
 
-        for output_dir in output_dirs.values():
-            output_dir.mkdir(parents=True, exist_ok=True)
+        print(f"\n  ✓ COMPLETE")
+        print(f"    BAU 2050: {result['bau_2050_mt']:.2f} Mt")
+        print(f"    Net 2050: {result['net_2050_mt']:.4f} Mt")
+        print(f"    CAPEX: ${result['capex_billion_usd']:.1f}B")
 
-        try:
-            # Module 1: Baseline
-            print(">>> Module 1: Baseline Emissions & BAU Trajectory")
-            baseline_engine = BaselineAnalyzer(
-                data_dir='data',
-                output_dir=str(output_dirs['baseline'])
-            )
-            baseline_engine.run_complete_analysis()
-            print("   ✓ Module 1 완료")
-            print()
+        return result
 
-            # Module 2: MACC
-            print(">>> Module 2: MACC Calculation")
-            macc_engine = MACCAnalyzer(
-                baseline_output=str(output_dirs['baseline']),
-                data_dir='data',
-                output_dir=str(output_dirs['macc'])
-            )
-            macc_engine.run_complete_analysis()
-            print("   ✓ Module 2 완료")
-            print()
+    except Exception as e:
+        print(f"  ✗ ERROR: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
 
-            # Module 3: Optimization (with forced NCC technology)
-            print(f">>> Module 3: Cost Optimization (Forcing {tech_info['name']})")
-            opt_engine = CostOptimizerV2(
-                baseline_output=str(output_dirs['baseline']),
-                macc_output=str(output_dirs['macc']),
-                output_dir=str(output_dirs['optimization']),
-                force_ncc_technology=tech_info['force_tech']
-            )
-            opt_engine.run_complete_analysis()
-            print("   ✓ Module 3 완료")
-            print()
 
-            # Extract key results
-            df_deployment = pd.read_csv(output_dirs['optimization'] / 'policy_target_deployment.csv')
-            df_2050 = df_deployment[df_deployment['year'] == 2050].iloc[0]
+# =============================================================================
+# MAIN
+# =============================================================================
 
-            results_summary.append({
-                'scenario': scenario_name,
-                'scenario_id': scenario_id,
-                'production_pathway': prod_info['name'],
-                'technology_pathway': tech_info['name'],
-                'bau_emissions_2050_mt': df_2050['bau_mt'],
-                'emissions_2050_mt': df_2050['actual_emissions_mt'],
-                'cost_2050_billion_usd': df_2050['cumulative_capex_musd'] / 1000,
-                'ncc_h2_mt': df_2050['ncc_h2_mt'],
-                'ncc_elec_mt': df_2050['ncc_elec_mt'],
-                're_ppa_mt': df_2050['re_ppa_mt'],
-                'heat_pump_mt': df_2050['heat_pump_mt'],
-                'h2_consumption_kt': df_2050['h2_consumption_kt'],
-                'electricity_increase_twh': df_2050['electricity_consumption_increase_twh']
-            })
+if __name__ == "__main__":
 
-            print(f"✓ {scenario_name} 시나리오 완료")
-            print(f"  2050 BAU 배출량: {df_2050['bau_mt']:.2f} MtCO2")
-            print(f"  2050 실제 배출량: {df_2050['actual_emissions_mt']:.2f} MtCO2")
-            print(f"  누적 CAPEX: ${df_2050['cumulative_capex_musd']/1000:.1f} billion USD")
-            print(f"  NCC-H2: {df_2050['ncc_h2_mt']:.2f} Mt")
-            print(f"  NCC-Electricity: {df_2050['ncc_elec_mt']:.2f} Mt")
-            print()
+    results = []
 
-        except Exception as e:
-            print(f"   ✗ {scenario_name} 실행 중 오류:")
-            print(f"      {str(e)}")
-            import traceback
-            traceback.print_exc()
-            print()
-            continue
-
-# Restore original file
-if backup_file.exists():
-    shutil.copy(backup_file, original_file)
-    print(f"✓ 원본 수요 성장 파일 복원")
-    print()
-
-# Create comparison summary
-if results_summary:
+    # Define scenarios
+    print("\n" + "="*80)
+    print("GENERATING SCENARIOS")
     print("="*80)
-    print("시나리오 비교 요약 (6개 시나리오)")
-    print("="*80)
-    print()
 
-    df_summary = pd.DataFrame(results_summary)
+    scenarios = [
+        create_shaheen_scenario(),
+        create_restructure_scenario(0.25),
+        create_restructure_scenario(0.40),
+    ]
+
+    technologies = ['NCC-H2', 'NCC-Electricity']
+
+    # Run all 6 combinations
+    for df_fac, df_energy, name, n_fac in scenarios:
+        for tech in technologies:
+            # Create scenario ID
+            if 'Shaheen' in name:
+                scenario_id = 'shaheen_' + tech.lower().replace('-', '_')
+            elif '25%' in name:
+                scenario_id = 'restructure_25pct_' + tech.lower().replace('-', '_')
+            elif '40%' in name:
+                scenario_id = 'restructure_40pct_' + tech.lower().replace('-', '_')
+            else:
+                scenario_id = name.lower().replace(' ', '_') + '_' + tech.lower().replace('-', '_')
+
+            result = run_scenario(name, scenario_id, df_fac.copy(), df_energy.copy(), tech)
+            if result:
+                results.append(result)
+
+    # Restore originals
+    print("\n" + "="*80)
+    print("Restoring original data...")
+    shutil.copy(backup_fac, DATA_DIR / 'facility_database_with_regions.csv')
+    shutil.copy(backup_energy, DATA_DIR / 'energy_intensities.csv')
+    print("  ✓ Restored")
 
     # Save summary
-    summary_path = Path('outputs/scenarios_comparison_6scenarios/summary.csv')
-    summary_path.parent.mkdir(parents=True, exist_ok=True)
-    df_summary.to_csv(summary_path, index=False)
+    if results:
+        df_results = pd.DataFrame(results)
+        summary_path = OUTPUT_DIR / 'scenario_summary_v3.csv'
+        df_results.to_csv(summary_path, index=False)
+        print(f"\n  ✓ Saved: {summary_path}")
 
-    print("2050년 시나리오 비교:")
-    print()
-    print(f"{'Scenario':<35s} {'Emissions':>10s} {'Cost (B$)':>10s} {'NCC-H2':>10s} {'NCC-Elec':>10s} {'RE PPA':>10s} {'Heat Pump':>12s}")
-    print("-" * 110)
+        # Print comparison
+        print("\n" + "="*80)
+        print("SCENARIO COMPARISON (2050)")
+        print("="*80)
 
-    for idx, row in df_summary.iterrows():
-        print(f"{row['scenario']:<35s} {row['emissions_2050_mt']:>10.2f} {row['cost_2050_billion_usd']:>10.1f} {row['ncc_h2_mt']:>10.2f} {row['ncc_elec_mt']:>10.2f} {row['re_ppa_mt']:>10.2f} {row['heat_pump_mt']:>12.2f}")
+        print(f"\n{'Scenario':<45} {'Fac':>5} {'NCC':>5} {'BAU Mt':>10} {'Net Mt':>10} {'CAPEX $B':>10}")
+        print("-"*95)
+        for _, r in df_results.iterrows():
+            label = f"{r['scenario']} + {r['technology']}"
+            print(f"{label:<45} {r['n_facilities']:>5} {r['n_ncc_facilities']:>5} {r['bau_2050_mt']:>10.1f} {r['net_2050_mt']:>10.2f} {r['capex_billion_usd']:>10.1f}")
 
-    print()
-    print(f"✓ 저장: {summary_path}")
-    print()
+        # Key insights
+        print("\n" + "="*80)
+        print("KEY INSIGHTS")
+        print("="*80)
 
-print("="*80)
-print("모든 시나리오 실행 완료 (6개)")
-print("="*80)
-print()
-print("생성된 결과:")
-for prod_key in production_scenarios.keys():
-    for tech_key in technology_pathways.keys():
-        scenario_id = f"{prod_key}_{tech_key}"
-        output_base = Path('outputs') / f'scenarios_{scenario_id}'
-        print(f"  - {scenario_id}: {output_base}/")
-print()
-print("다음 단계:")
-print("  1. Streamlit 대시보드 업데이트")
-print("  2. 한국어 Word 보고서 생성")
-print()
+        shaheen = df_results[df_results['scenario'].str.contains('Shaheen')].iloc[0]
+        r25 = df_results[df_results['scenario'].str.contains('25%')].iloc[0]
+        r40 = df_results[df_results['scenario'].str.contains('40%')].iloc[0]
+
+        print(f"\n1. SHAHEEN Project (Growth Scenario):")
+        print(f"   Total facilities: {shaheen['n_facilities']} (+6 new)")
+        print(f"   NCC facilities: {shaheen['n_ncc_facilities']}")
+        print(f"   BAU emissions 2050: {shaheen['bau_2050_mt']:.1f} Mt")
+
+        print(f"\n2. RESTRUCTURE 25% NCC:")
+        print(f"   Total facilities: {r25['n_facilities']} (-9 NCC)")
+        print(f"   NCC facilities: {r25['n_ncc_facilities']}")
+        print(f"   BAU emissions 2050: {r25['bau_2050_mt']:.1f} Mt")
+        print(f"   BAU reduction: {shaheen['bau_2050_mt'] - r25['bau_2050_mt']:.1f} Mt")
+
+        print(f"\n3. RESTRUCTURE 40% NCC:")
+        print(f"   Total facilities: {r40['n_facilities']} (-16 NCC)")
+        print(f"   NCC facilities: {r40['n_ncc_facilities']}")
+        print(f"   BAU emissions 2050: {r40['bau_2050_mt']:.1f} Mt")
+        print(f"   BAU reduction: {shaheen['bau_2050_mt'] - r40['bau_2050_mt']:.1f} Mt")
+
+    print("\n" + "="*80)
+    print("COMPLETE")
+    print("="*80)

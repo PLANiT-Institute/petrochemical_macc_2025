@@ -280,23 +280,21 @@ class MACCAnalyzer:
 
         # DYNAMIC H2 PRICE CALCULATION (LCOH)
         if re_price is not None:
-            # Electrolyzer assumptions (could be moved to parameters)
-            # CAPEX: $1000/kW (2025) -> $600/kW (2050)
-            if year < 2030:
-                ely_capex = 1000
-            elif year < 2040:
-                ely_capex = 800
-            else:
-                ely_capex = 600
-                
+            # Electrolyzer CAPEX trajectory: $1000/kW (2025) -> $500/kW (2050) = 50% decline
+            # Linear interpolation: 20 $/kW/year decline
+            ely_capex = max(500, 1000 - (year - 2025) * 20)
+
+            # Efficiency trajectory: 70% (2025) -> 75% (2050)
+            ely_efficiency = min(0.75, 0.70 + (year - 2025) * 0.002)
+
             lcoh_result = calculate_lcoh(
                 elec_price=re_price,
                 capex=ely_capex,
-                efficiency=0.70, # 70% efficiency
+                efficiency=ely_efficiency,
                 lifetime=20
             )
             final_h2_price = lcoh_result['lcoh']
-            # print(f"   [DEBUG] Year {year}: RE=${re_price:.1f}/MWh -> LCOH=${final_h2_price:.2f}/kg")
+            # print(f"   [DEBUG] Year {year}: RE=${re_price:.1f}/MWh, Ely=${ely_capex}/kW -> LCOH=${final_h2_price:.2f}/kg")
         else:
             final_h2_price = h2_price
 
