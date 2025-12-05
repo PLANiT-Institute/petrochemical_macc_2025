@@ -207,6 +207,11 @@ cat outputs/scenarios_shaheen/module_02_macc/macc_annual_2025_2050.csv
 
 ## 📖 Complete References (Abbreviated)
 
+### Attribution
+This model incorporates data and methodologies from **PLANiT Institute (2025)**, specifically:
+- **RE PPA Price Trajectory:** Forecast of renewable energy power purchase agreement prices.
+- **LCOH Logic:** Levelized Cost of Hydrogen calculation methodology.
+
 ### Peer-Reviewed Literature
 1. **BASF/SABIC/Linde (2024)** - Electric cracker pilot (5.0 MWh/ton)
 2. **Toribio-Ramirez et al. (2025)** - E-cracker CAPEX ($1,500/t)

@@ -126,7 +126,7 @@ class CostOptimizerV2:
         cumulative_capex_musd = 0
 
         # Track deployed capacity (irreversible - can only increase)
-        deployed_capacity = {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0}
+        deployed_capacity = {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0, 'RDH': 0}
 
         # NEW: Track NCC technology choice (mutually exclusive)
         # Once chosen (H2 or Electricity), this persists for all future years
@@ -321,7 +321,7 @@ class CostOptimizerV2:
 
         # Deploy technologies until budget constraint met
         # NEW: Track deployed capacity (irreversible)
-        deployed_capacity = {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0}
+        deployed_capacity = {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0, 'RDH': 0}
         deployment_dict = {year: {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0}
                           for year in years}
 

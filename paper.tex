@@ -1,0 +1,259 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{float}
+
+\onehalfspacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\title{Decarbonization Pathways for the Korean Petrochemical Industry:\\Model Assumptions and Results}
+
+\author{PLANiT Institute}
+
+\date{December 2024}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This report presents the key assumptions and results of a marginal abatement cost curve (MACC) analysis for decarbonizing Korea's petrochemical industry. Using a facility-level database of 248 plants with 100,066 kt/year capacity, we evaluate two primary pathways: NCC-Electricity and NCC-Hydrogen. Our analysis finds that net-zero emissions by 2050 is technically achievable through electrification, requiring \$37.3 billion in cumulative investment and 230 TWh of annual renewable electricity.
+\end{abstract}
+
+\section{Introduction}
+
+Korea's petrochemical sector produces approximately 46 MtCO$_2$/year at current operating rates (70\%), making it one of the largest industrial emission sources. This report documents the data sources, model assumptions, and scenario results for achieving net-zero emissions by 2050.
+
+\section{Model Assumptions}
+
+\subsection{Facility Database}
+
+\begin{table}[H]
+\centering
+\caption{Facility Database Summary}
+\begin{tabular}{lcc}
+\toprule
+Region & Facilities & Capacity (kt/yr) \\
+\midrule
+Yeosu & 87 & 37,216 \\
+Daesan & 57 & 27,424 \\
+Ulsan & 71 & 24,105 \\
+Onsan & 14 & 7,331 \\
+Other & 19 & 3,990 \\
+\midrule
+\textbf{Total} & \textbf{248} & \textbf{100,066} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Technology Parameters}
+
+\begin{table}[H]
+\centering
+\caption{Technology CAPEX Assumptions (USD/t-C$_2$H$_4$/yr)}
+\begin{tabular}{lccccl}
+\toprule
+Technology & 2025 & 2030 & 2040 & 2050 & Source \\
+\midrule
+NCC-Electricity & 1,500 & 1,350 & 1,050 & 900 & Toribio-Ramirez 2025 \\
+NCC-H2 & 1,700 & 1,300 & 935 & 780 & Thunder Said Energy 2023 \\
+Heat Pump & 800 & 640 & 480 & 400 & McKinsey 2024 \\
+RDH & 900 & 720 & 540 & 450 & Coolbrook 2024 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Energy Intensity}
+
+\begin{table}[H]
+\centering
+\caption{Process Energy Intensity}
+\begin{tabular}{lccc}
+\toprule
+Process & Parameter & Value & Source \\
+\midrule
+Naphtha Cracker & Electricity & 5.0 MWh/t-C$_2$H$_4$ & BASF/SABIC/Linde 2024 \\
+Naphtha Cracker & H2 Consumption & 0.2 t-H$_2$/t-C$_2$H$_4$ & Lummus Tech 2023 \\
+Heat Pump & COP & 4.0 & Kosmadakis 2020 \\
+RDH & Efficiency & 93\% & Coolbrook 2024 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Emission Factors}
+
+\begin{table}[H]
+\centering
+\caption{Combustion Emission Factors}
+\begin{tabular}{lcc}
+\toprule
+Fuel & tCO$_2$/GJ & Source \\
+\midrule
+Naphtha & 0.0542 & IPCC 2019 \\
+LNG & 0.0561 & IPCC 2019 \\
+Fuel Gas & 0.050 & API Compendium 2021 \\
+Byproduct Gas & 0.048 & API Compendium 2021 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Price Trajectories}
+
+\begin{table}[H]
+\centering
+\caption{Energy Price Trajectories}
+\begin{tabular}{lcccccc}
+\toprule
+Parameter & 2025 & 2030 & 2035 & 2040 & 2045 & 2050 \\
+\midrule
+RE Price (\$/MWh) & 129 & 157 & 191 & 191 & 191 & 191 \\
+H2 Price (\$/kg) & 6.73 & 5.88 & 5.02 & 4.16 & 3.31 & 2.63 \\
+\bottomrule
+\end{tabular}
+\caption*{Source: PLANiT Institute (2025)}
+\end{table}
+
+\subsection{LCOH Calculation Assumptions}
+
+The Levelized Cost of Hydrogen (LCOH) is calculated using:
+
+\begin{equation}
+LCOH = \frac{CAPEX \times CRF + OPEX}{H_2\ Production} + Electricity\ Cost
+\end{equation}
+
+Key parameters:
+\begin{itemize}
+    \item Electrolyzer efficiency: 70\% (HHV)
+    \item Capacity factor: 90\%
+    \item Discount rate: 8\%
+    \item Electrolyzer CAPEX: \$1,200/kW (2025) $\rightarrow$ \$300/kW (2050)
+    \item Stack lifetime: 10 years
+\end{itemize}
+
+\section{Results}
+
+\subsection{Baseline Emissions}
+
+At 70\% operating rate, baseline emissions in 2025 are 46.3 MtCO$_2$/year. Business-as-usual projections reach 53.3 MtCO$_2$ by 2050.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{outputs/figures/fig_emissions_pathway.png}
+    \caption{Decarbonization Pathway vs BAU (2025-2050)}
+    \label{fig:emissions}
+\end{figure}
+
+\subsection{Technology Contribution}
+
+The analysis assumes that the "NCC-Electricity" technology applies to the entire Naphtha Cracker process, decarbonizing all co-products (Ethylene, Propylene, Butadiene, etc.) simultaneously. This is a critical assumption as electrification replaces the fuel gas combustion in the cracking furnaces, which is the primary emission source for the entire facility.
+
+\begin{table}[H]
+\centering
+\caption{Technology Contribution to Net Zero (2050)}
+\begin{tabular}{lccc}
+\toprule
+Technology & Abatement (Mt) & Share (\%) & MAC (\$/tCO$_2$) \\
+\midrule
+NCC-Electricity & 47.1 & 88.3 & 496 \\
+Heat Pump & 3.6 & 6.7 & 301 \\
+RDH & 2.6 & 4.9 & 1,086 \\
+\midrule
+Total & 53.3 & 100.0 & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Scenario Comparison: NCC-Electricity vs NCC-H2}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\textwidth]{outputs/figures/fig_scenario_comparison.png}
+    \caption{Scenario Comparison: CAPEX and Energy Cost in 2050}
+    \label{fig:scenario_comp}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{NCC-Electricity vs NCC-H2 (2050)}
+\begin{tabular}{lcc}
+\toprule
+Metric & NCC-Electricity & NCC-H2 \\
+\midrule
+Energy Consumption & 42 TWh & 1.7 Mt H$_2$ \\
+Energy Price (2050) & \$191/MWh & \$2.63/kg \\
+Annual Energy Cost & \$8.0B & \$4.5B \\
+CAPEX & \$900/t-C$_2$H$_4$ & \$780/t-C$_2$H$_4$ \\
+Infrastructure & Grid upgrade & H$_2$ pipeline \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The NCC-H2 pathway shows lower annual energy costs by 2050 due to declining hydrogen prices, but requires significant hydrogen infrastructure investment not captured in this analysis.
+
+\subsection{Regional Investment Requirements}
+
+\begin{table}[H]
+\centering
+\caption{Regional Investment Summary}
+\begin{tabular}{lcccc}
+\toprule
+Region & Facilities & Emissions (Mt) & Investment (\$B) & Elec (TWh) \\
+\midrule
+Yeosu & 87 & 18.5 & 13.8 & 85 \\
+Daesan & 57 & 15.7 & 11.7 & 72 \\
+Ulsan & 71 & 7.3 & 7.1 & 44 \\
+Onsan & 14 & 4.6 & 4.7 & 30 \\
+\midrule
+Total & 248 & 46.1 & 37.3 & 231 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Cumulative Investment}
+
+Total investment over 2025-2050: \$37.3 billion.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{outputs/figures/fig_cost_waterfall.png}
+    \caption{Cumulative Investment Breakdown (2025-2050)}
+    \label{fig:waterfall}
+\end{figure}
+
+\section{Conclusion}
+
+Net-zero emissions for Korea's petrochemical industry is achievable by 2050 through:
+\begin{enumerate}
+    \item Electrification of naphtha crackers (88\% of abatement)
+    \item Heat pumps for low-temperature processes (7\%)
+    \item RotoDynamic Heaters for high-temperature aromatics (5\%)
+\end{enumerate}
+
+The primary bottleneck is renewable electricity availability (231 TWh/year by 2050). The NCC-H2 pathway offers lower long-term energy costs but requires substantial hydrogen infrastructure.
+
+\section{References}
+
+\begin{itemize}
+    \item Toribio-Ramirez, D. et al. (2025). \textit{Techno-economic assessment of electric cracking for ethylene production}. Energy Conversion and Management.
+    \item Thunder Said Energy. (2023). \textit{Hydrogen vs Electrification in Industrial Heat}. Research Report.
+    \item McKinsey \& Company. (2024). \textit{Decarbonizing the Chemical Industry}. Global Insight.
+    \item Coolbrook. (2024). \textit{RotoDynamic Heater Technology Specification}. Technical Whitepaper.
+    \item BASF, SABIC, Linde. (2024). \textit{World's First Demonstration Plant for Large-Scale Electrically Heated Steam Cracking Furnaces}. Press Release.
+    \item Lummus Technology. (2023). \textit{Net Zero Ethylene Technology}. Technical Brochure.
+    \item Kosmadakis, G. (2020). \textit{Industrial High Temperature Heat Pumps}. Renewable and Sustainable Energy Reviews.
+    \item IPCC. (2019). \textit{Refinement to the 2006 IPCC Guidelines for National Greenhouse Gas Inventories}.
+    \item API. (2021). \textit{Compendium of Greenhouse Gas Emissions Methodologies for the Oil and Natural Gas Industry}.
+    \item PLANiT Institute. (2025). \textit{Korea Petrochemical Industry Decarbonization Model}. Internal Documentation.
+\end{itemize}
+
+\end{document}

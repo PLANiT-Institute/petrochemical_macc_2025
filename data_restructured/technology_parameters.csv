@@ -1,0 +1,6 @@
+technology,applies_to,cop,h2_ton_per_ton_ethylene,elec_mwh_per_ton_ethylene,energy_conversion_efficiency,trl,available_year,capex_2025_musd_per_mtco2,capex_2030_musd_per_mtco2,capex_2040_musd_per_mtco2,capex_2050_musd_per_mtco2,opex_pct_capex,lifetime_years,notes
+Heat_Pump,All processes <165C,4.0,,,0.95,8.0,2025,800,640,480,400,3.0,20,COP 4.0 (Kosmadakis 2020) CAPEX $800/tCO2 (McKinsey 2024)
+NCC-H2,Naphtha crackers only,,0.2,,0.85,7.0,2030,1700,1300,935,780,4.0,25,H2 0.2 ton/ton C2H4 CAPEX $1700/t (Thunder Said Energy 2023)
+NCC-Electricity,Naphtha crackers only,,,5.0,0.95,7.0,2030,1500,1350,1050,900,4.0,25,5.0 MWh/ton (BASF/SABIC/Linde 2024) CAPEX $1500/t
+RE_PPA,NCC electricity only,,,,1.0,,2025,0,0,0,0,0.0,99,Renewable PPA No CAPEX (IRENA 2024 BNEF 2024)
+RDH,High-temp BTX,,,,0.93,8.0,2030,900,720,540,450,3.0,25,RotoDynamic Heater (Coolbrook 2024) 92-95% eff TRL 8

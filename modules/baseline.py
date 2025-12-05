@@ -193,10 +193,24 @@ class BaselineAnalyzer:
                 n_active = len(baseline_2025)
                 n_retired = 0
 
+            # Calculate effective multiplier including operating rate
+            demand_row = self.df_demand_growth[self.df_demand_growth['year'] == year]
+            
+            if 'operating_rate_pct' in demand_row.columns:
+                op_rate = demand_row['operating_rate_pct'].iloc[0] / 100.0
+            else:
+                op_rate = 1.0  # Default to 100% if not specified
+            
+            # Effective production = Capacity * Growth * Operating Rate
+            # Note: capacity_multiplier tracks INSTALLED capacity growth
+            # We need to adjust for ACTUAL production
+            effective_multiplier = capacity_multiplier * op_rate
+
             # Emissions scale with:
             # 1. Remaining capacity (after retirement)
             # 2. Demand growth (capacity multiplier)
-            # 3. Grid decarbonization (electricity only)
+            # 3. Operating Rate (NEW)
+            # 4. Grid decarbonization (electricity only)
 
             # Fossil fuel emissions
             fossil_emissions_base = (
@@ -208,16 +222,16 @@ class BaselineAnalyzer:
                 active_facilities['emissions_fuel_oil_kt'].sum() +
                 active_facilities['emissions_diesel_kt'].sum()
             )
-            fossil_emissions = fossil_emissions_base * capacity_multiplier
+            fossil_emissions = fossil_emissions_base * effective_multiplier
 
-            # Electricity emissions scale with both demand growth AND grid decarbonization
+            # Electricity emissions scale with both demand/op_rate AND grid decarbonization
             elec_emissions_base = active_facilities['emissions_electricity_kt'].sum()
             grid_scaling = grid_ef / grid_ef_2025
-            elec_emissions = elec_emissions_base * capacity_multiplier * grid_scaling
+            elec_emissions = elec_emissions_base * effective_multiplier * grid_scaling
 
             total_emissions = fossil_emissions + elec_emissions
 
-            # Calculate total capacity
+            # Calculate total capacity (installed capacity, not actual production)
             total_capacity = active_facilities['capacity_kt'].sum() * capacity_multiplier
 
             trajectory.append({
