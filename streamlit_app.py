@@ -237,12 +237,22 @@ elif page == "🗺️ Regional Impact":
         emission_factor = 46.3 / 100.0  # Mt per 1000 kt capacity
         regional_baseline['total_emissions_mt'] = regional_baseline['capacity_kt'] / 1000 * emission_factor
 
-        # Coordinates for Korean petrochemical complexes
+        # Coordinates for Korean petrochemical complexes (expanded list)
         coords = {
             'Yeosu': {'lat': 34.7604, 'lon': 127.6622},
             'Daesan': {'lat': 36.9921, 'lon': 126.4297},
             'Ulsan': {'lat': 35.5384, 'lon': 129.3114},
-            'Onsan': {'lat': 35.4354, 'lon': 129.3333}
+            'Onsan': {'lat': 35.4354, 'lon': 129.3333},
+            'Gwangyang': {'lat': 34.9407, 'lon': 127.6959},
+            'Incheon': {'lat': 37.4563, 'lon': 126.7052},
+            'Jeonju': {'lat': 35.8242, 'lon': 127.1480},
+            'Gunsan': {'lat': 35.9676, 'lon': 126.7369},
+            'Pohang': {'lat': 36.0190, 'lon': 129.3435},
+            'Gumi': {'lat': 36.1195, 'lon': 128.3446},
+            'Gimcheon': {'lat': 36.1398, 'lon': 128.1136},
+            'Busan/Iksan/Siheung': {'lat': 35.1796, 'lon': 129.0756},  # Using Busan coords
+            'Naju': {'lat': 35.0154, 'lon': 126.7108},
+            'Jinhae': {'lat': 35.1336, 'lon': 128.6811}
         }
 
         # Add coordinates
@@ -256,10 +266,16 @@ elif page == "🗺️ Regional Impact":
         regional_baseline['Investment ($B)'] = (regional_baseline['capacity_kt'] / total_capacity) * total_invest
         regional_baseline['Emissions (Mt)'] = regional_baseline['total_emissions_mt']
 
+        # Filter to only rows with valid coordinates for the map
+        map_data = regional_baseline.dropna(subset=['lat', 'lon'])
+
         col1, col2 = st.columns([2, 1])
 
         with col1:
-            st.map(regional_baseline, latitude='lat', longitude='lon', size='Investment ($B)', zoom=6)
+            if not map_data.empty:
+                st.map(map_data, latitude='lat', longitude='lon', size='Investment ($B)', zoom=6)
+            else:
+                st.warning("No location data available for map display.")
 
         with col2:
             st.subheader("Regional Investment")
