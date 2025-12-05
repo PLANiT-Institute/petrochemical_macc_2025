@@ -50,7 +50,8 @@
       "Bash(then head -5 \"$fac_file\")",
       "Bash(else echo \"facility_summary.csv NOT FOUND\")",
       "Bash(fi)",
-      "Bash(timeout 5 streamlit run:*)"
+      "Bash(timeout 5 streamlit run:*)",
+      "Bash(gtimeout 5 streamlit run:*)"
     ],
     "deny": [],
     "ask": []

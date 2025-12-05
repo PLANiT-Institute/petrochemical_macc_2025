@@ -1,6 +1,7 @@
 """
 Korean Petrochemical Net Zero Dashboard
 Complete 6-Scenario Analysis with Facility-Level Transitions
+Full Technology Coverage: NCC-H2/Elec, RDH, Heat Pump, RE-PPA
 """
 
 import streamlit as st
@@ -26,7 +27,7 @@ OUTPUTS_DIR = BASE_DIR / "outputs"
 # ============================================================================
 # Data Loading
 # ============================================================================
-@st.cache_data
+@st.cache_data(ttl=60)  # Cache for 60 seconds only
 def load_data():
     """Load all necessary data including 6 scenarios"""
     data = {}
@@ -47,7 +48,6 @@ def load_data():
     if scenario_summary_path.exists():
         data['scenarios'] = pd.read_csv(scenario_summary_path)
     else:
-        st.warning("Scenario summary not found. Run run_scenarios_complete.py first.")
         data['scenarios'] = None
 
     # Load each scenario's facility data
@@ -79,6 +79,7 @@ def load_data():
 
     return data
 
+# Load data
 data = load_data()
 
 # Scenario display names
@@ -132,15 +133,23 @@ else:
     selected_scenario = None
 
 st.sidebar.markdown("---")
+
+# Cache clear button
+if st.sidebar.button("🔄 Refresh Data"):
+    st.cache_data.clear()
+    st.rerun()
+
+st.sidebar.markdown("---")
 st.sidebar.info(
-    "**Data Sources:**\n"
-    "- PLANiT Institute Analysis\n"
-    "- IRENA, IEA WEO 2024\n"
-    "- KPIA Industry Data\n\n"
+    "**Technology Coverage:**\n"
+    "- NCC-H2/Elec: Naphtha Crackers\n"
+    "- RDH: BTX Plants\n"
+    "- Heat Pump: Low-temp heat\n"
+    "- RE-PPA: Grid electricity\n\n"
     "**Key Assumptions:**\n"
     "- 50% CAPEX decline by 2050\n"
-    "- LCOH-based H2 pricing\n"
-    "- Grid decarbonization path"
+    "- Grid EF = 0 in 2050\n"
+    "- NO CCS/CCUS"
 )
 
 # ============================================================================
@@ -166,18 +175,18 @@ if page == "📊 Executive Summary":
             """)
 
         with col2:
-            st.markdown("### Technology Pathways")
+            st.markdown("### NCC Technology")
             st.markdown("""
             - **NCC-H2**: Green hydrogen for crackers
             - **NCC-Electricity**: Direct electrification
             """)
 
         with col3:
-            st.markdown("### Common Technologies")
+            st.markdown("### Supporting Technologies")
             st.markdown("""
-            - Heat Pump for low-temp heat
-            - RE-PPA for grid emissions
-            - 50% learning curve (all tech)
+            - **RDH**: BTX high-temp (Coolbrook)
+            - **Heat Pump**: Low-temp heat (COP 4.0)
+            - **RE-PPA**: Grid decarbonization
             """)
 
         st.markdown("---")
@@ -185,16 +194,25 @@ if page == "📊 Executive Summary":
         # Summary Table
         st.subheader("Scenario Results Summary")
 
-        summary_display = scenarios_df[['scenario', 'technology', 'n_facilities', 'n_ncc_facilities',
-                                        'ncc_capacity_kt', 'bau_2050_mt', 'net_2050_mt', 'capex_billion_usd']].copy()
-        summary_display.columns = ['Production', 'Technology', 'Total Facilities', 'NCC Facilities',
-                                   'NCC Capacity (kt)', 'BAU 2050 (Mt)', 'Net 2050 (Mt)', 'CAPEX ($B)']
+        # Check if new columns exist
+        cols_to_display = ['scenario', 'technology', 'n_facilities', 'n_ncc_facilities']
+        if 'n_btx_facilities' in scenarios_df.columns:
+            cols_to_display.append('n_btx_facilities')
+        cols_to_display.extend(['ncc_capacity_kt', 'bau_2050_mt', 'net_2050_mt', 'capex_billion_usd'])
+
+        summary_display = scenarios_df[cols_to_display].copy()
+
+        col_names = ['Production', 'Technology', 'Facilities', 'NCC']
+        if 'n_btx_facilities' in scenarios_df.columns:
+            col_names.append('BTX')
+        col_names.extend(['NCC Cap (kt)', 'BAU 2050', 'Net 2050', 'CAPEX'])
+        summary_display.columns = col_names
 
         # Format numbers
-        summary_display['NCC Capacity (kt)'] = summary_display['NCC Capacity (kt)'].apply(lambda x: f"{x:,.0f}")
-        summary_display['BAU 2050 (Mt)'] = summary_display['BAU 2050 (Mt)'].apply(lambda x: f"{x:.1f}")
-        summary_display['Net 2050 (Mt)'] = summary_display['Net 2050 (Mt)'].apply(lambda x: f"{x:.1f}")
-        summary_display['CAPEX ($B)'] = summary_display['CAPEX ($B)'].apply(lambda x: f"${x:.1f}")
+        summary_display['NCC Cap (kt)'] = summary_display['NCC Cap (kt)'].apply(lambda x: f"{x:,.0f}")
+        summary_display['BAU 2050'] = summary_display['BAU 2050'].apply(lambda x: f"{x:.1f} Mt")
+        summary_display['Net 2050'] = summary_display['Net 2050'].apply(lambda x: f"{x:.1f} Mt")
+        summary_display['CAPEX'] = summary_display['CAPEX'].apply(lambda x: f"${x:.1f}B")
 
         st.dataframe(summary_display, use_container_width=True, hide_index=True)
 
@@ -208,27 +226,6 @@ if page == "📊 Executive Summary":
         with col1:
             st.markdown("#### Emission Reduction")
 
-            # BAU vs Net comparison chart
-            fig = go.Figure()
-
-            for idx, row in scenarios_df.iterrows():
-                scenario_label = f"{row['scenario']}\n{row['technology']}"
-                fig.add_trace(go.Bar(
-                    name=scenario_label,
-                    x=[scenario_label],
-                    y=[row['bau_2050_mt']],
-                    marker_color='lightcoral',
-                    showlegend=False
-                ))
-                fig.add_trace(go.Bar(
-                    name=scenario_label,
-                    x=[scenario_label],
-                    y=[row['net_2050_mt']],
-                    marker_color='green',
-                    showlegend=False
-                ))
-
-            # Simpler approach - grouped bar
             fig = go.Figure(data=[
                 go.Bar(name='BAU 2050', x=scenarios_df['scenario'] + ' + ' + scenarios_df['technology'],
                        y=scenarios_df['bau_2050_mt'], marker_color='indianred'),
@@ -257,20 +254,22 @@ if page == "📊 Executive Summary":
 
         col1, col2, col3, col4 = st.columns(4)
 
-        min_capex = scenarios_df['capex_billion_usd'].min()
-        max_capex = scenarios_df['capex_billion_usd'].max()
+        min_capex_row = scenarios_df.loc[scenarios_df['capex_billion_usd'].idxmin()]
+        max_capex_row = scenarios_df.loc[scenarios_df['capex_billion_usd'].idxmax()]
         avg_abatement = scenarios_df['ncc_abatement_mt'].mean()
+        net_2050_avg = scenarios_df['net_2050_mt'].mean()
 
-        col1.metric("Lowest CAPEX", f"${min_capex:.1f}B",
-                   f"구조조정 40% + NCC-H2")
-        col2.metric("Highest CAPEX", f"${max_capex:.1f}B",
-                   f"Shaheen + NCC-Elec")
+        col1.metric("Lowest CAPEX", f"${min_capex_row['capex_billion_usd']:.1f}B",
+                   f"{min_capex_row['scenario']}")
+        col2.metric("Highest CAPEX", f"${max_capex_row['capex_billion_usd']:.1f}B",
+                   f"{max_capex_row['scenario']}")
         col3.metric("Avg NCC Abatement", f"{avg_abatement:.1f} Mt",
                    "per scenario")
-        col4.metric("All Scenarios", "Net Zero Ready",
-                   "3.9 Mt residual")
+        col4.metric("All Scenarios", "NET ZERO",
+                   f"{net_2050_avg:.1f} Mt residual")
     else:
-        st.error("Scenario data not loaded. Please run run_scenarios_complete.py first.")
+        st.error("Scenario data not loaded. Please run `python run_scenarios_complete.py` first.")
+        st.code("cd /path/to/petrochemical_macc_2025\npython run_scenarios_complete.py", language="bash")
 
 # ============================================================================
 # Page: Scenario Comparison
@@ -333,51 +332,42 @@ elif page == "🔄 Scenario Comparison":
 
         with col2:
             # Energy requirements
-            energy_data = []
-            for _, row in scenarios_df.iterrows():
-                if row['technology'] == 'NCC-H2':
-                    energy_data.append({
-                        'Scenario': row['scenario'],
-                        'Technology': 'NCC-H2',
-                        'H2 Demand (kt)': row['h2_kt'],
-                        'Electricity (TWh)': row['electricity_twh']
-                    })
-                else:
-                    energy_data.append({
-                        'Scenario': row['scenario'],
-                        'Technology': 'NCC-Electricity',
-                        'H2 Demand (kt)': 0,
-                        'Electricity (TWh)': row['electricity_twh']
-                    })
+            h2_scenarios = scenarios_df[scenarios_df['technology'] == 'NCC-H2'].copy()
+            h2_scenarios['h2_mt'] = h2_scenarios['h2_kt'] / 1000
 
-            energy_df = pd.DataFrame(energy_data)
-
-            fig = px.bar(energy_df, x='Scenario', y='H2 Demand (kt)',
-                        color='Technology', barmode='group',
-                        title='Hydrogen Demand by Scenario (kt)',
-                        color_discrete_map={'NCC-H2': '#3498DB', 'NCC-Electricity': '#E74C3C'})
+            fig = px.bar(h2_scenarios, x='scenario', y='h2_mt',
+                        title='Hydrogen Demand (NCC-H2 Scenarios, Mt)',
+                        color='scenario',
+                        color_discrete_sequence=['#3498DB', '#2980B9', '#1ABC9C'])
             st.plotly_chart(fig, use_container_width=True)
 
         st.markdown("---")
 
-        # Abatement Breakdown
+        # Abatement Breakdown (including RDH)
         st.subheader("3. Abatement Breakdown by Technology")
 
         abatement_data = []
         for _, row in scenarios_df.iterrows():
             label = f"{row['scenario']}\n{row['technology']}"
-            abatement_data.append({
+            entry = {
                 'Scenario': label,
-                'NCC Abatement': row['ncc_abatement_mt'],
+                'NCC Technology': row['ncc_abatement_mt'],
                 'Heat Pump': row['heat_pump_mt'],
                 'RE-PPA': row['re_ppa_mt']
-            })
+            }
+            # Add RDH if available
+            if 'rdh_abatement_mt' in row:
+                entry['RDH (BTX)'] = row['rdh_abatement_mt']
+            abatement_data.append(entry)
 
         abatement_df = pd.DataFrame(abatement_data)
 
         fig = go.Figure()
         fig.add_trace(go.Bar(name='NCC Technology', x=abatement_df['Scenario'],
-                            y=abatement_df['NCC Abatement'], marker_color='#2ECC71'))
+                            y=abatement_df['NCC Technology'], marker_color='#2ECC71'))
+        if 'RDH (BTX)' in abatement_df.columns:
+            fig.add_trace(go.Bar(name='RDH (BTX)', x=abatement_df['Scenario'],
+                                y=abatement_df['RDH (BTX)'], marker_color='#E67E22'))
         fig.add_trace(go.Bar(name='Heat Pump', x=abatement_df['Scenario'],
                             y=abatement_df['Heat Pump'], marker_color='#F39C12'))
         fig.add_trace(go.Bar(name='RE-PPA', x=abatement_df['Scenario'],
@@ -407,12 +397,13 @@ elif page == "🏭 Facility Transitions":
 
             n_total = len(facilities)
             n_ncc = len(facilities[facilities['process'] == 'Naphtha Cracker'])
+            n_btx = len(facilities[facilities['process'] == 'BTX Plant'])
             total_cap = facilities['capacity_kt'].sum()
             ncc_cap = facilities[facilities['process'] == 'Naphtha Cracker']['capacity_kt'].sum()
 
             col1.metric("Total Facilities", n_total)
             col2.metric("NCC Facilities", n_ncc)
-            col3.metric("Total Capacity", f"{total_cap:,.0f} kt")
+            col3.metric("BTX Facilities", n_btx)
             col4.metric("NCC Capacity", f"{ncc_cap:,.0f} kt")
 
             st.markdown("---")
@@ -423,9 +414,15 @@ elif page == "🏭 Facility Transitions":
             ncc_fac = facilities[facilities['process'] == 'Naphtha Cracker'].copy()
             ncc_fac = ncc_fac.sort_values('capacity_kt', ascending=False)
 
-            display_cols = ['product', 'company', 'location', 'capacity_kt', 'year_built', 'age_2025']
+            display_cols = ['product', 'company', 'location', 'capacity_kt', 'year_built']
+            if 'age_2025' in ncc_fac.columns:
+                display_cols.append('age_2025')
+
             ncc_display = ncc_fac[display_cols].copy()
-            ncc_display.columns = ['Product', 'Company', 'Location', 'Capacity (kt)', 'Year Built', 'Age (2025)']
+            col_names = ['Product', 'Company', 'Location', 'Capacity (kt)', 'Year Built']
+            if 'age_2025' in ncc_fac.columns:
+                col_names.append('Age (2025)')
+            ncc_display.columns = col_names
 
             st.dataframe(ncc_display, use_container_width=True, hide_index=True)
 
@@ -434,11 +431,14 @@ elif page == "🏭 Facility Transitions":
 
             with col1:
                 st.subheader("NCC Age Distribution")
-                fig = px.histogram(ncc_fac, x='age_2025', nbins=10,
-                                  title='NCC Facility Age Distribution',
-                                  labels={'age_2025': 'Age in 2025 (years)'})
-                fig.update_layout(showlegend=False)
-                st.plotly_chart(fig, use_container_width=True)
+                if 'age_2025' in ncc_fac.columns:
+                    fig = px.histogram(ncc_fac, x='age_2025', nbins=10,
+                                      title='NCC Facility Age Distribution',
+                                      labels={'age_2025': 'Age in 2025 (years)'})
+                    fig.update_layout(showlegend=False)
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.info("Age data not available")
 
             with col2:
                 st.subheader("NCC Capacity by Company")
@@ -466,26 +466,21 @@ elif page == "🏭 Facility Transitions":
                                  xaxis_title='Year', yaxis_title='Emissions (Mt CO2)')
                 st.plotly_chart(fig, use_container_width=True)
 
-                # Show deployment data table
-                deploy_display = deploy[['year', 'bau_mt', 'deployed_abatement_mt', 'actual_emissions_mt', 'grid_ef']].copy()
-                deploy_display.columns = ['Year', 'BAU (Mt)', 'Abatement (Mt)', 'Net (Mt)', 'Grid EF']
-                st.dataframe(deploy_display, use_container_width=True, hide_index=True)
-
             st.markdown("---")
 
             # Top Emitters
             if scenario_data.get('emissions') is not None:
                 st.subheader("Top 20 Facilities by 2050 Emissions")
 
-                emissions = scenario_data['emissions'].sort_values('total_emissions_kt', ascending=False).head(20)
-
-                display_cols = ['product', 'company', 'location', 'capacity_kt', 'total_emissions_kt']
-                emissions_display = emissions[display_cols].copy()
-                emissions_display.columns = ['Product', 'Company', 'Location', 'Capacity (kt)', 'Emissions 2050 (kt)']
-
-                st.dataframe(emissions_display, use_container_width=True, hide_index=True)
+                emissions = scenario_data['emissions']
+                if 'total_emissions_kt' in emissions.columns:
+                    emissions = emissions.sort_values('total_emissions_kt', ascending=False).head(20)
+                    display_cols = ['product', 'company', 'location', 'capacity_kt', 'total_emissions_kt']
+                    emissions_display = emissions[display_cols].copy()
+                    emissions_display.columns = ['Product', 'Company', 'Location', 'Capacity (kt)', 'Emissions 2050 (kt)']
+                    st.dataframe(emissions_display, use_container_width=True, hide_index=True)
         else:
-            st.warning("Facility data not found for this scenario. Run run_scenarios_complete.py first.")
+            st.warning("Facility data not found for this scenario.")
     else:
         st.info("Select a scenario from the sidebar to view facility details.")
 
@@ -552,21 +547,24 @@ elif page == "📈 Emission Pathways":
 
             st.markdown("---")
 
-            # Grid decarbonization impact
+            # Grid decarbonization
             st.subheader("Grid Decarbonization Impact")
 
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(
-                x=deploy['year'], y=deploy['grid_ef'],
-                mode='lines+markers', name='Grid Emission Factor',
-                line=dict(color='purple', width=2)
-            ))
-            fig.update_layout(
-                title='Grid Emission Factor Trajectory (tCO2/MWh)',
-                xaxis_title='Year',
-                yaxis_title='tCO2/MWh'
-            )
-            st.plotly_chart(fig, use_container_width=True)
+            if 'grid_ef' in deploy.columns:
+                fig = go.Figure()
+                fig.add_trace(go.Scatter(
+                    x=deploy['year'], y=deploy['grid_ef'],
+                    mode='lines+markers', name='Grid Emission Factor',
+                    line=dict(color='purple', width=2)
+                ))
+                fig.add_hline(y=0, line_dash="dot", line_color="green",
+                             annotation_text="Net Zero Grid (2050)")
+                fig.update_layout(
+                    title='Grid Emission Factor Trajectory (tCO2/MWh)',
+                    xaxis_title='Year',
+                    yaxis_title='tCO2/MWh'
+                )
+                st.plotly_chart(fig, use_container_width=True)
         else:
             st.warning("Deployment data not found for this scenario.")
     else:
@@ -584,13 +582,7 @@ elif page == "🛠️ Technology & Learning Curves":
 
         tech_params = data['tech_params']
 
-        display_cols = ['technology', 'applies_to', 'capex_2025_musd_per_mtco2',
-                       'capex_2050_musd_per_mtco2', 'available_year']
-        tech_display = tech_params[display_cols].copy()
-        tech_display.columns = ['Technology', 'Applies To', 'CAPEX 2025 ($M/MtCO2)',
-                               'CAPEX 2050 ($M/MtCO2)', 'Available Year']
-
-        st.dataframe(tech_display, use_container_width=True, hide_index=True)
+        st.dataframe(tech_params, use_container_width=True, hide_index=True)
 
         st.markdown("---")
 
@@ -602,11 +594,11 @@ elif page == "🛠️ Technology & Learning Curves":
         fig = go.Figure()
 
         colors = {'Heat_Pump': '#F39C12', 'NCC-H2': '#3498DB',
-                 'NCC-Electricity': '#E74C3C', 'RDH': '#2ECC71'}
+                 'NCC-Electricity': '#E74C3C', 'RDH': '#E67E22', 'RE_PPA': '#9B59B6'}
 
         for _, row in tech_params.iterrows():
             tech = row['technology']
-            if row['capex_2025_musd_per_mtco2'] > 0:
+            if 'capex_2025_musd_per_mtco2' in row and row['capex_2025_musd_per_mtco2'] > 0:
                 capex_2025 = row['capex_2025_musd_per_mtco2']
                 capex_2050 = row['capex_2050_musd_per_mtco2']
 
@@ -632,7 +624,7 @@ elif page == "🛠️ Technology & Learning Curves":
         st.markdown("---")
 
         # H2 Price Trajectory (LCOH-based)
-        st.subheader("3. Hydrogen Price Trajectory (LCOH-based)")
+        st.subheader("3. Green Hydrogen Price Trajectory (LCOH-based)")
 
         h2_prices = data['h2_prices']
 
@@ -661,37 +653,33 @@ elif page == "🛠️ Technology & Learning Curves":
             - Electrolyzer: $1000 → $500/kW
             - Efficiency: 70% → 75%
             - Capacity Factor: 25%
-            - Lifetime: 20 years
             """)
 
-            st.markdown("**Key Milestones:**")
             h2_2025 = h2_prices[h2_prices['year'] == 2025]['h2_price_usd_per_kg'].values[0]
-            h2_2030 = h2_prices[h2_prices['year'] == 2030]['h2_price_usd_per_kg'].values[0]
             h2_2050 = h2_prices[h2_prices['year'] == 2050]['h2_price_usd_per_kg'].values[0]
 
             st.metric("2025", f"${h2_2025:.2f}/kg")
-            st.metric("2030", f"${h2_2030:.2f}/kg")
             st.metric("2050", f"${h2_2050:.2f}/kg", f"-{(1-h2_2050/h2_2025)*100:.0f}%")
 
         st.markdown("---")
 
-        # RE Price Trajectory
-        st.subheader("4. Renewable Energy Price Trajectory")
+        # Grid Emission Factor
+        st.subheader("4. Grid Decarbonization (Zero by 2050)")
 
-        re_prices = data['re_prices']
+        grid_ef = data['grid_ef']
 
         fig = go.Figure()
         fig.add_trace(go.Scatter(
-            x=re_prices['year'], y=re_prices['re_price_usd_per_mwh'],
-            mode='lines+markers', name='RE Price',
-            line=dict(color='#2ECC71', width=3),
-            marker=dict(size=6),
-            fill='tozeroy', fillcolor='rgba(46,204,113,0.2)'
+            x=grid_ef['year'], y=grid_ef['grid_ef_tco2_per_mwh'],
+            mode='lines+markers', name='Grid EF',
+            line=dict(color='#9B59B6', width=3),
+            fill='tozeroy', fillcolor='rgba(155,89,182,0.2)'
         ))
+        fig.add_hline(y=0, line_dash="dot", line_color="green")
         fig.update_layout(
-            title='Renewable Energy PPA Price (Korea)',
+            title='Grid Emission Factor (100% RE by 2050)',
             xaxis_title='Year',
-            yaxis_title='$/MWh',
+            yaxis_title='tCO2/MWh',
             height=400
         )
         st.plotly_chart(fig, use_container_width=True)
@@ -724,7 +712,13 @@ elif page == "💰 Cost & Investment":
         # Cost per tonne abated
         st.subheader("2. Cost Effectiveness Analysis")
 
-        scenarios_df['cost_per_tonne'] = scenarios_df['capex_billion_usd'] * 1000 / scenarios_df['ncc_abatement_mt']
+        # Calculate total abatement
+        scenarios_df = scenarios_df.copy()
+        scenarios_df['total_abatement'] = scenarios_df['ncc_abatement_mt'] + scenarios_df['heat_pump_mt'] + scenarios_df['re_ppa_mt']
+        if 'rdh_abatement_mt' in scenarios_df.columns:
+            scenarios_df['total_abatement'] += scenarios_df['rdh_abatement_mt']
+
+        scenarios_df['cost_per_tonne'] = scenarios_df['capex_billion_usd'] * 1000 / scenarios_df['total_abatement']
 
         col1, col2 = st.columns(2)
 
@@ -732,40 +726,25 @@ elif page == "💰 Cost & Investment":
             fig = px.bar(scenarios_df,
                         x='scenario_id', y='cost_per_tonne',
                         color='technology',
-                        title='CAPEX per Tonne Abated ($M/Mt)',
+                        title='CAPEX per Tonne Abated ($/tCO2)',
                         color_discrete_map={'NCC-H2': '#3498DB', 'NCC-Electricity': '#E74C3C'})
             fig.update_layout(xaxis_tickangle=-45)
             st.plotly_chart(fig, use_container_width=True)
 
         with col2:
-            # Scatter: CAPEX vs Abatement
             fig = px.scatter(scenarios_df,
-                           x='ncc_abatement_mt', y='capex_billion_usd',
+                           x='total_abatement', y='capex_billion_usd',
                            color='technology', size='n_ncc_facilities',
                            hover_name='scenario_id',
                            title='CAPEX vs Abatement',
-                           labels={'ncc_abatement_mt': 'NCC Abatement (Mt)',
+                           labels={'total_abatement': 'Total Abatement (Mt)',
                                   'capex_billion_usd': 'CAPEX ($B)'},
                            color_discrete_map={'NCC-H2': '#3498DB', 'NCC-Electricity': '#E74C3C'})
             st.plotly_chart(fig, use_container_width=True)
 
         st.markdown("---")
 
-        # Investment Summary Table
-        st.subheader("3. Investment Summary")
-
-        investment_summary = scenarios_df[['scenario', 'technology', 'capex_billion_usd',
-                                           'ncc_abatement_mt', 'cost_per_tonne']].copy()
-        investment_summary.columns = ['Production', 'Technology', 'CAPEX ($B)',
-                                      'Abatement (Mt)', 'Cost ($/tCO2)']
-        investment_summary['CAPEX ($B)'] = investment_summary['CAPEX ($B)'].apply(lambda x: f"${x:.1f}")
-        investment_summary['Abatement (Mt)'] = investment_summary['Abatement (Mt)'].apply(lambda x: f"{x:.1f}")
-        investment_summary['Cost ($/tCO2)'] = investment_summary['Cost ($/tCO2)'].apply(lambda x: f"${x:.0f}")
-
-        st.dataframe(investment_summary, use_container_width=True, hide_index=True)
-
         # Key insights
-        st.markdown("---")
         st.subheader("Key Insights")
 
         min_cost = scenarios_df.loc[scenarios_df['cost_per_tonne'].idxmin()]
@@ -808,7 +787,7 @@ elif page == "⚡ Energy Requirements":
             h2_scenarios['h2_mt'] = h2_scenarios['h2_kt'] / 1000
 
             fig = px.bar(h2_scenarios, x='scenario', y='h2_mt',
-                        title='Hydrogen Demand (NCC-H2 Scenarios)',
+                        title='Hydrogen Demand (NCC-H2 Scenarios, Mt)',
                         labels={'h2_mt': 'H2 Demand (Mt)', 'scenario': 'Production Pathway'},
                         color='scenario',
                         color_discrete_sequence=['#3498DB', '#2980B9', '#1ABC9C'])
@@ -816,44 +795,18 @@ elif page == "⚡ Energy Requirements":
 
         with col2:
             # Electricity demand
-            elec_scenarios = scenarios_df[scenarios_df['technology'] == 'NCC-Electricity'].copy()
-
-            fig = px.bar(elec_scenarios, x='scenario', y='electricity_twh',
-                        title='Additional Electricity Demand (NCC-Electricity)',
+            fig = px.bar(scenarios_df, x='scenario', y='electricity_twh',
+                        title='Total Electricity Demand (TWh)',
                         labels={'electricity_twh': 'Electricity (TWh)', 'scenario': 'Production Pathway'},
-                        color='scenario',
-                        color_discrete_sequence=['#E74C3C', '#C0392B', '#D35400'])
+                        color='technology',
+                        barmode='group',
+                        color_discrete_map={'NCC-H2': '#3498DB', 'NCC-Electricity': '#E74C3C'})
             st.plotly_chart(fig, use_container_width=True)
 
         st.markdown("---")
 
-        # Comparison: H2 vs Electricity
-        st.subheader("2. Technology Pathway Comparison")
-
-        if selected_scenario:
-            scenario_data = data['scenario_data'].get(selected_scenario, {})
-
-            st.markdown(f"**Selected: {SCENARIO_KOREAN[selected_scenario]}**")
-
-            scenario_row = scenarios_df[scenarios_df['scenario_id'] == selected_scenario]
-            if len(scenario_row) > 0:
-                row = scenario_row.iloc[0]
-
-                col1, col2, col3 = st.columns(3)
-
-                col1.metric("Technology", row['technology'])
-
-                if row['technology'] == 'NCC-H2':
-                    col2.metric("H2 Demand", f"{row['h2_kt']/1000:.2f} Mt")
-                    col3.metric("Electricity for H2", "Included in LCOH")
-                else:
-                    col2.metric("H2 Demand", "0 Mt")
-                    col3.metric("Electricity Demand", f"{row['electricity_twh']:.1f} TWh")
-
-        st.markdown("---")
-
         # Energy infrastructure requirements
-        st.subheader("3. Infrastructure Implications")
+        st.subheader("2. Infrastructure Implications")
 
         col1, col2 = st.columns(2)
 
@@ -863,7 +816,7 @@ elif page == "⚡ Energy Requirements":
             **Requirements:**
             - Green H2 production facilities
             - H2 storage and distribution
-            - Electrolyzer capacity: ~50-100 GW
+            - Electrolyzer capacity
 
             **Advantages:**
             - Lower grid stress
@@ -876,13 +829,13 @@ elif page == "⚡ Energy Requirements":
             st.markdown("""
             **Requirements:**
             - Massive grid expansion
-            - Additional 200-300 TWh/year
-            - ~40% of current Korea generation
+            - Additional RE capacity
+            - Grid reinforcement
 
             **Advantages:**
             - Simpler technology
-            - No H2 infrastructure needed
-            - Higher efficiency (direct use)
+            - No H2 infrastructure
+            - Higher efficiency
             """)
     else:
         st.error("Scenario data not loaded.")
@@ -947,33 +900,6 @@ elif page == "🗺️ Regional Analysis":
         st.subheader("3. Complete Regional Summary")
 
         st.dataframe(regional, use_container_width=True, hide_index=True)
-
-        # Map placeholder
-        st.subheader("4. Geographic Distribution")
-
-        coords = {
-            'Yeosu': {'lat': 34.7604, 'lon': 127.6622},
-            'Daesan': {'lat': 36.9921, 'lon': 126.4297},
-            'Ulsan': {'lat': 35.5384, 'lon': 129.3114},
-            'Onsan': {'lat': 35.4354, 'lon': 129.3333},
-            'Gwangyang': {'lat': 34.9407, 'lon': 127.6959},
-            'Incheon': {'lat': 37.4563, 'lon': 126.7052},
-        }
-
-        map_data = []
-        for _, row in regional.iterrows():
-            if row['Region'] in coords:
-                map_data.append({
-                    'lat': coords[row['Region']]['lat'],
-                    'lon': coords[row['Region']]['lon'],
-                    'size': row['Total Capacity (kt)'] / 1000
-                })
-
-        if map_data:
-            map_df = pd.DataFrame(map_data)
-            st.map(map_df, latitude='lat', longitude='lon', size='size', zoom=6)
-        else:
-            st.info("Map data not available for all regions.")
     else:
         st.error("Data not loaded.")
 
@@ -984,6 +910,6 @@ st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: gray; font-size: 12px;'>
 Korea Petrochemical Net Zero Analysis | PLANiT Institute | 2025<br>
-Data Sources: KPIA, IRENA, IEA WEO 2024 | All scenarios assume 50% CAPEX learning curve
+Technologies: NCC-H2/Elec, RDH (Coolbrook), Heat Pump, RE-PPA | Grid = 0 tCO2/MWh by 2050 | NO CCS/CCUS
 </div>
 """, unsafe_allow_html=True)
