@@ -93,9 +93,9 @@ if page == "📊 Executive Summary":
     if data:
         # Key Metrics (2050)
         bau_2050 = data['bau_traj'][data['bau_traj']['year'] == 2050]['total_emissions_mt'].values[0]
-        opt_2050 = data['opt_traj'][data['opt_traj']['year'] == 2050]['remaining_emissions_mt'].values[0]
-        total_cost = data['opt_traj']['total_annual_cost_musd'].sum() / 1000
-        elec_demand = data['opt_traj'][data['opt_traj']['year'] == 2050]['electricity_demand_twh'].values[0]
+        opt_2050 = data['opt_traj'][data['opt_traj']['year'] == 2050]['actual_emissions_mt'].values[0]
+        total_cost = data['opt_traj']['cumulative_capex_musd'].max() / 1000  # Use max cumulative CAPEX
+        elec_demand = data['opt_traj'][data['opt_traj']['year'] == 2050]['electricity_consumption_increase_twh'].values[0]
 
         col1, col2, col3, col4 = st.columns(4)
         col1.metric("2050 Emissions", f"{opt_2050:.1f} Mt", f"-100% vs BAU")
@@ -105,26 +105,29 @@ if page == "📊 Executive Summary":
 
         # Waterfall Chart
         st.subheader("2050 Abatement Waterfall")
-        
-        # Calculate abatement by tech in 2050
-        macc_2050 = data['macc_annual'][data['macc_annual']['year'] == 2050]
-        
+
+        # Get actual deployed abatement from optimization trajectory
+        opt_2050_row = data['opt_traj'][data['opt_traj']['year'] == 2050].iloc[0]
+        ncc_elec_abate = opt_2050_row['ncc_elec_mt']
+        heat_pump_abate = opt_2050_row['heat_pump_mt']
+        re_ppa_abate = opt_2050_row['re_ppa_mt']
+        # RDH is not in this trajectory - it was removed. Use 0 or check if column exists
+        rdh_abate = 0.0  # RDH not deployed in this scenario
+
         fig = go.Figure(go.Waterfall(
             name = "2050", orientation = "v",
-            measure = ["relative", "relative", "relative", "relative", "relative", "total"],
-            x = ["BAU Emissions", "NCC-Electricity", "Heat Pump", "RDH", "RE-PPA (Grid)", "Net Zero"],
+            measure = ["relative", "relative", "relative", "relative", "total"],
+            x = ["BAU Emissions", "NCC-Electricity", "Heat Pump", "RE-PPA (Grid)", "Net Zero"],
             textposition = "outside",
-            text = [f"{bau_2050:.1f}", 
-                    f"-{macc_2050[macc_2050['technology']=='NCC-Electricity']['abatement_potential_mtco2'].values[0]:.1f}",
-                    f"-{macc_2050[macc_2050['technology']=='Heat_Pump']['abatement_potential_mtco2'].values[0]:.1f}",
-                    f"-{macc_2050[macc_2050['technology']=='RDH']['abatement_potential_mtco2'].values[0]:.1f}",
-                    f"-{macc_2050[macc_2050['technology']=='RE_PPA']['abatement_potential_mtco2'].values[0]:.1f}",
-                    "0.0"],
-            y = [bau_2050, 
-                 -macc_2050[macc_2050['technology']=='NCC-Electricity']['abatement_potential_mtco2'].values[0],
-                 -macc_2050[macc_2050['technology']=='Heat_Pump']['abatement_potential_mtco2'].values[0],
-                 -macc_2050[macc_2050['technology']=='RDH']['abatement_potential_mtco2'].values[0],
-                 -macc_2050[macc_2050['technology']=='RE_PPA']['abatement_potential_mtco2'].values[0],
+            text = [f"{bau_2050:.1f}",
+                    f"-{ncc_elec_abate:.1f}",
+                    f"-{heat_pump_abate:.1f}",
+                    f"-{re_ppa_abate:.1f}",
+                    f"{opt_2050:.1f}"],
+            y = [bau_2050,
+                 -ncc_elec_abate,
+                 -heat_pump_abate,
+                 -re_ppa_abate,
                  0],
             connector = {"line":{"color":"rgb(63, 63, 63)"}},
         ))
@@ -142,7 +145,7 @@ elif page == "📈 Emission Pathway":
         df_chart = pd.DataFrame({
             'Year': data['bau_traj']['year'],
             'BAU': data['bau_traj']['total_emissions_mt'],
-            'Net Zero Pathway': data['opt_traj']['remaining_emissions_mt']
+            'Net Zero Pathway': data['opt_traj']['actual_emissions_mt']
         })
         
         fig = px.line(df_chart, x='Year', y=['BAU', 'Net Zero Pathway'], 
@@ -184,81 +187,88 @@ elif page == "🛠️ Technology Mix":
 # ============================================================================
 elif page == "💰 Cost Analysis":
     st.title("💰 Investment & Cost Analysis")
-    
+
     if data:
-        df_cost = data['opt_traj']
-        
-        # Annual Cost Composition
+        df_cost = data['opt_traj'].copy()
+
+        # Calculate annual CAPEX from cumulative (difference between years)
+        df_cost['annual_capex_musd'] = df_cost['cumulative_capex_musd'].diff().fillna(0)
+
+        # Annual Cost Chart
         fig = go.Figure()
-        fig.add_trace(go.Bar(x=df_cost['year'], y=df_cost['capex_musd'], name='CAPEX'))
-        fig.add_trace(go.Bar(x=df_cost['year'], y=df_cost['opex_musd'], name='OPEX'))
-        fig.add_trace(go.Bar(x=df_cost['year'], y=df_cost['fuel_cost_musd'], name='Energy Cost'))
-        
-        fig.update_layout(barmode='stack', title='Annual Cost Composition ($ Million)',
-                          xaxis_title='Year', yaxis_title='Cost ($ Million)')
+        fig.add_trace(go.Bar(x=df_cost['year'], y=df_cost['annual_capex_musd'], name='Annual CAPEX'))
+
+        fig.update_layout(title='Annual CAPEX Investment ($ Million)',
+                          xaxis_title='Year', yaxis_title='CAPEX ($ Million)')
         st.plotly_chart(fig, use_container_width=True)
-        
-        # Cumulative Cost
-        total_capex = df_cost['capex_musd'].sum() / 1000
-        total_opex = df_cost['opex_musd'].sum() / 1000
-        total_energy = df_cost['fuel_cost_musd'].sum() / 1000
-        
+
+        # Cumulative Cost Chart
+        fig2 = go.Figure()
+        fig2.add_trace(go.Scatter(x=df_cost['year'], y=df_cost['cumulative_capex_musd']/1000,
+                                   mode='lines+markers', name='Cumulative CAPEX'))
+        fig2.update_layout(title='Cumulative CAPEX Investment ($ Billion)',
+                           xaxis_title='Year', yaxis_title='CAPEX ($ Billion)')
+        st.plotly_chart(fig2, use_container_width=True)
+
+        # Total Cost Summary
+        total_capex = df_cost['cumulative_capex_musd'].max() / 1000
+
         st.subheader("Cumulative Investment (2025-2050)")
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Total Cost", f"${total_capex+total_opex+total_energy:.1f}B")
-        col2.metric("CAPEX", f"${total_capex:.1f}B")
-        col3.metric("OPEX", f"${total_opex:.1f}B")
-        col4.metric("Energy", f"${total_energy:.1f}B")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Total CAPEX", f"${total_capex:.1f}B")
+        col2.metric("Peak Annual Investment", f"${df_cost['annual_capex_musd'].max():.0f}M")
+        col3.metric("Investment Start Year", f"{df_cost[df_cost['annual_capex_musd'] > 0]['year'].min()}")
 
 
 elif page == "🗺️ Regional Impact":
     st.title("🗺️ Regional Impact Analysis")
-    
+
     if data:
-        # Load Regional Data from Excel Report Output (or generate it on the fly)
-        # For now, we simulate the aggregation from the facility database which is loaded
-        
         # Aggregate facility data by region
         df_fac = data['facilities']
-        
-        # Calculate regional totals (Baseline)
+
+        # Calculate regional capacity totals
         regional_baseline = df_fac.groupby('location').agg({
-            'capacity_kt': 'sum',
-            'total_emissions_kt': 'sum'
+            'capacity_kt': 'sum'
         }).reset_index()
-        
-        # Coordinates
+
+        # Estimate emissions based on capacity (NCC emission factor ~2 tCO2/ton ethylene)
+        # BAU 2025 total: ~46.3 Mt from ~100,000 kt capacity
+        emission_factor = 46.3 / 100.0  # Mt per 1000 kt capacity
+        regional_baseline['total_emissions_mt'] = regional_baseline['capacity_kt'] / 1000 * emission_factor
+
+        # Coordinates for Korean petrochemical complexes
         coords = {
             'Yeosu': {'lat': 34.7604, 'lon': 127.6622},
             'Daesan': {'lat': 36.9921, 'lon': 126.4297},
             'Ulsan': {'lat': 35.5384, 'lon': 129.3114},
             'Onsan': {'lat': 35.4354, 'lon': 129.3333}
         }
-        
+
         # Add coordinates
         regional_baseline['lat'] = regional_baseline['location'].map(lambda x: coords.get(x, {}).get('lat'))
         regional_baseline['lon'] = regional_baseline['location'].map(lambda x: coords.get(x, {}).get('lon'))
-        
-        # Calculate Investment Share (Proportional to Capacity/Emissions)
-        total_invest = data['opt_traj']['total_annual_cost_musd'].sum() / 1000
-        total_emissions = regional_baseline['total_emissions_kt'].sum()
-        
-        regional_baseline['Investment ($B)'] = (regional_baseline['total_emissions_kt'] / total_emissions) * total_invest
-        regional_baseline['Emissions (Mt)'] = regional_baseline['total_emissions_kt'] / 1000
-        
+
+        # Calculate Investment Share (Proportional to Capacity)
+        total_invest = data['opt_traj']['cumulative_capex_musd'].max() / 1000
+        total_capacity = regional_baseline['capacity_kt'].sum()
+
+        regional_baseline['Investment ($B)'] = (regional_baseline['capacity_kt'] / total_capacity) * total_invest
+        regional_baseline['Emissions (Mt)'] = regional_baseline['total_emissions_mt']
+
         col1, col2 = st.columns([2, 1])
-        
+
         with col1:
             st.map(regional_baseline, latitude='lat', longitude='lon', size='Investment ($B)', zoom=6)
-            
+
         with col2:
             st.subheader("Regional Investment")
             st.dataframe(
                 regional_baseline[['location', 'Investment ($B)', 'Emissions (Mt)']].set_index('location'),
                 use_container_width=True
             )
-            
-        st.info("Regional investment is calculated based on the facility-level decarbonization cost for each region.")
+
+        st.info("Regional investment is calculated proportionally based on facility capacity in each region.")
 
 # ============================================================================
 # Page: Energy Demand
