@@ -19,7 +19,7 @@ st.set_page_config(
 )
 
 # Data Paths
-BASE_DIR = Path(__file__).parent
+BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 SCENARIO_DIR = BASE_DIR / "outputs/new_scenarios/cost_effective"
 BAU_DIR = BASE_DIR / "outputs/new_scenarios/bau"
@@ -32,9 +32,17 @@ def load_data():
     """Load all necessary data"""
     data = {}
     
+    # Debug: Check file existence
+    bau_path = BAU_DIR / 'module_01/bau_trajectory_2025_2050.csv'
+    if not bau_path.exists():
+        st.error(f"CRITICAL ERROR: File not found at {bau_path}")
+        st.error(f"Current Working Directory: {Path.cwd()}")
+        st.error(f"Script Location: {BASE_DIR}")
+        return None
+
     # Trajectories
     try:
-        data['bau_traj'] = pd.read_csv(BAU_DIR / 'module_01/bau_trajectory_2025_2050.csv')
+        data['bau_traj'] = pd.read_csv(bau_path)
         data['opt_traj'] = pd.read_csv(SCENARIO_DIR / 'module_03/optimization_trajectory.csv')
         data['macc_annual'] = pd.read_csv(SCENARIO_DIR / 'module_02/macc_annual_2025_2050.csv')
     except Exception as e:
@@ -66,6 +74,16 @@ st.sidebar.info(
     "- Result: **Achieved (0.0 Mt)**\n"
     "- Key Tech: NCC-Elec, RDH, Heat Pump"
 )
+
+# Debug Info (Expandable)
+with st.sidebar.expander("🔧 Debug Info"):
+    st.write(f"**Script:** `{BASE_DIR}`")
+    st.write(f"**Data:** `{DATA_DIR}`")
+    st.write(f"**BAU Path:** `{BAU_DIR}`")
+    if data:
+        st.success("Data Loaded Successfully")
+    else:
+        st.error("Data Load Failed")
 
 # ============================================================================
 # Page: Executive Summary
@@ -193,12 +211,7 @@ elif page == "💰 Cost Analysis":
         col3.metric("OPEX", f"${total_opex:.1f}B")
         col4.metric("Energy", f"${total_energy:.1f}B")
 
-# ============================================================================
-# Page: Regional Impact
-# ============================================================================
-# ============================================================================
-# Page: Regional Impact
-# ============================================================================
+
 elif page == "🗺️ Regional Impact":
     st.title("🗺️ Regional Impact Analysis")
     
