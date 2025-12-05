@@ -386,7 +386,7 @@ class ComprehensiveExcelGenerator:
                             fuel_cost_usd = new_h2_kg * h2_price
 
                         # CAPEX (annualized over lifetime)
-                        capex_total = facility['capacity_kt'] * 1000 * ncc_capex * deployment_rate
+                        capex_total = facility['capacity_kt'] * 1000 * ncc_capex
                         capex_annual = capex_total / 25  # 25-year lifetime
                         opex_annual = capex_total * 0.04  # 4% of CAPEX
 
@@ -845,6 +845,121 @@ class ComprehensiveExcelGenerator:
         
         return df_restructure, filepath
 
+    def create_cover_sheet(self, wb):
+        """Create a professional Cover Sheet"""
+        ws = wb.create_sheet("Cover", 0)
+        ws.sheet_view.showGridLines = False
+        
+        # Title
+        ws['B4'] = "KOREA PETROCHEMICAL DECARBONIZATION"
+        ws['B4'].font = Font(name='Arial', size=24, bold=True, color="1F4E79")
+        
+        ws['B5'] = "Strategic Roadmap to Net Zero 2050"
+        ws['B5'].font = Font(name='Arial', size=16, color="595959")
+        
+        # Date
+        ws['B8'] = f"Date: {datetime.now().strftime('%Y-%m-%d')}"
+        ws['B8'].font = Font(name='Arial', size=11)
+        
+        # Prepared For
+        ws['B10'] = "Prepared For:"
+        ws['B10'].font = Font(name='Arial', size=11, bold=True)
+        ws['B11'] = "Client Executive Team"
+        ws['B11'].font = Font(name='Arial', size=11)
+        
+        # Disclaimer
+        ws['B20'] = "Disclaimer"
+        ws['B20'].font = Font(name='Arial', size=10, bold=True, color="7F7F7F")
+        ws['B21'] = "This report contains forward-looking statements and model-based projections."
+        ws['B22'] = "Actual results may vary based on policy changes, technology costs, and market conditions."
+        ws['B21'].font = Font(name='Arial', size=9, color="7F7F7F")
+        ws['B22'].font = Font(name='Arial', size=9, color="7F7F7F")
+
+    def create_toc_sheet(self, wb):
+        """Create Table of Contents with hyperlinks"""
+        if "Table_of_Contents" in wb.sheetnames:
+            ws = wb["Table_of_Contents"]
+        else:
+            ws = wb.create_sheet("Table_of_Contents", 1)
+            
+        ws.sheet_view.showGridLines = False
+        ws.column_dimensions['B'].width = 5
+        ws.column_dimensions['C'].width = 40
+        ws.column_dimensions['D'].width = 60
+        
+        ws['C3'] = "TABLE OF CONTENTS"
+        ws['C3'].font = Font(name='Arial', size=18, bold=True, color="1F4E79")
+        
+        sheets = [
+            ("Executive_Dashboard", "High-level KPIs and Scenario Comparison"),
+            ("Regional_Annual", "Annual investment and emissions by region"),
+            ("Facility_Annual_Detail", "Detailed annual metrics for all 248 facilities"),
+            ("Facility_Transition_Matrix", "Technology deployment timeline per facility"),
+            ("Investment_Annual", "Annual CAPEX requirements by region"),
+            ("Scenario_Comparison", "Detailed comparison of 3 scenarios"),
+            ("Technology_Parameters", "CAPEX and efficiency assumptions"),
+            ("Price_Trajectories", "Energy price forecasts (H2, Electricity)")
+        ]
+        
+        for i, (sheet_name, desc) in enumerate(sheets):
+            row = 6 + i*2
+            cell = ws.cell(row=row, column=3)
+            cell.value = sheet_name.replace('_', ' ')
+            cell.hyperlink = f"#'{sheet_name}'!A1"
+            cell.font = Font(name='Arial', size=12, underline="single", color="0563C1")
+            
+            desc_cell = ws.cell(row=row, column=4)
+            desc_cell.value = desc
+            desc_cell.font = Font(name='Arial', size=11, color="595959")
+
+    def apply_professional_style(self, ws):
+        """Apply consistent professional formatting to a worksheet"""
+        ws.sheet_view.showGridLines = False
+        
+        # Header Style
+        header_font = Font(name='Arial', size=10, bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="1F4E79", end_color="1F4E79", fill_type="solid")
+        
+        # Data Style
+        data_font = Font(name='Arial', size=10)
+        border = Border(left=Side(style='thin', color="D9D9D9"), 
+                        right=Side(style='thin', color="D9D9D9"), 
+                        top=Side(style='thin', color="D9D9D9"), 
+                        bottom=Side(style='thin', color="D9D9D9"))
+        
+        # Find header row (usually row 1)
+        for cell in ws[1]:
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+        
+        # Auto-fit columns and apply formatting
+        for col in ws.columns:
+            max_length = 0
+            column = col[0].column_letter
+            
+            for cell in col:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                    
+                    # Apply data style
+                    if cell.row > 1:
+                        cell.font = data_font
+                        cell.border = border
+                        
+                        # Number formatting
+                        if isinstance(cell.value, (int, float)):
+                            if 'USD' in str(ws.cell(row=1, column=cell.col_idx).value) or 'Cost' in str(ws.cell(row=1, column=cell.col_idx).value):
+                                cell.number_format = '#,##0'
+                            elif 'kt' in str(ws.cell(row=1, column=cell.col_idx).value) or 'Mt' in str(ws.cell(row=1, column=cell.col_idx).value):
+                                cell.number_format = '#,##0.0'
+                except:
+                    pass
+            
+            adjusted_width = (max_length + 2) * 1.1
+            ws.column_dimensions[column].width = min(adjusted_width, 50) # Cap width
+
     def create_dashboard_sheet(self, wb, df_elec, df_h2, df_restructure=None):
         """Create Executive Dashboard sheet"""
         print("  - Writing Executive_Dashboard...")
@@ -1016,6 +1131,138 @@ class ComprehensiveExcelGenerator:
         from openpyxl.utils.dataframe import dataframe_to_rows
         for r in dataframe_to_rows(display_comp, index=False, header=True):
             ws_comp.append(r)
+        # 2. Regional Annual (Long Format)
+        print("  - Writing Regional_Annual (Long Format)...")
+        ws_reg = wb.create_sheet("Regional_Annual")
+        
+        regional_long = df_elec.groupby(['location', 'year']).agg({
+            'final_emissions_kt': 'sum',
+            'total_annual_cost_usd': 'sum',
+            'capex_annual_usd': 'sum',
+            'new_electricity_mwh': 'sum',
+            'new_h2_kg': 'sum'
+        }).reset_index()
+        
+        regional_long.rename(columns={
+            'location': 'Region',
+            'year': 'Year',
+            'final_emissions_kt': 'Emissions (kt)',
+            'total_annual_cost_usd': 'Total Cost (USD)',
+            'capex_annual_usd': 'CAPEX (USD)',
+            'new_electricity_mwh': 'Electricity Demand (MWh)',
+            'new_h2_kg': 'H2 Demand (kg)'
+        }, inplace=True)
+        
+        for r in dataframe_to_rows(regional_long, index=False, header=True):
+            ws_reg.append(r)
+        self.apply_professional_style(ws_reg)
+        
+        # 3. Facility Annual Detail
+        print("  - Writing Facility_Annual_Detail...")
+        ws_fac = wb.create_sheet("Facility_Annual_Detail")
+        
+        facility_detail = df_elec[[
+            'location', 'company', 'product', 'year', 
+            'technology_deployed', 'final_emissions_kt', 
+            'total_annual_cost_usd', 'capex_annual_usd'
+        ]].copy()
+        
+        facility_detail.sort_values(['location', 'company', 'product', 'year'], inplace=True)
+        
+        for r in dataframe_to_rows(facility_detail, index=False, header=True):
+            ws_fac.append(r)
+        self.apply_professional_style(ws_fac)
+            
+        # 4. Facility Transition Matrix
+        print("  - Writing Facility_Transition_Matrix...")
+        ws_trans = wb.create_sheet("Facility_Transition_Matrix")
+        df_elec['facility_label'] = df_elec['company'] + ' (' + df_elec['product'] + ')'
+        transition_matrix = df_elec.pivot_table(
+            index=['location', 'facility_label'], 
+            columns='year', 
+            values='technology_deployed',
+            aggfunc='first'
+        )
+        transition_matrix = transition_matrix.reset_index()
+        for r in dataframe_to_rows(transition_matrix, index=False, header=True):
+            ws_trans.append(r)
+        self.apply_professional_style(ws_trans)
+        
+        # 5. Investment Annual
+        print("  - Writing Investment_Annual...")
+        ws_inv = wb.create_sheet("Investment_Annual")
+        invest_pivot = df_elec.pivot_table(
+            index='location',
+            columns='year',
+            values='capex_annual_usd',
+            aggfunc='sum'
+        )
+        invest_pivot = invest_pivot.reset_index()
+        for r in dataframe_to_rows(invest_pivot, index=False, header=True):
+            ws_inv.append(r)
+        self.apply_professional_style(ws_inv)
+        
+        # 6. Scenario Comparison
+        print("  - Writing Scenario_Comparison...")
+        ws_comp = wb.create_sheet("Scenario_Comparison")
+        
+        # Aggregate scenarios
+        agg_elec = df_elec.groupby('year').agg({
+            'final_emissions_kt': 'sum', 'total_annual_cost_usd': 'sum',
+            'new_electricity_mwh': 'sum', 'new_h2_kg': 'sum', 'capex_annual_usd': 'sum'
+        }).reset_index()
+        
+        agg_h2 = df_h2.groupby('year').agg({
+            'final_emissions_kt': 'sum', 'total_annual_cost_usd': 'sum',
+            'new_electricity_mwh': 'sum', 'new_h2_kg': 'sum', 'capex_annual_usd': 'sum'
+        }).reset_index()
+        
+        # Merge Main Scenarios
+        comparison = pd.merge(agg_elec, agg_h2, on='year', suffixes=('_Elec', '_H2'))
+        
+        # Add Restructuring if available
+        if df_restructure is not None:
+            agg_res = df_restructure.groupby('year').agg({
+                'final_emissions_kt': 'sum', 'total_annual_cost_usd': 'sum',
+                'new_electricity_mwh': 'sum', 'new_h2_kg': 'sum', 'capex_annual_usd': 'sum'
+            }).reset_index()
+            comparison = pd.merge(comparison, agg_res, on='year')
+            comparison.rename(columns={
+                'final_emissions_kt': 'final_emissions_kt_Res',
+                'total_annual_cost_usd': 'total_annual_cost_usd_Res',
+                'new_electricity_mwh': 'new_electricity_mwh_Res',
+                'new_h2_kg': 'new_h2_kg_Res',
+                'capex_annual_usd': 'capex_annual_usd_Res'
+            }, inplace=True)
+
+        # Format for display
+        display_comp = pd.DataFrame()
+        display_comp['Year'] = comparison['year']
+        
+        # Emissions
+        display_comp['Emissions_Elec_Mt'] = comparison['final_emissions_kt_Elec'] / 1000
+        display_comp['Emissions_H2_Mt'] = comparison['final_emissions_kt_H2'] / 1000
+        if df_restructure is not None:
+            display_comp['Emissions_Res_Mt'] = comparison['final_emissions_kt_Res'] / 1000
+        
+        # Costs
+        display_comp['Total_Cost_Elec_MUSD'] = comparison['total_annual_cost_usd_Elec'] / 1e6
+        display_comp['Total_Cost_H2_MUSD'] = comparison['total_annual_cost_usd_H2'] / 1e6
+        if df_restructure is not None:
+            display_comp['Total_Cost_Res_MUSD'] = comparison['total_annual_cost_usd_Res'] / 1e6
+            
+        # CAPEX
+        display_comp['CAPEX_Elec_MUSD'] = comparison['capex_annual_usd_Elec'] / 1e6
+        display_comp['CAPEX_H2_MUSD'] = comparison['capex_annual_usd_H2'] / 1e6
+        if df_restructure is not None:
+            display_comp['CAPEX_Res_MUSD'] = comparison['capex_annual_usd_Res'] / 1e6
+
+        # Write data to sheet manually to use openpyxl styles if needed, or use pandas
+        # Using pandas for simplicity, then adding chart
+        from openpyxl.utils.dataframe import dataframe_to_rows
+        for r in dataframe_to_rows(display_comp, index=False, header=True):
+            ws_comp.append(r)
+        self.apply_professional_style(ws_comp)
             
         # Add Chart to Dashboard referencing this data
         ws_dash = wb["Executive_Dashboard"]
@@ -1032,78 +1279,13 @@ class ComprehensiveExcelGenerator:
         
         ws_dash.add_chart(chart, "B16")
         
-        # 2. Regional Annual (Long Format: Region | Year | Metrics)
-        print("  - Writing Regional_Annual (Long Format)...")
-        ws_reg = wb.create_sheet("Regional_Annual")
+        # 7. Table of Contents (Last step to ensure all sheets exist)
+        self.create_toc_sheet(wb)
         
-        # Group by Location and Year
-        regional_long = df_elec.groupby(['location', 'year']).agg({
-            'final_emissions_kt': 'sum',
-            'total_annual_cost_usd': 'sum',
-            'capex_annual_usd': 'sum',
-            'new_electricity_mwh': 'sum',
-            'new_h2_kg': 'sum'
-        }).reset_index()
+        # Move TOC to index 1 (after Cover)
+        # openpyxl doesn't easily move sheets by index, but we created them in order mostly.
+        # We can reorder sheet names list if needed, but creation order is usually fine.
         
-        # Rename columns for clarity
-        regional_long.rename(columns={
-            'location': 'Region',
-            'year': 'Year',
-            'final_emissions_kt': 'Emissions (kt)',
-            'total_annual_cost_usd': 'Total Cost (USD)',
-            'capex_annual_usd': 'CAPEX (USD)',
-            'new_electricity_mwh': 'Electricity Demand (MWh)',
-            'new_h2_kg': 'H2 Demand (kg)'
-        }, inplace=True)
-        
-        for r in dataframe_to_rows(regional_long, index=False, header=True):
-            ws_reg.append(r)
-        
-        # 3. Facility Annual Detail (All 248 Facilities)
-        print("  - Writing Facility_Annual_Detail...")
-        ws_fac = wb.create_sheet("Facility_Annual_Detail")
-        
-        # Select key columns
-        facility_detail = df_elec[[
-            'location', 'company', 'product', 'year', 
-            'technology_deployed', 'final_emissions_kt', 
-            'total_annual_cost_usd', 'capex_annual_usd'
-        ]].copy()
-        
-        # Sort for readability
-        facility_detail.sort_values(['location', 'company', 'product', 'year'], inplace=True)
-        
-        for r in dataframe_to_rows(facility_detail, index=False, header=True):
-            ws_fac.append(r)
-            
-        # 4. Facility Transition Matrix
-        print("  - Writing Facility_Transition_Matrix...")
-        ws_trans = wb.create_sheet("Facility_Transition_Matrix")
-        df_elec['facility_label'] = df_elec['company'] + ' (' + df_elec['product'] + ')'
-        transition_matrix = df_elec.pivot_table(
-            index=['location', 'facility_label'], 
-            columns='year', 
-            values='technology_deployed',
-            aggfunc='first'
-        )
-        # Reset index to make it flat
-        transition_matrix = transition_matrix.reset_index()
-        for r in dataframe_to_rows(transition_matrix, index=False, header=True):
-            ws_trans.append(r)
-        
-        # 5. Investment Annual
-        print("  - Writing Investment_Annual...")
-        ws_inv = wb.create_sheet("Investment_Annual")
-        invest_pivot = df_elec.pivot_table(
-            index='location',
-            columns='year',
-            values='capex_annual_usd',
-            aggfunc='sum'
-        )
-        invest_pivot = invest_pivot.reset_index()
-        for r in dataframe_to_rows(invest_pivot, index=False, header=True):
-            ws_inv.append(r)
-
         wb.save(filepath)
         print(f"\n  Comparison Report saved: {filepath}")
         return filepath

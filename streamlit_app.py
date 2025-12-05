@@ -19,9 +19,10 @@ st.set_page_config(
 )
 
 # Data Paths
-DATA_DIR = Path("data")
-SCENARIO_DIR = Path("outputs/new_scenarios/cost_effective")
-BAU_DIR = Path("outputs/new_scenarios/bau")
+BASE_DIR = Path(__file__).parent
+DATA_DIR = BASE_DIR / "data"
+SCENARIO_DIR = BASE_DIR / "outputs/new_scenarios/cost_effective"
+BAU_DIR = BASE_DIR / "outputs/new_scenarios/bau"
 
 # ============================================================================
 # Data Loading
