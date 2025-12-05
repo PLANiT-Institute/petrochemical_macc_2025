@@ -19,8 +19,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Data Paths
-BASE_DIR = Path(__file__).resolve().parent
+# Data Paths - Use absolute paths to avoid issues
+BASE_DIR = Path("/Users/jinsupark/jinsu-coding/petrochemical_macc_2025")
 DATA_DIR = BASE_DIR / "data"
 OUTPUTS_DIR = BASE_DIR / "outputs"
 
@@ -41,6 +41,7 @@ def load_data():
         data['grid_ef'] = pd.read_csv(DATA_DIR / "grid_emission_trajectory.csv")
     except Exception as e:
         st.error(f"Error loading core data: {e}")
+        st.error(f"DATA_DIR: {DATA_DIR}")
         return None
 
     # Scenario summary
@@ -48,6 +49,7 @@ def load_data():
     if scenario_summary_path.exists():
         data['scenarios'] = pd.read_csv(scenario_summary_path)
     else:
+        st.warning(f"Scenario summary not found at: {scenario_summary_path}")
         data['scenarios'] = None
 
     # Load each scenario's facility data
