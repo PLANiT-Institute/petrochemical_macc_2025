@@ -255,9 +255,14 @@ elif page == "🗺️ Regional Impact":
             'Jinhae': {'lat': 35.1336, 'lon': 128.6811}
         }
 
-        # Add coordinates
-        regional_baseline['lat'] = regional_baseline['location'].map(lambda x: coords.get(x, {}).get('lat'))
-        regional_baseline['lon'] = regional_baseline['location'].map(lambda x: coords.get(x, {}).get('lon'))
+        # Add coordinates (using explicit iteration instead of lambda)
+        regional_baseline['lat'] = None
+        regional_baseline['lon'] = None
+        for idx, row in regional_baseline.iterrows():
+            loc = row['location']
+            if loc in coords:
+                regional_baseline.at[idx, 'lat'] = coords[loc]['lat']
+                regional_baseline.at[idx, 'lon'] = coords[loc]['lon']
 
         # Calculate Investment Share (Proportional to Capacity)
         total_invest = data['opt_traj']['cumulative_capex_musd'].max() / 1000
