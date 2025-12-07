@@ -51,7 +51,9 @@
       "Bash(else echo \"facility_summary.csv NOT FOUND\")",
       "Bash(fi)",
       "Bash(timeout 5 streamlit run:*)",
-      "Bash(gtimeout 5 streamlit run:*)"
+      "Bash(gtimeout 5 streamlit run:*)",
+      "Bash(ls:*)",
+      "Bash(pgrep:*)"
     ],
     "deny": [],
     "ask": []
