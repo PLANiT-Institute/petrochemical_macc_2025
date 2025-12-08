@@ -20,8 +20,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Data Paths - Absolute paths
-BASE_DIR = Path("/Users/jinsupark/jinsu-coding/petrochemical_macc_2025")
+# Data Paths - Use script directory for portability
+BASE_DIR = Path(__file__).parent.resolve()
 DATA_DIR = BASE_DIR / "data"
 OUTPUTS_DIR = BASE_DIR / "outputs"
 
