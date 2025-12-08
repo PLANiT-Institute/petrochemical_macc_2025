@@ -274,6 +274,7 @@ class CostOptimizerV2:
                 'ncc_h2_mt': deployed['NCC-H2'],
                 'ncc_elec_mt': deployed['NCC-Electricity'],
                 're_ppa_mt': deployed['RE_PPA'],
+                'rdh_mt': deployed['RDH'],  # RDH for BTX facilities
                 'h2_consumption_kt': h2_consumption_kt,
                 'electricity_consumption_increase_twh': electricity_consumption_increase_twh,
                 'total_deployed_mt': sum(deployed.values()),
@@ -322,7 +323,7 @@ class CostOptimizerV2:
         # Deploy technologies until budget constraint met
         # NEW: Track deployed capacity (irreversible)
         deployed_capacity = {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0, 'RDH': 0}
-        deployment_dict = {year: {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0}
+        deployment_dict = {year: {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0, 'RDH': 0}
                           for year in years}
 
         cumulative = 0
@@ -367,7 +368,7 @@ class CostOptimizerV2:
         deployment = []
         cumulative = 0
         cumulative_capex_calc = 0  # Recalculate for consistency
-        prev_deployment = {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0}
+        prev_deployment = {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0, 'RDH': 0}
 
         for year in years:
             bau = self.df_bau[self.df_bau['year'] == year]['total_emissions_mt'].iloc[0]
@@ -376,7 +377,7 @@ class CostOptimizerV2:
 
             # Calculate CAPEX for new deployment this year
             tech_year = self.df_macc[(self.df_macc['year'] == year) & (self.df_macc['available'] == True)]
-            for tech_name in ['Heat_Pump', 'NCC-H2', 'NCC-Electricity', 'RE_PPA']:
+            for tech_name in ['Heat_Pump', 'NCC-H2', 'NCC-Electricity', 'RE_PPA', 'RDH']:
                 new_capacity = deployment_dict[year][tech_name] - prev_deployment[tech_name]
                 if new_capacity > 0:
                     tech_data = tech_year[tech_year['technology'] == tech_name]
@@ -408,6 +409,7 @@ class CostOptimizerV2:
                 'ncc_h2_mt': deployment_dict[year]['NCC-H2'],
                 'ncc_elec_mt': deployment_dict[year]['NCC-Electricity'],
                 're_ppa_mt': deployment_dict[year]['RE_PPA'],
+                'rdh_mt': deployment_dict[year]['RDH'],  # RDH for BTX facilities
                 'h2_consumption_kt': h2_consumption_kt,
                 'electricity_consumption_increase_twh': electricity_consumption_increase_twh,
                 'total_deployed_mt': sum(deployment_dict[year].values()),
@@ -432,10 +434,11 @@ class CostOptimizerV2:
             # Deployment stack plot
             fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 10))
 
-            # Top: Technology deployment
-            ax1.stackplot(df['year'], df['heat_pump_mt'], df['ncc_h2_mt'], df['ncc_elec_mt'], df['re_ppa_mt'],
-                        labels=['Heat Pump', 'NCC-H2', 'NCC-Electricity', 'RE PPA'],
-                        colors=['#2ECC71', '#3498DB', '#E74C3C', '#F39C12'], alpha=0.8)
+            # Top: Technology deployment (include RDH if present)
+            rdh_data = df['rdh_mt'] if 'rdh_mt' in df.columns else [0] * len(df)
+            ax1.stackplot(df['year'], df['heat_pump_mt'], df['ncc_h2_mt'], df['ncc_elec_mt'], df['re_ppa_mt'], rdh_data,
+                        labels=['Heat Pump', 'NCC-H2', 'NCC-Electricity', 'RE PPA', 'RDH'],
+                        colors=['#2ECC71', '#3498DB', '#E74C3C', '#F39C12', '#9B59B6'], alpha=0.8)
             ax1.set_ylabel('Abatement (MtCO2/year)', fontweight='bold')
             ax1.set_title(f'Technology Deployment: {scenario}', fontweight='bold', fontsize=14)
             ax1.legend(loc='upper left')
