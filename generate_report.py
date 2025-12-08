@@ -164,6 +164,13 @@ def load_all_data():
                 'deployment': pd.read_csv(scenario_dir / 'deployment_trajectory.csv') if (scenario_dir / 'deployment_trajectory.csv').exists() else None,
             }
 
+    # Load regional annual analysis (from Shaheen Electricity scenario as representative)
+    regional_path = OUTPUTS_DIR / 'scenario_shaheen_ncc_electricity' / 'module_03_optimization' / 'regional_annual_analysis.csv'
+    if regional_path.exists():
+        data['regional_annual'] = pd.read_csv(regional_path)
+    else:
+        data['regional_annual'] = None
+
     return data
 
 

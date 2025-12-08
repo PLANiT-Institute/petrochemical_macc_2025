@@ -816,6 +816,10 @@ class CostOptimizerV2:
         # Identify NCC facilities
         df_facilities['is_ncc'] = df_facilities['product'].apply(is_ncc_facility)
         
+        # Generate facility_id if missing
+        if 'facility_id' not in df_facilities.columns:
+            df_facilities['facility_id'] = df_facilities.index
+            
         df_facilities['fossil_fuel_emissions_kt'] = (
             df_facilities['emissions_naphtha_kt'] +
             df_facilities['emissions_lng_kt'] +
