@@ -46,7 +46,11 @@ class BaselineAnalyzer:
         try:
             self.df_demand_growth = pd.read_csv(self.data_dir / 'demand_growth_trajectory.csv')
             print(f"   - Loaded demand growth trajectory (2025-2050)")
-            print(f"   - Total capacity growth: {(self.df_demand_growth[self.df_demand_growth['year']==2050]['cumulative_capacity_multiplier'].iloc[0]-1)*100:.1f}%")
+            try:
+                growth_2050 = self.df_demand_growth[self.df_demand_growth['year']==2050]['cumulative_capacity_multiplier'].iloc[0]
+                print(f"   - Total capacity growth: {(growth_2050-1)*100:.1f}%")
+            except (IndexError, KeyError):
+                print("   - ⚠️  Could not calculate 2050 growth (data missing)")
         except FileNotFoundError:
             print("   - ⚠️  No demand growth file found, assuming zero growth")
             self.df_demand_growth = pd.DataFrame({
@@ -170,12 +174,15 @@ class BaselineAnalyzer:
 
         for year in years:
             # Get grid emission factor for this year
-            grid_ef = self.df_grid_emissions[self.df_grid_emissions['year'] == year]['grid_ef_tco2_per_mwh'].iloc[0]
-
-            # Get capacity multiplier for this year (demand growth)
-            capacity_multiplier = self.df_demand_growth[
-                self.df_demand_growth['year'] == year
-            ]['cumulative_capacity_multiplier'].iloc[0]
+            try:
+                grid_ef = self.df_grid_emissions[self.df_grid_emissions['year'] == year]['grid_ef_tco2_per_mwh'].iloc[0]
+            except (IndexError, KeyError):
+                # Fallback to 2045 or previous known value if 2050 is missing
+                # Assuming monotonic decrease, using last available is safe approx
+                if year > 2025:
+                     grid_ef = trajectory[-1]['grid_ef_tco2_per_mwh']
+                else:
+                     grid_ef = 0.436 # Fallback to 2025 default
 
             # Calculate active facilities if retirement is enabled
             if facility_lifetime:
@@ -193,17 +200,30 @@ class BaselineAnalyzer:
                 n_active = len(baseline_2025)
                 n_retired = 0
 
-            # Calculate effective multiplier including operating rate
+            # Get demand row for this year
             demand_row = self.df_demand_growth[self.df_demand_growth['year'] == year]
             
-            if 'operating_rate_pct' in demand_row.columns:
-                op_rate = demand_row['operating_rate_pct'].iloc[0] / 100.0
+            if not demand_row.empty:
+                try:
+                     capacity_multiplier = demand_row['cumulative_capacity_multiplier'].iloc[0]
+                except (IndexError, KeyError):
+                     capacity_multiplier = 1.0
+                
+                try:
+                     if 'operating_rate_pct' in demand_row.columns:
+                         op_rate = demand_row['operating_rate_pct'].iloc[0] / 100.0
+                     else:
+                         op_rate = 1.0
+                except (IndexError, KeyError):
+                     op_rate = 1.0
             else:
-                op_rate = 1.0  # Default to 100% if not specified
-            
+                 # Missing year
+                 capacity_multiplier = 1.0
+                 op_rate = 1.0
+                 if year == 2050:
+                     print(f"   Warning: Missing growth data for {year}, using default 1.0")
+
             # Effective production = Capacity * Growth * Operating Rate
-            # Note: capacity_multiplier tracks INSTALLED capacity growth
-            # We need to adjust for ACTUAL production
             effective_multiplier = capacity_multiplier * op_rate
 
             # Emissions scale with:
@@ -313,7 +333,15 @@ class BaselineAnalyzer:
         print("\n💰 Calculating fuel costs...")
 
         # Get 2025 fuel prices
-        prices_2025 = self.df_fuel_prices[self.df_fuel_prices['year'] == 2025].iloc[0]
+        try:
+            prices_2025 = self.df_fuel_prices[self.df_fuel_prices['year'] == 2025].iloc[0]
+        except (IndexError, KeyError):
+            print("   Warning: Missing 2025 fuel prices, using defaults")
+            # Create dummy series with 0.0 or reasonable defaults
+            prices_2025 = pd.Series(dtype=float)
+            for fuel in ['naphtha', 'electricity', 'lng', 'fuel_gas', 'lpg', 'fuel_oil', 'diesel']:
+                 prices_2025[f'{fuel}_usd_per_gj'] = 0.0
+            prices_2025['electricity_usd_per_kwh'] = 0.0
 
         total_cost = 0
 

@@ -30,7 +30,7 @@ class DataLoader:
 
     def load_facilities(self):
         """Load facility database"""
-        return pd.read_csv(self.data_dir / 'facility_database.csv')
+        return pd.read_csv(self.data_dir / 'facility_database_with_regions.csv')
 
     def load_energy_intensities(self):
         """Load energy intensity data"""

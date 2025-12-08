@@ -89,7 +89,30 @@ This report presents a comprehensive analysis of decarbonization pathways for Ko
 | Carbon Price | Not modeled | Policy constraint approach instead |
 | Discount Rate | 8% | WACC for industrial projects |
 
+
 ---
+
+## 2.3 Energy Calculation & Forecast Logic (Methodology)
+
+### A. Baseline (2017) Calculation
+The baseline emissions are calculated using a **Hybrid Approach** that combines high-level user data with bottom-up facility intensity data.
+
+1.  **User Provided Data (Top-Down):** Total consumption for **LPG** (3,592 kTOE), **LNG** (1,372 kTOE), and **Electricity** (3,929 kTOE). This serves as the "Control Total" for the industry.
+2.  **Facility Data (Bottom-Up):** `data/energy_intensities.csv` containing production capacity (kt) and energy intensity factors (Energy/tonne) for 248 facilities.
+3.  **Fuel Gas & Off-Gases:** Since user data did not specify Fuel Gas, the total volume is derived directly from the bottom-up sum of specific facility intensities (4,500+ kTOE equivalent), ensuring process-specific emissions are captured.
+
+**Allocation Logic:**
+*   **Sector Split (NCC vs Non-NCC):** Derived from the bottom-up summation of the CSV data.
+    *   *Naphtha/Fuel Gas:* Allocation strictly follows facility-level intensities.
+    *   *Electricity/LPG/LNG:* The relative share from the CSV is used to split the User Provided Total.
+
+### B. 2024 Forecast Logic
+*   **Driver:** Ethylene production growth from ~8.7 Mt (2017) to ~9.6 Mt (2024). Ratio: **1.10**.
+*   **Allocation Method:** **Global Uniform Scalar**. We apply a 1.10 multiplier to the aggregate industry energy consumption.
+    *   *Logic:* In the absence of facility-specific operational data for 2024, we assume the aggregate industry energy consumption scales linearly with the net production increase. This effectively treats the growth as a distributed system-wide increase (10%).
+
+---
+
 
 ## 3. Baseline Analysis (2025)
 

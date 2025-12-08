@@ -209,66 +209,64 @@ def run_scenario(scenario_name, scenario_id, df_fac, df_energy, force_tech):
     # Also save scenario facility list
     df_fac.to_csv(output_base / 'scenario_facilities.csv', index=False)
 
-    try:
-        # Module 1: Baseline
-        print("  >>> Module 1: Baseline")
-        baseline = BaselineAnalyzer(str(DATA_DIR), str(dirs['baseline']))
-        baseline.run_complete_analysis()
+    # Module 1: Baseline
+    print("  >>> Module 1: Baseline")
+    baseline = BaselineAnalyzer(str(DATA_DIR), str(dirs['baseline']))
+    baseline.run_complete_analysis()
 
-        # Module 2: MACC
-        print("  >>> Module 2: MACC")
-        macc = MACCAnalyzer(str(dirs['baseline']), str(DATA_DIR), str(dirs['macc']))
-        macc.run_complete_analysis()
+    # Module 2: MACC
+    print("  >>> Module 2: MACC")
+    macc = MACCAnalyzer(str(dirs['baseline']), str(DATA_DIR), str(dirs['macc']))
+    macc.run_complete_analysis()
 
-        # Module 3: Optimization
-        print(f"  >>> Module 3: Optimization ({force_tech})")
-        opt = CostOptimizerV2(str(dirs['baseline']), str(dirs['macc']), str(dirs['opt']), force_tech)
-        opt.run_complete_analysis()
+    # Module 3: Optimization
+    print(f"  >>> Module 3: Optimization ({force_tech})")
+    opt = CostOptimizerV2(
+        baseline_output=str(dirs['baseline']),
+        macc_output=str(dirs['macc']),
+        output_dir=str(dirs['opt']),
+        force_ncc_technology=force_tech
+    )
+    opt.run_complete_analysis()
 
-        # Read results
-        deploy = pd.read_csv(dirs['opt'] / 'policy_target_deployment.csv')
-        r2050 = deploy[deploy['year'] == 2050].iloc[0]
+    # Read results
+    deploy = pd.read_csv(dirs['opt'] / 'policy_target_deployment.csv')
+    r2050 = deploy[deploy['year'] == 2050].iloc[0]
 
-        # Read facility allocation
-        alloc_path = dirs['opt'] / 'policy_target_facility_allocation_2050.csv'
-        if alloc_path.exists():
-            alloc = pd.read_csv(alloc_path)
-            n_alloc = len(alloc)
-        else:
-            n_alloc = 0
+    # Read facility allocation
+    alloc_path = dirs['opt'] / 'policy_target_facility_allocation_2050.csv'
+    if alloc_path.exists():
+        alloc = pd.read_csv(alloc_path)
+        n_alloc = len(alloc)
+    else:
+        n_alloc = 0
 
-        result = {
-            'scenario': scenario_name,
-            'technology': force_tech,
-            'scenario_id': scenario_id,
-            'n_facilities': len(df_fac),
-            'n_ncc_facilities': ncc_count,
-            'total_capacity_kt': df_fac['capacity_kt'].sum(),
-            'ncc_capacity_kt': ncc_cap,
-            'bau_2050_mt': r2050['bau_mt'],
-            'net_2050_mt': r2050['actual_emissions_mt'],
-            'capex_billion_usd': r2050['cumulative_capex_musd'] / 1000,
-            'ncc_h2_mt': r2050['ncc_h2_mt'],
-            'ncc_elec_mt': r2050['ncc_elec_mt'],
-            'heat_pump_mt': r2050['heat_pump_mt'],
-            're_ppa_mt': r2050['re_ppa_mt'],
-            'electricity_twh': r2050['electricity_consumption_increase_twh'],
-            'h2_kt': r2050['h2_consumption_kt'],
-            'n_facilities_allocated': n_alloc
-        }
+    result = {
+        'scenario': scenario_name,
+        'technology': force_tech,
+        'scenario_id': scenario_id,
+        'n_facilities': len(df_fac),
+        'n_ncc_facilities': ncc_count,
+        'total_capacity_kt': df_fac['capacity_kt'].sum(),
+        'ncc_capacity_kt': ncc_cap,
+        'bau_2050_mt': r2050['bau_mt'],
+        'net_2050_mt': r2050['actual_emissions_mt'],
+        'capex_billion_usd': r2050['cumulative_capex_musd'] / 1000,
+        'ncc_h2_mt': r2050['ncc_h2_mt'],
+        'ncc_elec_mt': r2050['ncc_elec_mt'],
+        'heat_pump_mt': r2050['heat_pump_mt'],
+        're_ppa_mt': r2050['re_ppa_mt'],
+        'electricity_twh': r2050['electricity_consumption_increase_twh'],
+        'h2_kt': r2050['h2_consumption_kt'],
+        'n_facilities_allocated': n_alloc
+    }
 
-        print(f"\n  ✓ COMPLETE")
-        print(f"    BAU 2050: {result['bau_2050_mt']:.2f} Mt")
-        print(f"    Net 2050: {result['net_2050_mt']:.4f} Mt")
-        print(f"    CAPEX: ${result['capex_billion_usd']:.1f}B")
+    print(f"\n  ✓ COMPLETE")
+    print(f"    BAU 2050: {result['bau_2050_mt']:.2f} Mt")
+    print(f"    Net 2050: {result['net_2050_mt']:.4f} Mt")
+    print(f"    CAPEX: ${result['capex_billion_usd']:.1f}B")
 
-        return result
-
-    except Exception as e:
-        print(f"  ✗ ERROR: {e}")
-        import traceback
-        traceback.print_exc()
-        return None
+    return result
 
 
 # =============================================================================

@@ -496,26 +496,39 @@ class MACCAnalyzer:
         # Emission factors
         re_ef = 0.05  # tCO2/MWh (lifecycle emissions for renewable energy)
 
-        # Abatement per MWh
-        abatement_per_mwh = grid_ef - re_ef
-
-        # Abatement potential: all facility electricity + HP electricity could switch to RE
-        abatement_potential_mt = total_elec_emissions_mt * (1 - re_ef / grid_ef)
-
-        # Cost: Price differential between RE and Grid (Option A - Switching)
-        # When switching from Grid to RE:
-        #   - Stop paying Grid price
-        #   - Start paying RE price
-        #   - Net cost = (RE price - Grid price) × electricity
-        #   - This can be NEGATIVE if RE is cheaper than Grid!
-        total_elec_mwh = total_elec_emissions_mt * 1e6 / grid_ef  # MWh (from emissions back to energy)
-        price_diff = re_price - grid_price  # Can be negative!
-        total_cost_diff = total_elec_mwh * price_diff  # Total incremental cost (can be negative!)
-
-        if abatement_potential_mt > 0:
-            cost_per_tco2 = total_cost_diff / (abatement_potential_mt * 1e6)  # $/tCO2 (can be negative!)
+        # SAFETY CHECK: If Grid is cleaner than RE (or zero), RE PPA has NO benefit
+        if grid_ef <= re_ef or np.isclose(grid_ef, 0):
+            abatement_potential_mt = 0.0
+            total_cost_diff = 0.0
+            cost_per_tco2 = 1e9  # Infinite cost (not available/effective)
         else:
-            cost_per_tco2 = 1e9
+            # Abatement per MWh
+            # abatement_per_mwh = grid_ef - re_ef
+
+            # Abatement potential: all facility electricity + HP electricity could switch to RE
+            # Potential = Emissions * (1 - RE_EF / Grid_EF)
+            # Derived from: MWh = Emissions / Grid_EF
+            #               New_Emissions = MWh * RE_EF = (Emissions / Grid_EF) * RE_EF
+            #               Abatement = Emissions - New_Emissions = Emissions * (1 - RE_EF/Grid_EF)
+            abatement_potential_mt = total_elec_emissions_mt * (1 - re_ef / grid_ef)
+
+            # Cost: Price differential between RE and Grid (Option A - Switching)
+            # When switching from Grid to RE:
+            #   - Stop paying Grid price
+            #   - Start paying RE price
+            #   - Net cost = (RE price - Grid price) × electricity
+            #   - This can be NEGATIVE if RE is cheaper than Grid!
+            
+            # Calculate MWh safely
+            total_elec_mwh = total_elec_emissions_mt * 1e6 / grid_ef  # MWh
+            
+            price_diff = re_price - grid_price  # Can be negative!
+            total_cost_diff = total_elec_mwh * price_diff  # Total incremental cost (can be negative!)
+
+            if abatement_potential_mt > 0.001:  # Avoid tiny division errors
+                cost_per_tco2 = total_cost_diff / (abatement_potential_mt * 1e6)  # $/tCO2
+            else:
+                cost_per_tco2 = 1e9
 
         return {
             'year': year,

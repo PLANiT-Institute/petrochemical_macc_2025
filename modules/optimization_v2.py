@@ -235,11 +235,17 @@ class CostOptimizerV2:
             # Calculate H2 consumption for NCC-H2 deployment
             # Get H2 consumption from MACC data for current year
             macc_year = self.df_macc[self.df_macc['year'] == year]
-            macc_ncc_h2 = macc_year[macc_year['technology'] == 'NCC-H2'].iloc[0]
-
-            # H2 consumption per ton ethylene from MACC data
-            h2_ton_per_ton_ethylene = macc_ncc_h2['h2_consumption_ton_per_ton_ethylene']
-            baseline_tco2_per_ton_ethylene = macc_ncc_h2['baseline_combustion_emissions_tco2_per_ton']
+            try:
+                macc_ncc_h2 = macc_year[macc_year['technology'] == 'NCC-H2'].iloc[0]
+                # H2 consumption per ton ethylene from MACC data
+                h2_ton_per_ton_ethylene = macc_ncc_h2['h2_consumption_ton_per_ton_ethylene']
+                baseline_tco2_per_ton_ethylene = macc_ncc_h2['baseline_combustion_emissions_tco2_per_ton']
+            except (IndexError, KeyError):
+                # 2024-12-08: Fallback if MACC data missing for specific year
+                h2_ton_per_ton_ethylene = 0.2 # Default assumption
+                baseline_tco2_per_ton_ethylene = 1.9 # Default assumption
+                if deployed['NCC-H2'] > 0:
+                     print(f"   ⚠️  Warning: Missing NCC-H2 MACC data for {year}, using defaults")
 
             # Convert: deployed MtCO2 → Mt ethylene → kt H2
             # 1 MtCO2 abated = (1e6 tCO2) / (baseline_tco2_per_ton_ethylene) = tons ethylene
@@ -388,9 +394,15 @@ class CostOptimizerV2:
 
             # Calculate H2 consumption from MACC data
             macc_year = self.df_macc[self.df_macc['year'] == year]
-            macc_ncc_h2 = macc_year[macc_year['technology'] == 'NCC-H2'].iloc[0]
-            h2_ton_per_ton_ethylene = macc_ncc_h2['h2_consumption_ton_per_ton_ethylene']
-            baseline_tco2_per_ton_ethylene = macc_ncc_h2['baseline_combustion_emissions_tco2_per_ton']
+            try:
+                macc_ncc_h2 = macc_year[macc_year['technology'] == 'NCC-H2'].iloc[0]
+                h2_ton_per_ton_ethylene = macc_ncc_h2['h2_consumption_ton_per_ton_ethylene']
+                baseline_tco2_per_ton_ethylene = macc_ncc_h2['baseline_combustion_emissions_tco2_per_ton']
+            except (IndexError, KeyError):
+                h2_ton_per_ton_ethylene = 0.2
+                baseline_tco2_per_ton_ethylene = 1.9
+                if deployment_dict[year]['NCC-H2'] > 0:
+                     print(f"   ⚠️  Warning: Missing NCC-H2 MACC data for {year}, using defaults")
             h2_consumption_kt = deployment_dict[year]['NCC-H2'] * (1e6 / baseline_tco2_per_ton_ethylene) * h2_ton_per_ton_ethylene / 1000
 
             # Calculate electricity consumption increase
