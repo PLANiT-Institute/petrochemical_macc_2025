@@ -136,34 +136,8 @@ elif page == "🗺️ Regional Transitions":
         if selected:
             st.markdown("---")
 
-            # Technology Deployment
-            st.header("1. Technology Deployment")
-            for sid in selected:
-                df = scenarios[sid]
-                st.subheader(f"📊 {SCENARIOS[sid]}")
-
-                col1, col2 = st.columns(2)
-                tech_cols = [c for c in ['ncc_abatement_kt', 'hp_abatement_kt', 're_ppa_abatement_kt'] if c in df.columns]
-
-                with col1:
-                    yearly = df.groupby('year')[tech_cols].sum().reset_index()
-                    melted = yearly.melt(id_vars='year', var_name='Tech', value_name='kt')
-                    melted['Tech'] = melted['Tech'].replace({'ncc_abatement_kt': 'NCC', 'hp_abatement_kt': 'Heat Pump', 're_ppa_abatement_kt': 'RE-PPA'})
-                    fig = px.area(melted, x='year', y='kt', color='Tech', title='Technology Over Time (kt CO2)')
-                    st.plotly_chart(fig, use_container_width=True)
-
-                with col2:
-                    df_2050 = df[df['year'] == 2050]
-                    reg = df_2050.groupby('region')[tech_cols].sum().reset_index()
-                    reg_melt = reg.melt(id_vars='region', var_name='Tech', value_name='kt')
-                    reg_melt['Tech'] = reg_melt['Tech'].replace({'ncc_abatement_kt': 'NCC', 'hp_abatement_kt': 'Heat Pump', 're_ppa_abatement_kt': 'RE-PPA'})
-                    fig = px.bar(reg_melt, x='region', y='kt', color='Tech', title='Regional Mix 2050', barmode='stack')
-                    st.plotly_chart(fig, use_container_width=True)
-
-            st.markdown("---")
-
-            # Emission Pathways
-            st.header("2. Emission Pathways")
+            # 1. Total Overview
+            st.header("1. Total Emission Pathways")
             for sid in selected:
                 df = scenarios[sid]
                 st.subheader(f"📊 {SCENARIOS[sid]}")
@@ -171,21 +145,73 @@ elif page == "🗺️ Regional Transitions":
                 col1, col2 = st.columns(2)
 
                 with col1:
-                    reg_yr = df.groupby(['year', 'region'])['actual_emissions_kt'].sum().reset_index()
-                    fig = px.area(reg_yr, x='year', y='actual_emissions_kt', color='region', title='Emissions by Region (kt)')
-                    st.plotly_chart(fig, use_container_width=True)
-
-                with col2:
                     total = df.groupby('year').agg({'bau_emissions_kt': 'sum', 'actual_emissions_kt': 'sum'}).reset_index()
                     fig = go.Figure()
                     fig.add_trace(go.Scatter(x=total['year'], y=total['bau_emissions_kt']/1000, name='BAU', line=dict(color='red', dash='dash')))
                     fig.add_trace(go.Scatter(x=total['year'], y=total['actual_emissions_kt']/1000, name='Net Zero', fill='tozeroy', line=dict(color='green')))
-                    fig.update_layout(title='BAU vs Net Zero (Mt CO2)', xaxis_title='Year', yaxis_title='Mt CO2')
+                    fig.update_layout(title='Total: BAU vs Net Zero (Mt CO2)', xaxis_title='Year', yaxis_title='Mt CO2')
+                    st.plotly_chart(fig, use_container_width=True)
+
+                with col2:
+                    tech_cols = [c for c in ['ncc_abatement_kt', 'hp_abatement_kt', 're_ppa_abatement_kt'] if c in df.columns]
+                    yearly = df.groupby('year')[tech_cols].sum().reset_index()
+                    melted = yearly.melt(id_vars='year', var_name='Tech', value_name='kt')
+                    melted['Tech'] = melted['Tech'].replace({'ncc_abatement_kt': 'NCC', 'hp_abatement_kt': 'Heat Pump', 're_ppa_abatement_kt': 'RE-PPA'})
+                    fig = px.area(melted, x='year', y='kt', color='Tech', title='Technology Deployment (kt CO2 abated)')
                     st.plotly_chart(fig, use_container_width=True)
 
             st.markdown("---")
 
-            # Summary Table
+            # 2. By Region - Individual Graphs
+            st.header("2. Regional Breakdown")
+            for sid in selected:
+                df = scenarios[sid]
+                regions = sorted(df['region'].unique())
+                st.subheader(f"📊 {SCENARIOS[sid]}")
+
+                # Emissions by region
+                st.markdown("**Emission Pathways by Region**")
+                cols = st.columns(2)
+                for i, region in enumerate(regions):
+                    with cols[i % 2]:
+                        region_df = df[df['region'] == region]
+                        yearly = region_df.groupby('year').agg({'bau_emissions_kt': 'sum', 'actual_emissions_kt': 'sum'}).reset_index()
+                        fig = go.Figure()
+                        fig.add_trace(go.Scatter(x=yearly['year'], y=yearly['bau_emissions_kt'], name='BAU', line=dict(color='red', dash='dash')))
+                        fig.add_trace(go.Scatter(x=yearly['year'], y=yearly['actual_emissions_kt'], name='Net Zero', fill='tozeroy', line=dict(color='green')))
+                        fig.update_layout(title=f'{region}', xaxis_title='Year', yaxis_title='kt CO2', height=300, showlegend=True)
+                        st.plotly_chart(fig, use_container_width=True)
+
+                # Technology by region
+                st.markdown("**Technology Deployment by Region**")
+                tech_cols = [c for c in ['ncc_abatement_kt', 'hp_abatement_kt', 're_ppa_abatement_kt'] if c in df.columns]
+                cols = st.columns(2)
+                for i, region in enumerate(regions):
+                    with cols[i % 2]:
+                        region_df = df[df['region'] == region]
+                        yearly = region_df.groupby('year')[tech_cols].sum().reset_index()
+                        melted = yearly.melt(id_vars='year', var_name='Tech', value_name='kt')
+                        melted['Tech'] = melted['Tech'].replace({'ncc_abatement_kt': 'NCC', 'hp_abatement_kt': 'Heat Pump', 're_ppa_abatement_kt': 'RE-PPA'})
+                        fig = px.area(melted, x='year', y='kt', color='Tech', title=f'{region}')
+                        fig.update_layout(height=300)
+                        st.plotly_chart(fig, use_container_width=True)
+
+                # Electricity by region
+                st.markdown("**Electricity Demand by Region**")
+                cols = st.columns(2)
+                for i, region in enumerate(regions):
+                    with cols[i % 2]:
+                        region_df = df[df['region'] == region]
+                        yearly = region_df.groupby('year')['elec_demand_mwh'].sum().reset_index()
+                        yearly['TWh'] = yearly['elec_demand_mwh'] / 1e6
+                        fig = px.area(yearly, x='year', y='TWh', title=f'{region}')
+                        fig.update_traces(fillcolor='rgba(52, 152, 219, 0.5)', line_color='#3498DB')
+                        fig.update_layout(height=300)
+                        st.plotly_chart(fig, use_container_width=True)
+
+                st.markdown("---")
+
+            # 3. Summary Table
             st.header("3. Regional Summary (2050)")
             for sid in selected:
                 df = scenarios[sid]
