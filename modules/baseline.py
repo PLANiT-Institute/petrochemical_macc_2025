@@ -69,8 +69,15 @@ class BaselineAnalyzer:
         """
         Calculate 2025 baseline emissions for all facilities
         Returns DataFrame with facility-level details and energy consumption
+        
+        NOTE: Operating rate of 70% is applied to reflect actual industry utilization.
+        This is consistent with Korean petrochemical industry average (2023-2024).
         """
         print("\nCalculating 2025 baseline...")
+        
+        # OPERATING RATE: 70% capacity utilization (industry average)
+        OPERATING_RATE = 0.70
+        print(f"   📊 Applying operating rate: {OPERATING_RATE*100:.0f}%")
 
         baseline = []
 
@@ -78,7 +85,7 @@ class BaselineAnalyzer:
             # Get energy intensities for this product
             intensity_row = self.df_intensities.iloc[idx]
 
-            capacity = facility['capacity_kt']  # kt/year
+            capacity = facility['capacity_kt'] * OPERATING_RATE  # kt/year (adjusted for operating rate)
 
             # Calculate energy consumption (total for facility per year)
             energy_consumption = {
