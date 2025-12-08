@@ -69,7 +69,7 @@ def load_data():
                 'emissions': 'facility_emissions_2050.csv',
                 'deployment': 'deployment_trajectory.csv',
                 'regional': 'regional_summary_2050.csv',
-                'annual': 'annual_regional_trajectory.csv'
+                'annual': 'regional_annual_analysis.csv'
             }
 
             for key, filename in files.items():
@@ -519,16 +519,32 @@ elif page == "🗺️ Regional Analysis":
                 'elec_demand_mwh': 'sum'
             }).reset_index()
 
-            # BAU vs Net by region
-            fig = px.line(regional_yearly, x='year', y='actual_emissions_kt', color='region',
-                         title='Net Emissions by Region (kt CO2)')
-            st.plotly_chart(fig, use_container_width=True)
-
-            # Energy by region
-            regional_yearly['elec_twh'] = regional_yearly['elec_demand_mwh'] / 1e6
-            fig = px.area(regional_yearly, x='year', y='elec_twh', color='region',
-                         title='Electricity Demand by Region (TWh)')
-            st.plotly_chart(fig, use_container_width=True)
+            # Annual Regional Analysis: Required Charts (Cost & Electricity)
+            st.subheader("Regional Trends Over Time")
+            col1, col2 = st.columns(2)
+            
+            # The column names in regional_annual_analysis.csv are:
+            # location, capex_investment_musd, total_annual_cost_musd, electricity_demand_twh, year, scenario
+            # Note: Renaming 'location' to 'region' might be needed depending on previous load mismatch,
+            # but standardizing on 'location' as per CSV generation.
+            
+            # Check column names
+            x_col = 'year'
+            color_col = 'location' if 'location' in annual_df.columns else 'region'
+            
+            with col1:
+                y_col = 'capex_investment_musd'
+                fig = px.bar(annual_df, x=x_col, y=y_col, color=color_col,
+                             title='Annual Regional Investment (Million USD)',
+                             labels={'capex_investment_musd': 'Investment ($M)'})
+                st.plotly_chart(fig, use_container_width=True)
+                
+            with col2:
+                y_col = 'electricity_demand_twh'
+                fig = px.line(annual_df, x=x_col, y=y_col, color=color_col,
+                              title='Annual Regional Electricity Demand (TWh)',
+                              labels={'electricity_demand_twh': 'Demand (TWh)'})
+                st.plotly_chart(fig, use_container_width=True)
 
 # ============================================================================
 # Footer

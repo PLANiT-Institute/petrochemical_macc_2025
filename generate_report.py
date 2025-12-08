@@ -1407,6 +1407,83 @@ def create_scenario_comparison_sheet(wb, data):
     ws.column_dimensions['H'].width = 12
     ws.column_dimensions['I'].width = 12
 
+    row += 2
+
+    # NEW SECTION: Annual Regional Analysis
+    if 'regional_annual' in data and data['regional_annual'] is not None:
+        reg_df = data['regional_annual']
+        
+        # Section 4: Regional Investment Trajectory (Chart Data)
+        ws.cell(row=row, column=1, value="4. Regional Annual Investment Trajectory ($ Million)").font = Font(bold=True, size=12, color='1F4E79')
+        row += 2
+        
+        regions = sorted(reg_df['location'].unique())
+        years = sorted(reg_df['year'].unique())
+        
+        # Table Header
+        ws.cell(row=row, column=1, value="Year")
+        for j, reg in enumerate(regions, 2):
+            ws.cell(row=row, column=j, value=reg).style = 'header_style'
+        row += 1
+        
+        chart_start_row = row
+        for year in years:
+            ws.cell(row=row, column=1, value=year)
+            for j, reg in enumerate(regions, 2):
+                val = reg_df[(reg_df['year'] == year) & (reg_df['location'] == reg)]['capex_investment_musd'].sum()
+                ws.cell(row=row, column=j, value=val)
+            row += 1
+        chart_end_row = row - 1
+        
+        # Create Line Chart for CAPEX
+        c1 = LineChart()
+        c1.title = "Annual Regional Investment (CAPEX)"
+        c1.style = 13
+        c1.y_axis.title = "Investment ($ Million)"
+        c1.x_axis.title = "Year"
+        
+        data_ref = Reference(ws, min_col=2, min_row=chart_start_row-1, max_col=1+len(regions), max_row=chart_end_row)
+        cats_ref = Reference(ws, min_col=1, min_row=chart_start_row, max_row=chart_end_row)
+        c1.add_data(data_ref, titles_from_data=True)
+        c1.set_categories(cats_ref)
+        
+        ws.add_chart(c1, "F5")
+        
+        row += 20
+        
+        # Section 5: Regional Electricity Demand Trajectory (Chart Data)
+        ws.cell(row=row, column=1, value="5. Regional Annual Electricity Demand (TWh)").font = Font(bold=True, size=12, color='1F4E79')
+        row += 2
+        
+        # Table Header
+        ws.cell(row=row, column=1, value="Year")
+        for j, reg in enumerate(regions, 2):
+            ws.cell(row=row, column=j, value=reg).style = 'header_style'
+        row += 1
+        
+        chart_start_row = row
+        for year in years:
+            ws.cell(row=row, column=1, value=year)
+            for j, reg in enumerate(regions, 2):
+                val = reg_df[(reg_df['year'] == year) & (reg_df['location'] == reg)]['electricity_demand_twh'].sum()
+                ws.cell(row=row, column=j, value=val)
+            row += 1
+        chart_end_row = row - 1
+        
+        # Create Line Chart for Electricity
+        c2 = LineChart()
+        c2.title = "Annual Regional Electricity Demand"
+        c2.style = 13
+        c2.y_axis.title = "Demand (TWh)"
+        c2.x_axis.title = "Year"
+        
+        data_ref = Reference(ws, min_col=2, min_row=chart_start_row-1, max_col=1+len(regions), max_row=chart_end_row)
+        cats_ref = Reference(ws, min_col=1, min_row=chart_start_row, max_row=chart_end_row)
+        c2.add_data(data_ref, titles_from_data=True)
+        c2.set_categories(cats_ref)
+        
+        ws.add_chart(c2, "F25")
+
     return wb
 
 
