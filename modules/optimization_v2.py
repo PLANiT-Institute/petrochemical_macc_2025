@@ -798,3 +798,175 @@ class CostOptimizerV2:
             regional_summary.append(summary)
 
         return pd.DataFrame(regional_summary)
+
+    def create_annual_regional_analysis(self, scenario_name, deployment_df):
+        """
+        Create annual regional analysis for Cost and Electricity (NEW REQUIREMENT)
+        Iterates 2025-2050 to allocate technologies to facilities each year
+        and aggregates by location.
+        """
+        print(f"\\n📍 Creating annual regional analysis for {scenario_name}...")
+        
+        regional_results = []
+        years = range(2025, 2051)
+        
+        # Pre-calculate non-NCC fossil emissions for weighting heat pump
+        df_facilities = self.df_baseline.copy()
+        
+        # Identify NCC facilities
+        df_facilities['is_ncc'] = df_facilities['product'].apply(is_ncc_facility)
+        
+        df_facilities['fossil_fuel_emissions_kt'] = (
+            df_facilities['emissions_naphtha_kt'] +
+            df_facilities['emissions_lng_kt'] +
+            df_facilities['emissions_fuel_gas_kt'] + 
+            df_facilities['emissions_lpg_kt'] +
+            df_facilities['emissions_fuel_oil_kt'] +
+            df_facilities['emissions_diesel_kt']
+        )
+        non_ncc_fossil_emissions = df_facilities[~df_facilities['is_ncc']]['fossil_fuel_emissions_kt'].sum() / 1000
+        ncc_emissions = df_facilities[df_facilities['is_ncc']]['emissions_naphtha_kt'].sum() / 1000
+        
+        # Calculate total electricity consumption for RE weighting
+        if 'emissions_electricity_kt' in df_facilities.columns:
+            df_facilities['electricity_emissions_kt'] = df_facilities['emissions_electricity_kt']
+        else:
+            # Fallback if column missing (should be there from baseline)
+            df_facilities['electricity_emissions_kt'] = 0
+            
+        # Parameters
+        lifetime = 20 # years for CAPEX amortization
+        
+        # Track previous deployment to calculate new CAPEX investment flow
+        # Initialize with 0 for all facilities and technologies
+        prev_deployment = {}
+        for idx, row in df_facilities.iterrows():
+            prev_deployment[row['facility_id']] = {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0}
+            
+        for year in years:
+            year_data = deployment_df[deployment_df['year'] == year]
+            if year_data.empty:
+                continue
+            deploy_year = year_data.iloc[0]
+            
+            # Get costs for this year
+            macc_year = self.df_macc[self.df_macc['year'] == year]
+            
+            # --- ALLOCATION LOGIC ---
+            # We must re-calculate the cumulative deployment for this year for each facility
+            
+            current_deployment_by_fac = {}
+            for idx, row in df_facilities.iterrows():
+                current_deployment_by_fac[row['facility_id']] = {'Heat_Pump': 0, 'NCC-H2': 0, 'NCC-Electricity': 0, 'RE_PPA': 0}
+            
+            # 1. Heat Pump
+            if deploy_year['heat_pump_mt'] > 0 and non_ncc_fossil_emissions > 0:
+                 rate = deploy_year['heat_pump_mt'] / non_ncc_fossil_emissions
+                 mask = (~df_facilities['is_ncc'])
+                 for idx, row in df_facilities[mask].iterrows():
+                     abated = (row['fossil_fuel_emissions_kt'] / 1000) * rate
+                     current_deployment_by_fac[row['facility_id']]['Heat_Pump'] = abated
+
+            # 2. NCC Tech
+            ncc_tech = None
+            deploy_amt = 0
+            if deploy_year['ncc_h2_mt'] > 0:
+                ncc_tech = 'NCC-H2'
+                deploy_amt = deploy_year['ncc_h2_mt']
+            elif deploy_year['ncc_elec_mt'] > 0:
+                ncc_tech = 'NCC-Electricity'
+                deploy_amt = deploy_year['ncc_elec_mt']
+                
+            if ncc_tech and ncc_emissions > 0:
+                rate = deploy_amt / ncc_emissions
+                mask = (df_facilities['is_ncc'])
+                for idx, row in df_facilities[mask].iterrows():
+                    abated = (row['emissions_naphtha_kt'] / 1000) * rate
+                    current_deployment_by_fac[row['facility_id']][ncc_tech] = abated
+            
+            # 3. RE PPA
+            if deploy_year['re_ppa_mt'] > 0:
+                if ncc_tech == 'NCC-Electricity':
+                    eligible_mask = (~df_facilities['is_ncc']) & (df_facilities['electricity_emissions_kt'] > 0)
+                else:
+                    eligible_mask = (df_facilities['electricity_emissions_kt'] > 0)
+                
+                eligible_emissions = df_facilities[eligible_mask]['electricity_emissions_kt'].sum() / 1000
+                
+                if eligible_emissions > 0:
+                    rate = deploy_year['re_ppa_mt'] / eligible_emissions
+                    for idx, row in df_facilities[eligible_mask].iterrows():
+                        abated = (row['electricity_emissions_kt'] / 1000) * rate
+                        current_deployment_by_fac[row['facility_id']]['RE_PPA'] = abated
+
+            # --- CALCULATE METRICS PER FACILITY ---
+            
+            row_data = [] 
+            
+            for idx, row in df_facilities.iterrows():
+                fac_id = row['facility_id']
+                loc = row['location']
+                
+                # Calculate Electricity Demand (TWh)
+                # Base electricity estimate (approximate from 2025 emissions)
+                # Grid EF 2025 ~ 0.436 tCO2/MWh
+                grid_ef_2025 = 0.436
+                base_emissions_t = row['electricity_emissions_kt'] * 1000
+                base_mwh = base_emissions_t / grid_ef_2025 if base_emissions_t > 0 else 0
+                    
+                # Increase from tech
+                increase_mwh = (
+                    current_deployment_by_fac[fac_id]['NCC-Electricity'] * 1e6 * 5.3 + 
+                    current_deployment_by_fac[fac_id]['Heat_Pump'] * 1e6 * 4.65
+                )
+                
+                total_elec_twh = (base_mwh + increase_mwh) / 1e6
+                
+                capex_investment_usd = 0
+                total_annual_cost_usd = 0
+                
+                for tech in ['Heat_Pump', 'NCC-H2', 'NCC-Electricity', 'RE_PPA']:
+                    amt = current_deployment_by_fac[fac_id][tech]
+                    prev_amt = prev_deployment[fac_id][tech]
+                    delta = max(0, amt - prev_amt) # New capacity
+                    
+                    try:
+                        t_data = macc_year[macc_year['technology'] == tech]
+                        if not t_data.empty:
+                            t_data = t_data.iloc[0]
+                            unit_capex_ann = t_data['capex_ann_usd_per_tco2']
+                            unit_opex = t_data['opex_ann_usd_per_tco2']
+                            unit_fuel = t_data['fuel_cost_diff_usd_per_tco2']
+                            
+                            # CAPEX Investment (Full cost upfront)
+                            if delta > 0:
+                                capex_investment_usd += delta * 1e6 * unit_capex_ann * lifetime
+                                
+                            # Annual Cost
+                            total_annual_cost_usd += amt * 1e6 * (unit_capex_ann + unit_opex + unit_fuel)
+                    except (IndexError, KeyError):
+                        pass
+                        
+                # Update prev deployment for next loop
+                for tech in ['Heat_Pump', 'NCC-H2', 'NCC-Electricity', 'RE_PPA']:
+                    prev_deployment[fac_id][tech] = current_deployment_by_fac[fac_id][tech]
+                    
+                row_data.append({
+                    'location': loc,
+                    'capex_investment_musd': capex_investment_usd / 1e6,
+                    'total_annual_cost_musd': total_annual_cost_usd / 1e6,
+                    'electricity_demand_twh': total_elec_twh
+                })
+                
+            # Aggregate by region
+            df_year_sim = pd.DataFrame(row_data)
+            agg = df_year_sim.groupby('location').sum().reset_index()
+            agg['year'] = year
+            agg['scenario'] = scenario_name
+            regional_results.append(agg)
+            
+        # Combine all years
+        final_df = pd.concat(regional_results, ignore_index=True)
+        final_df.to_csv(self.output_dir / 'regional_annual_analysis.csv', index=False)
+        print(f"   ✓ Saved regional analysis: regional_annual_analysis.csv")
+        return final_df
