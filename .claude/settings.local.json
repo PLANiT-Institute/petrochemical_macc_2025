@@ -97,7 +97,8 @@
       "Bash(data/technology_parameters_original_backup.csv )",
       "WebFetch(domain:www1.eere.energy.gov)",
       "WebFetch(domain:dspace.library.uu.nl)",
-      "WebFetch(domain:pubs.acs.org)"
+      "WebFetch(domain:pubs.acs.org)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
