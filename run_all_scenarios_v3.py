@@ -233,6 +233,13 @@ def run_scenario(scenario_name, scenario_id, df_fac, df_energy, force_tech):
     deploy = pd.read_csv(dirs['opt'] / 'policy_target_deployment.csv')
     r2050 = deploy[deploy['year'] == 2050].iloc[0]
 
+    # The instruction implies 'opt' object should be named 'optimizer' and 'deployment' should be used.
+    # Assuming 'opt' is the optimizer object and 'deploy' is the deployment dataframe.
+    opt.create_facility_level_allocation(scenario_name, deploy)
+    
+    # NEW: Create annual regional analysis
+    opt.create_annual_regional_analysis(scenario_name, deploy)
+
     # Read facility allocation
     alloc_path = dirs['opt'] / 'policy_target_facility_allocation_2050.csv'
     if alloc_path.exists():
