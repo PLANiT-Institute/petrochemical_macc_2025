@@ -23,7 +23,7 @@
 
 ## 1. Executive Summary
 
-This analysis evaluates six decarbonization pathways for Korea's petrochemical industry, combining three production scenarios with two NCC (Naphtha Cracking Center) technology options. The study covers **238 baseline facilities** across four major petrochemical complexes with a total capacity of **92,912 kt/year** (2025 baseline, excluding Shaheen project which is added in 2026).
+This analysis evaluates six decarbonization pathways for Korea's petrochemical industry, combining three production scenarios with two NCC (Naphtha Cracking Center) technology options. The study covers **248 baseline facilities** across four major petrochemical complexes with a total capacity of **100,066 kt/year** (2025 baseline). The Shaheen project adds 6 additional facilities starting in 2026, bringing the total to 254 facilities.
 
 ### Key Findings
 - All six scenarios achieve **Net Zero by 2050**
@@ -39,7 +39,7 @@ This analysis evaluates six decarbonization pathways for Korea's petrochemical i
 
 | Pathway | Description | Impact on Capacity |
 |---------|-------------|-------------------|
-| **Shaheen (Growth)** | Baseline + 6 new S-Oil Shaheen facilities (built 2026) | +4.3% capacity (244 facilities total) |
+| **Shaheen (Growth)** | Baseline + 6 new S-Oil Shaheen facilities (built 2026) | +3.9% capacity (254 facilities total) |
 | **Restructure 25%** | Retire 25% oldest NCC capacity | -25% NCC capacity |
 | **Restructure 40%** | Retire 40% oldest NCC capacity | -40% NCC capacity |
 
@@ -196,8 +196,9 @@ Korea's grid is assumed to fully decarbonize by 2050:
 
 | Metric | Value |
 |--------|-------|
-| Total facilities | 256 |
-| Total capacity | 104,762 kt/year |
+| Baseline facilities (2025) | 248 |
+| With Shaheen (2026+) | 254 |
+| Total capacity (baseline) | 100,066 kt/year |
 | Products covered | 54 types |
 | Regions | 4 major complexes |
 
@@ -205,11 +206,10 @@ Korea's grid is assumed to fully decarbonize by 2050:
 
 | Region | Facilities | Capacity (kt) | Share |
 |--------|-----------|---------------|-------|
-| Yeosu | 85 | 33,642 | 32.1% |
-| Daesan | 56 | 26,324 | 25.1% |
-| Ulsan | 65 | 22,185 | 21.2% |
-| Onsan | 31 | 18,621 | 17.8% |
-| Other | 19 | 3,990 | 3.8% |
+| Yeosu Complex | 87 | 37,216 | 37.2% |
+| Ulsan Complex | 85 | 31,436 | 31.4% |
+| Daesan Complex | 57 | 27,424 | 27.4% |
+| Other Regions | 19 | 3,990 | 4.0% |
 
 ### 6.3 Major Products
 

@@ -1,12 +1,15 @@
-product,process,company,location,complex,capacity_kt,year_built,age_2025,remaining_life,retirement_year_40yr
+product,process,company,location,region,capacity_kt,year_built,age_2025,remaining_life,retirement_year_40yr
+Ethylene,Naphtha Cracker,Lotte Chemical,Daesan,Daesan Complex,1100,1991,34,6,2031
 Ethylene,Naphtha Cracker,HD Hyundai Chemical,Daesan,Daesan Complex,850,2021,4,36,2061
 Ethylene,Naphtha Cracker,LG Chem,Daesan,Daesan Complex,1300,1991,34,6,2031
 Ethylene,Naphtha Cracker,Hanwha TotalEnergies,Daesan,Daesan Complex,1525,1991,34,6,2031
 Ethylene,Naphtha Cracker,Lotte Chemical,Yeosu,Yeosu Complex,1230,1992,33,7,2032
 Ethylene,Naphtha Cracker,LG Chem,Yeosu,Yeosu Complex,1030,2021,4,36,2061
+Ethylene,Naphtha Cracker,Yeochon NCC,Yeosu,Yeosu Complex,2285,1979,46,-6,2019
 Ethylene,Naphtha Cracker,GS Caltex,Yeosu,Yeosu Complex,900,2021,4,36,2061
 Ethylene,Naphtha Cracker,Daehan Oil Chemical,Onsan,Ulsan Complex,900,1991,34,6,2031
 Ethylene,Naphtha Cracker,S-Oil,Onsan,Ulsan Complex,182,2018,7,33,2058
+Ethylene,Naphtha Cracker,SK Geocentric,Ulsan,Ulsan Complex,660,1989,36,4,2029
 Propylene,Naphtha Cracker,Lotte Chemical,Daesan,Daesan Complex,550,1997,28,12,2037
 Propylene,Naphtha Cracker,HDHyundai Oilbank,Daesan,Daesan Complex,420,2011,14,26,2051
 Propylene,Naphtha Cracker,HD Hyundai Chemical,Daesan,Daesan Complex,451,2021,4,36,2061
@@ -14,11 +17,15 @@ Propylene,Naphtha Cracker,LG Chem,Daesan,Daesan Complex,680,1991,34,6,2031
 Propylene,Naphtha Cracker,Hanwha TotalEnergies,Daesan,Daesan Complex,1064,1991,34,6,2031
 Propylene,Naphtha Cracker,Lotte Chemical,Yeosu,Yeosu Complex,641,1992,33,7,2032
 Propylene,Naphtha Cracker,LG Chem,Yeosu,Yeosu Complex,1300,2021,4,36,2061
+Propylene,Naphtha Cracker,Yeochon NCC,Yeosu,Yeosu Complex,1289,1979,46,-6,2019
 Propylene,Naphtha Cracker,GS Caltex,Yeosu,Yeosu Complex,970,2021,4,36,2061
+Propylene,Naphtha Cracker,Daehan Oil Chemical,Onsan,Ulsan Complex,560,1991,34,6,2031
 Propylene,Naphtha Cracker,S-Oil,Onsan,Ulsan Complex,840,2018,7,33,2058
 Propylene,Naphtha Cracker,SK Advanced,Ulsan,Ulsan Complex,600,2016,9,31,2056
 Propylene,Naphtha Cracker,SK Energy,Ulsan,Ulsan Complex,620,1996,29,11,2036
+Propylene,Naphtha Cracker,SK Geocentric,Ulsan,Ulsan Complex,380,1989,36,4,2029
 Propylene,Naphtha Cracker,Taekwang Industrial,Ulsan,Ulsan Complex,300,1997,28,12,2037
+Propylene,Naphtha Cracker,Hyosung Chemical,Ulsan,Ulsan Complex,500,1991,34,6,2031
 Butadiene,Naphtha Cracker,Lotte Chemical,Daesan,Daesan Complex,190,1997,28,12,2037
 Butadiene,Naphtha Cracker,HD Hyundai Chemical,Daesan,Daesan Complex,163,2021,4,36,2061
 Butadiene,Naphtha Cracker,LG Chem,Daesan,Daesan Complex,200,1991,34,6,2031
@@ -28,7 +35,9 @@ Butadiene,Naphtha Cracker,Lotte GS Chemical,Yeosu,Yeosu Complex,130,2022,3,37,20
 Butadiene,Naphtha Cracker,Lotte Chemical,Yeosu,Yeosu Complex,160,2011,14,26,2051
 Butadiene,Naphtha Cracker,LG Chem,Yeosu,Yeosu Complex,306,1991,34,6,2031
 Butadiene,Naphtha Cracker,Yeochon NCC,Yeosu,Yeosu Complex,378,1992,33,7,2032
+Butadiene,Naphtha Cracker,Kumho Petrochemical,Ulsan,Ulsan Complex,90,1979,46,-6,2019
 Butadiene,Naphtha Cracker,Daehan Oil Chemical,Ulsan,Ulsan Complex,146,2023,2,38,2063
+Butadiene,Naphtha Cracker,SK Geocentric,Ulsan,Ulsan Complex,130,1989,36,4,2029
 Benzene,BTX Plant,OCI,Gwangyang,Other Regions,200,1995,30,10,2035
 Benzene,BTX Plant,Lotte Chemical,Daesan,Daesan Complex,240,2011,14,26,2051
 Benzene,BTX Plant,HD Hyundai Chemical,Daesan,Daesan Complex,410,2016,9,31,2056
@@ -76,6 +85,7 @@ P-X,BTX Plant,Lotte Chemical,Ulsan,Ulsan Complex,750,1980,45,-5,2020
 P-X,BTX Plant,SK Geocentric,Ulsan,Ulsan Complex,830,1990,35,5,2030
 P-X,BTX Plant,Ulsan Aromatics,Ulsan,Ulsan Complex,1000,2014,11,29,2054
 P-X,BTX Plant,SK Incheon Petrochemical,Incheon,Other Regions,1500,2014,11,29,2054
+C-H,Naphtha Cracker,SK Geocentric,Ulsan,Ulsan Complex,160,1974,51,-11,2014
 C-H,Naphtha Cracker,Caprolactam,Ulsan,Ulsan Complex,190,2000,25,15,2040
 SM,Utility,Lotte Chemical,Daesan,Daesan Complex,350,2005,20,20,2045
 SM,Utility,LG Chem,Daesan,Daesan Complex,577,2006,19,21,2046

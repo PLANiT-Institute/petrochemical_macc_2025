@@ -117,50 +117,52 @@ class EmissionCalculator:
             intensities_row: Row from energy intensities
 
         Returns:
-            Dictionary with emissions by fuel type
+            Dictionary with emissions by fuel type (in tCO2/year)
         """
-        capacity = facility_row['capacity_kt']
+        # CRITICAL: capacity is in kt (kilotonnes), intensities are per tonne
+        # Must multiply by 1000 to convert kt to tonnes
+        capacity_tonnes = facility_row['capacity_kt'] * 1000
 
         emissions = {}
 
         # Naphtha
         if intensities_row.get('Naphtha_GJ_per_tonne', 0) > 0:
-            energy = intensities_row['Naphtha_GJ_per_tonne'] * capacity
+            energy = intensities_row['Naphtha_GJ_per_tonne'] * capacity_tonnes
             emissions['naphtha'] = self.calculate_emissions('Naphtha', energy)
 
         # Electricity
         if intensities_row.get('Electricity_kWh_per_tonne', 0) > 0:
-            energy = intensities_row['Electricity_kWh_per_tonne'] * capacity
+            energy = intensities_row['Electricity_kWh_per_tonne'] * capacity_tonnes
             emissions['electricity'] = self.calculate_emissions('Electricity', energy)
 
         # LNG
         if intensities_row.get('LNG_GJ_per_tonne', 0) > 0:
-            energy = intensities_row['LNG_GJ_per_tonne'] * capacity
+            energy = intensities_row['LNG_GJ_per_tonne'] * capacity_tonnes
             emissions['lng'] = self.calculate_emissions('LNG', energy)
 
         # Fuel Gas
         if intensities_row.get('Fuel_Gas_GJ_per_tonne', 0) > 0:
-            energy = intensities_row['Fuel_Gas_GJ_per_tonne'] * capacity
+            energy = intensities_row['Fuel_Gas_GJ_per_tonne'] * capacity_tonnes
             emissions['fuel_gas'] = self.calculate_emissions('Fuel_Gas', energy)
 
         # Byproduct Gas
         if intensities_row.get('Byproduct_Gas_GJ_per_tonne', 0) > 0:
-            energy = intensities_row['Byproduct_Gas_GJ_per_tonne'] * capacity
+            energy = intensities_row['Byproduct_Gas_GJ_per_tonne'] * capacity_tonnes
             emissions['byproduct_gas'] = self.calculate_emissions('Byproduct_Gas', energy)
 
         # LPG
         if intensities_row.get('LPG_GJ_per_tonne', 0) > 0:
-            energy = intensities_row['LPG_GJ_per_tonne'] * capacity
+            energy = intensities_row['LPG_GJ_per_tonne'] * capacity_tonnes
             emissions['lpg'] = self.calculate_emissions('LPG', energy)
 
         # Fuel Oil
         if intensities_row.get('Fuel_Oil_GJ_per_tonne', 0) > 0:
-            energy = intensities_row['Fuel_Oil_GJ_per_tonne'] * capacity
+            energy = intensities_row['Fuel_Oil_GJ_per_tonne'] * capacity_tonnes
             emissions['fuel_oil'] = self.calculate_emissions('Fuel_Oil', energy)
 
         # Diesel
         if intensities_row.get('Diesel_GJ_per_tonne', 0) > 0:
-            energy = intensities_row['Diesel_GJ_per_tonne'] * capacity
+            energy = intensities_row['Diesel_GJ_per_tonne'] * capacity_tonnes
             emissions['diesel'] = self.calculate_emissions('Diesel', energy)
 
         emissions['total'] = sum(emissions.values())

@@ -92,13 +92,14 @@ class BaselineAnalyzer:
                 'diesel_gj': intensity_row['Diesel_GJ_per_tonne'] * capacity * 1000,
             }
 
-            # Calculate emissions by fuel (kt CO2/year)
+            # Calculate emissions by fuel (tCO2/year from EmissionCalculator)
             emissions = self.emission_calc.calculate_total_emissions(facility, intensity_row)
 
             # Add product group
             product_group = identify_product_group(facility['product'])
 
             # Compile baseline row
+            # Note: emissions are stored in kt (divide by 1000 from tCO2)
             baseline.append({
                 'product': facility['product'],
                 'product_group': product_group,
@@ -116,16 +117,16 @@ class BaselineAnalyzer:
                 'lpg_gj_per_year': energy_consumption['lpg_gj'],
                 'fuel_oil_gj_per_year': energy_consumption['fuel_oil_gj'],
                 'diesel_gj_per_year': energy_consumption['diesel_gj'],
-                # Emissions
-                'emissions_naphtha_kt': emissions.get('naphtha', 0),
-                'emissions_electricity_kt': emissions.get('electricity', 0),
-                'emissions_lng_kt': emissions.get('lng', 0),
-                'emissions_fuel_gas_kt': emissions.get('fuel_gas', 0),
-                'emissions_byproduct_gas_kt': emissions.get('byproduct_gas', 0),
-                'emissions_lpg_kt': emissions.get('lpg', 0),
-                'emissions_fuel_oil_kt': emissions.get('fuel_oil', 0),
-                'emissions_diesel_kt': emissions.get('diesel', 0),
-                'total_emissions_kt': emissions['total'],
+                # Emissions (convert from tCO2 to ktCO2)
+                'emissions_naphtha_kt': emissions.get('naphtha', 0) / 1000,
+                'emissions_electricity_kt': emissions.get('electricity', 0) / 1000,
+                'emissions_lng_kt': emissions.get('lng', 0) / 1000,
+                'emissions_fuel_gas_kt': emissions.get('fuel_gas', 0) / 1000,
+                'emissions_byproduct_gas_kt': emissions.get('byproduct_gas', 0) / 1000,
+                'emissions_lpg_kt': emissions.get('lpg', 0) / 1000,
+                'emissions_fuel_oil_kt': emissions.get('fuel_oil', 0) / 1000,
+                'emissions_diesel_kt': emissions.get('diesel', 0) / 1000,
+                'total_emissions_kt': emissions['total'] / 1000,
             })
 
         df_baseline = pd.DataFrame(baseline)

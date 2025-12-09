@@ -7,14 +7,15 @@
 A comprehensive **facility-level analysis tool** for evaluating decarbonization pathways for Korea's petrochemical industry (2025-2050).
 
 ### Key Results
-- **238 baseline facilities** analyzed across 4 major complexes (92,912 kt/year capacity)
+- **248 baseline facilities** analyzed across 4 major complexes (100,066 kt/year capacity)
+- **Baseline emissions: 46.3 MtCO2/year** at 70% operating rate
 - All scenarios achieve **Net Zero by 2050**
 - Investment range: **$13.4B - $22.1B** depending on scenario
 - **No CCS/CCUS** - focus on electrification and green hydrogen
 
 ## Key Features
 
-- **Facility-level resolution**: 256 petrochemical facilities across Yeosu, Daesan, Ulsan, and Other regions
+- **Facility-level resolution**: 248 baseline + 6 Shaheen (254 total with Shaheen project) across Yeosu, Daesan, Ulsan, and Other regions
 - **6 scenarios**: 3 production pathways × 2 NCC technology options
 - **Technology portfolio**: NCC-H₂, NCC-Electricity, Heat Pump, RE-PPA, RDH
 - **Interactive dashboard**: Streamlit-based visualization
@@ -80,12 +81,12 @@ streamlit run streamlit_app.py
 
 | # | Scenario | Production Pathway | NCC Technology |
 |---|----------|-------------------|----------------|
-| 1 | Shaheen + NCC-H2 | Growth (+6 facilities, 244 total) | Green H2 furnaces |
-| 2 | Shaheen + NCC-Elec | Growth (+6 facilities, 244 total) | Electric crackers |
-| 3 | Restructure 25% + NCC-H2 | -25% NCC capacity | Green H2 furnaces |
-| 4 | Restructure 25% + NCC-Elec | -25% NCC capacity | Electric crackers |
-| 5 | Restructure 40% + NCC-H2 | -40% NCC capacity | Green H2 furnaces |
-| 6 | Restructure 40% + NCC-Elec | -40% NCC capacity | Electric crackers |
+| 1 | Shaheen + NCC-H2 | Growth (+6 facilities, 254 total from 2026) | Green H2 furnaces |
+| 2 | Shaheen + NCC-Elec | Growth (+6 facilities, 254 total from 2026) | Electric crackers |
+| 3 | Restructure 25% + NCC-H2 | -25% NCC capacity (248 baseline) | Green H2 furnaces |
+| 4 | Restructure 25% + NCC-Elec | -25% NCC capacity (248 baseline) | Electric crackers |
+| 5 | Restructure 40% + NCC-H2 | -40% NCC capacity (248 baseline) | Green H2 furnaces |
+| 6 | Restructure 40% + NCC-Elec | -40% NCC capacity (248 baseline) | Electric crackers |
 
 ## Key Assumptions
 
