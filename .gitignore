@@ -7,7 +7,8 @@ __pycache__/
 .venv/
 .env
 
-# Generated outputs (keep release figures)
+# Generated outputs (keep release figures and scenario results for Streamlit)
 outputs/*
+!outputs/scenario_results.csv
 !outputs/figures/
 !outputs/figures/**
