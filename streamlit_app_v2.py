@@ -1,12 +1,13 @@
 """
 Korea Petrochemical Net Zero Dashboard v2
 =========================================
-Comprehensive dashboard with 5 pages:
+Comprehensive dashboard with 6 pages:
 1. Scenario Comparison - Summary cards, bar charts, MACC curve
-2. Technology Details - Parameters, MACC evolution by year
-3. Regional Transition Outlook - Regional metrics, H2 demand, cost pathways
-4. Facility-Level Results - Summaries and searchable table
-5. Energy Infrastructure - Electricity and H2 demand by scenario
+2. Assumptions - All input data and parameters
+3. Technology Details - Parameters, MACC evolution by year
+4. Regional Transition Outlook - Regional metrics, H2 demand, regional MACCs
+5. Facility-Level Results - Summaries and searchable table
+6. Energy Infrastructure - Electricity and H2 demand by scenario
 
 Reads from outputs/scenario_results.csv
 """
@@ -76,22 +77,108 @@ def load_data():
 
 
 @st.cache_data
-def load_assumptions():
-    """Load input assumptions"""
-    data = {}
+def load_all_assumptions():
+    """Load all input assumptions from data files"""
+    assumptions = {}
+
+    # Technology parameters (via symlink: technology_parameters.csv -> inputs/technology_capex.csv)
     try:
-        data['tech'] = pd.read_csv(DATA_DIR / "technology_parameters.csv")
-        data['h2'] = pd.read_csv(DATA_DIR / "h2_price_trajectory.csv")
-        data['re'] = pd.read_csv(DATA_DIR / "re_price_trajectory.csv")
-        data['grid'] = pd.read_csv(DATA_DIR / "grid_emission_trajectory.csv")
-    except Exception as e:
-        st.error(f"Error loading assumptions: {e}")
-    return data
+        assumptions['tech'] = pd.read_csv(DATA_DIR / "technology_parameters.csv")
+    except:
+        try:
+            assumptions['tech'] = pd.read_csv(DATA_DIR / "inputs" / "technology_capex.csv")
+        except:
+            assumptions['tech'] = None
+
+    # H2 Price trajectory
+    try:
+        assumptions['h2'] = pd.read_csv(DATA_DIR / "h2_price_trajectory.csv")
+    except:
+        try:
+            assumptions['h2'] = pd.read_csv(DATA_DIR / "price_trajectories" / "h2_price_trajectory.csv")
+        except:
+            assumptions['h2'] = None
+
+    # RE Price trajectory
+    try:
+        assumptions['re'] = pd.read_csv(DATA_DIR / "re_price_trajectory.csv")
+    except:
+        try:
+            assumptions['re'] = pd.read_csv(DATA_DIR / "price_trajectories" / "re_price_trajectory.csv")
+        except:
+            assumptions['re'] = None
+
+    # Grid emission trajectory
+    try:
+        assumptions['grid'] = pd.read_csv(DATA_DIR / "grid_emission_trajectory.csv")
+    except:
+        try:
+            assumptions['grid'] = pd.read_csv(DATA_DIR / "price_trajectories" / "grid_emission_trajectory.csv")
+        except:
+            assumptions['grid'] = None
+
+    # Emission factors
+    try:
+        assumptions['emission_factors'] = pd.read_csv(DATA_DIR / "emission_factors.csv")
+    except:
+        try:
+            assumptions['emission_factors'] = pd.read_csv(DATA_DIR / "inputs" / "emission_factors.csv")
+        except:
+            assumptions['emission_factors'] = None
+
+    # Fuel prices
+    try:
+        assumptions['fuel_prices'] = pd.read_csv(DATA_DIR / "fuel_price_trajectory.csv")
+    except:
+        try:
+            assumptions['fuel_prices'] = pd.read_csv(DATA_DIR / "price_trajectories" / "fuel_price_trajectory.csv")
+        except:
+            assumptions['fuel_prices'] = None
+
+    # Operating rates (Shaheen)
+    try:
+        assumptions['op_rate_shaheen'] = pd.read_csv(DATA_DIR / "demand_growth_trajectory_shaheen.csv")
+    except:
+        try:
+            assumptions['op_rate_shaheen'] = pd.read_csv(DATA_DIR / "inputs" / "operating_rate_shaheen.csv")
+        except:
+            assumptions['op_rate_shaheen'] = None
+
+    # Operating rates (Restructure 25%)
+    try:
+        assumptions['op_rate_restructure_25'] = pd.read_csv(DATA_DIR / "demand_growth_trajectory_restructure_25pct.csv")
+    except:
+        try:
+            assumptions['op_rate_restructure_25'] = pd.read_csv(DATA_DIR / "inputs" / "operating_rate_restructure_25pct.csv")
+        except:
+            assumptions['op_rate_restructure_25'] = None
+
+    # Operating rates (Restructure 40%)
+    try:
+        assumptions['op_rate_restructure_40'] = pd.read_csv(DATA_DIR / "demand_growth_trajectory_restructure_40pct.csv")
+    except:
+        try:
+            assumptions['op_rate_restructure_40'] = pd.read_csv(DATA_DIR / "inputs" / "operating_rate_restructure_40pct.csv")
+        except:
+            assumptions['op_rate_restructure_40'] = None
+
+    # Energy intensities (summary)
+    try:
+        ei_df = pd.read_csv(DATA_DIR / "energy_intensities.csv")
+        assumptions['energy_intensities'] = ei_df
+    except:
+        try:
+            ei_df = pd.read_csv(DATA_DIR / "inputs" / "energy_intensities.csv")
+            assumptions['energy_intensities'] = ei_df
+        except:
+            assumptions['energy_intensities'] = None
+
+    return assumptions
 
 
 # Load data
 df = load_data()
-assumptions = load_assumptions()
+assumptions = load_all_assumptions()
 
 # Check if data loaded
 if df is None:
@@ -108,8 +195,8 @@ st.sidebar.markdown("---")
 # Page selection
 page = st.sidebar.radio(
     "📑 Select Page",
-    ["1. Scenario Comparison", "2. Technology Details", "3. Regional Outlook",
-     "4. Facility Results", "5. Energy Infrastructure"]
+    ["1. Scenario Comparison", "2. Assumptions", "3. Technology Details",
+     "4. Regional Outlook", "5. Facility Results", "6. Energy Infrastructure"]
 )
 
 st.sidebar.markdown("---")
@@ -135,7 +222,6 @@ st.sidebar.markdown("---")
 
 # Info box
 total_facilities = df['facility_id'].nunique()
-shaheen_facilities = df[df['scenario'].str.contains('shaheen')]['facility_id'].nunique()
 st.sidebar.info(
     f"**Data Summary**\n\n"
     f"Total Facilities: {total_facilities}\n\n"
@@ -253,38 +339,311 @@ if page == "1. Scenario Comparison":
         if len(df_macc) > 0:
             fig = go.Figure()
 
-            for tech in df_macc['technology'].dropna().unique():
-                df_tech = df_macc[df_macc['technology'] == tech]
+            # Create proper MACC bars (horizontal position based on cumulative abatement)
+            x_start = 0
+            for _, row in df_macc.iterrows():
+                width = row['abatement_tco2'] / 1e6
+                tech = row['technology']
                 fig.add_trace(go.Bar(
-                    x=df_tech['abatement_tco2'] / 1e6,
-                    y=df_tech['mac_usd_per_tco2'],
+                    x=[width],
+                    y=[row['mac_usd_per_tco2']],
+                    width=0.8,
                     name=tech,
                     marker_color=TECH_COLORS.get(tech, '#808080'),
+                    showlegend=False,
                     hovertemplate=(
-                        '<b>%{customdata[0]}</b><br>'
-                        'Product: %{customdata[1]}<br>'
-                        'Region: %{customdata[2]}<br>'
-                        'Abatement: %{x:.3f} Mt<br>'
-                        'MAC: $%{y:.0f}/tCO2<extra></extra>'
+                        f'<b>{row["company"]}</b><br>'
+                        f'Product: {row["product"]}<br>'
+                        f'Region: {row["region"]}<br>'
+                        f'Abatement: {width:.3f} Mt<br>'
+                        f'MAC: ${row["mac_usd_per_tco2"]:.0f}/tCO2<extra></extra>'
                     ),
-                    customdata=df_tech[['company', 'product', 'region']].values
+                    base=x_start
+                ))
+                x_start += width
+
+            # Add legend entries
+            for tech in df_macc['technology'].unique():
+                fig.add_trace(go.Bar(
+                    x=[None], y=[None],
+                    name=tech,
+                    marker_color=TECH_COLORS.get(tech, '#808080'),
+                    showlegend=True
                 ))
 
             fig.update_layout(
                 title=f'MACC - {SCENARIO_NAMES.get(scenario, scenario)} ({selected_year})',
                 barmode='stack',
-                xaxis_title='Abatement (MtCO2)',
+                xaxis_title='Cumulative Abatement (MtCO2)',
                 yaxis_title='MAC ($/tCO2)',
                 height=500,
-                legend=dict(orientation='h', y=1.05)
+                legend=dict(orientation='h', y=1.1)
             )
             st.plotly_chart(fig, use_container_width=True)
 
 
 # =============================================================================
-# PAGE 2: TECHNOLOGY DETAILS
+# PAGE 2: ASSUMPTIONS
 # =============================================================================
-elif page == "2. Technology Details":
+elif page == "2. Assumptions":
+    st.title("📋 Model Assumptions")
+
+    st.markdown("""
+    This page displays all input data and assumptions used in the model.
+    Data sources are documented in `docs/ENERGY_INTENSITY_SOURCES.md`.
+    """)
+
+    # Emission Targets
+    st.header("1. Emission Reduction Targets")
+
+    target_df = pd.DataFrame([
+        {'Year': year, 'Reduction Target (%)': target * 100, 'Note':
+         'Baseline' if year == 2025 else
+         'Korea Industry NDC' if year == 2035 else
+         'Net Zero' if year == 2050 else
+         'Interpolated'}
+        for year, target in EMISSION_TARGETS.items()
+    ])
+    st.dataframe(target_df, hide_index=True, use_container_width=True)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        fig = px.line(target_df, x='Year', y='Reduction Target (%)',
+                     markers=True, title='Emission Reduction Trajectory')
+        fig.add_hline(y=24.5, line_dash="dash", annotation_text="2035 NDC (24.5%)")
+        fig.add_hline(y=100, line_dash="dash", annotation_text="Net Zero")
+        st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("---")
+
+    # Technology Parameters
+    st.header("2. Technology Parameters")
+
+    if assumptions.get('tech') is not None:
+        tech_df = assumptions['tech']
+
+        # Display key parameters
+        display_cols = ['technology', 'applies_to', 'trl', 'available_year',
+                       'capex_2025_musd_per_mtco2', 'capex_2030_musd_per_mtco2',
+                       'capex_2040_musd_per_mtco2', 'capex_2050_musd_per_mtco2',
+                       'opex_pct_capex', 'lifetime_years']
+        display_cols = [c for c in display_cols if c in tech_df.columns]
+
+        st.dataframe(tech_df[display_cols], hide_index=True, use_container_width=True)
+
+        # CAPEX learning curves
+        st.subheader("Technology CAPEX Learning Curves")
+        capex_data = []
+        for _, row in tech_df.iterrows():
+            tech_name = row['technology']
+            for year in [2025, 2030, 2040, 2050]:
+                col_name = f'capex_{year}_musd_per_mtco2'
+                if col_name in row and pd.notna(row[col_name]):
+                    capex_data.append({
+                        'Technology': tech_name,
+                        'Year': year,
+                        'CAPEX (M$/MtCO2)': row[col_name]
+                    })
+
+        if capex_data:
+            capex_df = pd.DataFrame(capex_data)
+            fig = px.line(capex_df, x='Year', y='CAPEX (M$/MtCO2)', color='Technology',
+                         markers=True, title='Technology CAPEX Learning Curves',
+                         color_discrete_map=TECH_COLORS)
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Additional tech parameters
+        st.subheader("Technology-Specific Parameters")
+        col1, col2 = st.columns(2)
+        with col1:
+            if 'cop' in tech_df.columns:
+                hp_row = tech_df[tech_df['technology'] == 'Heat_Pump']
+                if len(hp_row) > 0:
+                    st.metric("Heat Pump COP", f"{hp_row['cop'].iloc[0]}")
+            if 'h2_ton_per_ton_ethylene' in tech_df.columns:
+                ncc_h2 = tech_df[tech_df['technology'] == 'NCC-H2']
+                if len(ncc_h2) > 0 and pd.notna(ncc_h2['h2_ton_per_ton_ethylene'].iloc[0]):
+                    st.metric("NCC-H2: H2 Consumption", f"{ncc_h2['h2_ton_per_ton_ethylene'].iloc[0]} t-H2/t-C2H4")
+        with col2:
+            if 'elec_mwh_per_ton_ethylene' in tech_df.columns:
+                ncc_elec = tech_df[tech_df['technology'] == 'NCC-Electricity']
+                if len(ncc_elec) > 0 and pd.notna(ncc_elec['elec_mwh_per_ton_ethylene'].iloc[0]):
+                    st.metric("NCC-Elec: Electricity", f"{ncc_elec['elec_mwh_per_ton_ethylene'].iloc[0]} MWh/t-C2H4")
+    else:
+        st.warning("Technology parameters not loaded")
+
+    st.markdown("---")
+
+    # Energy Price Trajectories
+    st.header("3. Energy Price Trajectories")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # H2 prices
+        if assumptions.get('h2') is not None:
+            h2_df = assumptions['h2']
+            fig = px.line(h2_df, x='year', y='h2_price_usd_per_kg',
+                         markers=True, title='Green Hydrogen Price Trajectory')
+            fig.update_yaxes(title='H2 Price ($/kg)')
+            st.plotly_chart(fig, use_container_width=True)
+
+            with st.expander("H2 Price Data"):
+                st.dataframe(h2_df[['year', 'h2_price_usd_per_kg']], hide_index=True)
+        else:
+            st.warning("H2 price trajectory not loaded")
+
+    with col2:
+        # RE prices
+        if assumptions.get('re') is not None:
+            re_df = assumptions['re']
+            fig = px.line(re_df, x='year', y='re_price_usd_per_mwh',
+                         markers=True, title='Renewable Electricity Price Trajectory')
+            fig.update_yaxes(title='RE Price ($/MWh)')
+            st.plotly_chart(fig, use_container_width=True)
+
+            with st.expander("RE Price Data"):
+                st.dataframe(re_df[['year', 're_price_usd_per_mwh']], hide_index=True)
+        else:
+            st.warning("RE price trajectory not loaded")
+
+    st.markdown("---")
+
+    # Grid Emission Factor
+    st.header("4. Grid Decarbonization Trajectory")
+
+    if assumptions.get('grid') is not None:
+        grid_df = assumptions['grid']
+
+        col1, col2 = st.columns(2)
+        with col1:
+            fig = px.line(grid_df, x='year', y='grid_ef_tco2_per_mwh',
+                         markers=True, title='Korea Grid Emission Factor')
+            fig.update_yaxes(title='Grid EF (tCO2/MWh)')
+            fig.add_hline(y=0, line_dash="dash", annotation_text="Net Zero Grid")
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col2:
+            st.markdown("""
+            **Key Milestones:**
+            - 2025: 0.436 tCO2/MWh (current)
+            - 2030: 0.349 tCO2/MWh
+            - 2040: 0.140 tCO2/MWh
+            - 2050: 0.000 tCO2/MWh (Net Zero Grid)
+
+            **Source:** Korea 10th Basic Energy Plan targets
+            """)
+
+            with st.expander("Grid EF Data"):
+                st.dataframe(grid_df, hide_index=True)
+    else:
+        st.warning("Grid emission trajectory not loaded")
+
+    st.markdown("---")
+
+    # Emission Factors
+    st.header("5. Fuel Emission Factors")
+
+    if assumptions.get('emission_factors') is not None:
+        ef_df = assumptions['emission_factors']
+        st.dataframe(ef_df, hide_index=True, use_container_width=True)
+
+        # Bar chart
+        ef_plot = ef_df[ef_df['tCO2_per_GJ'].notna()].copy()
+        if len(ef_plot) > 0:
+            fig = px.bar(ef_plot, x='fuel', y='tCO2_per_GJ',
+                        title='Emission Factors by Fuel Type')
+            fig.update_yaxes(title='Emission Factor (tCO2/GJ)')
+            st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.warning("Emission factors not loaded")
+
+    st.markdown("---")
+
+    # Operating Rate Trajectories
+    st.header("6. Production Scenarios (Operating Rate)")
+
+    op_rate_data = []
+
+    if assumptions.get('op_rate_shaheen') is not None:
+        for _, row in assumptions['op_rate_shaheen'].iterrows():
+            op_rate_data.append({
+                'Year': row['year'],
+                'Scenario': 'Shaheen',
+                'Capacity Multiplier': row.get('cumulative_capacity_multiplier', 1.0),
+                'Operating Rate (%)': row.get('operating_rate_pct', 70)
+            })
+
+    if assumptions.get('op_rate_restructure_25') is not None:
+        for _, row in assumptions['op_rate_restructure_25'].iterrows():
+            op_rate_data.append({
+                'Year': row['year'],
+                'Scenario': 'Restructure 25%',
+                'Capacity Multiplier': row.get('cumulative_capacity_multiplier', 1.0),
+                'Operating Rate (%)': row.get('operating_rate_pct', 70)
+            })
+
+    if assumptions.get('op_rate_restructure_40') is not None:
+        for _, row in assumptions['op_rate_restructure_40'].iterrows():
+            op_rate_data.append({
+                'Year': row['year'],
+                'Scenario': 'Restructure 40%',
+                'Capacity Multiplier': row.get('cumulative_capacity_multiplier', 1.0),
+                'Operating Rate (%)': row.get('operating_rate_pct', 70)
+            })
+
+    if op_rate_data:
+        op_df = pd.DataFrame(op_rate_data)
+
+        col1, col2 = st.columns(2)
+        with col1:
+            fig = px.line(op_df, x='Year', y='Capacity Multiplier', color='Scenario',
+                         markers=True, title='Capacity Multiplier by Scenario')
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col2:
+            fig = px.line(op_df, x='Year', y='Operating Rate (%)', color='Scenario',
+                         markers=True, title='Operating Rate by Scenario')
+            st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.warning("Operating rate data not loaded")
+
+    st.markdown("---")
+
+    # Energy Intensity Summary
+    st.header("7. Energy Intensity Summary")
+
+    if assumptions.get('energy_intensities') is not None:
+        ei_df = assumptions['energy_intensities']
+
+        # Summary by process type
+        process_summary = ei_df.groupby('process').agg({
+            'Naphtha_GJ_per_tonne': 'mean',
+            'Electricity_kWh_per_tonne': 'mean',
+            'LNG_GJ_per_tonne': 'mean',
+            'Fuel_Gas_GJ_per_tonne': 'mean'
+        }).reset_index()
+
+        st.subheader("Average Energy Intensity by Process")
+        st.dataframe(process_summary, hide_index=True, use_container_width=True)
+
+        with st.expander("Full Energy Intensity Data"):
+            display_cols = ['product', 'process', 'company', 'location',
+                          'Naphtha_GJ_per_tonne', 'Electricity_kWh_per_tonne',
+                          'LNG_GJ_per_tonne', 'Fuel_Gas_GJ_per_tonne']
+            display_cols = [c for c in display_cols if c in ei_df.columns]
+            st.dataframe(ei_df[display_cols], hide_index=True, use_container_width=True)
+    else:
+        st.warning("Energy intensity data not loaded")
+
+    st.markdown("---")
+    st.caption("Data sources documented in docs/ENERGY_INTENSITY_SOURCES.md")
+
+
+# =============================================================================
+# PAGE 3: TECHNOLOGY DETAILS
+# =============================================================================
+elif page == "3. Technology Details":
     st.title("🔧 Technology Details")
 
     # Technology selector
@@ -297,7 +656,7 @@ elif page == "2. Technology Details":
     # Technology parameters from Assumptions
     st.header("Technology Parameters")
 
-    if 'tech' in assumptions:
+    if assumptions.get('tech') is not None:
         tech_df = assumptions['tech']
         tech_row = tech_df[tech_df['technology'].str.contains(selected_tech.split('-')[0], case=False)]
 
@@ -369,9 +728,9 @@ elif page == "2. Technology Details":
 
 
 # =============================================================================
-# PAGE 3: REGIONAL OUTLOOK
+# PAGE 4: REGIONAL OUTLOOK
 # =============================================================================
-elif page == "3. Regional Outlook":
+elif page == "4. Regional Outlook":
     st.title("🗺️ Regional Transition Outlook")
 
     # Regional metrics summary
@@ -398,6 +757,62 @@ elif page == "3. Regional Outlook":
             mac = df_r['total_cost_usd'].sum() / df_r['abatement_tco2'].sum() if df_r['abatement_tco2'].sum() > 0 else 0
             st.metric("MAC", f"${mac:.0f}/t")
             st.metric("Facilities", df_r['facility_id'].nunique())
+
+    st.markdown("---")
+
+    # Regional MACC Curves (IMPROVED)
+    st.header("Regional MACC Curves")
+
+    for region in regions:
+        df_r = df_s[(df_s['region'] == region) & (df_s['abatement_tco2'] > 0)].copy()
+        df_r = df_r.sort_values('mac_usd_per_tco2')
+
+        if len(df_r) > 0:
+            fig = go.Figure()
+
+            # Create proper MACC bars
+            x_start = 0
+            for _, row in df_r.iterrows():
+                width = row['abatement_tco2'] / 1e6
+                tech = row['technology']
+                fig.add_trace(go.Bar(
+                    x=[width],
+                    y=[row['mac_usd_per_tco2']],
+                    width=0.8,
+                    name=tech,
+                    marker_color=TECH_COLORS.get(tech, '#808080'),
+                    showlegend=False,
+                    hovertemplate=(
+                        f'<b>{row["company"]}</b><br>'
+                        f'Product: {row["product"]}<br>'
+                        f'Abatement: {width:.3f} Mt<br>'
+                        f'MAC: ${row["mac_usd_per_tco2"]:.0f}/tCO2<extra></extra>'
+                    ),
+                    base=x_start
+                ))
+                x_start += width
+
+            # Add legend entries
+            for tech in df_r['technology'].unique():
+                fig.add_trace(go.Bar(
+                    x=[None], y=[None],
+                    name=tech,
+                    marker_color=TECH_COLORS.get(tech, '#808080'),
+                    showlegend=True
+                ))
+
+            total_abatement = df_r['abatement_tco2'].sum() / 1e6
+            avg_mac = df_r['total_cost_usd'].sum() / df_r['abatement_tco2'].sum() if df_r['abatement_tco2'].sum() > 0 else 0
+
+            fig.update_layout(
+                title=f'{region} MACC - Total: {total_abatement:.2f} MtCO2, Avg MAC: ${avg_mac:.0f}/tCO2',
+                barmode='stack',
+                xaxis_title='Cumulative Abatement (MtCO2)',
+                yaxis_title='MAC ($/tCO2)',
+                height=400,
+                legend=dict(orientation='h', y=1.1)
+            )
+            st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
 
@@ -445,42 +860,11 @@ elif page == "3. Regional Outlook":
                  color_discrete_map=REGION_COLORS)
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("---")
-
-    # Regional MACC curves
-    st.header("Regional MACC Curves")
-
-    col1, col2 = st.columns(2)
-    for i, region in enumerate(regions):
-        df_r = df_s[(df_s['region'] == region) & (df_s['abatement_tco2'] > 0)]
-        df_r = df_r.sort_values('mac_usd_per_tco2')
-
-        if len(df_r) > 0:
-            with [col1, col2][i % 2]:
-                fig = go.Figure()
-                for tech in df_r['technology'].dropna().unique():
-                    df_t = df_r[df_r['technology'] == tech]
-                    fig.add_trace(go.Bar(
-                        x=df_t['abatement_tco2'] / 1e6,
-                        y=df_t['mac_usd_per_tco2'],
-                        name=tech,
-                        marker_color=TECH_COLORS.get(tech, '#808080')
-                    ))
-                fig.update_layout(
-                    title=f'{region} MACC',
-                    barmode='stack',
-                    xaxis_title='Abatement (Mt)',
-                    yaxis_title='MAC ($/tCO2)',
-                    height=350,
-                    showlegend=False
-                )
-                st.plotly_chart(fig, use_container_width=True)
-
 
 # =============================================================================
-# PAGE 4: FACILITY RESULTS
+# PAGE 5: FACILITY RESULTS
 # =============================================================================
-elif page == "4. Facility Results":
+elif page == "5. Facility Results":
     st.title("🏢 Facility-Level Results")
 
     # Summary
@@ -614,9 +998,9 @@ elif page == "4. Facility Results":
 
 
 # =============================================================================
-# PAGE 5: ENERGY INFRASTRUCTURE
+# PAGE 6: ENERGY INFRASTRUCTURE
 # =============================================================================
-elif page == "5. Energy Infrastructure":
+elif page == "6. Energy Infrastructure":
     st.title("⚡ Energy Infrastructure")
 
     # Electricity demand by scenario
