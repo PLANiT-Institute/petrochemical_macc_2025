@@ -98,7 +98,9 @@
       "WebFetch(domain:www1.eere.energy.gov)",
       "WebFetch(domain:dspace.library.uu.nl)",
       "WebFetch(domain:pubs.acs.org)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(timeout 10 streamlit run:*)",
+      "Bash(gtimeout 10 streamlit run:*)"
     ],
     "deny": [],
     "ask": []

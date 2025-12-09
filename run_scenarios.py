@@ -1,25 +1,25 @@
 """
-SCENARIO RUNNER - Generates Long-Format Output
-==============================================
+SCENARIO RUNNER - Cost-Optimized with Emission Constraints
+==========================================================
 Runs all 6 scenarios and outputs a single CSV file with facility-level results.
 
 Output: outputs/scenario_results.csv
 
-Methodology:
-- Emissions are calculated by fuel source (naphtha, LNG, fuel_gas, byproduct_gas, electricity)
-- Technologies target specific emission sources:
-  * NCC-H2/Electricity: Naphtha combustion in crackers (100% by 2050)
-  * Heat_Pump: LNG/Fuel_Gas/Byproduct_Gas for heat (gradual ramp to 100% by 2050)
-  * RE_PPA: Electricity emissions (covered by grid decarbonization - 0 by 2050)
-  * RDH: High-temp BTX processes (100% by 2050)
+Emission Constraints (from baseline):
+- 2035: 24.5% reduction (Korea industry sector NDC target)
+- 2050: 100% reduction (Net Zero)
 
-Technology deployment timeline:
-- 2025: Baseline only (no technology)
-- 2030: 30% deployment
-- 2035: 50% deployment
-- 2040: 70% deployment
-- 2045: 85% deployment
-- 2050: 100% deployment (Net Zero)
+Optimization Approach:
+- Cost-optimization: Deploy technologies by MAC order (lowest cost first)
+- Facilities are ranked by MAC and deployed until emission target is met
+- Each facility gets an installation year based on when it's needed to meet targets
+
+Technology application logic:
+- NCC facilities: NCC-H2 or NCC-Electricity for naphtha combustion
+                 + Heat Pump for LNG/Fuel_Gas/Byproduct_Gas
+- BTX facilities: RDH for high-temp heat
+- Other facilities: Heat Pump for all combustion emissions
+- All facilities: Grid decarbonization handles electricity (0 by 2050)
 """
 
 import pandas as pd
@@ -35,14 +35,14 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 # Years for analysis (key years only)
 YEARS = [2025, 2030, 2035, 2040, 2045, 2050]
 
-# Technology deployment schedule (fraction of eligible facilities converted)
-DEPLOYMENT_SCHEDULE = {
-    2025: 0.00,  # Baseline year
-    2030: 0.30,
-    2035: 0.50,
-    2040: 0.70,
-    2045: 0.85,
-    2050: 1.00   # Net Zero target
+# Emission reduction targets (from baseline)
+EMISSION_TARGETS = {
+    2025: 0.000,   # 0% reduction (baseline)
+    2030: 0.150,   # 15% reduction (interpolated)
+    2035: 0.245,   # 24.5% reduction (Korea industry NDC)
+    2040: 0.500,   # 50% reduction (interpolated)
+    2045: 0.750,   # 75% reduction (interpolated)
+    2050: 1.000,   # 100% reduction (Net Zero)
 }
 
 # Scenarios: 6 combinations
@@ -110,10 +110,9 @@ def is_btx_facility(process):
     return process == 'BTX Plant'
 
 
-def calculate_facility_emissions_by_source(facility, intensity, emission_calc, operating_rate):
+def calculate_facility_baseline(facility, intensity, operating_rate, grid_ef):
     """
-    Calculate emissions by source for a facility.
-    Returns detailed breakdown for technology targeting.
+    Calculate baseline emissions for a facility (no technology deployment).
     """
     capacity_tonnes = facility['capacity_kt'] * 1000
     production_tonnes = capacity_tonnes * operating_rate
@@ -127,7 +126,8 @@ def calculate_facility_emissions_by_source(facility, intensity, emission_calc, o
 
     # Electricity
     elec_kwh = intensity.get('Electricity_kWh_per_tonne', 0) * production_tonnes
-    emissions_by_source['electricity_kwh'] = elec_kwh  # Store kWh for grid EF calc
+    elec_mwh = elec_kwh / 1000
+    emissions_by_source['electricity'] = elec_mwh * grid_ef
 
     # LNG (steam/utilities)
     lng_gj = intensity.get('LNG_GJ_per_tonne', 0) * production_tonnes
@@ -144,197 +144,163 @@ def calculate_facility_emissions_by_source(facility, intensity, emission_calc, o
     # Total heat demand (for Heat Pump sizing)
     total_heat_gj = naphtha_gj + lng_gj + fuel_gas_gj + byproduct_gas_gj
 
+    # Combustion emissions (abatable by technology)
+    combustion_emissions = (
+        emissions_by_source['naphtha'] +
+        emissions_by_source['lng'] +
+        emissions_by_source['fuel_gas'] +
+        emissions_by_source['byproduct_gas']
+    )
+
+    # Total baseline emissions
+    total_emissions = combustion_emissions + emissions_by_source['electricity']
+
     return {
         'capacity_tpy': capacity_tonnes,
         'production_t': production_tonnes,
         'emissions_by_source': emissions_by_source,
-        'elec_demand_mwh': elec_kwh / 1000,
+        'combustion_emissions': combustion_emissions,
+        'elec_emissions': emissions_by_source['electricity'],
+        'total_emissions': total_emissions,
+        'elec_demand_mwh': elec_mwh,
         'heat_demand_gj': total_heat_gj,
     }
 
 
-def calculate_abatement_and_costs(facility_data, process, ncc_tech, year, data, grid_ef):
+def calculate_facility_mac(facility_baseline, process, ncc_tech, year, data, grid_ef):
     """
-    Calculate emissions abatement for a facility based on technology deployment.
-
-    Technology application logic:
-    - NCC facilities: NCC-H2 or NCC-Electricity for naphtha combustion
-                     + Heat Pump for LNG/Fuel_Gas/Byproduct_Gas
-    - BTX facilities: RDH for high-temp heat
-                     + Heat Pump for remaining fuel gas
-    - Other facilities: Heat Pump for all combustion emissions
-
-    All facilities: RE_PPA for electricity (grid EF covers this automatically)
-
-    BAU (Business as Usual) = what emissions would be with 2025 grid EF (no decarbonization)
-    Emissions = actual emissions after technology deployment + grid decarbonization
-    Abatement = BAU - Emissions (includes both tech deployment and grid improvement)
+    Calculate MAC for full technology deployment at a facility.
+    Used for ranking facilities by cost-effectiveness.
     """
-    emissions = facility_data['emissions_by_source']
-    deployment = DEPLOYMENT_SCHEDULE.get(year, 0)
+    emissions = facility_baseline['emissions_by_source']
 
-    # Baseline grid EF (2025)
-    BASELINE_GRID_EF = 0.436  # tCO2/MWh
-
-    # Calculate BAU emissions (using 2025 baseline grid EF for comparison)
-    elec_kwh = emissions['electricity_kwh']
-    elec_mwh = elec_kwh / 1000
-    bau_elec_emissions = elec_mwh * BASELINE_GRID_EF  # What elec emissions would be at 2025 levels
-
-    combustion_emissions = (
-        emissions.get('naphtha', 0) +
-        emissions.get('lng', 0) +
-        emissions.get('fuel_gas', 0) +
-        emissions.get('byproduct_gas', 0)
-    )
-    bau_emissions = combustion_emissions + bau_elec_emissions
-
-    # Initialize result
-    result = {
-        'capacity_tpy': facility_data['capacity_tpy'],
-        'production_t': facility_data['production_t'],
-        'bau_emissions_tco2': bau_emissions,
-        'elec_demand_mwh': facility_data['elec_demand_mwh'],
-        'heat_demand_gj': facility_data['heat_demand_gj'],
-        'h2_demand_t': 0,
-        'capex_usd': 0,
-        'opex_usd_yr': 0,
-        'fuel_cost_usd_yr': 0,
-    }
-
-    # Track abatement by source
-    abated_naphtha = 0
-    abated_lng_fg_bg = 0  # LNG + Fuel_Gas + Byproduct_Gas
-    abated_electricity = 0
-
-    # Get prices
+    # Get prices for the year
     h2_price = data['h2_prices'][data['h2_prices']['year'] == year]['h2_price_usd_per_kg'].iloc[0] \
         if year in data['h2_prices']['year'].values else 3.0
     re_price = data['re_prices'][data['re_prices']['year'] == year]['re_price_usd_per_mwh'].iloc[0] \
         if year in data['re_prices']['year'].values else 50.0
 
-    # Determine technology and calculate abatement
+    # Calculate potential abatement (combustion emissions only - electricity handled by grid)
+    potential_abatement = facility_baseline['combustion_emissions']
+
+    if potential_abatement <= 0:
+        return float('inf'), 'None', 0, 0, 0, 0, 0
+
+    # Determine technology and calculate costs
     if is_ncc_facility(process):
-        # NCC facility: Use NCC technology for naphtha, Heat Pump for other fuels
-        result['technology'] = ncc_tech
-
-        # NCC technology abates naphtha combustion
+        technology = ncc_tech
         naphtha_emissions = emissions.get('naphtha', 0)
-        abated_naphtha = naphtha_emissions * deployment
-
-        # Calculate H2 or electricity demand for NCC
-        if ncc_tech == 'NCC-H2':
-            # H2 demand: 0.2 t-H2 per t-ethylene, roughly 0.12 t-H2 per tCO2 abated
-            result['h2_demand_t'] = abated_naphtha * 0.12  # Rough estimate
-            result['fuel_cost_usd_yr'] = result['h2_demand_t'] * h2_price * 1000
-        else:  # NCC-Electricity
-            # ~2.5 MWh per tCO2 abated for electric cracker
-            added_elec_mwh = abated_naphtha * 2.5
-            result['elec_demand_mwh'] += added_elec_mwh
-            result['fuel_cost_usd_yr'] = added_elec_mwh * re_price
-
-        # Heat Pump for other fuel combustion (LNG, Fuel_Gas, Byproduct_Gas)
         other_fuel_emissions = emissions.get('lng', 0) + emissions.get('fuel_gas', 0) + emissions.get('byproduct_gas', 0)
-        abated_lng_fg_bg = other_fuel_emissions * deployment
 
-        # Heat pump electricity demand (COP = 4)
-        heat_pump_elec_mwh = (facility_data['heat_demand_gj'] - emissions.get('naphtha', 0) / 0.0542) * deployment / 3.6 / 4.0
-        heat_pump_elec_mwh = max(0, heat_pump_elec_mwh)
-        result['elec_demand_mwh'] += heat_pump_elec_mwh
+        if ncc_tech == 'NCC-H2':
+            h2_demand_t = naphtha_emissions * 0.12
+            fuel_cost = h2_demand_t * h2_price * 1000
+            added_elec_mwh = 0
+        else:
+            h2_demand_t = 0
+            added_elec_mwh = naphtha_emissions * 2.5
+            fuel_cost = added_elec_mwh * re_price
+
+        # Heat pump for other fuels
+        heat_gj = facility_baseline['heat_demand_gj'] - emissions.get('naphtha', 0) / 0.0542
+        heat_gj = max(0, heat_gj)
+        hp_elec_mwh = heat_gj / 3.6 / 4.0
+        added_elec_mwh += hp_elec_mwh
+        fuel_cost += hp_elec_mwh * re_price
 
     elif is_btx_facility(process):
-        # BTX facility: RDH for high-temp, Heat Pump for low-temp
-        result['technology'] = 'RDH'
-
-        # RDH covers all fuel combustion in BTX
-        total_combustion = combustion_emissions
-        abated_naphtha = emissions.get('naphtha', 0) * deployment
-        abated_lng_fg_bg = (emissions.get('lng', 0) + emissions.get('fuel_gas', 0) + emissions.get('byproduct_gas', 0)) * deployment
-
-        # RDH electricity demand
-        rdh_elec_mwh = facility_data['heat_demand_gj'] * deployment / 3.6 * 0.9  # 90% efficiency
-        result['elec_demand_mwh'] += rdh_elec_mwh
-        result['fuel_cost_usd_yr'] = rdh_elec_mwh * re_price
+        technology = 'RDH'
+        h2_demand_t = 0
+        rdh_elec_mwh = facility_baseline['heat_demand_gj'] / 3.6 * 0.9
+        added_elec_mwh = rdh_elec_mwh
+        fuel_cost = rdh_elec_mwh * re_price
 
     else:
-        # Other facilities: Heat Pump for all combustion
-        result['technology'] = 'Heat_Pump'
+        technology = 'Heat_Pump'
+        h2_demand_t = 0
+        hp_elec_mwh = facility_baseline['heat_demand_gj'] / 3.6 / 4.0
+        added_elec_mwh = hp_elec_mwh
+        fuel_cost = hp_elec_mwh * re_price
 
-        # Heat Pump covers all fuel combustion
-        abated_naphtha = emissions.get('naphtha', 0) * deployment
-        abated_lng_fg_bg = (emissions.get('lng', 0) + emissions.get('fuel_gas', 0) + emissions.get('byproduct_gas', 0)) * deployment
-
-        # Heat pump electricity (COP = 4)
-        hp_elec_mwh = facility_data['heat_demand_gj'] * deployment / 3.6 / 4.0
-        result['elec_demand_mwh'] += hp_elec_mwh
-        result['fuel_cost_usd_yr'] = hp_elec_mwh * re_price
-
-    # Calculate actual electricity emissions (with current year's grid EF)
-    # Baseline electricity uses grid power with current grid_ef
-    baseline_elec_emissions = elec_mwh * grid_ef
-
-    # Additional electricity from technology deployment (also uses grid power)
-    added_elec_mwh = result['elec_demand_mwh'] - facility_data['elec_demand_mwh']
-    added_elec_emissions = added_elec_mwh * grid_ef
-
-    # Total electricity emissions for this year
-    total_elec_emissions = baseline_elec_emissions + added_elec_emissions
-
-    # Residual combustion emissions (portion not yet converted by technology)
-    residual_combustion = combustion_emissions - abated_naphtha - abated_lng_fg_bg
-
-    # Total actual emissions
-    residual_emissions = max(0, residual_combustion + total_elec_emissions)
-
-    result['emissions_tco2'] = residual_emissions
-    result['abatement_tco2'] = bau_emissions - residual_emissions
-    result['tech_deployed'] = 1 if deployment > 0 else 0
-
-    # CAPEX calculation
+    # Get CAPEX
     tech_params = data['tech_params']
-    tech_name = result['technology'].replace('-', '_')
+    tech_name = technology.replace('-', '_')
     tech_row = tech_params[tech_params['technology'].str.contains(tech_name.split('_')[0], case=False)]
 
     if len(tech_row) > 0:
         tech_row = tech_row.iloc[0]
-
-        # Interpolate CAPEX
-        years = [2025, 2030, 2040, 2050]
+        years_capex = [2025, 2030, 2040, 2050]
         capex_values = [
             tech_row.get('capex_2025_musd_per_mtco2', 0),
             tech_row.get('capex_2030_musd_per_mtco2', 0),
             tech_row.get('capex_2040_musd_per_mtco2', 0),
             tech_row.get('capex_2050_musd_per_mtco2', 0)
         ]
-        capex_per_mtco2 = np.interp(year, years, capex_values)
+        capex_per_mtco2 = np.interp(year, years_capex, capex_values)
 
-        # CAPEX based on abatement
-        abatement_mt = result['abatement_tco2'] / 1e6
-        result['capex_usd'] = capex_per_mtco2 * abatement_mt * 1e6
-
-        # OPEX
+        abatement_mt = potential_abatement / 1e6
+        capex_usd = capex_per_mtco2 * abatement_mt * 1e6
         opex_pct = tech_row.get('opex_pct_capex', 3) / 100
-        result['opex_usd_yr'] = result['capex_usd'] * opex_pct
+        opex_usd = capex_usd * opex_pct
+    else:
+        capex_usd = 0
+        opex_usd = 0
 
-    # Total cost
+    # Total annualized cost
     lifetime = 25
-    capex_annual = result['capex_usd'] / lifetime
-    result['total_cost_usd'] = capex_annual + result['opex_usd_yr'] + result.get('fuel_cost_usd_yr', 0)
+    capex_annual = capex_usd / lifetime
+    total_cost = capex_annual + opex_usd + fuel_cost
 
     # MAC
-    if result['abatement_tco2'] > 0:
-        result['mac_usd_per_tco2'] = result['total_cost_usd'] / result['abatement_tco2']
-    else:
-        result['mac_usd_per_tco2'] = 0
+    mac = total_cost / potential_abatement if potential_abatement > 0 else float('inf')
 
-    return result
+    return mac, technology, potential_abatement, capex_usd, total_cost, h2_demand_t, added_elec_mwh
+
+
+def determine_installation_schedule(facilities_mac_data, baseline_emissions, target_years):
+    """
+    Determine when each facility should install technology based on MAC ranking
+    and emission reduction targets.
+
+    Returns dict: {facility_id: installation_year}
+    """
+    # Sort facilities by MAC (lowest first)
+    sorted_facilities = sorted(facilities_mac_data, key=lambda x: x['mac'])
+
+    installation_schedule = {}
+    cumulative_abatement = 0
+
+    # For each target year, determine which facilities need to be deployed
+    for year in sorted(target_years.keys()):
+        if year == 2025:
+            continue  # No deployment in baseline year
+
+        target_reduction = target_years[year]
+        required_abatement = baseline_emissions * target_reduction
+
+        # Deploy facilities until we meet the target
+        for fac in sorted_facilities:
+            if fac['facility_id'] in installation_schedule:
+                continue  # Already scheduled
+
+            if cumulative_abatement >= required_abatement:
+                break  # Target met
+
+            # Schedule this facility for installation
+            installation_schedule[fac['facility_id']] = year
+            cumulative_abatement += fac['potential_abatement']
+
+    # Any remaining facilities get installed in 2050
+    for fac in sorted_facilities:
+        if fac['facility_id'] not in installation_schedule:
+            installation_schedule[fac['facility_id']] = 2050
+
+    return installation_schedule
 
 
 def run_scenario(scenario, data, years):
-    """Run a single scenario and return facility-level results"""
+    """Run a single scenario with cost-optimized deployment"""
     print(f"\n  Running: {scenario['name']}")
-
-    results = []
 
     # Select facilities based on production pathway
     if scenario['production'] == 'shaheen':
@@ -350,59 +316,165 @@ def run_scenario(scenario, data, years):
         facilities = data['facilities'].copy()
         op_rate_df = data['op_rate_shaheen']
 
-    # Get energy intensities (aligned with facilities)
     intensities = data['intensities']
-
-    # Create emission calculator
-    emission_calc = EmissionCalculator(data['emission_factors'])
 
     # Create facility ID
     facilities['facility_id'] = facilities.apply(
         lambda x: f"{x['company']}_{x['product']}_{x['location']}", axis=1
     )
 
+    # STEP 1: Calculate baseline emissions and MAC for each facility (using 2035 prices for ranking)
+    print(f"    Calculating facility MACs...")
+
+    # Use 2035 for MAC calculation (when most deployment happens)
+    mac_year = 2035
+    op_row = op_rate_df[op_rate_df['year'] == mac_year]
+    operating_rate = op_row['operating_rate_pct'].iloc[0] / 100 if len(op_row) > 0 else 0.70
+
+    grid_row = data['grid_emissions'][data['grid_emissions']['year'] == mac_year]
+    grid_ef = grid_row['grid_ef_tco2_per_mwh'].iloc[0] if len(grid_row) > 0 else 0.436
+
+    facilities_mac_data = []
+    total_baseline_emissions = 0
+
+    for idx, facility in facilities.iterrows():
+        if idx >= len(intensities):
+            continue
+
+        intensity = intensities.iloc[idx]
+        process = facility.get('process', '')
+
+        # Calculate baseline
+        baseline = calculate_facility_baseline(facility, intensity, operating_rate, grid_ef)
+        total_baseline_emissions += baseline['combustion_emissions']  # Only combustion (electricity handled by grid)
+
+        # Calculate MAC
+        mac, technology, potential_abatement, capex, total_cost, h2_demand, elec_demand = \
+            calculate_facility_mac(baseline, process, scenario['ncc_tech'], mac_year, data, grid_ef)
+
+        facilities_mac_data.append({
+            'facility_id': facility['facility_id'],
+            'idx': idx,
+            'mac': mac,
+            'technology': technology,
+            'potential_abatement': potential_abatement,
+            'capex': capex,
+            'total_cost': total_cost,
+            'h2_demand': h2_demand,
+            'elec_demand': elec_demand,
+        })
+
+    # STEP 2: Determine installation schedule based on emission targets
+    print(f"    Determining installation schedule (target-based)...")
+    installation_schedule = determine_installation_schedule(
+        facilities_mac_data, total_baseline_emissions, EMISSION_TARGETS
+    )
+
+    # Print schedule summary
+    schedule_summary = {}
+    for fac_id, install_year in installation_schedule.items():
+        schedule_summary[install_year] = schedule_summary.get(install_year, 0) + 1
+    print(f"    Installation schedule: {dict(sorted(schedule_summary.items()))}")
+
+    # STEP 3: Run simulation for each year
+    results = []
+
     for year in years:
         print(f"    Year {year}...")
 
-        # Get operating rate for year
+        # Get operating rate and grid EF for year
         op_row = op_rate_df[op_rate_df['year'] == year]
-        if len(op_row) > 0 and 'operating_rate_pct' in op_row.columns:
-            operating_rate = op_row['operating_rate_pct'].iloc[0] / 100
-        else:
-            operating_rate = 0.70  # Default 70%
+        operating_rate = op_row['operating_rate_pct'].iloc[0] / 100 if len(op_row) > 0 else 0.70
 
-        # Get grid emission factor
         grid_row = data['grid_emissions'][data['grid_emissions']['year'] == year]
         grid_ef = grid_row['grid_ef_tco2_per_mwh'].iloc[0] if len(grid_row) > 0 else 0.436
 
+        # Baseline grid EF (2025) for BAU comparison
+        BASELINE_GRID_EF = 0.436
+
+        # Get prices
+        h2_price = data['h2_prices'][data['h2_prices']['year'] == year]['h2_price_usd_per_kg'].iloc[0] \
+            if year in data['h2_prices']['year'].values else 3.0
+        re_price = data['re_prices'][data['re_prices']['year'] == year]['re_price_usd_per_mwh'].iloc[0] \
+            if year in data['re_prices']['year'].values else 50.0
+
         for idx, facility in facilities.iterrows():
-            # Get matching intensity row
-            if idx < len(intensities):
-                intensity = intensities.iloc[idx]
-            else:
+            if idx >= len(intensities):
                 continue
 
-            # Calculate emissions by source
-            facility_data = calculate_facility_emissions_by_source(
-                facility, intensity, emission_calc, operating_rate
-            )
-
-            # Get process type
+            intensity = intensities.iloc[idx]
             process = facility.get('process', '')
+            facility_id = facility['facility_id']
 
-            # Calculate abatement and costs
-            result = calculate_abatement_and_costs(
-                facility_data, process, scenario['ncc_tech'], year, data, grid_ef
-            )
+            # Calculate baseline emissions
+            baseline = calculate_facility_baseline(facility, intensity, operating_rate, grid_ef)
 
-            # Add identifiers
-            result['year'] = year
-            result['scenario'] = scenario['name']
-            result['region'] = get_region(facility.get('location', ''))
-            result['facility_id'] = facility['facility_id']
-            result['company'] = facility.get('company', '')
-            result['product'] = facility.get('product', '')
-            result['process'] = facility.get('process', '')
+            # BAU emissions (with 2025 grid EF)
+            baseline_2025_grid = calculate_facility_baseline(facility, intensity, operating_rate, BASELINE_GRID_EF)
+            bau_emissions = baseline_2025_grid['total_emissions']
+
+            # Check if technology is deployed
+            install_year = installation_schedule.get(facility_id, 2050)
+            tech_deployed = 1 if year >= install_year else 0
+
+            # Find MAC data for this facility
+            fac_mac = next((f for f in facilities_mac_data if f['facility_id'] == facility_id), None)
+
+            if tech_deployed and fac_mac and fac_mac['mac'] < float('inf'):
+                # Technology is deployed
+                technology = fac_mac['technology']
+
+                # Recalculate with current year prices
+                mac, _, potential_abatement, capex, total_cost, h2_demand, added_elec = \
+                    calculate_facility_mac(baseline, process, scenario['ncc_tech'], year, data, grid_ef)
+
+                # Emissions after technology (only electricity remains, combustion eliminated)
+                emissions = baseline['elec_emissions'] + added_elec * grid_ef
+                abatement = bau_emissions - emissions
+
+                result = {
+                    'technology': technology,
+                    'emissions_tco2': max(0, emissions),
+                    'abatement_tco2': max(0, abatement),
+                    'capex_usd': capex,
+                    'total_cost_usd': total_cost,
+                    'mac_usd_per_tco2': mac if mac < float('inf') else 0,
+                    'elec_demand_mwh': baseline['elec_demand_mwh'] + added_elec,
+                    'h2_demand_t': h2_demand,
+                    'tech_deployed': 1,
+                    'install_year': install_year,
+                }
+            else:
+                # No technology deployed yet
+                result = {
+                    'technology': 'None',
+                    'emissions_tco2': baseline['total_emissions'],
+                    'abatement_tco2': bau_emissions - baseline['total_emissions'],  # Grid improvement only
+                    'capex_usd': 0,
+                    'total_cost_usd': 0,
+                    'mac_usd_per_tco2': 0,
+                    'elec_demand_mwh': baseline['elec_demand_mwh'],
+                    'h2_demand_t': 0,
+                    'tech_deployed': 0,
+                    'install_year': install_year,
+                }
+
+            # Add common fields
+            result.update({
+                'year': year,
+                'scenario': scenario['name'],
+                'region': get_region(facility.get('location', '')),
+                'facility_id': facility_id,
+                'company': facility.get('company', ''),
+                'product': facility.get('product', ''),
+                'process': process,
+                'capacity_tpy': baseline['capacity_tpy'],
+                'production_t': baseline['production_t'],
+                'bau_emissions_tco2': bau_emissions,
+                'heat_demand_gj': baseline['heat_demand_gj'],
+                'opex_usd_yr': result['capex_usd'] * 0.03 if result['capex_usd'] > 0 else 0,
+                'fuel_cost_usd_yr': result['total_cost_usd'] - result['capex_usd'] / 25 - result['capex_usd'] * 0.03 if result['capex_usd'] > 0 else 0,
+            })
 
             results.append(result)
 
@@ -412,8 +484,11 @@ def run_scenario(scenario, data, years):
 def main():
     """Main execution"""
     print("=" * 80)
-    print("KOREA PETROCHEMICAL NET ZERO SCENARIO RUNNER")
+    print("KOREA PETROCHEMICAL NET ZERO - COST-OPTIMIZED SCENARIO RUNNER")
     print("=" * 80)
+    print("\nEmission Targets:")
+    for year, target in EMISSION_TARGETS.items():
+        print(f"  {year}: {target*100:.1f}% reduction")
 
     # Load data
     data = load_data()
@@ -439,7 +514,7 @@ def main():
         'bau_emissions_tco2', 'emissions_tco2', 'abatement_tco2',
         'capex_usd', 'opex_usd_yr', 'fuel_cost_usd_yr', 'total_cost_usd', 'mac_usd_per_tco2',
         'elec_demand_mwh', 'h2_demand_t', 'heat_demand_gj',
-        'tech_deployed'
+        'tech_deployed', 'install_year'
     ]
 
     # Only include columns that exist
@@ -460,20 +535,28 @@ def main():
     print(f"  Regions: {df_results['region'].unique().tolist()}")
     print(f"\n  Output saved to: {output_path}")
 
-    # Quick validation
+    # Validation
     print("\n" + "=" * 80)
-    print("VALIDATION")
+    print("VALIDATION - EMISSION TARGETS")
     print("=" * 80)
 
-    # 2025 baseline check
-    baseline_2025 = df_results[(df_results['year'] == 2025) & (df_results['scenario'] == 'shaheen_ncc_h2')]
-    total_bau = baseline_2025['bau_emissions_tco2'].sum() / 1e6
-    print(f"  2025 BAU emissions (shaheen): {total_bau:.2f} MtCO2")
+    for scenario_name in df_results['scenario'].unique():
+        print(f"\n  {scenario_name}:")
+        df_s = df_results[df_results['scenario'] == scenario_name]
 
-    # 2050 net zero check
-    for scenario in df_results['scenario'].unique():
-        net_2050 = df_results[(df_results['year'] == 2050) & (df_results['scenario'] == scenario)]['emissions_tco2'].sum() / 1e6
-        print(f"  2050 emissions ({scenario}): {net_2050:.2f} MtCO2")
+        baseline_2025 = df_s[df_s['year'] == 2025]['bau_emissions_tco2'].sum() / 1e6
+
+        for year in YEARS:
+            df_y = df_s[df_s['year'] == year]
+            emissions = df_y['emissions_tco2'].sum() / 1e6
+            bau = df_y['bau_emissions_tco2'].sum() / 1e6
+            reduction = (1 - emissions / baseline_2025) * 100 if baseline_2025 > 0 else 0
+            target = EMISSION_TARGETS.get(year, 0) * 100
+            deployed = df_y[df_y['tech_deployed'] == 1]['facility_id'].nunique()
+
+            status = "OK" if reduction >= target - 1 else "MISS"
+            print(f"    {year}: {emissions:.2f} Mt ({reduction:.1f}% reduction, target {target:.1f}%) "
+                  f"[{deployed} facilities deployed] {status}")
 
     print("\n" + "=" * 80)
     print("DONE")
