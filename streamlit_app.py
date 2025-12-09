@@ -1,6 +1,7 @@
 """
-Korea Petrochemical Net Zero - Regional Analysis
-================================================
+Korea Petrochemical Net Zero - Regional Analysis Dashboard
+==========================================================
+Enhanced with: Technology Deployment, Emission Paths, Energy Demand by Region
 """
 
 import streamlit as st
@@ -14,263 +15,264 @@ st.set_page_config(page_title="Korea Petrochemical Net Zero", page_icon="🏭", 
 # Paths
 BASE_DIR = Path(__file__).parent
 DATA_DIR = BASE_DIR / "data"
-SCENARIOS_DIR = DATA_DIR / "scenarios"
+OUTPUTS_DIR = BASE_DIR / "outputs"
 
-# Scenario info
+# Scenario mapping
 SCENARIOS = {
     'shaheen_ncc_h2': 'Shaheen + NCC-H2',
-    'shaheen_ncc_electricity': 'Shaheen + NCC-Elec',
-    'restructure_25pct_ncc_h2': 'Restructure 25% + NCC-H2',
-    'restructure_25pct_ncc_electricity': 'Restructure 25% + NCC-Elec',
-    'restructure_40pct_ncc_h2': 'Restructure 40% + NCC-H2',
-    'restructure_40pct_ncc_electricity': 'Restructure 40% + NCC-Elec',
+    'shaheen_ncc_electricity': 'Shaheen + NCC-전기화',
+    'restructure_25pct_ncc_h2': '구조조정 25% + NCC-H2',
+    'restructure_25pct_ncc_electricity': '구조조정 25% + NCC-전기화',
+    'restructure_40pct_ncc_h2': '구조조정 40% + NCC-H2',
+    'restructure_40pct_ncc_electricity': '구조조정 40% + NCC-전기화',
 }
 
-# Load scenario data
+# Load data
 @st.cache_data
-def load_scenarios():
-    data = {}
-    for sid, name in SCENARIOS.items():
-        path = SCENARIOS_DIR / f"{sid}.csv"
+def load_regional_data():
+    """Load regional annual analysis from all scenarios"""
+    all_data = []
+    for sid in SCENARIOS.keys():
+        path = OUTPUTS_DIR / f"scenario_{sid}" / "module_03_optimization" / "regional_annual_analysis.csv"
         if path.exists():
             df = pd.read_csv(path)
-            df['scenario'] = name
-            data[sid] = df
-    return data
+            df['scenario_id'] = sid
+            df['scenario_name'] = SCENARIOS[sid]
+            all_data.append(df)
+    
+    if all_data:
+        return pd.concat(all_data, ignore_index=True)
+    return None
 
 @st.cache_data
 def load_assumptions():
     data = {}
     try:
-        data['tech'] = pd.read_csv(DATA_DIR / "technology_parameters.csv")
-        data['h2'] = pd.read_csv(DATA_DIR / "h2_price_trajectory.csv")
-        data['re'] = pd.read_csv(DATA_DIR / "re_price_trajectory.csv")
-        data['grid'] = pd.read_csv(DATA_DIR / "grid_emission_trajectory.csv")
         data['fac'] = pd.read_csv(DATA_DIR / "facility_database_with_regions.csv")
+        data['tech'] = pd.read_csv(DATA_DIR / "technology_parameters.csv")
+        data['grid'] = pd.read_csv(DATA_DIR / "grid_emission_trajectory.csv")
     except Exception as e:
-        st.error(f"Error: {e}")
+        st.warning(f"Some data files missing: {e}")
     return data
 
-scenarios = load_scenarios()
+regional_df = load_regional_data()
 assumptions = load_assumptions()
 
 # Sidebar
 st.sidebar.title("🏭 Net Zero Dashboard")
-page = st.sidebar.radio("Navigation", ["📋 Assumptions", "🗺️ Regional Transitions", "⚡ Energy Demand"])
+st.sidebar.markdown("**Korea Petrochemical Industry**")
 st.sidebar.markdown("---")
-st.sidebar.info(f"**Scenarios:** {len(scenarios)}\n\n**Period:** 2025-2050\n\n**NO CCS/CCUS**")
 
-# ===================== ASSUMPTIONS =====================
-if page == "📋 Assumptions":
-    st.title("📋 Key Assumptions")
+page = st.sidebar.radio("Navigation", [
+    "📊 Executive Summary",
+    "🗺️ Regional Transitions",
+    "⚡ Energy Demand",
+    "📋 Assumptions"
+])
 
-    # Technology CAPEX
-    st.header("1. Technology CAPEX Learning Curve")
-    if 'tech' in assumptions:
-        tech = assumptions['tech']
-        col1, col2 = st.columns(2)
+st.sidebar.markdown("---")
 
-        with col1:
-            capex_data = []
-            for _, r in tech.iterrows():
-                if r['technology'] != 'RE_PPA':
-                    for y in [2025, 2030, 2040, 2050]:
-                        capex_data.append({'Technology': r['technology'].replace('_', ' '), 'Year': y, 'CAPEX': r[f'capex_{y}_musd_per_mtco2']})
-            fig = px.line(pd.DataFrame(capex_data), x='Year', y='CAPEX', color='Technology', markers=True, title='CAPEX (M$/MtCO2)')
-            st.plotly_chart(fig, use_container_width=True)
+# Scenario selector
+if regional_df is not None:
+    scenarios_available = regional_df['scenario_id'].unique().tolist()
+    selected_scenario = st.sidebar.selectbox(
+        "Scenario",
+        scenarios_available,
+        format_func=lambda x: SCENARIOS.get(x, x)
+    )
+else:
+    selected_scenario = None
+    st.sidebar.warning("No scenario data found")
 
-        with col2:
-            st.dataframe(tech[['technology', 'applies_to', 'trl', 'available_year', 'capex_2025_musd_per_mtco2', 'capex_2050_musd_per_mtco2']], hide_index=True)
+st.sidebar.markdown("---")
+st.sidebar.info("**Operating Rate:** 70%\n\n**Period:** 2025-2050\n\n**NO CCS/CCUS**")
 
-    st.markdown("---")
+# ==================== EXECUTIVE SUMMARY ====================
+if page == "📊 Executive Summary":
+    st.title("📊 Executive Summary")
+    
+    if regional_df is not None and selected_scenario:
+        df = regional_df[regional_df['scenario_id'] == selected_scenario]
+        
+        # 2050 totals
+        df_2050 = df[df['year'] == 2050]
+        
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("BAU 2050", f"{df_2050['bau_emissions_mt'].sum():.1f} Mt")
+        col2.metric("Net 2050", f"{df_2050['actual_emissions_mt'].sum():.1f} Mt")
+        col3.metric("Abatement", f"{df_2050['abatement_mt'].sum():.1f} Mt")
+        col4.metric("Electricity", f"{df_2050['electricity_demand_twh'].sum():.1f} TWh")
+        
+        st.markdown("---")
+        
+        # Total emission path
+        st.subheader("Total Emission Pathway")
+        yearly = df.groupby('year').agg({
+            'bau_emissions_mt': 'sum',
+            'actual_emissions_mt': 'sum'
+        }).reset_index()
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=yearly['year'], y=yearly['bau_emissions_mt'], name='BAU', line=dict(color='red', dash='dash', width=2)))
+        fig.add_trace(go.Scatter(x=yearly['year'], y=yearly['actual_emissions_mt'], name='With Technology', fill='tozeroy', line=dict(color='green', width=2)))
+        fig.update_layout(xaxis_title='Year', yaxis_title='Mt CO2', height=400)
+        st.plotly_chart(fig, use_container_width=True)
 
-    # Prices
-    st.header("2. Price Trajectories")
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        if 'h2' in assumptions:
-            h2 = assumptions['h2']
-            fig = px.line(h2, x='year', y='h2_price_usd_per_kg', title='Green H2 ($/kg)')
-            fig.add_hline(y=2.0, line_dash="dash", line_color="green")
-            st.plotly_chart(fig, use_container_width=True)
-
-    with col2:
-        if 're' in assumptions:
-            fig = px.line(assumptions['re'], x='year', y='re_price_usd_per_mwh', title='RE Price ($/MWh)')
-            st.plotly_chart(fig, use_container_width=True)
-
-    with col3:
-        if 'grid' in assumptions:
-            fig = px.area(assumptions['grid'], x='year', y='grid_ef_tco2_per_mwh', title='Grid EF (tCO2/MWh)')
-            st.plotly_chart(fig, use_container_width=True)
-
-    st.markdown("---")
-
-    # Facilities
-    st.header("3. Facility Coverage")
-    if 'fac' in assumptions:
-        fac = assumptions['fac']
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Facilities", len(fac))
-        col2.metric("Capacity", f"{fac['capacity_kt'].sum():,.0f} kt")
-        col3.metric("Regions", fac['location'].nunique())
-
-        col1, col2 = st.columns(2)
-        with col1:
-            fig = px.pie(fac.groupby('location')['capacity_kt'].sum().reset_index(), values='capacity_kt', names='location', title='By Region')
-            st.plotly_chart(fig, use_container_width=True)
-        with col2:
-            fig = px.bar(fac.groupby('product')['capacity_kt'].sum().reset_index(), x='product', y='capacity_kt', title='By Product', color='product')
-            st.plotly_chart(fig, use_container_width=True)
-
-# ===================== REGIONAL TRANSITIONS =====================
+# ==================== REGIONAL TRANSITIONS ====================
 elif page == "🗺️ Regional Transitions":
     st.title("🗺️ Regional Transitions")
-
-    if not scenarios:
-        st.error("No scenario data. Check data/scenarios/ folder.")
-    else:
-        selected = st.multiselect("Select Scenarios", list(scenarios.keys()), default=list(scenarios.keys())[:2], format_func=lambda x: SCENARIOS[x])
-
-        if selected:
-            st.markdown("---")
-
-            # 1. Total Overview
-            st.header("1. Total Emission Pathways")
-            for sid in selected:
-                df = scenarios[sid]
-                st.subheader(f"📊 {SCENARIOS[sid]}")
-
-                col1, col2 = st.columns(2)
-
-                with col1:
-                    total = df.groupby('year').agg({'bau_emissions_kt': 'sum', 'actual_emissions_kt': 'sum'}).reset_index()
-                    fig = go.Figure()
-                    fig.add_trace(go.Scatter(x=total['year'], y=total['bau_emissions_kt']/1000, name='BAU', line=dict(color='red', dash='dash')))
-                    fig.add_trace(go.Scatter(x=total['year'], y=total['actual_emissions_kt']/1000, name='Net Zero', fill='tozeroy', line=dict(color='green')))
-                    fig.update_layout(title='Total: BAU vs Net Zero (Mt CO2)', xaxis_title='Year', yaxis_title='Mt CO2')
-                    st.plotly_chart(fig, use_container_width=True)
-
-                with col2:
-                    tech_cols = [c for c in ['ncc_abatement_kt', 'hp_abatement_kt', 're_ppa_abatement_kt'] if c in df.columns]
-                    yearly = df.groupby('year')[tech_cols].sum().reset_index()
-                    melted = yearly.melt(id_vars='year', var_name='Tech', value_name='kt')
-                    melted['Tech'] = melted['Tech'].replace({'ncc_abatement_kt': 'NCC', 'hp_abatement_kt': 'Heat Pump', 're_ppa_abatement_kt': 'RE-PPA'})
-                    fig = px.area(melted, x='year', y='kt', color='Tech', title='Technology Deployment (kt CO2 abated)')
-                    st.plotly_chart(fig, use_container_width=True)
-
-            st.markdown("---")
-
-            # 2. By Region - Individual Graphs
-            st.header("2. Regional Breakdown")
-            for sid in selected:
-                df = scenarios[sid]
-                regions = sorted(df['region'].unique())
-                st.subheader(f"📊 {SCENARIOS[sid]}")
-
-                # Emissions by region
-                st.markdown("**Emission Pathways by Region**")
-                cols = st.columns(2)
-                for i, region in enumerate(regions):
-                    with cols[i % 2]:
-                        region_df = df[df['region'] == region]
-                        yearly = region_df.groupby('year').agg({'bau_emissions_kt': 'sum', 'actual_emissions_kt': 'sum'}).reset_index()
-                        fig = go.Figure()
-                        fig.add_trace(go.Scatter(x=yearly['year'], y=yearly['bau_emissions_kt'], name='BAU', line=dict(color='red', dash='dash')))
-                        fig.add_trace(go.Scatter(x=yearly['year'], y=yearly['actual_emissions_kt'], name='Net Zero', fill='tozeroy', line=dict(color='green')))
-                        fig.update_layout(title=f'{region}', xaxis_title='Year', yaxis_title='kt CO2', height=300, showlegend=True)
-                        st.plotly_chart(fig, use_container_width=True)
-
-                # Technology by region
-                st.markdown("**Technology Deployment by Region**")
-                tech_cols = [c for c in ['ncc_abatement_kt', 'hp_abatement_kt', 're_ppa_abatement_kt'] if c in df.columns]
-                cols = st.columns(2)
-                for i, region in enumerate(regions):
-                    with cols[i % 2]:
-                        region_df = df[df['region'] == region]
-                        yearly = region_df.groupby('year')[tech_cols].sum().reset_index()
-                        melted = yearly.melt(id_vars='year', var_name='Tech', value_name='kt')
-                        melted['Tech'] = melted['Tech'].replace({'ncc_abatement_kt': 'NCC', 'hp_abatement_kt': 'Heat Pump', 're_ppa_abatement_kt': 'RE-PPA'})
-                        fig = px.area(melted, x='year', y='kt', color='Tech', title=f'{region}')
-                        fig.update_layout(height=300)
-                        st.plotly_chart(fig, use_container_width=True)
-
-                # Electricity by region
-                st.markdown("**Electricity Demand by Region**")
-                cols = st.columns(2)
-                for i, region in enumerate(regions):
-                    with cols[i % 2]:
-                        region_df = df[df['region'] == region]
-                        yearly = region_df.groupby('year')['elec_demand_mwh'].sum().reset_index()
-                        yearly['TWh'] = yearly['elec_demand_mwh'] / 1e6
-                        fig = px.area(yearly, x='year', y='TWh', title=f'{region}')
-                        fig.update_traces(fillcolor='rgba(52, 152, 219, 0.5)', line_color='#3498DB')
-                        fig.update_layout(height=300)
-                        st.plotly_chart(fig, use_container_width=True)
-
-                st.markdown("---")
-
-            # 3. Summary Table
-            st.header("3. Regional Summary (2050)")
-            for sid in selected:
-                df = scenarios[sid]
-                df_2050 = df[df['year'] == 2050]
-
-                summary = df_2050.groupby('region').agg({
-                    'n_facilities': 'first',
-                    'capacity_kt': 'first',
-                    'bau_emissions_kt': 'sum',
-                    'actual_emissions_kt': 'sum',
-                    'elec_demand_mwh': 'sum'
+    st.markdown(f"**Scenario:** {SCENARIOS.get(selected_scenario, selected_scenario)}")
+    
+    if regional_df is not None and selected_scenario:
+        df = regional_df[regional_df['scenario_id'] == selected_scenario]
+        regions = sorted(df['location'].unique())
+        
+        # Filter to major regions (exclude small ones)
+        major_regions = [r for r in regions if df[df['location'] == r]['bau_emissions_mt'].sum() > 0.5]
+        
+        st.markdown("---")
+        
+        # ===== 1. TECHNOLOGY DEPLOYMENT =====
+        st.header("1. Technology Deployment by Region (Annual)")
+        st.markdown("*Abatement achieved by each technology (Mt CO2)*")
+        
+        for region in major_regions:
+            region_df = df[df['location'] == region]
+            
+            # Melt tech columns
+            tech_data = region_df[['year', 'heat_pump_mt', 'ncc_h2_mt', 'ncc_elec_mt', 're_ppa_mt']].copy()
+            tech_data = tech_data.groupby('year').sum().reset_index()
+            tech_melted = tech_data.melt(id_vars='year', var_name='Technology', value_name='Mt CO2')
+            tech_melted['Technology'] = tech_melted['Technology'].replace({
+                'heat_pump_mt': 'Heat Pump',
+                'ncc_h2_mt': 'NCC-H2',
+                'ncc_elec_mt': 'NCC-Electricity',
+                're_ppa_mt': 'RE-PPA'
+            })
+            
+            fig = px.area(tech_melted, x='year', y='Mt CO2', color='Technology',
+                         title=f'📍 {region}',
+                         color_discrete_map={'Heat Pump': '#E67E22', 'NCC-H2': '#3498DB', 
+                                            'NCC-Electricity': '#9B59B6', 'RE-PPA': '#27AE60'})
+            fig.update_layout(height=300)
+            st.plotly_chart(fig, use_container_width=True)
+        
+        st.markdown("---")
+        
+        # ===== 2. EMISSION REDUCTION PATH =====
+        st.header("2. Emission Reduction Path by Region (Annual)")
+        st.markdown("*BAU vs Actual emissions over time*")
+        
+        cols = st.columns(2)
+        for i, region in enumerate(major_regions):
+            with cols[i % 2]:
+                region_df = df[df['location'] == region]
+                yearly = region_df.groupby('year').agg({
+                    'bau_emissions_mt': 'sum',
+                    'actual_emissions_mt': 'sum'
                 }).reset_index()
-                summary['Reduction %'] = ((1 - summary['actual_emissions_kt'] / summary['bau_emissions_kt']) * 100).round(1)
-                summary['Elec TWh'] = (summary['elec_demand_mwh'] / 1e6).round(2)
+                
+                fig = go.Figure()
+                fig.add_trace(go.Scatter(x=yearly['year'], y=yearly['bau_emissions_mt'], 
+                                        name='BAU', line=dict(color='red', dash='dash')))
+                fig.add_trace(go.Scatter(x=yearly['year'], y=yearly['actual_emissions_mt'], 
+                                        name='Net', fill='tozeroy', line=dict(color='green')))
+                fig.update_layout(title=f'📍 {region}', xaxis_title='Year', yaxis_title='Mt CO2', height=300)
+                st.plotly_chart(fig, use_container_width=True)
+        
+        st.markdown("---")
+        
+        # ===== 3. ENERGY DEMAND =====
+        st.header("3. Energy Demand by Region (Annual)")
+        st.markdown("*Total electricity demand including technology additions (TWh)*")
+        
+        cols = st.columns(2)
+        for i, region in enumerate(major_regions):
+            with cols[i % 2]:
+                region_df = df[df['location'] == region]
+                yearly = region_df.groupby('year')['electricity_demand_twh'].sum().reset_index()
+                
+                fig = px.area(yearly, x='year', y='electricity_demand_twh', 
+                             title=f'📍 {region}')
+                fig.update_traces(fillcolor='rgba(52, 152, 219, 0.5)', line_color='#3498DB')
+                fig.update_layout(yaxis_title='TWh', height=300)
+                st.plotly_chart(fig, use_container_width=True)
+        
+        st.markdown("---")
+        
+        # Summary table
+        st.header("4. Regional Summary (2050)")
+        df_2050 = df[df['year'] == 2050]
+        summary = df_2050.groupby('location').agg({
+            'bau_emissions_mt': 'sum',
+            'actual_emissions_mt': 'sum',
+            'abatement_mt': 'sum',
+            'heat_pump_mt': 'sum',
+            'ncc_elec_mt': 'sum',
+            're_ppa_mt': 'sum',
+            'electricity_demand_twh': 'sum'
+        }).reset_index()
+        summary.columns = ['Region', 'BAU (Mt)', 'Net (Mt)', 'Abatement (Mt)', 
+                          'Heat Pump', 'NCC-Elec', 'RE-PPA', 'Electricity (TWh)']
+        st.dataframe(summary.round(2), hide_index=True, use_container_width=True)
 
-                st.subheader(f"📊 {SCENARIOS[sid]}")
-                st.dataframe(summary[['region', 'n_facilities', 'capacity_kt', 'bau_emissions_kt', 'actual_emissions_kt', 'Reduction %', 'Elec TWh']], hide_index=True)
-
-# ===================== ENERGY DEMAND =====================
+# ==================== ENERGY DEMAND ====================
 elif page == "⚡ Energy Demand":
-    st.title("⚡ Energy Demand")
+    st.title("⚡ Energy Demand Analysis")
+    
+    if regional_df is not None and selected_scenario:
+        df = regional_df[regional_df['scenario_id'] == selected_scenario]
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.subheader("Total Electricity Demand")
+            yearly = df.groupby('year')['electricity_demand_twh'].sum().reset_index()
+            fig = px.area(yearly, x='year', y='electricity_demand_twh', title='Total (TWh)')
+            st.plotly_chart(fig, use_container_width=True)
+        
+        with col2:
+            st.subheader("By Region")
+            yearly = df.groupby(['year', 'location'])['electricity_demand_twh'].sum().reset_index()
+            fig = px.line(yearly, x='year', y='electricity_demand_twh', color='location', title='Regional (TWh)')
+            st.plotly_chart(fig, use_container_width=True)
+        
+        # 2050 breakdown
+        st.subheader("2050 Breakdown")
+        df_2050 = df[df['year'] == 2050]
+        fig = px.pie(df_2050, values='electricity_demand_twh', names='location', title='Electricity by Region (2050)')
+        st.plotly_chart(fig, use_container_width=True)
 
-    if not scenarios:
-        st.error("No scenario data.")
-    else:
-        selected = st.multiselect("Select Scenarios", list(scenarios.keys()), default=list(scenarios.keys())[:2], format_func=lambda x: SCENARIOS[x])
-
-        if selected:
-            st.markdown("---")
-
-            for sid in selected:
-                df = scenarios[sid]
-                st.subheader(f"⚡ {SCENARIOS[sid]}")
-
-                col1, col2 = st.columns(2)
-
-                with col1:
-                    yearly = df.groupby('year')['elec_demand_mwh'].sum().reset_index()
-                    yearly['TWh'] = yearly['elec_demand_mwh'] / 1e6
-                    fig = px.area(yearly, x='year', y='TWh', title='Total Electricity (TWh)')
-                    st.plotly_chart(fig, use_container_width=True)
-
-                with col2:
-                    reg = df.groupby(['year', 'region'])['elec_demand_mwh'].sum().reset_index()
-                    reg['TWh'] = reg['elec_demand_mwh'] / 1e6
-                    fig = px.line(reg, x='year', y='TWh', color='region', title='By Region (TWh)')
-                    st.plotly_chart(fig, use_container_width=True)
-
-                # 2050 metrics
-                df_2050 = df[df['year'] == 2050]
-                total = df_2050['elec_demand_mwh'].sum() / 1e6
-                cols = st.columns(5)
-                cols[0].metric("Total 2050", f"{total:.1f} TWh")
-                for i, (r, v) in enumerate(df_2050.groupby('region')['elec_demand_mwh'].sum().items()):
-                    if i < 4:
-                        cols[i+1].metric(r, f"{v/1e6:.2f} TWh")
-
-                st.markdown("---")
+# ==================== ASSUMPTIONS ====================
+elif page == "📋 Assumptions":
+    st.title("📋 Key Assumptions")
+    
+    st.markdown("""
+    | Parameter | Value | Source |
+    |-----------|-------|--------|
+    | **Operating Rate** | 70% | Industry average (2023-2024) |
+    | **Baseline Year** | 2025 | Current state |
+    | **Target Year** | 2050 | Net Zero |
+    | **2035 Target** | 30.4 Mt | NDC (24.5% reduction from 2018 @ 70%) |
+    | **Grid EF 2050** | 0.0 tCO2/MWh | Full decarbonization |
+    | **H2 Price 2050** | ~$2/kg | Cost reduction trajectory |
+    """)
+    
+    st.markdown("---")
+    
+    if 'fac' in assumptions:
+        st.subheader("Facility Coverage")
+        fac = assumptions['fac']
+        
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Facilities", len(fac))
+        col2.metric("Total Capacity", f"{fac['capacity_kt'].sum():,.0f} kt")
+        col3.metric("Regions", fac['location'].nunique())
+        
+        fig = px.pie(fac.groupby('location')['capacity_kt'].sum().reset_index(), 
+                    values='capacity_kt', names='location', title='Capacity by Region')
+        st.plotly_chart(fig, use_container_width=True)
 
 # Footer
 st.markdown("---")
-st.caption("Korea Petrochemical Net Zero | 2024 | NO CCS/CCUS")
+st.caption("Korea Petrochemical Net Zero | 2024 | 70% Operating Rate | NO CCS/CCUS")

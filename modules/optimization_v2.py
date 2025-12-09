@@ -954,12 +954,26 @@ class CostOptimizerV2:
                 # Update prev deployment for next loop
                 for tech in ['Heat_Pump', 'NCC-H2', 'NCC-Electricity', 'RE_PPA']:
                     prev_deployment[fac_id][tech] = current_deployment_by_fac[fac_id][tech]
+                
+                # Calculate emissions
+                bau_emissions_mt = row['total_emissions_kt'] / 1000  # Original BAU
+                total_abatement_mt = sum(current_deployment_by_fac[fac_id].values())
+                actual_emissions_mt = max(0, bau_emissions_mt - total_abatement_mt)
                     
                 row_data.append({
                     'location': loc,
                     'capex_investment_musd': capex_investment_usd / 1e6,
                     'total_annual_cost_musd': total_annual_cost_usd / 1e6,
-                    'electricity_demand_twh': total_elec_twh
+                    'electricity_demand_twh': total_elec_twh,
+                    # Technology deployment (Mt abated)
+                    'heat_pump_mt': current_deployment_by_fac[fac_id]['Heat_Pump'],
+                    'ncc_h2_mt': current_deployment_by_fac[fac_id]['NCC-H2'],
+                    'ncc_elec_mt': current_deployment_by_fac[fac_id]['NCC-Electricity'],
+                    're_ppa_mt': current_deployment_by_fac[fac_id]['RE_PPA'],
+                    # Emissions
+                    'bau_emissions_mt': bau_emissions_mt,
+                    'actual_emissions_mt': actual_emissions_mt,
+                    'abatement_mt': total_abatement_mt
                 })
                 
             # Aggregate by region
