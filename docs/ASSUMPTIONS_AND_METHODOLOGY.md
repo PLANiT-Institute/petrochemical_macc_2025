@@ -23,7 +23,7 @@
 
 ## 1. Executive Summary
 
-This analysis evaluates six decarbonization pathways for Korea's petrochemical industry, combining three production scenarios with two NCC (Naphtha Cracking Center) technology options. The study covers 256 facilities across four major petrochemical complexes with a total capacity of 104,762 kt/year.
+This analysis evaluates six decarbonization pathways for Korea's petrochemical industry, combining three production scenarios with two NCC (Naphtha Cracking Center) technology options. The study covers **238 baseline facilities** across four major petrochemical complexes with a total capacity of **92,912 kt/year** (2025 baseline, excluding Shaheen project which is added in 2026).
 
 ### Key Findings
 - All six scenarios achieve **Net Zero by 2050**
@@ -39,7 +39,7 @@ This analysis evaluates six decarbonization pathways for Korea's petrochemical i
 
 | Pathway | Description | Impact on Capacity |
 |---------|-------------|-------------------|
-| **Shaheen (Growth)** | Baseline growth with +6 new S-Oil facilities | +14.4% capacity |
+| **Shaheen (Growth)** | Baseline + 6 new S-Oil Shaheen facilities (built 2026) | +4.3% capacity (244 facilities total) |
 | **Restructure 25%** | Retire 25% oldest NCC capacity | -25% NCC capacity |
 | **Restructure 40%** | Retire 40% oldest NCC capacity | -40% NCC capacity |
 

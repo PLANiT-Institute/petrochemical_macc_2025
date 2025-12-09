@@ -7,7 +7,7 @@
 A comprehensive **facility-level analysis tool** for evaluating decarbonization pathways for Korea's petrochemical industry (2025-2050).
 
 ### Key Results
-- **256 facilities** analyzed across 4 major complexes (104,762 kt/year capacity)
+- **238 baseline facilities** analyzed across 4 major complexes (92,912 kt/year capacity)
 - All scenarios achieve **Net Zero by 2050**
 - Investment range: **$13.4B - $22.1B** depending on scenario
 - **No CCS/CCUS** - focus on electrification and green hydrogen
@@ -80,8 +80,8 @@ streamlit run streamlit_app.py
 
 | # | Scenario | Production Pathway | NCC Technology |
 |---|----------|-------------------|----------------|
-| 1 | Shaheen + NCC-H2 | Growth (+6 facilities) | Green H2 furnaces |
-| 2 | Shaheen + NCC-Elec | Growth (+6 facilities) | Electric crackers |
+| 1 | Shaheen + NCC-H2 | Growth (+6 facilities, 244 total) | Green H2 furnaces |
+| 2 | Shaheen + NCC-Elec | Growth (+6 facilities, 244 total) | Electric crackers |
 | 3 | Restructure 25% + NCC-H2 | -25% NCC capacity | Green H2 furnaces |
 | 4 | Restructure 25% + NCC-Elec | -25% NCC capacity | Electric crackers |
 | 5 | Restructure 40% + NCC-H2 | -40% NCC capacity | Green H2 furnaces |
