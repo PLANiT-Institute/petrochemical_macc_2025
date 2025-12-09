@@ -1,180 +1,130 @@
-# Facility-Level MACC Model for Petrochemical Decarbonization
+# Korea Petrochemical Net Zero Pathway Analysis
 
-[![DOI](https://img.shields.io/badge/DOI-Pending-orange)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## Overview
 
-This repository contains the **facility-level Marginal Abatement Cost Curve (MACC) model** developed for the research paper:
+A comprehensive **facility-level analysis tool** for evaluating decarbonization pathways for Korea's petrochemical industry (2025-2050).
 
-> **"Beyond Partial Equilibrium: Why Technology Costs and Energy System Constraints Diverge in Industrial Decarbonization Pathways"**
-> *Jinsu Park*
-> Published in *Carbon Neutrality* (Springer Nature), 2025
-
-The model analyzes decarbonization pathways for South Korea's petrochemical sector (248 facilities, 66.2 MtCO₂/year) and quantifies the divergence between technology costs and energy system feasibility for hydrogen vs. electricity pathways.
+### Key Results
+- **256 facilities** analyzed across 4 major complexes (104,762 kt/year capacity)
+- All scenarios achieve **Net Zero by 2050**
+- Investment range: **$13.4B - $22.1B** depending on scenario
+- **No CCS/CCUS** - focus on electrification and green hydrogen
 
 ## Key Features
 
-- **Facility-level resolution**: 248 petrochemical facilities across 11 naphtha cracker complexes
-- **Energy demand quantification**: Explicit calculation of electricity (TWh) and hydrogen (Mt) demands
-- **Technology portfolio**: NCC-H₂, NCC-Electricity, RE PPA, High-Temperature Heat Pumps
-- **Scenario analysis**: 6 scenarios combining 3 production pathways × 2 technology routes
-- **Learning curve modeling**: CAPEX projections with 15-20% learning rates
-- **Policy integration**: Alignment with Korea's Hydrogen Economy Roadmap and renewable energy targets
+- **Facility-level resolution**: 256 petrochemical facilities across Yeosu, Daesan, Ulsan, and Other regions
+- **6 scenarios**: 3 production pathways × 2 NCC technology options
+- **Technology portfolio**: NCC-H₂, NCC-Electricity, Heat Pump, RE-PPA, RDH
+- **Interactive dashboard**: Streamlit-based visualization
+- **Client reports**: Automated Excel generation
 
 ## Repository Structure
 
 ```
 petrochemical_macc_2025/
-├── data/                           # Input parameters
-│   ├── facility_database.csv       # 248 facilities with product/capacity
-│   ├── energy_intensities.csv      # Process energy intensities
-│   ├── emission_factors.csv        # Fuel emission factors
-│   ├── fuel_price_trajectory.csv   # Naphtha/LNG/electricity prices
-│   ├── h2_price_trajectory.csv     # Hydrogen price trajectory
-│   ├── re_price_trajectory.csv     # Renewable electricity price trajectory
-│   ├── grid_emission_trajectory.csv# Grid decarbonization pathway
-│   ├── demand_growth_trajectory_scenarios.csv # Production pathways
-│   ├── technology_parameters.csv   # CAPEX/OPEX/efficiency/availability
-│   └── MACC_Model_Assumptions_v2.xlsx # Combined assumption workbook (EN/KR)
+├── data/                           # Input data
+│   ├── scenarios/                  # Scenario results (for Streamlit)
+│   ├── facility_database_with_regions.csv
+│   ├── technology_parameters.csv
+│   ├── h2_price_trajectory.csv
+│   ├── re_price_trajectory.csv
+│   └── grid_emission_trajectory.csv
 │
-├── modules/                        # Core model modules
-│   ├── baseline.py                 # Baseline emissions
-│   ├── macc.py                     # MACC calculation engine
-│   ├── optimization_v2.py          # Cost optimization (mutually exclusive NCC tech)
-│   ├── data_manager.py             # Centralized data loading/validation
-│   └── utils.py                    # Shared helpers (plots, loaders, calculators)
+├── modules/                        # Core calculation modules
+│   ├── baseline.py                 # Baseline emission calculations
+│   ├── macc.py                     # MACC curve generation
+│   ├── optimization_v2.py          # Scenario optimization
+│   ├── data_manager.py             # Data loading utilities
+│   └── utils.py                    # Helper functions
 │
-├── outputs/                        # Model results
-│   └── figures/                    # Publication-quality figures (v1.0 release)
+├── docs/                           # Documentation
+│   ├── ASSUMPTIONS_AND_METHODOLOGY.md
+│   ├── MODEL_DOCUMENTATION.md
+│   └── paper.pdf
 │
-├── run_all_scenarios_v3.py        # Main execution script
-├── generate_professional_figures.py  # Figure generation
-└── README.md                       # This file
+├── reports/                        # Client deliverables
+│   └── Korea_Petrochemical_NetZero_Analysis_YYYYMMDD.xlsx
+│
+├── streamlit_app.py               # Interactive dashboard
+├── run_all_scenarios_v3.py        # Main scenario runner
+├── generate_client_excel.py       # Excel report generator
+└── requirements.txt               # Dependencies
 ```
 
 ## Installation
 
-### Requirements
-
-- Python 3.8+
-- pandas >= 1.3.0
-- numpy >= 1.21.0
-- matplotlib >= 3.4.0
-- seaborn >= 0.11.0
-
-### Setup
-
 ```bash
-# Clone repository
-git clone https://github.com/[your-username]/petrochemical_macc_2025.git
-cd petrochemical_macc_2025
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
-## Usage
+## Quick Start
 
-### Run Full Scenario Analysis
-
+### 1. Run Scenario Analysis
 ```bash
 python run_all_scenarios_v3.py
 ```
 
-This executes all 6 scenarios (Shaheen/25%/40% restructuring × H₂/Electricity) and generates:
-- MACC curves (2025-2050)
-- Energy demand trajectories
-- Cost summaries
-- Sensitivity analysis results
-
-### Generate Figures
-
+### 2. Generate Excel Report
 ```bash
-python generate_professional_figures.py
+python generate_client_excel.py
 ```
 
-Produces publication-quality figures:
-- Figure 1: Cumulative decarbonization costs
-- Figure 3: MACC comparison (H₂ vs Electricity)
-- Figure 4: Energy demand trajectories
-- Figure 5: Feasibility assessment
-- Figure 7: Baseline emissions structure
-
-### Key Parameters
-
-Edit `data/technology_parameters.csv` to modify:
-
-| Technology | Parameter | Baseline Value | Source |
-|------------|-----------|----------------|--------|
-| NCC-Electricity | Electricity intensity | 5.0 MWh/ton C₂H₄ | BASF/SABIC/Linde 2024 |
-| NCC-H₂ | H₂ consumption | 0.56 ton H₂/ton C₂H₄ | Chen 2024, Gupta 2023 |
-| RE PPA | Price trajectory | $70→$50/MWh (2025→2050) | IRENA 2024 |
-| Heat Pump | COP | 4.0 | Kosmadakis 2020 |
-
-## Key Results
-
-### Technology Cost Parity
-- **Shaheen scenario**: $31.4B (H₂) vs $33.3B (Electricity) — **6% difference**
-- MACC convergence: $65/tCO₂ (H₂) vs $72/tCO₂ (Electricity) in 2050
-
-### Energy System Divergence
-- **Electricity pathway**: 164.5 TWh/year (97% of 2036 renewable target) — **INFEASIBLE**
-- **Hydrogen pathway**: 7.7 Mt H₂/year (28% of 2050 target) — **FEASIBLE**
-
-### Policy Implication
-**Grid capacity, not technology cost, emerges as the binding constraint** for industrial decarbonization.
-
-## Model Validation
-
-| Metric | Model Output | Literature Range | Status |
-|--------|--------------|------------------|--------|
-| Baseline intensity (tCO₂/ton) | 2.26 | 2.0-2.5 | ✅ Validated |
-| NCC-H₂ CAPEX | $1,550/t-C₂H₄ | $1,300-2,000 | ✅ Validated |
-| NCC-Electricity CAPEX | $1,500/t-C₂H₄ | $1,200-1,800 | ✅ Validated |
-| Total ethylene capacity | 11.96 Mt/year | KPIA 2023 | ✅ Validated |
-
-## Citation
-
-If you use this model in your research, please cite:
-
-```bibtex
-@article{Park2025MACC,
-  title={Beyond Partial Equilibrium: Why Technology Costs and Energy System Constraints Diverge in Industrial Decarbonization Pathways},
-  author={Park, Jinsu},
-  journal={Carbon Neutrality},
-  year={2025},
-  publisher={Springer Nature},
-  doi={[to-be-added]}
-}
+### 3. Launch Dashboard
+```bash
+streamlit run streamlit_app.py
 ```
 
-## Data Sources
+## Scenarios
 
-- **Facility emissions**: Korea National Greenhouse Gas Inventory (2022)
-- **Production capacity**: Korea Petrochemical Industry Association (KPIA, 2023)
-- **Technology costs**: Literature review (Smith 2024, Jones 2023, Zhang 2022, Chen 2024)
-- **Energy prices**: IRENA (2024), IEA (2023)
-- **Policy targets**: Korea 10th Basic Plan for Electricity Supply and Demand (2023), Hydrogen Economy Roadmap (2021)
+| # | Scenario | Production Pathway | NCC Technology |
+|---|----------|-------------------|----------------|
+| 1 | Shaheen + NCC-H2 | Growth (+6 facilities) | Green H2 furnaces |
+| 2 | Shaheen + NCC-Elec | Growth (+6 facilities) | Electric crackers |
+| 3 | Restructure 25% + NCC-H2 | -25% NCC capacity | Green H2 furnaces |
+| 4 | Restructure 25% + NCC-Elec | -25% NCC capacity | Electric crackers |
+| 5 | Restructure 40% + NCC-H2 | -40% NCC capacity | Green H2 furnaces |
+| 6 | Restructure 40% + NCC-Elec | -40% NCC capacity | Electric crackers |
+
+## Key Assumptions
+
+| Parameter | 2025 | 2050 | Unit |
+|-----------|------|------|------|
+| Green H2 Price | 4.58 | 2.01 | $/kg |
+| RE Electricity | 65 | 30 | $/MWh |
+| Grid EF | 0.436 | 0.000 | tCO2/MWh |
+| Heat Pump COP | 4.0 | 4.0 | - |
+| CAPEX Learning | - | -50% | % |
+
+See `docs/ASSUMPTIONS_AND_METHODOLOGY.md` for complete details.
+
+## Technologies
+
+| Technology | Application | Available |
+|------------|-------------|-----------|
+| **Heat Pump** | Low-temp heat (<165°C) | 2025 |
+| **NCC-H2** | Naphtha cracker furnaces | 2030 |
+| **NCC-Electricity** | Electric crackers (eFurnace) | 2030 |
+| **RE-PPA** | All grid electricity | 2025 |
+| **RDH** | High-temp BTX (Coolbrook) | 2026 |
+
+## Dashboard
+
+The Streamlit dashboard provides:
+- **Assumptions page**: Technology CAPEX, price trajectories, facility coverage
+- **Regional Transitions**: Emission pathways and technology deployment by region
+- **Energy Demand**: Electricity requirements by region and scenario
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - See [LICENSE](LICENSE)
 
 ## Contact
 
-**Jinsu Park**
-Plan/It Institute
+**PLANiT**
 Seoul, South Korea
-Email: jinsu@planit.institute
-
-## Acknowledgments
-
-Facility-level emissions data were obtained from Korea's National Greenhouse Gas Inventory (2022) and publicly available industrial complex reports. Technology cost parameters were validated against industry pilot plant data from BASF, SABIC, and Linde (2024).
 
 ## Version History
 
-- **v1.0** (2025-01-XX): Initial release accompanying journal publication
-  - Full 6-scenario analysis
-  - Sensitivity analysis (±10% CAPEX, electricity price, H₂ efficiency)
-  - Publication-quality figures
+- **v1.0** (December 2024): Final release with 6 scenarios, regional analysis, and client reporting
