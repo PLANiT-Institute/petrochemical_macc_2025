@@ -816,6 +816,52 @@ elif page == "4. Regional Outlook":
 
     st.markdown("---")
 
+    # Regional MAC by Year (NEW)
+    st.header("Regional MAC by Year")
+
+    mac_by_year_data = []
+    for year in sorted(df['year'].unique()):
+        df_y = df_full[df_full['year'] == year]
+        for region in regions:
+            df_r = df_y[(df_y['region'] == region) & (df_y['abatement_tco2'] > 0)]
+            if len(df_r) > 0:
+                total_cost = df_r['total_cost_usd'].sum()
+                total_abatement = df_r['abatement_tco2'].sum()
+                mac = total_cost / total_abatement if total_abatement > 0 else 0
+                mac_by_year_data.append({
+                    'Year': year,
+                    'Region': region,
+                    'MAC ($/tCO2)': mac,
+                    'Abatement (MtCO2)': total_abatement / 1e6,
+                    'Total Cost ($M)': total_cost / 1e6
+                })
+
+    if mac_by_year_data:
+        mac_year_df = pd.DataFrame(mac_by_year_data)
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            fig = px.line(mac_year_df, x='Year', y='MAC ($/tCO2)', color='Region',
+                         markers=True, title='Average MAC by Region Over Time',
+                         color_discrete_map=REGION_COLORS)
+            fig.update_yaxes(title='MAC ($/tCO2)')
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col2:
+            fig = px.bar(mac_year_df, x='Year', y='Abatement (MtCO2)', color='Region',
+                        title='Abatement by Region Over Time',
+                        color_discrete_map=REGION_COLORS)
+            st.plotly_chart(fig, use_container_width=True)
+
+        # MAC table by year and region
+        st.subheader("MAC Summary Table ($/tCO2)")
+        mac_pivot = mac_year_df.pivot(index='Region', columns='Year', values='MAC ($/tCO2)')
+        mac_pivot = mac_pivot.round(0)
+        st.dataframe(mac_pivot, use_container_width=True)
+
+    st.markdown("---")
+
     # H2 demand by region
     st.header("H2 Demand by Region")
 

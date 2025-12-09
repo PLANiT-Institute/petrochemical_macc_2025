@@ -100,7 +100,13 @@
       "WebFetch(domain:pubs.acs.org)",
       "Bash(git push:*)",
       "Bash(timeout 10 streamlit run:*)",
-      "Bash(gtimeout 10 streamlit run:*)"
+      "Bash(gtimeout 10 streamlit run:*)",
+      "WebFetch(domain:kcia.kr)",
+      "WebFetch(domain:www.index.go.kr)",
+      "WebFetch(domain:kosis.kr)",
+      "WebFetch(domain:www.data.go.kr)",
+      "WebFetch(domain:www.investkorea.org)",
+      "WebFetch(domain:www.ksure.or.kr)"
     ],
     "deny": [],
     "ask": []
