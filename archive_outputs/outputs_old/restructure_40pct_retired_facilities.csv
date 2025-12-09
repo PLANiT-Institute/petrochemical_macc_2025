@@ -1,0 +1,17 @@
+product,process,company,location,complex,capacity_kt,year_built,age_2025,remaining_life,retirement_year_40yr
+C-H,Naphtha Cracker,SK Geocentric,Ulsan,Ulsan Complex,160,1974,51,-11,2014
+Butadiene,Naphtha Cracker,Kumho Petrochemical,Ulsan,Ulsan Complex,90,1979,46,-6,2019
+Ethylene,Naphtha Cracker,Yeochon NCC,Yeosu,Yeosu Complex,2285,1979,46,-6,2019
+Propylene,Naphtha Cracker,Yeochon NCC,Yeosu,Yeosu Complex,1289,1979,46,-6,2019
+Butadiene,Naphtha Cracker,SK Geocentric,Ulsan,Ulsan Complex,130,1989,36,4,2029
+Ethylene,Naphtha Cracker,SK Geocentric,Ulsan,Ulsan Complex,660,1989,36,4,2029
+Propylene,Naphtha Cracker,SK Geocentric,Ulsan,Ulsan Complex,380,1989,36,4,2029
+Ethylene,Naphtha Cracker,Lotte Chemical,Daesan,Daesan Complex,1100,1991,34,6,2031
+Propylene,Naphtha Cracker,LG Chem,Daesan,Daesan Complex,680,1991,34,6,2031
+Butadiene,Naphtha Cracker,LG Chem,Yeosu,Yeosu Complex,306,1991,34,6,2031
+Butadiene,Naphtha Cracker,Hanwha TotalEnergies,Daesan,Daesan Complex,150,1991,34,6,2031
+Butadiene,Naphtha Cracker,LG Chem,Daesan,Daesan Complex,200,1991,34,6,2031
+Propylene,Naphtha Cracker,Hyosung Chemical,Ulsan,Ulsan Complex,500,1991,34,6,2031
+Propylene,Naphtha Cracker,Hanwha TotalEnergies,Daesan,Daesan Complex,1064,1991,34,6,2031
+Propylene,Naphtha Cracker,Daehan Oil Chemical,Onsan,Ulsan Complex,560,1991,34,6,2031
+Ethylene,Naphtha Cracker,LG Chem,Daesan,Daesan Complex,1300,1991,34,6,2031

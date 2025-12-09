@@ -1,0 +1,29 @@
+category,item,metric,model_value,calculation,manual_value,difference,pct_diff,notes
+Baseline,NCC Facilities,Total Emissions,56.84437494609307,25667 kt × 2.215 tCO2/ton,56.84437494609307,0.0,0.0,Self-consistent (intensity derived from model)
+Baseline,BTX Facilities,Total Emissions,9.097422046391248,25754 kt × 0.353 tCO2/ton,9.097422046391248,0.0,0.0,Self-consistent (intensity derived from model)
+MACC,Heat_Pump 2025,Ann. CAPEX,40.0,800.0 / 20 years,40.0,0.0,0.0,Linear interpolation of CAPEX
+MACC,NCC-H2 2025,Ann. CAPEX,68.0,1700.0 / 25 years,68.0,0.0,0.0,Linear interpolation of CAPEX
+MACC,NCC-Electricity 2025,Ann. CAPEX,60.0,1500.0 / 25 years,60.0,0.0,0.0,Linear interpolation of CAPEX
+MACC,RE_PPA 2025,Ann. CAPEX,0.0,0.0 / 99 years,0.0,0.0,0.0,Linear interpolation of CAPEX
+MACC,RDH 2025,Ann. CAPEX,36.0,900.0 / 25 years,36.0,0.0,0.0,Linear interpolation of CAPEX
+MACC,Heat_Pump 2030,Ann. CAPEX,32.0,720.0 / 20 years,36.0,4.0,12.5,Linear interpolation of CAPEX
+MACC,NCC-H2 2030,Ann. CAPEX,52.0,1530.0 / 25 years,61.2,9.200000000000003,17.6923076923077,Linear interpolation of CAPEX
+MACC,NCC-Electricity 2030,Ann. CAPEX,54.0,1350.0 / 25 years,54.0,0.0,0.0,Linear interpolation of CAPEX
+MACC,RE_PPA 2030,Ann. CAPEX,0.0,0.0 / 99 years,0.0,0.0,0.0,Linear interpolation of CAPEX
+MACC,RDH 2030,Ann. CAPEX,28.8,810.0 / 25 years,32.4,3.599999999999998,12.499999999999991,Linear interpolation of CAPEX
+MACC,Heat_Pump 2050,Ann. CAPEX,20.0,400.0 / 20 years,20.0,0.0,0.0,Linear interpolation of CAPEX
+MACC,NCC-H2 2050,Ann. CAPEX,31.2,850.0 / 25 years,34.0,2.8000000000000007,8.974358974358978,Linear interpolation of CAPEX
+MACC,NCC-Electricity 2050,Ann. CAPEX,36.0,750.0 / 25 years,30.0,6.0,16.666666666666664,Linear interpolation of CAPEX
+MACC,RE_PPA 2050,Ann. CAPEX,0.0,0.0 / 99 years,0.0,0.0,0.0,Linear interpolation of CAPEX
+MACC,RDH 2050,Ann. CAPEX,18.0,450.0 / 25 years,18.0,0.0,0.0,Linear interpolation of CAPEX
+Abatement Potential,NCC-H2 2050,Max Abatement,47.07075459300832,NCC combustion emissions × demand multiplier,52.20802417148216,5.137269578473841,10.91393078970718,Difference due to demand growth trajectory
+Abatement Potential,Heat Pump 2050,Max Abatement,3.5859251030661916,Non-NCC fossil × HP applicability × demand multiplier,3.0584069579689075,0.5275181450972841,14.710796515136998,Difference due to demand growth and grid EF adjustment
+H2 Demand,Shaheen NCC-H2,H2 Demand 2050,4977.222363136283,50.62 Mt / 1.74 × 0.2,5818.351338953964,841.1289758176808,16.899565951633765,Uses simplified emission intensity
+H2 Demand,Restructure 25% H2,H2 Demand 2050,3022.741701908114,30.74 Mt / 1.74 × 0.2,3533.571929369613,510.8302274614989,16.899565951633775,Uses simplified emission intensity
+H2 Demand,Restructure 40% H2,H2 Demand 2050,2341.3380840679065,23.81 Mt / 1.74 × 0.2,2737.014057735681,395.67597366777454,16.899565951633775,Uses simplified emission intensity
+Deployment,Shaheen NCC-H2,Balance Check,0.0,BAU 66.49 - Total 66.49,0.0,0.0,0.0,BAU - abatement = actual emissions
+Deployment,Shaheen NCC-Elec,Balance Check,0.0,BAU 66.49 - Total 66.49,0.0,0.0,0.0,BAU - abatement = actual emissions
+Deployment,Restructure 25% H2,Balance Check,0.0,BAU 39.95 - Total 39.95,0.0,0.0,0.0,BAU - abatement = actual emissions
+Deployment,Restructure 25% Elec,Balance Check,0.0,BAU 39.95 - Total 39.95,0.0,0.0,0.0,BAU - abatement = actual emissions
+Deployment,Restructure 40% H2,Balance Check,0.0,BAU 34.69 - Total 34.69,0.0,0.0,0.0,BAU - abatement = actual emissions
+Deployment,Restructure 40% Elec,Balance Check,0.0,BAU 34.69 - Total 34.69,0.0,0.0,0.0,BAU - abatement = actual emissions

@@ -1,0 +1,255 @@
+facility_idx,product,process,company,location,complex,region,capacity_kt,year_built,total_fossil_kt,ncc_fossil_kt,btx_fossil_kt,low_temp_fossil_kt,elec_mwh,elec_emissions_kt,total_emissions_kt
+0,Ethylene,Naphtha Cracker,Lotte Chemical,Daesan,Daesan Complex,Daesan,1100,1991,2374.333837908007,2018.1837622218059,0.0,356.15007568620103,23995.33439572932,0.0,2374.333837908007
+1,Ethylene,Naphtha Cracker,HD Hyundai Chemical,Daesan,Daesan Complex,Daesan,850,2021,1834.7125111107325,1559.5056344441225,0.0,275.20687666660984,18541.849305790838,0.0,1834.7125111107325
+2,Ethylene,Naphtha Cracker,LG Chem,Daesan,Daesan Complex,Daesan,1300,1991,2806.030899345826,2385.126264443952,0.0,420.9046349018739,28358.122467680103,0.0,2806.030899345826
+3,Ethylene,Naphtha Cracker,Hanwha TotalEnergies,Daesan,Daesan Complex,Daesan,1525,1991,3291.690093463373,2797.9365794438672,0.0,493.75351401950593,33266.259048624735,0.0,3291.690093463373
+4,Ethylene,Naphtha Cracker,Lotte Chemical,Yeosu,Yeosu Complex,Yeosu,1230,1992,2654.9369278425893,2256.6963886662006,0.0,398.2405391763884,26831.146642497326,0.0,2654.9369278425893
+5,Ethylene,Naphtha Cracker,LG Chem,Yeosu,Yeosu Complex,Yeosu,1030,2021,2223.23986640477,1889.7538864440544,0.0,333.4859799607155,22468.35857054654,0.0,2223.23986640477
+6,Ethylene,Naphtha Cracker,Yeochon NCC,Yeosu,Yeosu Complex,Yeosu,2285,1979,4932.138926927087,4192.318087888024,0.0,739.820839039063,49844.85372203772,0.0,4932.138926927087
+7,Ethylene,Naphtha Cracker,GS Caltex,Yeosu,Yeosu Complex,Yeosu,900,2021,1942.6367764701872,1651.2412599996592,0.0,291.3955164705281,19632.546323778533,0.0,1942.6367764701872
+8,Ethylene,Naphtha Cracker,Daehan Oil Chemical,Onsan,Ulsan Complex,Ulsan,900,1991,1942.6367764701872,1651.2412599996592,0.0,291.3955164705281,19632.546323778533,0.0,1942.6367764701872
+9,Ethylene,Naphtha Cracker,S-Oil,Onsan,Ulsan Complex,Ulsan,182,2018,392.8443259084156,333.91767702215327,0.0,58.92664888626234,3970.1371454752143,0.0,392.8443259084156
+10,Ethylene,Naphtha Cracker,SK Geocentric,Ulsan,Ulsan Complex,Ulsan,660,1989,1424.600302744804,1210.9102573330833,0.0,213.69004541172058,14397.20063743759,0.0,1424.600302744804
+11,Propylene,Naphtha Cracker,Lotte Chemical,Daesan,Daesan Complex,Daesan,550,1997,1052.8526371051535,894.9247415393804,0.0,157.927895565773,26864.61121009468,0.0,1052.8526371051535
+12,Propylene,Naphtha Cracker,HDHyundai Oilbank,Daesan,Daesan Complex,Daesan,420,2011,803.9965592439354,683.3970753573451,0.0,120.5994838865903,20514.794014981395,0.0,803.9965592439354
+13,Propylene,Naphtha Cracker,HD Hyundai Chemical,Daesan,Daesan Complex,Daesan,451,2021,863.3391624262258,733.8382880622919,0.0,129.50087436393386,22028.98119227764,0.0,863.3391624262258
+14,Propylene,Naphtha Cracker,LG Chem,Daesan,Daesan Complex,Daesan,680,1991,1301.7087149663714,1106.4524077214157,0.0,195.2563072449557,33214.428405207975,0.0,1301.7087149663714
+15,Propylene,Naphtha Cracker,Hanwha TotalEnergies,Daesan,Daesan Complex,Daesan,1064,1991,2036.7912834179695,1731.272590905274,0.0,305.5186925126954,51970.81150461953,0.0,2036.7912834179695
+16,Propylene,Naphtha Cracker,Lotte Chemical,Yeosu,Yeosu Complex,Yeosu,641,1992,1227.0518916080061,1042.9941078668053,0.0,184.05778374120092,31309.483246673986,0.0,1227.0518916080061
+17,Propylene,Naphtha Cracker,LG Chem,Yeosu,Yeosu Complex,Yeosu,1300,2021,2488.560778612181,2115.2766618203536,0.0,373.2841167918271,63498.17195113289,0.0,2488.560778612181
+18,Propylene,Naphtha Cracker,Yeochon NCC,Yeosu,Yeosu Complex,Yeosu,1289,1979,2467.503725870078,2097.3781669895666,0.0,370.12555888051173,62960.879726931,0.0,2467.503725870078
+19,Propylene,Naphtha Cracker,GS Caltex,Yeosu,Yeosu Complex,Yeosu,970,2021,1856.8491963490887,1578.3218168967253,0.0,278.5273794523633,47379.40522507608,0.0,1856.8491963490887
+20,Propylene,Naphtha Cracker,Daehan Oil Chemical,Onsan,Ulsan Complex,Ulsan,560,1991,1071.9954123252471,911.1961004764601,0.0,160.79931184878706,27353.05868664186,0.0,1071.9954123252471
+21,Propylene,Naphtha Cracker,S-Oil,Onsan,Ulsan Complex,Ulsan,840,2018,1607.9931184878708,1366.7941507146902,0.0,241.1989677731806,41029.58802996279,0.0,1607.9931184878708
+22,Propylene,Naphtha Cracker,SK Advanced,Ulsan,Ulsan Complex,Ulsan,600,2016,1148.566513205622,976.2815362247786,0.0,172.28497698084328,29306.848592830564,0.0,1148.566513205622
+23,Propylene,Naphtha Cracker,SK Energy,Ulsan,Ulsan Complex,Ulsan,620,1996,1186.8520636458095,1008.824254098938,0.0,178.02780954687142,30283.743545924917,0.0,1186.8520636458095
+24,Propylene,Naphtha Cracker,SK Geocentric,Ulsan,Ulsan Complex,Ulsan,380,1989,727.4254583635607,618.3116396090265,0.0,109.1138187545341,18561.00410879269,0.0,727.4254583635607
+25,Propylene,Naphtha Cracker,Taekwang Industrial,Ulsan,Ulsan Complex,Ulsan,300,1997,574.283256602811,488.1407681123893,0.0,86.14248849042164,14653.424296415282,0.0,574.283256602811
+26,Propylene,Naphtha Cracker,Hyosung Chemical,Ulsan,Ulsan Complex,Ulsan,500,1991,957.138761004685,813.5679468539822,0.0,143.57081415070274,24422.373827358806,0.0,957.138761004685
+27,Butadiene,Naphtha Cracker,Lotte Chemical,Daesan,Daesan Complex,Daesan,190,1997,404.15978510885503,343.53581734252674,0.0,60.62396776632825,19410.200375208053,0.0,404.15978510885503
+28,Butadiene,Naphtha Cracker,HD Hyundai Chemical,Daesan,Daesan Complex,Daesan,163,2021,346.726552488123,294.71756961490456,0.0,52.00898287321845,16651.908742941647,0.0,346.726552488123
+29,Butadiene,Naphtha Cracker,LG Chem,Daesan,Daesan Complex,Daesan,200,1991,425.4313527461632,361.61664983423873,0.0,63.81470291192448,20431.789868640055,0.0,425.4313527461632
+30,Butadiene,Naphtha Cracker,Hanwha TotalEnergies,Daesan,Daesan Complex,Daesan,150,1991,319.0735145596224,271.2124873756791,0.0,47.861027183943364,15323.842401480042,0.0,319.0735145596224
+31,Butadiene,Naphtha Cracker,Kumho Petrochemical,Yeosu,Yeosu Complex,Yeosu,147,1992,312.6920442684299,265.7882376281654,0.0,46.903806640264484,15017.365553450441,0.0,312.6920442684299
+32,Butadiene,Naphtha Cracker,Lotte GS Chemical,Yeosu,Yeosu Complex,Yeosu,130,2022,276.5303792850061,235.05082239225518,0.0,41.479556892750914,13280.663414616036,0.0,276.5303792850061
+33,Butadiene,Naphtha Cracker,Lotte Chemical,Yeosu,Yeosu Complex,Yeosu,160,2011,340.3450821969306,289.293319867391,0.0,51.05176232953959,16345.431894912044,0.0,340.3450821969306
+34,Butadiene,Naphtha Cracker,LG Chem,Yeosu,Yeosu Complex,Yeosu,306,1991,650.9099697016298,553.2734742463854,0.0,97.63649545524447,31260.638499019286,0.0,650.9099697016298
+35,Butadiene,Naphtha Cracker,Yeochon NCC,Yeosu,Yeosu Complex,Yeosu,378,1992,804.0652566902485,683.4554681867112,0.0,120.60978850353726,38616.082851729705,0.0,804.0652566902485
+36,Butadiene,Naphtha Cracker,Kumho Petrochemical,Ulsan,Ulsan Complex,Ulsan,90,1979,191.44410873577345,162.72749242540743,0.0,28.716616310366017,9194.305440888025,0.0,191.44410873577345
+37,Butadiene,Naphtha Cracker,Daehan Oil Chemical,Ulsan,Ulsan Complex,Ulsan,146,2023,310.56488750469913,263.98015437899426,0.0,46.584733125704865,14915.20660410724,0.0,310.56488750469913
+38,Butadiene,Naphtha Cracker,SK Geocentric,Ulsan,Ulsan Complex,Ulsan,130,1989,276.5303792850061,235.05082239225518,0.0,41.479556892750914,13280.663414616036,0.0,276.5303792850061
+39,Benzene,BTX Plant,OCI,Gwangyang,Other Regions,Other,200,1995,66.36042471932275,0.0,53.0883397754582,13.27208494386455,1869.2359938125335,0.0,66.36042471932275
+40,Benzene,BTX Plant,Lotte Chemical,Daesan,Daesan Complex,Daesan,240,2011,79.6325096631873,0.0,63.70600773054985,15.926501932637462,2243.0831925750404,0.0,79.6325096631873
+41,Benzene,BTX Plant,HD Hyundai Chemical,Daesan,Daesan Complex,Daesan,410,2016,136.03887067461167,0.0,108.83109653968934,27.207774134922335,3831.9337873156937,0.0,136.03887067461167
+42,Benzene,BTX Plant,HDHyundai Oilbank,Daesan,Daesan Complex,Daesan,338,1997,112.14911777565547,0.0,89.71929422052438,22.429823555131094,3159.0088295431815,0.0,112.14911777565547
+43,Benzene,BTX Plant,LG Chem,Daesan,Daesan Complex,Daesan,270,1991,89.58657337108573,0.0,71.6692586968686,17.91731467421715,2523.4685916469202,0.0,89.58657337108573
+44,Benzene,BTX Plant,Hanwha TotalEnergies,Daesan,Daesan Complex,Daesan,1267,1991,420.3932905969097,0.0,336.31463247752777,84.07865811938194,11841.6100208024,0.0,420.3932905969097
+45,Benzene,BTX Plant,Lotte Chemical,Yeosu,Yeosu Complex,Yeosu,235,1992,77.97349904520424,0.0,62.37879923616339,15.594699809040847,2196.352292729727,0.0,77.97349904520424
+46,Benzene,BTX Plant,LG Chem,Yeosu,Yeosu Complex,Yeosu,630,1992,209.03533786586667,0.0,167.22827029269334,41.807067573173335,5888.093380509481,0.0,209.03533786586667
+47,Benzene,BTX Plant,Yeochon NCC,Yeosu,Yeosu Complex,Yeosu,457,1979,151.6335704836525,0.0,121.30685638692201,30.326714096730502,4271.20424586164,0.0,151.6335704836525
+48,Benzene,BTX Plant,GS Caltex,Yeosu,Yeosu Complex,Yeosu,930,1990,308.5759749448508,0.0,246.86077995588067,61.71519498897017,8691.947371228282,0.0,308.5759749448508
+49,Benzene,BTX Plant,Daehan Oil Chemical,Onsan,Ulsan Complex,Ulsan,210,2008,69.6784459552889,0.0,55.74275676423112,13.93568919105778,1962.69779350316,0.0,69.6784459552889
+50,Benzene,BTX Plant,S-Oil,Onsan,Ulsan Complex,Ulsan,672,1991,222.97102705692447,0.0,178.3768216455396,44.5942054113849,6280.632939210113,0.0,222.97102705692447
+51,Benzene,BTX Plant,Lotte Chemical,Ulsan,Ulsan Complex,Ulsan,110,1986,36.49823359562752,0.0,29.198586876502016,7.299646719125504,1028.0797965968934,0.0,36.49823359562752
+52,Benzene,BTX Plant,SK Geocentric,Ulsan,Ulsan Complex,Ulsan,603,1972,200.07668052875812,0.0,160.06134442300652,40.01533610575163,5635.746521344789,0.0,200.07668052875812
+53,Benzene,BTX Plant,Ulsan Aromatics,Ulsan,Ulsan Complex,Ulsan,600,2014,199.08127415796827,0.0,159.2650193263746,39.81625483159365,5607.7079814376,0.0,199.08127415796827
+54,Benzene,BTX Plant,SK Incheon Petrochemical,Incheon,Other Regions,Other,600,2006,199.08127415796827,0.0,159.2650193263746,39.81625483159365,5607.7079814376,0.0,199.08127415796827
+55,Toluene,BTX Plant,OCI,Gwangyang,Other Regions,Other,40,1995,17.696113258486065,0.0,14.156890606788853,3.539222651697213,274.1546124258383,0.0,17.696113258486065
+56,Toluene,BTX Plant,Lotte Chemical,Daesan,Daesan Complex,Daesan,120,2011,53.08833977545818,0.0,42.47067182036655,10.617667955091637,822.4638372775149,0.0,53.08833977545818
+57,Toluene,BTX Plant,LG Chem,Daesan,Daesan Complex,Daesan,100,2011,44.24028314621516,0.0,35.39222651697213,8.848056629243032,685.3865310645958,0.0,44.24028314621516
+58,Toluene,BTX Plant,Lotte Chemical,Yeosu,Yeosu Complex,Yeosu,220,1992,97.32862292167337,0.0,77.8628983373387,19.465724584334676,1507.8503683421106,0.0,97.32862292167337
+59,Toluene,BTX Plant,LG Chem,Yeosu,Yeosu Complex,Yeosu,112,1992,49.54911712376098,0.0,39.63929369900879,9.909823424752197,767.6329147923473,0.0,49.54911712376098
+60,Toluene,BTX Plant,Yeochon NCC,Yeosu,Yeosu Complex,Yeosu,282,1979,124.75759847232676,0.0,99.80607877786142,24.951519694465354,1932.79001760216,0.0,124.75759847232676
+61,Toluene,BTX Plant,GS Caltex,Yeosu,Yeosu Complex,Yeosu,170,1990,75.20848134856577,0.0,60.16678507885262,15.041696269713155,1165.1571028098128,0.0,75.20848134856577
+62,Toluene,BTX Plant,Daehan Oil Chemical,Onsan,Ulsan Complex,Ulsan,78,2008,34.50742085404782,0.0,27.60593668323826,6.901484170809565,534.6014942303847,0.0,34.50742085404782
+63,Toluene,BTX Plant,S-Oil,Onsan,Ulsan Complex,Ulsan,300,1991,132.72084943864547,0.0,106.17667955091639,26.544169887729097,2056.1595931937873,0.0,132.72084943864547
+64,Toluene,BTX Plant,SK Geocentric,Ulsan,Ulsan Complex,Ulsan,1506,2070,666.2586641820003,0.0,533.0069313456003,133.25173283640007,10321.921157832812,0.0,666.2586641820003
+65,Xylene,BTX Plant,Lotte Chemical,Daesan,Daesan Complex,Daesan,60,2011,29.862191123695236,0.0,23.88975289895619,5.972438224739047,11692.0711412974,0.0,29.862191123695236
+66,Xylene,BTX Plant,HD Hyundai Chemical,Daesan,Daesan Complex,Daesan,1350,2016,671.8993002831427,0.0,537.5194402265141,134.37986005662853,263071.60067919147,0.0,671.8993002831427
+67,Xylene,BTX Plant,LG Chem,Daesan,Daesan Complex,Daesan,0,2011,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+68,Xylene,BTX Plant,Lotte Chemical,Yeosu,Yeosu Complex,Yeosu,79,1992,39.31855164619873,0.0,31.454841316958984,7.863710329239746,15394.560336041575,0.0,39.31855164619873
+69,Xylene,BTX Plant,LG Chem,Yeosu,Yeosu Complex,Yeosu,60,1992,29.862191123695236,0.0,23.88975289895619,5.972438224739047,11692.0711412974,0.0,29.862191123695236
+70,Xylene,BTX Plant,Yeochon NCC,Yeosu,Yeosu Complex,Yeosu,204,1979,101.53144982056381,0.0,81.22515985645106,20.306289964112764,39753.041880411154,0.0,101.53144982056381
+71,Xylene,BTX Plant,GS Caltex,Yeosu,Yeosu Complex,Yeosu,350,1990,174.1961148882222,0.0,139.3568919105778,34.83922297764445,68203.74832423482,0.0,174.1961148882222
+72,Xylene,BTX Plant,Daehan Oil Chemical,Onsan,Ulsan Complex,Ulsan,47,2008,23.392049713561267,0.0,18.713639770849014,4.678409942712253,9158.789060682964,0.0,23.392049713561267
+73,Xylene,BTX Plant,S-Oil,Onsan,Ulsan Complex,Ulsan,450,1991,223.96643342771426,0.0,179.1731467421714,44.79328668554285,87690.5335597305,0.0,223.96643342771426
+74,Xylene,BTX Plant,SK Geocentric,Ulsan,Ulsan Complex,Ulsan,894,2070,444.9466477430591,0.0,355.9573181944473,88.98932954861182,174211.86000533125,0.0,444.9466477430591
+75,O-X,BTX Plant,Lotte Chemical,Ulsan,Ulsan Complex,Ulsan,210,1980,0.0,0.0,0.0,0.0,196.26977935031604,0.0,0.0
+76,O-X,BTX Plant,SK Geocentric,Ulsan,Ulsan Complex,Ulsan,200,1990,0.0,0.0,0.0,0.0,186.92359938125335,0.0,0.0
+77,M-X,BTX Plant,Lotte Chemical,Ulsan,Ulsan Complex,Ulsan,360,1998,0.0,0.0,0.0,0.0,336.46247888625606,0.0,0.0
+78,P-X,BTX Plant,HDHyundai Oilbank,Daesan,Daesan Complex,Daesan,1460,1997,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+79,P-X,BTX Plant,Hanwha TotalEnergies,Daesan,Daesan Complex,Daesan,2000,1997,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+80,P-X,BTX Plant,GS Caltex,Yeosu,Yeosu Complex,Yeosu,1350,1990,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+81,P-X,BTX Plant,S-Oil,Onsan,Ulsan Complex,Ulsan,1900,1997,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+82,P-X,BTX Plant,Lotte Chemical,Ulsan,Ulsan Complex,Ulsan,750,1980,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+83,P-X,BTX Plant,SK Geocentric,Ulsan,Ulsan Complex,Ulsan,830,1990,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+84,P-X,BTX Plant,Ulsan Aromatics,Ulsan,Ulsan Complex,Ulsan,1000,2014,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+85,P-X,BTX Plant,SK Incheon Petrochemical,Incheon,Other Regions,Other,1500,2014,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+86,C-H,Naphtha Cracker,SK Geocentric,Ulsan,Ulsan Complex,Ulsan,160,1974,163.12735135135125,138.65824864864857,0.0,24.46910270270269,128.96499467420762,0.0,163.12735135135125
+87,C-H,Naphtha Cracker,Caprolactam,Ulsan,Ulsan Complex,Ulsan,190,2000,193.7137297297296,164.65667027027015,0.0,29.05705945945944,153.14593117562154,0.0,193.7137297297296
+88,SM,Utility,Lotte Chemical,Daesan,Daesan Complex,Daesan,350,2005,0.0,0.0,0.0,0.0,403.4459521948145,0.0,0.0
+89,SM,Utility,LG Chem,Daesan,Daesan Complex,Daesan,577,2006,0.0,0.0,0.0,0.0,665.1094697611655,0.0,0.0
+90,SM,Utility,Hanwha TotalEnergies,Daesan,Daesan Complex,Daesan,1071,1991,0.0,0.0,0.0,0.0,1234.5446137161323,0.0,0.0
+91,SM,Utility,Yeochon NCC,Yeosu,Yeosu Complex,Yeosu,351,1986,0.0,0.0,0.0,0.0,404.598654915371,0.0,0.0
+92,SM,Utility,SKpicglobal,Ulsan,Ulsan Complex,Ulsan,400,1990,0.0,0.0,0.0,0.0,461.0810882226451,0.0,0.0
+93,EDC,Utility,LG Chem,Yeosu,Yeosu Complex,Yeosu,810,1996,0.0,0.0,0.0,0.0,933.6892036508563,0.0,0.0
+94,EDC,Utility,Hanwha Solutions,Yeosu,Yeosu Complex,Yeosu,1586,1980,0.0,0.0,0.0,0.0,1828.1865148027878,0.0,0.0
+95,EDC,Utility,Hanwha Solutions,Ulsan,Ulsan Complex,Ulsan,385,1991,0.0,0.0,0.0,0.0,443.7905474142959,0.0,0.0
+96,VCM,Utility,LG Chem,Daesan,Daesan Complex,Daesan,230,1997,0.0,0.0,0.0,0.0,265.1216257280209,0.0,0.0
+97,VCM,Utility,LG Chem,Yeosu,Yeosu Complex,Yeosu,720,1990,0.0,0.0,0.0,0.0,829.9459588007611,0.0,0.0
+98,VCM,Utility,Hanwha Solutions,Yeosu,Yeosu Complex,Yeosu,583,1979,0.0,0.0,0.0,0.0,672.0256860845052,0.0,0.0
+99,VCM,Utility,Hanwha Solutions,Ulsan,Ulsan Complex,Ulsan,264,1972,0.0,0.0,0.0,0.0,304.31351822694575,0.0,0.0
+100,PC,Utility,Lotte Chemical,Yeosu,Yeosu Complex,Yeosu,480,2008,0.0,0.0,0.0,0.0,386.89498402262285,0.0,0.0
+101,PC,Utility,LG Chem,Yeosu,Yeosu Complex,Yeosu,170,2001,0.0,0.0,0.0,0.0,137.02530684134558,0.0,0.0
+102,PC,Utility,Samyang Chemical,Jeonju,Other Regions,Other,120,1999,0.0,0.0,0.0,0.0,96.72374600565571,0.0,0.0
+103,LDPE,Utility,HD Hyundai Chemical,Daesan,Daesan Complex,Daesan,300,2021,0.0,0.0,0.0,0.0,570.0823346881366,0.0,0.0
+104,LDPE,Utility,LG Chem,Daesan,Daesan Complex,Daesan,280,2006,0.0,0.0,0.0,0.0,532.0768457089275,0.0,0.0
+105,LDPE,Utility,Hanwha TotalEnergies,Daesan,Daesan Complex,Daesan,435,1991,0.0,0.0,0.0,0.0,826.6193852977981,0.0,0.0
+106,LDPE,Utility,LG Chem,Yeosu,Yeosu Complex,Yeosu,180,1990,0.0,0.0,0.0,0.0,342.0494008128819,0.0,0.0
+107,LDPE,Utility,Hanwha Solutions,Yeosu,Yeosu Complex,Yeosu,337,1979,0.0,0.0,0.0,0.0,640.3924892996735,0.0,0.0
+108,LDPE,Utility,Lotte Chemical,Ulsan,Ulsan Complex,Ulsan,120,1972,0.0,0.0,0.0,0.0,228.03293387525466,0.0,0.0
+109,LDPE,Utility,Lotte Chemical,Daesan,Daesan Complex,Daesan,500,2005,0.0,0.0,0.0,0.0,950.1372244802277,0.0,0.0
+110,L-LDPE,Utility,LG Chem,Daesan,Daesan Complex,Daesan,125,2006,0.0,0.0,0.0,0.0,219.26243641851414,0.0,0.0
+111,L-LDPE,Utility,Hanwha TotalEnergies,Daesan,Daesan Complex,Daesan,530,2004,0.0,0.0,0.0,0.0,929.6727304144999,0.0,0.0
+112,L-LDPE,Utility,DL Chemical,Yeosu,Yeosu Complex,Yeosu,10,2010,0.0,0.0,0.0,0.0,17.540994913481132,0.0,0.0
+113,L-LDPE,Utility,Lotte Chemical,Yeosu,Yeosu Complex,Yeosu,600,2019,0.0,0.0,0.0,0.0,1052.4596948088679,0.0,0.0
+114,L-LDPE,Utility,LG Chem,Yeosu,Yeosu Complex,Yeosu,425,2021,0.0,0.0,0.0,0.0,745.4922838229481,0.0,0.0
+115,L-LDPE,Utility,Hanwha Solutions,Yeosu,Yeosu Complex,Yeosu,288,1986,0.0,0.0,0.0,0.0,505.18065350825657,0.0,0.0
+116,L-LDPE,Utility,SSNC,Ulsan,Ulsan Complex,Ulsan,180,2015,0.0,0.0,0.0,0.0,315.73790844266034,0.0,0.0
+117,L-LDPE,Utility,SK Geocentric,Ulsan,Ulsan Complex,Ulsan,550,1990,0.0,0.0,0.0,0.0,964.7547202414622,0.0,0.0
+118,HDPE,Utility,HD Hyundai Chemical,Daesan,Daesan Complex,Daesan,575,2021,0.0,0.0,0.0,0.0,874.12624652181,0.0,0.0
+119,HDPE,Utility,Hanwha TotalEnergies,Daesan,Daesan Complex,Daesan,180,1991,0.0,0.0,0.0,0.0,273.6395206503057,0.0,0.0
+120,HDPE,Utility,DL Chemical,Yeosu,Yeosu Complex,Yeosu,630,1980,0.0,0.0,0.0,0.0,957.73832227607,0.0,0.0
+121,HDPE,Utility,Lotte Chemical,Yeosu,Yeosu Complex,Yeosu,360,1992,0.0,0.0,0.0,0.0,547.2790413006114,0.0,0.0
+122,HDPE,Utility,LG Chem,Yeosu,Yeosu Complex,Yeosu,500,1992,0.0,0.0,0.0,0.0,760.1097795841825,0.0,0.0
+123,HDPE,Utility,GS Caltex,Yeosu,Yeosu Complex,Yeosu,650,2021,0.0,0.0,0.0,0.0,988.1427134594373,0.0,0.0
+124,HDPE,Utility,Daehan Oil Chemical,Onsan,Ulsan Complex,Ulsan,210,1976,0.0,0.0,0.0,0.0,319.2461074253567,0.0,0.0
+125,HDPE,Utility,SK Geocentric,Ulsan,Ulsan Complex,Ulsan,490,1990,0.0,0.0,0.0,0.0,744.9075839924989,0.0,0.0
+126,PP,Utility,Lotte Chemical,Daesan,Daesan Complex,Daesan,500,2005,0.0,0.0,0.0,0.0,712.602918360171,0.0,0.0
+127,PP,Utility,HD Hyundai Chemical,Daesan,Daesan Complex,Daesan,380,2021,0.0,0.0,0.0,0.0,541.5782179537299,0.0,0.0
+128,PP,Utility,LG Chem,Daesan,Daesan Complex,Daesan,1117,2006,0.0,0.0,0.0,0.0,1591.954919616622,0.0,0.0
+129,PP,Utility,Hanwha TotalEnergies,Daesan,Daesan Complex,Daesan,600,1991,0.0,0.0,0.0,0.0,855.1235020322052,0.0,0.0
+130,PP,Utility,Lotte Chemical,Yeosu,Yeosu Complex,Yeosu,180,1979,0.0,0.0,0.0,0.0,256.53705060966155,0.0,0.0
+131,PP,Utility,GS Caltex,Yeosu,Yeosu Complex,Yeosu,730,1987,0.0,0.0,0.0,0.0,1040.4002608058497,0.0,0.0
+132,PP,Utility,Poly Mirae,Yeosu,Yeosu Complex,Yeosu,405,1993,0.0,0.0,0.0,0.0,577.2083638717386,0.0,0.0
+133,PP,Utility,S-Oil,Onsan,Ulsan Complex,Ulsan,550,2018,0.0,0.0,0.0,0.0,783.8632101961881,0.0,0.0
+134,PP,Utility,Daehan Oil Chemical,Onsan,Ulsan Complex,Ulsan,432,1976,0.0,0.0,0.0,0.0,615.6889214631876,0.0,0.0
+135,PP,Utility,SK Geocentric,Ulsan,Ulsan Complex,Ulsan,400,1990,0.0,0.0,0.0,0.0,570.0823346881368,0.0,0.0
+136,PP,Utility,Ulsan PP,Ulsan,Ulsan Complex,Ulsan,600,2021,0.0,0.0,0.0,0.0,855.1235020322052,0.0,0.0
+137,PP,Utility,Hyosung Chemical,Ulsan,Ulsan Complex,Ulsan,0,1991,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+138,PS,Utility,LG Chem,Yeosu,Yeosu Complex,Yeosu,40,1984,0.0,0.0,0.0,0.0,91.21317355010186,0.0,0.0
+139,PS,Utility,Kumho Petrochemical,Ulsan,Ulsan Complex,Ulsan,265,1973,0.0,0.0,0.0,0.0,604.2872747694248,0.0,0.0
+140,PS,Utility,HDC Hyundai EP,Ulsan,Ulsan Complex,Ulsan,148,1989,0.0,0.0,0.0,0.0,337.4887421353769,0.0,0.0
+141,PS,Utility,Korea INEOS Styrolution,Ulsan,Ulsan Complex,Ulsan,266,1985,0.0,0.0,0.0,0.0,606.5676041081773,0.0,0.0
+142,EPS,Utility,SH Energy Chemical,Gunsan,Other Regions,Other,100,1973,0.0,0.0,0.0,0.0,114.01646693762727,0.0,0.0
+143,EPS,Utility,Lotte Chemical,Yeosu,Yeosu Complex,Yeosu,90,1989,0.0,0.0,0.0,0.0,102.61482024386454,0.0,0.0
+144,EPS,Utility,LG Chem,Yeosu,Yeosu Complex,Yeosu,90,1984,0.0,0.0,0.0,0.0,102.61482024386454,0.0,0.0
+145,EPS,Utility,Kumho Petrochemical,Ulsan,Ulsan Complex,Ulsan,80,1973,0.0,0.0,0.0,0.0,91.21317355010181,0.0,0.0
+146,EPS,Utility,HDC Hyundai EP,Ulsan,Ulsan Complex,Ulsan,80,1989,0.0,0.0,0.0,0.0,91.21317355010181,0.0,0.0
+147,EPS,Utility,BASF Korea,Ulsan,Ulsan Complex,Ulsan,85,1982,0.0,0.0,0.0,0.0,96.91399689698316,0.0,0.0
+148,ABS,Utility,Lotte Chemical,Yeosu,Yeosu Complex,Yeosu,757,1989,0.0,0.0,0.0,0.0,863.1046547178383,0.0,0.0
+149,ABS,Utility,LG Chem,Yeosu,Yeosu Complex,Yeosu,1030,1978,0.0,0.0,0.0,0.0,1174.3696094575607,0.0,0.0
+150,ABS,Utility,Kumho Petrochemical,Ulsan,Ulsan Complex,Ulsan,290,1973,0.0,0.0,0.0,0.0,330.64775411911904,0.0,0.0
+151,ABS,Utility,Korea INEOS Styrolution,Ulsan,Ulsan Complex,Ulsan,276,1990,0.0,0.0,0.0,0.0,314.68544874785124,0.0,0.0
+152,PVC,Utility,LG Chem,Daesan,Daesan Complex,Daesan,240,1998,0.0,0.0,0.0,0.0,276.648652933587,0.0,0.0
+153,PVC,Utility,LG Chem,Yeosu,Yeosu Complex,Yeosu,450,1976,0.0,0.0,0.0,0.0,518.7162242504756,0.0,0.0
+154,PVC,Utility,Hanwha Solutions,Yeosu,Yeosu Complex,Yeosu,480,1990,0.0,0.0,0.0,0.0,553.297305867174,0.0,0.0
+155,PVC,Utility,Hanwha Solutions,Ulsan,Ulsan Complex,Ulsan,330,2066,0.0,0.0,0.0,0.0,380.3918977836822,0.0,0.0
+156,TPA,Utility,Hanwha Impact,Daesan,Daesan Complex,Daesan,700,1997,0.0,0.0,0.0,0.0,564.2218516996584,0.0,0.0
+157,TPA,Utility,Samnam Petrochemical,Yeosu,Yeosu Complex,Yeosu,1500,1990,0.0,0.0,0.0,0.0,1209.0468250706965,0.0,0.0
+158,TPA,Utility,Lotte Chemical,Ulsan,Ulsan Complex,Ulsan,0,1990,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+159,TPA,Utility,Hanwha Impact,Ulsan,Ulsan Complex,Ulsan,1300,1995,0.0,0.0,0.0,0.0,1047.8405817279368,0.0,0.0
+160,TPA,Utility,Taekwang Industrial,Ulsan,Ulsan Complex,Ulsan,1000,1980,0.0,0.0,0.0,0.0,806.0312167137977,0.0,0.0
+161,TPA,Utility,Hyosung Chemical,Ulsan,Ulsan Complex,Ulsan,420,1997,0.0,0.0,0.0,0.0,338.533111019795,0.0,0.0
+162,PIA,Utility,Lotte Chemical,Ulsan,Ulsan Complex,Ulsan,0,1998,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+163,CPLM,Utility,Caprolactam,Ulsan,Ulsan Complex,Ulsan,270,1974,0.0,0.0,0.0,0.0,217.62842851272538,0.0,0.0
+164,DMT,Utility,SK Chemical,Ulsan,Ulsan Complex,Ulsan,160,1989,0.0,0.0,0.0,0.0,128.96499467420762,0.0,0.0
+165,EG,Utility,Lotte Chemical,Daesan,Daesan Complex,Daesan,730,2005,0.0,0.0,0.0,0.0,588.4027882010722,0.0,0.0
+166,EG,Utility,LG Chem,Daesan,Daesan Complex,Daesan,0,2006,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+167,EG,Utility,Hanwha TotalEnergies,Daesan,Daesan Complex,Daesan,218,1991,0.0,0.0,0.0,0.0,175.71480524360788,0.0,0.0
+168,EG,Utility,Lotte Chemical,Yeosu,Yeosu Complex,Yeosu,400,1979,0.0,0.0,0.0,0.0,322.41248668551907,0.0,0.0
+169,EG,Utility,Daehan Oil Chemical,Ulsan,Ulsan Complex,Ulsan,200,2014,0.0,0.0,0.0,0.0,161.20624334275954,0.0,0.0
+170,AN,Utility,Dongseo Petrochemical,Ulsan,Ulsan Complex,Ulsan,602,1972,0.0,0.0,0.0,0.0,693.9270377750809,0.0,0.0
+171,AN,Utility,Taekwang Industrial,Ulsan,Ulsan Complex,Ulsan,290,1997,0.0,0.0,0.0,0.0,334.28378896141766,0.0,0.0
+172,SBR,Utility,LG Chem,Daesan,Daesan Complex,Daesan,80,1996,0.0,0.0,0.0,0.0,64.48249733710381,0.0,0.0
+173,SBR,Utility,Kumho Petrochemical,Ulsan,Ulsan Complex,Ulsan,183,1973,0.0,0.0,0.0,0.0,147.50371265862498,0.0,0.0
+174,S-SBR,Utility,LG Chem,Daesan,Daesan Complex,Daesan,80,2012,0.0,0.0,0.0,0.0,64.48249733710381,0.0,0.0
+175,S-SBR,Utility,Kumho Petrochemical,Yeosu,Yeosu Complex,Yeosu,123,2012,0.0,0.0,0.0,0.0,99.14183965579711,0.0,0.0
+176,S-SBR,Utility,Lotte Versalis Elastomers,Yeosu,Yeosu Complex,Yeosu,100,2018,0.0,0.0,0.0,0.0,80.60312167137977,0.0,0.0
+177,SB-Latex,Utility,LG Chem,Daesan,Daesan Complex,Daesan,20,1996,0.0,0.0,0.0,0.0,16.120624334275952,0.0,0.0
+178,SB-Latex,Utility,Kumho Petrochemical,Ulsan,Ulsan Complex,Ulsan,85,1983,0.0,0.0,0.0,0.0,68.51265342067279,0.0,0.0
+179,SB-Latex,Utility,Korea Trinseo,Ulsan,Ulsan Complex,Ulsan,43,1990,0.0,0.0,0.0,0.0,34.6593423186933,0.0,0.0
+180,SB-Latex,Utility,Hansol Chemical,Jeonju,Other Regions,Other,60,1996,0.0,0.0,0.0,0.0,48.361873002827856,0.0,0.0
+181,BR,Utility,LG Chem,Daesan,Daesan Complex,Daesan,220,1996,0.0,0.0,0.0,0.0,177.32686767703547,0.0,0.0
+182,BR,Utility,Kumho Petrochemical,Yeosu,Yeosu Complex,Yeosu,275,1980,0.0,0.0,0.0,0.0,221.65858459629436,0.0,0.0
+183,NBR,Utility,LG Chem,Daesan,Daesan Complex,Daesan,65,1996,0.0,0.0,0.0,0.0,52.392029086396846,0.0,0.0
+184,NBR,Utility,Kumho Petrochemical,Ulsan,Ulsan Complex,Ulsan,92,1987,0.0,0.0,0.0,0.0,74.15487193766938,0.0,0.0
+185,NB-Latex,Utility,LG Chem,Yeosu,Yeosu Complex,Yeosu,205,2008,0.0,0.0,0.0,0.0,165.23639942632852,0.0,0.0
+186,NB-Latex,Utility,Kumho Petrochemical,Ulsan,Ulsan Complex,Ulsan,946,2012,0.0,0.0,0.0,0.0,762.5055310112525,0.0,0.0
+187,NB-Latex,Utility,Hansol Chemical,Jeonju,Other Regions,Other,28,2021,0.0,0.0,0.0,0.0,22.568874067986332,0.0,0.0
+188,EPDM,Utility,Kumho Polychem,Yeosu,Yeosu Complex,Yeosu,310,1987,0.0,0.0,0.0,0.0,249.86967718127727,0.0,0.0
+189,EPDM,Utility,Lotte Versalis Elastomers,Yeosu,Yeosu Complex,Yeosu,96,2018,0.0,0.0,0.0,0.0,77.37899680452458,0.0,0.0
+190,Acetic Acid,Utility,Lotte INEOS Chemical,Ulsan,Ulsan Complex,Ulsan,710,1991,0.0,0.0,0.0,0.0,572.2821638667963,0.0,0.0
+191,Vinyl Acetate,Utility,Lotte INEOS Chemical,Ulsan,Ulsan Complex,Ulsan,460,1996,0.0,0.0,0.0,0.0,370.7743596883469,0.0,0.0
+192,Ethanol,Utility,Korea Alcohol Industrial,Ulsan,Ulsan Complex,Ulsan,70,1974,0.0,0.0,0.0,0.0,56.422185169965836,0.0,0.0
+193,Ethyl Acetate,Utility,Korea Alcohol Industrial,Ulsan,Ulsan Complex,Ulsan,123,1989,0.0,0.0,0.0,0.0,99.14183965579711,0.0,0.0
+194,Alkylbenzene,Utility,ISU Chemical,Ulsan,Ulsan Complex,Ulsan,180,1973,0.0,0.0,0.0,0.0,145.08561900848358,0.0,0.0
+195,PA,Utility,LG Chem,Yeosu,Yeosu Complex,Yeosu,0,1992,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+196,PA,Utility,Aekyung Chemical,Ulsan,Ulsan Complex,Ulsan,210,1972,0.0,0.0,0.0,0.0,169.2665555098975,0.0,0.0
+197,PA,Utility,Hanwha Solutions,Ulsan,Ulsan Complex,Ulsan,0,1997,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+198,PA,Utility,OCI,Pohang,Other Regions,Other,60,1983,0.0,0.0,0.0,0.0,48.361873002827856,0.0,0.0
+199,MA,Utility,Aekyung Chemical,Ulsan,Ulsan Complex,Ulsan,8,1988,0.0,0.0,0.0,0.0,6.448249733710381,0.0,0.0
+200,MA,Utility,Yongsan Chemical,Ulsan,Ulsan Complex,Ulsan,38,1976,0.0,0.0,0.0,0.0,30.629186235124312,0.0,0.0
+201,MA,Utility,Korea PTG,Ulsan,Ulsan Complex,Ulsan,30,1992,0.0,0.0,0.0,0.0,24.180936501413928,0.0,0.0
+202,MA,Utility,Hanwha Solutions,Ulsan,Ulsan Complex,Ulsan,0,1998,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+203,TDI,Utility,OCI,Gunsan,Other Regions,Other,50,1990,0.0,0.0,0.0,0.0,40.301560835689884,0.0,0.0
+204,TDI,Utility,BASF Korea,Yeosu,Yeosu Complex,Yeosu,160,1988,0.0,0.0,0.0,0.0,128.96499467420762,0.0,0.0
+205,TDI,Utility,Hanwha Solutions,Yeosu,Yeosu Complex,Yeosu,150,1981,0.0,0.0,0.0,0.0,120.90468250706965,0.0,0.0
+206,MDI,Utility,Downing Chemical,Yeosu,Yeosu Complex,Yeosu,30,2018,0.0,0.0,0.0,0.0,24.180936501413928,0.0,0.0
+207,MDI,Utility,Kumho Mitsui Chemical,Yeosu,Yeosu Complex,Yeosu,610,1992,0.0,0.0,0.0,0.0,491.67904219541657,0.0,0.0
+208,MDI,Utility,BASF Korea,Yeosu,Yeosu Complex,Yeosu,250,1992,0.0,0.0,0.0,0.0,201.50780417844942,0.0,0.0
+209,Phenol,Utility,LG Chem,Daesan,Daesan Complex,Daesan,360,2013,0.0,0.0,0.0,0.0,290.17123801696715,0.0,0.0
+210,Phenol,Utility,Kumho P&B Chemical,Yeosu,Yeosu Complex,Yeosu,680,1980,0.0,0.0,0.0,0.0,548.1012273653823,0.0,0.0
+211,Phenol,Utility,LG Chem,Yeosu,Yeosu Complex,Yeosu,350,2005,0.0,0.0,0.0,0.0,282.1109258498292,0.0,0.0
+212,Acetone,Utility,LG Chem,Daesan,Daesan Complex,Daesan,225,2013,0.0,0.0,0.0,0.0,181.35702376060448,0.0,0.0
+213,Acetone,Utility,Kumho P&B Chemical,Yeosu,Yeosu Complex,Yeosu,420,1980,0.0,0.0,0.0,0.0,338.533111019795,0.0,0.0
+214,Acetone,Utility,LG Chem,Yeosu,Yeosu Complex,Yeosu,210,2005,0.0,0.0,0.0,0.0,169.2665555098975,0.0,0.0
+215,BPA,Utility,Samyang Innochem,Gunsan,Other Regions,Other,180,2012,0.0,0.0,0.0,0.0,145.08561900848358,0.0,0.0
+216,BPA,Utility,LG Chem,Daesan,Daesan Complex,Daesan,165,2013,0.0,0.0,0.0,0.0,132.9951507577766,0.0,0.0
+217,BPA,Utility,Kumho P&B Chemical,Yeosu,Yeosu Complex,Yeosu,450,1991,0.0,0.0,0.0,0.0,362.71404752120895,0.0,0.0
+218,BPA,Utility,LG Chem,Yeosu,Yeosu Complex,Yeosu,330,2005,0.0,0.0,0.0,0.0,265.9903015155532,0.0,0.0
+219,Epoxy Resin,Utility,Bluecube Chemical,Gumi,Other Regions,Other,52,1990,0.0,0.0,0.0,0.0,41.91362326911747,0.0,0.0
+220,Epoxy Resin,Utility,Kolon Industries,Gimcheon,Other Regions,Other,0,2007,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+221,Epoxy Resin,Utility,Kukdo Chemical,Busan/Iksan/Siheung,Other Regions,Other,530,1973,0.0,0.0,0.0,0.0,427.19654485831273,0.0,0.0
+222,Epoxy Resin,Utility,Kumho P&B Chemical,Yeosu,Yeosu Complex,Yeosu,338,2019,0.0,0.0,0.0,0.0,272.4385512492636,0.0,0.0
+223,Octanol,Utility,LG Chem,Naju,Other Regions,Other,125,1982,0.0,0.0,0.0,0.0,100.75390208922471,0.0,0.0
+224,Octanol,Utility,LG Chem,Yeosu,Yeosu Complex,Yeosu,0,1996,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+225,Octanol,Utility,Hanwha Solutions,Yeosu,Yeosu Complex,Yeosu,152,1997,0.0,0.0,0.0,0.0,122.51674494049725,0.0,0.0
+226,Butanol,Utility,LG Chem,Naju,Other Regions,Other,55,1982,0.0,0.0,0.0,0.0,44.33171691925887,0.0,0.0
+227,Butanol,Utility,Hanwha Solutions,Yeosu,Yeosu Complex,Yeosu,12,1997,0.0,0.0,0.0,0.0,9.672374600565572,0.0,0.0
+228,PPG,Utility,Kumho Petrochemical,Yeosu,Yeosu Complex,Yeosu,152,1997,0.0,0.0,0.0,0.0,122.51674494049725,0.0,0.0
+229,PPG,Utility,PU Core,Ulsan,Ulsan Complex,Ulsan,220,1988,0.0,0.0,0.0,0.0,177.32686767703547,0.0,0.0
+230,PPG,Utility,KPX Chemical,Ulsan,Ulsan Complex,Ulsan,298,1990,0.0,0.0,0.0,0.0,240.1973025807117,0.0,0.0
+231,PPG,Utility,BASF Korea,Ulsan,Ulsan Complex,Ulsan,119,1975,0.0,0.0,0.0,0.0,95.91771478894191,0.0,0.0
+232,MMA,Utility,Lotte MCC,Daesan,Daesan Complex,Daesan,90,1995,0.0,0.0,0.0,0.0,72.54280950424179,0.0,0.0
+233,MMA,Utility,Lotte MCC,Yeosu,Yeosu Complex,Yeosu,97,2009,0.0,0.0,0.0,0.0,78.18502802123837,0.0,0.0
+234,MMA,Utility,Lotte Chemical,Yeosu,Yeosu Complex,Yeosu,50,2013,0.0,0.0,0.0,0.0,40.301560835689884,0.0,0.0
+235,MMA,Utility,LXMMA,Yeosu,Yeosu Complex,Yeosu,260,2001,0.0,0.0,0.0,0.0,209.56811634558738,0.0,0.0
+236,PMMA,Utility,Lotte MCC,Yeosu,Yeosu Complex,Yeosu,110,2008,0.0,0.0,0.0,0.0,125.41811363138999,0.0,0.0
+237,PMMA,Utility,LXMMA,Yeosu,Yeosu Complex,Yeosu,120,1991,0.0,0.0,0.0,0.0,136.8197603251527,0.0,0.0
+238,PMMA,Utility,Arkema,Jinhae,Other Regions,Other,100,1999,0.0,0.0,0.0,0.0,114.01646693762727,0.0,0.0
+239,Carbon Black(CB),Utility,OCI,Gwangyang,Other Regions,Other,150,1992,0.0,0.0,0.0,0.0,120.90468250706965,0.0,0.0
+240,Carbon Black(CB),Utility,HD Hyundai OCI,Daesan,Daesan Complex,Daesan,136,2018,0.0,0.0,0.0,0.0,109.62024547307648,0.0,0.0
+241,Carbon Black(CB),Utility,Birla Carbon Korea,Yeosu,Yeosu Complex,Yeosu,193,1996,0.0,0.0,0.0,0.0,155.56402482576294,0.0,0.0
+242,Carbon Black(CB),Utility,Orion Engineered Carbons,Yeosu,Yeosu Complex,Yeosu,170,1979,0.0,0.0,0.0,0.0,137.02530684134558,0.0,0.0
+243,Carbon Black(CB),Utility,OCI,Pohang,Other Regions,Other,40,1981,0.0,0.0,0.0,0.0,32.241248668551904,0.0,0.0
+244,Petroleum Resin,Utility,Kolon Industries,Daesan,Daesan Complex,Daesan,87,2014,0.0,0.0,0.0,0.0,70.12471585410039,0.0,0.0
+245,Petroleum Resin,Utility,Kolon Industries,Yeosu,Yeosu Complex,Yeosu,50,2004,0.0,0.0,0.0,0.0,40.301560835689884,0.0,0.0
+246,Petroleum Resin,Utility,Hanwha Solutions,Yeosu,Yeosu Complex,Yeosu,86,2019,0.0,0.0,0.0,0.0,69.3186846373866,0.0,0.0
+247,Petroleum Resin,Utility,Kolon Industries,Ulsan,Ulsan Complex,Ulsan,0,1978,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+248,Ethylene,Naphtha Cracker,S-Oil Shaheen,Onsan,Ulsan Complex,Ulsan,1800,2026,3882.6899999999996,3300.2864999999997,0.0,582.4034999999999,39240.0,0.0,3882.6899999999996
+249,Propylene,Naphtha Cracker,S-Oil Shaheen,Onsan,Ulsan Complex,Ulsan,770,2026,1473.0639,1252.104315,0.0,220.959585,37576.0,0.0,1473.0639
+250,Butadiene,Naphtha Cracker,S-Oil Shaheen,Onsan,Ulsan Complex,Ulsan,200,2026,346.92,294.882,0.0,52.038000000000004,20000.0,0.0,346.92
+251,Benzene,BTX Plant,S-Oil Shaheen,Onsan,Ulsan Complex,Ulsan,280,2026,92.13399999999999,0.0,73.70719999999999,18.426799999999997,2604.0,0.0,92.13399999999999
+252,HDPE,Utility,S-Oil Shaheen,Onsan,Ulsan Complex,Ulsan,400,2026,0.0,0.0,0.0,0.0,80000.0,0.0,0.0
+253,PP,Utility,S-Oil Shaheen,Onsan,Ulsan Complex,Ulsan,500,2026,0.0,0.0,0.0,0.0,700.0,0.0,0.0

@@ -23,7 +23,7 @@
 
 ## 1. Executive Summary
 
-This analysis evaluates six decarbonization pathways for Korea's petrochemical industry, combining three production scenarios with two NCC (Naphtha Cracking Center) technology options. The study covers **248 baseline facilities** across four major petrochemical complexes with a total capacity of **100,066 kt/year** (2025 baseline). The Shaheen project adds 6 additional facilities starting in 2026, bringing the total to 254 facilities.
+This analysis evaluates six decarbonization pathways for Korea's petrochemical industry, combining three production scenarios with two NCC (Naphtha Cracking Center) technology options. The study covers **237 baseline facilities** across four major petrochemical complexes with a total capacity of **100,066 kt/year** (2025 baseline). The Shaheen project adds 6 additional facilities starting in 2026, bringing the total to 243 facilities.
 
 ### Key Findings
 - All six scenarios achieve **Net Zero by 2050**
@@ -39,7 +39,7 @@ This analysis evaluates six decarbonization pathways for Korea's petrochemical i
 
 | Pathway | Description | Impact on Capacity |
 |---------|-------------|-------------------|
-| **Shaheen (Growth)** | Baseline + 6 new S-Oil Shaheen facilities (built 2026) | +3.9% capacity (254 facilities total) |
+| **Shaheen (Growth)** | Baseline + 6 new S-Oil Shaheen facilities (built 2026) | +3.9% capacity (243 facilities total) |
 | **Restructure 25%** | Retire 25% oldest NCC capacity | -25% NCC capacity |
 | **Restructure 40%** | Retire 40% oldest NCC capacity | -40% NCC capacity |
 
@@ -196,8 +196,8 @@ Korea's grid is assumed to fully decarbonize by 2050:
 
 | Metric | Value |
 |--------|-------|
-| Baseline facilities (2025) | 248 |
-| With Shaheen (2026+) | 254 |
+| Baseline facilities (2025) | 237 |
+| With Shaheen (2026+) | 243 |
 | Total capacity (baseline) | 100,066 kt/year |
 | Products covered | 54 types |
 | Regions | 4 major complexes |
