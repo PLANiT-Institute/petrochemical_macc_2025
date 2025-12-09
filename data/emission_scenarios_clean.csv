@@ -1,7 +1,0 @@
-scenario_name,constraint_type,year,target_mt,description
-Policy_Target,annual_path,2025,46.3,Current baseline (2025) with 70% operating rate
-Policy_Target,annual_path,2030,37.3,Reduction trajectory (70% adjusted)
-Policy_Target,annual_path,2035,30.4,24.5% reduction relative to 2018 baseline (40.3 Mt at 70%) -> 30.4 Mt
-Policy_Target,annual_path,2040,18.8,Continued reduction trajectory
-Policy_Target,annual_path,2045,9.4,Approaching net zero
-Policy_Target,annual_path,2050,0.0,Net zero target
