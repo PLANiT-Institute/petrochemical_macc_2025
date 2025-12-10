@@ -862,45 +862,56 @@ elif page == "4. Regional Outlook":
 
     st.markdown("---")
 
-    # Regional MAC Summary (Simple Bar Chart)
-    st.header("Regional MAC Summary")
+    # Regional MAC by Technology (Simple Bar Charts)
+    st.header("MAC by Technology per Region")
 
-    # Aggregate MAC by region
-    regional_mac_data = []
+    # Aggregate MAC by region and technology
+    regional_tech_mac_data = []
     for region in regions:
         df_r = df_s[(df_s['region'] == region) & (df_s['abatement_tco2'] > 0)]
         if len(df_r) > 0:
-            total_cost = df_r['total_cost_usd'].sum()
-            total_abatement = df_r['abatement_tco2'].sum()
-            mac = total_cost / total_abatement if total_abatement > 0 else 0
-            regional_mac_data.append({
-                'Region': region,
-                'MAC ($/tCO2)': mac,
-                'Abatement (MtCO2)': total_abatement / 1e6,
-                'Facilities': df_r['facility_id'].nunique()
-            })
+            for tech in df_r['technology'].unique():
+                df_t = df_r[df_r['technology'] == tech]
+                if len(df_t) > 0:
+                    total_cost = df_t['total_cost_usd'].sum()
+                    total_abatement = df_t['abatement_tco2'].sum()
+                    if total_abatement > 0:
+                        regional_tech_mac_data.append({
+                            'Region': region,
+                            'Technology': tech,
+                            'MAC ($/tCO2)': total_cost / total_abatement,
+                            'Abatement (MtCO2)': total_abatement / 1e6,
+                            'Facilities': df_t['facility_id'].nunique()
+                        })
 
-    if regional_mac_data:
-        regional_mac_df = pd.DataFrame(regional_mac_data)
+    if regional_tech_mac_data:
+        regional_tech_df = pd.DataFrame(regional_tech_mac_data)
 
-        col1, col2 = st.columns(2)
+        # Bar chart: MAC by Technology grouped by Region
+        fig = px.bar(regional_tech_df, x='Region', y='MAC ($/tCO2)', color='Technology',
+                    barmode='group', title=f'MAC by Technology per Region ({selected_year})',
+                    color_discrete_map=TECH_COLORS)
+        fig.update_layout(height=400, legend=dict(orientation='h', y=1.1, x=0.5, xanchor='center'))
+        st.plotly_chart(fig, use_container_width=True)
 
-        with col1:
-            fig = px.bar(regional_mac_df, x='Region', y='MAC ($/tCO2)',
-                        title=f'MAC by Region ({selected_year})',
-                        color='Region', color_discrete_map=REGION_COLORS)
-            fig.update_layout(height=350, showlegend=False)
-            st.plotly_chart(fig, use_container_width=True)
-
-        with col2:
-            fig = px.bar(regional_mac_df, x='Region', y='Abatement (MtCO2)',
-                        title=f'Abatement by Region ({selected_year})',
-                        color='Region', color_discrete_map=REGION_COLORS)
-            fig.update_layout(height=350, showlegend=False)
-            st.plotly_chart(fig, use_container_width=True)
+        # Bar chart: Abatement by Technology grouped by Region
+        fig = px.bar(regional_tech_df, x='Region', y='Abatement (MtCO2)', color='Technology',
+                    barmode='group', title=f'Abatement by Technology per Region ({selected_year})',
+                    color_discrete_map=TECH_COLORS)
+        fig.update_layout(height=400, legend=dict(orientation='h', y=1.1, x=0.5, xanchor='center'))
+        st.plotly_chart(fig, use_container_width=True)
 
         # Summary table
-        st.dataframe(regional_mac_df, hide_index=True, use_container_width=True)
+        with st.expander("Detailed Summary Table"):
+            pivot_mac = regional_tech_df.pivot(index='Technology', columns='Region', values='MAC ($/tCO2)')
+            pivot_mac = pivot_mac.round(0)
+            st.subheader("MAC ($/tCO2)")
+            st.dataframe(pivot_mac, use_container_width=True)
+
+            pivot_abate = regional_tech_df.pivot(index='Technology', columns='Region', values='Abatement (MtCO2)')
+            pivot_abate = pivot_abate.round(2)
+            st.subheader("Abatement (MtCO2)")
+            st.dataframe(pivot_abate, use_container_width=True)
 
     st.markdown("---")
 
