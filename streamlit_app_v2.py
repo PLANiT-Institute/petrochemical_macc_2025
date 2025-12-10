@@ -1016,8 +1016,9 @@ elif page == "4. Regional Outlook":
     st.header("Regional MAC by Year")
 
     mac_by_year_data = []
+    df_scenario = df[df['scenario'] == selected_scenario]  # Use selected scenario
     for year in sorted(df['year'].unique()):
-        df_y = df_full[df_full['year'] == year]
+        df_y = df_scenario[df_scenario['year'] == year]
         for region in regions:
             df_r = df_y[(df_y['region'] == region) & (df_y['abatement_tco2'] > 0)]
             if len(df_r) > 0:
