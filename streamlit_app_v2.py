@@ -356,133 +356,71 @@ if page == "1. Scenario Comparison":
 
     st.markdown("---")
 
-    # MACC Curve (IMPROVED - Classic Step Chart Style)
-    st.header("Marginal Abatement Cost Curve (MACC)")
+    # MAC by Technology Over Time (Simple Line Chart)
+    st.header("MAC by Technology Over Time")
 
-    for scenario in selected_scenarios:
-        df_s = df[(df['scenario'] == scenario) & (df['year'] == selected_year)]
-        df_macc = df_s[df_s['abatement_tco2'] > 0].copy()
+    mac_scenario = st.selectbox(
+        "Select Scenario",
+        selected_scenarios,
+        format_func=lambda x: SCENARIO_NAMES.get(x, x),
+        key="mac_scenario_select"
+    )
 
-        if len(df_macc) > 0:
-            # Aggregate by technology for clean MACC
-            tech_summary = df_macc.groupby('technology').agg({
-                'abatement_tco2': 'sum',
-                'total_cost_usd': 'sum',
-                'facility_id': 'nunique'
-            }).reset_index()
-            tech_summary['mac'] = tech_summary['total_cost_usd'] / tech_summary['abatement_tco2']
-            tech_summary['abatement_mt'] = tech_summary['abatement_tco2'] / 1e6
-            tech_summary = tech_summary.sort_values('mac').reset_index(drop=True)
+    # Calculate MAC by technology and year
+    mac_by_tech_year = []
+    df_scenario_mac = df[df['scenario'] == mac_scenario]
 
-            # Calculate cumulative positions
-            tech_summary['x_end'] = tech_summary['abatement_mt'].cumsum()
-            tech_summary['x_start'] = tech_summary['x_end'] - tech_summary['abatement_mt']
-            tech_summary['x_mid'] = (tech_summary['x_start'] + tech_summary['x_end']) / 2
+    for year in sorted(df['year'].unique()):
+        df_y = df_scenario_mac[df_scenario_mac['year'] == year]
+        for tech in df_y['technology'].unique():
+            df_t = df_y[(df_y['technology'] == tech) & (df_y['abatement_tco2'] > 0)]
+            if len(df_t) > 0:
+                total_cost = df_t['total_cost_usd'].sum()
+                total_abatement = df_t['abatement_tco2'].sum()
+                if total_abatement > 0:
+                    mac_by_tech_year.append({
+                        'Year': year,
+                        'Technology': tech,
+                        'MAC ($/tCO2)': total_cost / total_abatement,
+                        'Abatement (MtCO2)': total_abatement / 1e6
+                    })
 
-            fig = go.Figure()
+    if mac_by_tech_year:
+        mac_tech_df = pd.DataFrame(mac_by_tech_year)
 
-            # Draw bars using shapes for proper MACC appearance
-            for idx, row in tech_summary.iterrows():
-                tech = row['technology']
-                color = TECH_COLORS.get(tech, '#808080')
+        col1, col2 = st.columns(2)
 
-                # Add rectangle shape for each technology
-                fig.add_shape(
-                    type="rect",
-                    x0=row['x_start'], x1=row['x_end'],
-                    y0=0, y1=row['mac'],
-                    fillcolor=color,
-                    opacity=0.8,
-                    line=dict(color='white', width=2),
-                    layer="below"
-                )
-
-                # Add invisible scatter for legend
-                fig.add_trace(go.Scatter(
-                    x=[row['x_mid']],
-                    y=[row['mac'] / 2],
-                    mode='markers',
-                    marker=dict(color=color, size=15, symbol='square'),
-                    name=f"{tech} (${row['mac']:.0f}/t)",
-                    hovertemplate=(
-                        f'<b>{tech}</b><br>'
-                        f'Facilities: {row["facility_id"]}<br>'
-                        f'Abatement: {row["abatement_mt"]:.2f} MtCO₂<br>'
-                        f'MAC: ${row["mac"]:.0f}/tCO₂<extra></extra>'
-                    ),
-                    showlegend=True
-                ))
-
-                # Add text label on bar
-                fig.add_annotation(
-                    x=row['x_mid'],
-                    y=row['mac'] / 2,
-                    text=f"<b>{tech}</b><br>${row['mac']:.0f}/t",
-                    showarrow=False,
-                    font=dict(color='white', size=11),
-                    align='center'
-                )
-
-            # Add step line on top (classic MACC curve line)
-            x_line = [0]
-            y_line = [0]
-            for _, row in tech_summary.iterrows():
-                x_line.extend([row['x_start'], row['x_start'], row['x_end']])
-                y_line.extend([row['mac'], row['mac'], row['mac']])
-
-            fig.add_trace(go.Scatter(
-                x=x_line, y=y_line,
-                mode='lines',
-                line=dict(color='black', width=3),
-                name='MACC Curve',
-                showlegend=False,
-                hoverinfo='skip'
-            ))
-
-            total_abatement = tech_summary['abatement_mt'].sum()
-            avg_mac = df_macc['total_cost_usd'].sum() / df_macc['abatement_tco2'].sum()
-
+        with col1:
+            fig = px.line(mac_tech_df, x='Year', y='MAC ($/tCO2)', color='Technology',
+                         markers=True, title=f'MAC by Technology - {SCENARIO_NAMES.get(mac_scenario, mac_scenario)}',
+                         color_discrete_map=TECH_COLORS)
             fig.update_layout(
-                title=dict(
-                    text=f'MACC - {SCENARIO_NAMES.get(scenario, scenario)} ({selected_year})<br>'
-                         f'<sub>Total Abatement: {total_abatement:.1f} MtCO₂ | Avg MAC: ${avg_mac:.0f}/tCO₂</sub>',
-                    x=0.5,
-                    xanchor='center'
-                ),
-                xaxis=dict(
-                    title='Cumulative Abatement (MtCO₂)',
-                    range=[0, total_abatement * 1.02],
-                    showgrid=True,
-                    gridcolor='lightgray'
-                ),
-                yaxis=dict(
-                    title='Marginal Abatement Cost ($/tCO₂)',
-                    range=[0, tech_summary['mac'].max() * 1.15],
-                    showgrid=True,
-                    gridcolor='lightgray'
-                ),
-                height=500,
-                plot_bgcolor='white',
-                legend=dict(
-                    orientation='h',
-                    yanchor='bottom',
-                    y=1.02,
-                    xanchor='center',
-                    x=0.5,
-                    bgcolor='rgba(255,255,255,0.8)'
-                ),
-                margin=dict(t=100)
+                height=450,
+                yaxis_title='MAC ($/tCO₂)',
+                legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='center', x=0.5)
             )
-
             st.plotly_chart(fig, use_container_width=True)
 
-            # Summary table
-            with st.expander(f"Technology Summary - {SCENARIO_NAMES.get(scenario, scenario)}"):
-                summary_display = tech_summary[['technology', 'facility_id', 'abatement_mt', 'mac']].copy()
-                summary_display.columns = ['Technology', 'Facilities', 'Abatement (Mt)', 'MAC ($/tCO₂)']
-                summary_display['MAC ($/tCO₂)'] = summary_display['MAC ($/tCO₂)'].round(0).astype(int)
-                summary_display['Abatement (Mt)'] = summary_display['Abatement (Mt)'].round(2)
-                st.dataframe(summary_display, hide_index=True, use_container_width=True)
+        with col2:
+            fig = px.line(mac_tech_df, x='Year', y='Abatement (MtCO2)', color='Technology',
+                         markers=True, title='Abatement by Technology Over Time',
+                         color_discrete_map=TECH_COLORS)
+            fig.update_layout(
+                height=450,
+                yaxis_title='Abatement (MtCO₂)',
+                legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='center', x=0.5)
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Summary table for selected year
+        st.subheader(f"MAC Summary ({selected_year})")
+        mac_year_df = mac_tech_df[mac_tech_df['Year'] == selected_year].copy()
+        if len(mac_year_df) > 0:
+            mac_year_df = mac_year_df.sort_values('MAC ($/tCO2)')
+            mac_year_df['MAC ($/tCO2)'] = mac_year_df['MAC ($/tCO2)'].round(0).astype(int)
+            mac_year_df['Abatement (MtCO2)'] = mac_year_df['Abatement (MtCO2)'].round(2)
+            st.dataframe(mac_year_df[['Technology', 'MAC ($/tCO2)', 'Abatement (MtCO2)']],
+                        hide_index=True, use_container_width=True)
 
 
 # =============================================================================
@@ -924,86 +862,45 @@ elif page == "4. Regional Outlook":
 
     st.markdown("---")
 
-    # Regional MACC Curves (Clean Shape Style)
-    st.header("Regional MACC Curves")
+    # Regional MAC Summary (Simple Bar Chart)
+    st.header("Regional MAC Summary")
 
-    # Create 2x2 grid for regions
-    cols = st.columns(2)
-    for idx, region in enumerate(regions):
-        df_r = df_s[(df_s['region'] == region) & (df_s['abatement_tco2'] > 0)].copy()
-
+    # Aggregate MAC by region
+    regional_mac_data = []
+    for region in regions:
+        df_r = df_s[(df_s['region'] == region) & (df_s['abatement_tco2'] > 0)]
         if len(df_r) > 0:
-            # Aggregate by technology
-            tech_summary = df_r.groupby('technology').agg({
-                'abatement_tco2': 'sum',
-                'total_cost_usd': 'sum',
-                'facility_id': 'nunique'
-            }).reset_index()
-            tech_summary['mac'] = tech_summary['total_cost_usd'] / tech_summary['abatement_tco2']
-            tech_summary['abatement_mt'] = tech_summary['abatement_tco2'] / 1e6
-            tech_summary = tech_summary.sort_values('mac').reset_index(drop=True)
-            tech_summary['x_end'] = tech_summary['abatement_mt'].cumsum()
-            tech_summary['x_start'] = tech_summary['x_end'] - tech_summary['abatement_mt']
-            tech_summary['x_mid'] = (tech_summary['x_start'] + tech_summary['x_end']) / 2
+            total_cost = df_r['total_cost_usd'].sum()
+            total_abatement = df_r['abatement_tco2'].sum()
+            mac = total_cost / total_abatement if total_abatement > 0 else 0
+            regional_mac_data.append({
+                'Region': region,
+                'MAC ($/tCO2)': mac,
+                'Abatement (MtCO2)': total_abatement / 1e6,
+                'Facilities': df_r['facility_id'].nunique()
+            })
 
-            fig = go.Figure()
+    if regional_mac_data:
+        regional_mac_df = pd.DataFrame(regional_mac_data)
 
-            # Draw bars using shapes
-            for _, row in tech_summary.iterrows():
-                tech = row['technology']
-                color = TECH_COLORS.get(tech, '#808080')
+        col1, col2 = st.columns(2)
 
-                fig.add_shape(
-                    type="rect",
-                    x0=row['x_start'], x1=row['x_end'],
-                    y0=0, y1=row['mac'],
-                    fillcolor=color,
-                    opacity=0.8,
-                    line=dict(color='white', width=1),
-                    layer="below"
-                )
+        with col1:
+            fig = px.bar(regional_mac_df, x='Region', y='MAC ($/tCO2)',
+                        title=f'MAC by Region ({selected_year})',
+                        color='Region', color_discrete_map=REGION_COLORS)
+            fig.update_layout(height=350, showlegend=False)
+            st.plotly_chart(fig, use_container_width=True)
 
-                # Legend marker (only for first region)
-                if idx == 0:
-                    fig.add_trace(go.Scatter(
-                        x=[None], y=[None],
-                        mode='markers',
-                        marker=dict(color=color, size=10, symbol='square'),
-                        name=tech,
-                        showlegend=True
-                    ))
+        with col2:
+            fig = px.bar(regional_mac_df, x='Region', y='Abatement (MtCO2)',
+                        title=f'Abatement by Region ({selected_year})',
+                        color='Region', color_discrete_map=REGION_COLORS)
+            fig.update_layout(height=350, showlegend=False)
+            st.plotly_chart(fig, use_container_width=True)
 
-            # Step line
-            x_line = [0]
-            y_line = [0]
-            for _, row in tech_summary.iterrows():
-                x_line.extend([row['x_start'], row['x_start'], row['x_end']])
-                y_line.extend([row['mac'], row['mac'], row['mac']])
-
-            fig.add_trace(go.Scatter(
-                x=x_line, y=y_line,
-                mode='lines',
-                line=dict(color='black', width=2),
-                showlegend=False,
-                hoverinfo='skip'
-            ))
-
-            total_abatement = tech_summary['abatement_mt'].sum()
-            avg_mac = df_r['total_cost_usd'].sum() / df_r['abatement_tco2'].sum() if df_r['abatement_tco2'].sum() > 0 else 0
-
-            fig.update_layout(
-                title=f'{region}<br><sub>{total_abatement:.1f} Mt | ${avg_mac:.0f}/t</sub>',
-                xaxis=dict(title='Abatement (Mt)', range=[0, total_abatement * 1.05]),
-                yaxis=dict(title='MAC ($/t)', range=[0, tech_summary['mac'].max() * 1.15]),
-                height=320,
-                plot_bgcolor='white',
-                margin=dict(t=60, b=40, l=50, r=20),
-                showlegend=(idx == 0),
-                legend=dict(orientation='h', y=1.15, x=0.5, xanchor='center')
-            )
-
-            with cols[idx % 2]:
-                st.plotly_chart(fig, use_container_width=True)
+        # Summary table
+        st.dataframe(regional_mac_df, hide_index=True, use_container_width=True)
 
     st.markdown("---")
 
@@ -1011,7 +908,7 @@ elif page == "4. Regional Outlook":
     st.header("Regional MAC by Year")
 
     mac_by_year_data = []
-    df_scenario = df[df['scenario'] == selected_scenario]  # Use selected scenario
+    df_scenario = df[df['scenario'] == scenario_single]  # Use selected scenario
     for year in sorted(df['year'].unique()):
         df_y = df_scenario[df_scenario['year'] == year]
         for region in regions:
