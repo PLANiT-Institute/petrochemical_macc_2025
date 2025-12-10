@@ -1,6 +1,6 @@
 # Korean Petrochemical MACC Model - Data Flow Documentation
 
-**Version:** 2.0
+**Version:** 2.1
 **Updated:** December 10, 2024
 
 ## Overview
@@ -331,3 +331,4 @@ petrochemical_macc_2025/
 |---------|------|---------|
 | 1.0 | Oct 2024 | Initial release |
 | 2.0 | Dec 10, 2024 | Updated facility count (237); Corrected emission factors; Added LCOH formula; Updated file paths; Synchronized with data files |
+| 2.1 | Dec 10, 2024 | Fixed restructure scenario bug; Updated investment figures; Baseline emissions corrected to 47.0 MtCO₂/year |

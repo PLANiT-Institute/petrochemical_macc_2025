@@ -1,7 +1,7 @@
 # Korea Petrochemical Net Zero Pathway Analysis
 ## Assumptions and Methodology Documentation
 
-**Version:** Final v1.1
+**Version:** Final v1.2
 **Date:** December 2024 (Updated: December 10, 2024)
 **Project:** Korea Petrochemical Industry Decarbonization Pathway Analysis
 **Analysis Period:** 2025-2050
@@ -27,7 +27,11 @@ This analysis evaluates six decarbonization pathways for Korea's petrochemical i
 
 ### Key Findings
 - All six scenarios achieve **Net Zero by 2050**
-- Investment range: **$13.4B - $22.1B** depending on scenario
+- **Baseline emissions: 47.0 MtCO2/year** at 70% operating rate
+- Investment range: **$21.8B - $41.7B** depending on scenario
+  - Shaheen scenarios: $41.4-41.7B (growth pathway)
+  - Restructure 25%: $22.5-22.8B
+  - Restructure 40%: $21.8-22.3B
 - No CCS/CCUS technologies included - focus on electrification and green hydrogen
 - Complete grid decarbonization assumed by 2050 (Grid EF = 0)
 
@@ -381,6 +385,7 @@ Example (2030):
 |---------|------|--------|---------|
 | 1.0 | Dec 2024 | PLANiT | Initial release |
 | 1.1 | Dec 10, 2024 | PLANiT | Updated emission factors to match data files; Added LCOH formula and RE-H2 price linkage; Corrected grid price trajectory |
+| 1.2 | Dec 10, 2024 | PLANiT | Fixed restructure scenario bug; Updated investment figures ($21.8B-$41.7B); Baseline emissions corrected to 47.0 MtCO2/year |
 
 ---
 

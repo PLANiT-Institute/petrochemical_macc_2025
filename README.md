@@ -8,9 +8,10 @@ A comprehensive **facility-level analysis tool** for evaluating decarbonization 
 
 ### Key Results
 - **237 baseline facilities** analyzed across 4 major complexes (100,066 kt/year capacity)
-- **Baseline emissions: 44.7 MtCO2/year** at 70% operating rate (63.8 MtCO2 at 100%)
+- **243 total facilities** with Shaheen project (+6 from 2026)
+- **Baseline emissions: 47.0 MtCO2/year** at 70% operating rate (67.1 MtCO2 at 100%)
 - All scenarios achieve **Net Zero by 2050**
-- Investment range: **$13.4B - $22.1B** depending on scenario
+- Investment range: **$21.8B - $41.7B** depending on scenario
 - **No CCS/CCUS** - focus on electrification and green hydrogen
 
 ## Key Features
@@ -143,5 +144,6 @@ Seoul, South Korea
 
 ## Version History
 
+- **v1.2** (December 10, 2024): Fixed restructure scenario bug; Updated investment figures; Created unified facility_master.csv
 - **v1.1** (December 10, 2024): Documentation synchronized with data files; Added LCOH formula; Corrected Grid EF (0.0 by 2050)
 - **v1.0** (December 2024): Final release with 6 scenarios, regional analysis, and client reporting

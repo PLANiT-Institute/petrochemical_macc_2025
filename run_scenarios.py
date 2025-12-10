@@ -110,12 +110,20 @@ def is_btx_facility(process):
     return process == 'BTX Plant'
 
 
-def calculate_facility_baseline(facility, intensity, operating_rate, grid_ef):
+def calculate_facility_baseline(facility, intensity, operating_rate, grid_ef, capacity_multiplier=1.0):
     """
     Calculate baseline emissions for a facility (no technology deployment).
+
+    Args:
+        facility: Facility data row
+        intensity: Energy intensity data row
+        operating_rate: Operating rate (0-1)
+        grid_ef: Grid emission factor (tCO2/MWh)
+        capacity_multiplier: Capacity multiplier for restructure scenarios (0-1)
     """
     capacity_tonnes = facility['capacity_kt'] * 1000
-    production_tonnes = capacity_tonnes * operating_rate
+    # Apply both capacity multiplier (restructure) and operating rate
+    production_tonnes = capacity_tonnes * capacity_multiplier * operating_rate
 
     # Calculate emissions by fuel type
     emissions_by_source = {}
@@ -193,12 +201,16 @@ def calculate_facility_mac(facility_baseline, process, ncc_tech, year, data, gri
         other_fuel_emissions = emissions.get('lng', 0) + emissions.get('fuel_gas', 0) + emissions.get('byproduct_gas', 0)
 
         if ncc_tech == 'NCC-H2':
-            h2_demand_t = naphtha_emissions * 0.12
+            # H2 demand: 0.2 t-H2/t-C2H4 from tech spec
+            # Convert from emissions: factor = 0.2 / (29.0 GJ/t * 0.0542 tCO2/GJ) = 0.127
+            h2_demand_t = naphtha_emissions * 0.127
             fuel_cost = h2_demand_t * h2_price * 1000
             added_elec_mwh = 0
         else:
+            # Electricity demand: 5.0 MWh/t-C2H4 from tech spec
+            # Convert from emissions: factor = 5.0 / (29.0 GJ/t * 0.0542 tCO2/GJ) = 3.18
             h2_demand_t = 0
-            added_elec_mwh = naphtha_emissions * 2.5
+            added_elec_mwh = naphtha_emissions * 3.18
             fuel_cost = added_elec_mwh * re_price
 
         # Heat pump for other fuels
@@ -211,7 +223,9 @@ def calculate_facility_mac(facility_baseline, process, ncc_tech, year, data, gri
     elif is_btx_facility(process):
         technology = 'RDH'
         h2_demand_t = 0
-        rdh_elec_mwh = facility_baseline['heat_demand_gj'] / 3.6 * 0.9
+        # RDH efficiency is 93%, so electricity needed = heat / efficiency
+        # Convert GJ to MWh (÷3.6) then divide by efficiency (0.93)
+        rdh_elec_mwh = facility_baseline['heat_demand_gj'] / 3.6 / 0.93
         added_elec_mwh = rdh_elec_mwh
         fuel_cost = rdh_elec_mwh * re_price
 
@@ -330,6 +344,7 @@ def run_scenario(scenario, data, years):
     mac_year = 2035
     op_row = op_rate_df[op_rate_df['year'] == mac_year]
     operating_rate = op_row['operating_rate_pct'].iloc[0] / 100 if len(op_row) > 0 else 0.70
+    capacity_multiplier = op_row['cumulative_capacity_multiplier'].iloc[0] if len(op_row) > 0 else 1.0
 
     grid_row = data['grid_emissions'][data['grid_emissions']['year'] == mac_year]
     grid_ef = grid_row['grid_ef_tco2_per_mwh'].iloc[0] if len(grid_row) > 0 else 0.436
@@ -344,8 +359,8 @@ def run_scenario(scenario, data, years):
         intensity = intensities.iloc[idx]
         process = facility.get('process', '')
 
-        # Calculate baseline
-        baseline = calculate_facility_baseline(facility, intensity, operating_rate, grid_ef)
+        # Calculate baseline with capacity multiplier for restructure scenarios
+        baseline = calculate_facility_baseline(facility, intensity, operating_rate, grid_ef, capacity_multiplier)
         total_baseline_emissions += baseline['combustion_emissions']  # Only combustion (electricity handled by grid)
 
         # Calculate MAC
@@ -382,9 +397,10 @@ def run_scenario(scenario, data, years):
     for year in years:
         print(f"    Year {year}...")
 
-        # Get operating rate and grid EF for year
+        # Get operating rate, capacity multiplier, and grid EF for year
         op_row = op_rate_df[op_rate_df['year'] == year]
         operating_rate = op_row['operating_rate_pct'].iloc[0] / 100 if len(op_row) > 0 else 0.70
+        capacity_multiplier = op_row['cumulative_capacity_multiplier'].iloc[0] if len(op_row) > 0 else 1.0
 
         grid_row = data['grid_emissions'][data['grid_emissions']['year'] == year]
         grid_ef = grid_row['grid_ef_tco2_per_mwh'].iloc[0] if len(grid_row) > 0 else 0.436
@@ -406,11 +422,11 @@ def run_scenario(scenario, data, years):
             process = facility.get('process', '')
             facility_id = facility['facility_id']
 
-            # Calculate baseline emissions
-            baseline = calculate_facility_baseline(facility, intensity, operating_rate, grid_ef)
+            # Calculate baseline emissions with capacity multiplier
+            baseline = calculate_facility_baseline(facility, intensity, operating_rate, grid_ef, capacity_multiplier)
 
-            # BAU emissions (with 2025 grid EF)
-            baseline_2025_grid = calculate_facility_baseline(facility, intensity, operating_rate, BASELINE_GRID_EF)
+            # BAU emissions (with 2025 grid EF and capacity multiplier)
+            baseline_2025_grid = calculate_facility_baseline(facility, intensity, operating_rate, BASELINE_GRID_EF, capacity_multiplier)
             bau_emissions = baseline_2025_grid['total_emissions']
 
             # Check if technology is deployed

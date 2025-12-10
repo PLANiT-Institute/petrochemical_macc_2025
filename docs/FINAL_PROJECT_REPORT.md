@@ -3,7 +3,7 @@
 
 **Prepared by:** PLANiT Institute
 **Date:** December 2024 (Updated: December 10, 2024)
-**Version:** 2.1
+**Version:** 2.2
 
 ---
 
@@ -30,11 +30,12 @@ This report presents a comprehensive analysis of decarbonization pathways for Ko
 |--------|-------|
 | **Total Facilities Analyzed** | 237 (243 with Shaheen) |
 | **Total Capacity** | 100,066 kt/year |
-| **Baseline Emissions (100% Op)** | 66.19 MtCO₂/year |
-| **Baseline Emissions (70% Op)** | 46.34 MtCO₂/year |
+| **Baseline Emissions (100% Op)** | 67.14 MtCO₂/year |
+| **Baseline Emissions (70% Op)** | 47.00 MtCO₂/year |
 | **Operating Rate Assumption** | 70% (Flat 2025-2050) |
-| **2035 Target** | 43.5 MtCO₂ (24.5% reduction) |
+| **2035 Target** | 35.5 MtCO₂ (24.5% reduction) |
 | **2050 Target** | 0 MtCO₂ (Net Zero) |
+| **Investment Range** | $21.8B - $41.7B |
 
 ### Critical Insight
 **The model successfully achieves Net Zero by 2050.** The integration of RotoDynamic Heater (RDH) technology for high-temperature processes, combined with comprehensive NCC electrification and renewable energy procurement, eliminates the residual emissions gap.

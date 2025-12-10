@@ -2,7 +2,7 @@
 # 한국 석유화학 MACC 모델 문서
 
 **Date:** December 10, 2024
-**Version:** 2.0
+**Version:** 2.1
 **Status:** COMPLETE - All scenarios executed with final assumptions
 
 ---
@@ -151,7 +151,11 @@ Where:
 ### 4.2 Key Results
 
 - **All scenarios achieve Net Zero by 2050**
-- **Investment range:** $13.4B - $22.1B depending on scenario
+- **Baseline emissions: 47.0 MtCO₂/year** at 70% operating rate
+- **Investment range:** $21.8B - $41.7B depending on scenario
+  - Shaheen scenarios: $41.4-41.7B (growth pathway with 243 facilities)
+  - Restructure 25%: $22.5-22.8B (237 facilities, -30.9% NCC capacity)
+  - Restructure 40%: $21.8-22.3B (237 facilities, -40% NCC capacity)
 - **No CCS/CCUS** - focus on electrification and green hydrogen
 
 ---
@@ -228,6 +232,7 @@ This model incorporates data and methodologies from **PLANiT Institute (2025)**:
 |---------|------|---------|
 | 1.0 | Oct 2024 | Initial release |
 | 2.0 | Dec 10, 2024 | Updated all price trajectories; Corrected Grid EF to 0.0 (2050); Added LCOH formula; Synchronized with data files |
+| 2.1 | Dec 10, 2024 | Fixed restructure scenario bug; Updated investment figures ($21.8B-$41.7B); Baseline emissions corrected to 47.0 MtCO₂/year |
 
 ---
 
