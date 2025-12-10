@@ -8,6 +8,7 @@ Comprehensive dashboard with 6 pages:
 4. Regional Transition Outlook - Regional metrics, H2 demand, regional MACCs
 5. Facility-Level Results - Summaries and searchable table
 6. Energy Infrastructure - Electricity and H2 demand by scenario
+7. Documentation - Full methodology and assumptions documentation
 
 Reads from outputs/scenario_results.csv
 """
@@ -29,6 +30,7 @@ st.set_page_config(
 # Paths
 BASE_DIR = Path(__file__).parent
 DATA_DIR = BASE_DIR / "data"
+DOCS_DIR = BASE_DIR / "docs"
 OUTPUT_FILE = BASE_DIR / "outputs" / "scenario_results.csv"
 
 # Scenario names
@@ -176,6 +178,32 @@ def load_all_assumptions():
     return assumptions
 
 
+@st.cache_data
+def load_documentation():
+    """Load all documentation markdown files"""
+    docs = {}
+    doc_files = {
+        'Assumptions & Methodology': 'ASSUMPTIONS_AND_METHODOLOGY.md',
+        'Model Documentation': 'MODEL_DOCUMENTATION.md',
+        'Model Flow': 'MODEL_FLOW.md',
+        'Final Project Report': 'FINAL_PROJECT_REPORT.md',
+        'Energy Intensity Sources': 'ENERGY_INTENSITY_SOURCES.md',
+    }
+
+    for name, filename in doc_files.items():
+        filepath = DOCS_DIR / filename
+        if filepath.exists():
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    docs[name] = f.read()
+            except Exception as e:
+                docs[name] = f"Error loading {filename}: {str(e)}"
+        else:
+            docs[name] = f"File not found: {filename}"
+
+    return docs
+
+
 # Load data
 df = load_data()
 assumptions = load_all_assumptions()
@@ -196,7 +224,8 @@ st.sidebar.markdown("---")
 page = st.sidebar.radio(
     "📑 Select Page",
     ["1. Scenario Comparison", "2. Assumptions", "3. Technology Details",
-     "4. Regional Outlook", "5. Facility Results", "6. Energy Infrastructure"]
+     "4. Regional Outlook", "5. Facility Results", "6. Energy Infrastructure",
+     "7. Documentation"]
 )
 
 st.sidebar.markdown("---")
@@ -1189,6 +1218,72 @@ elif page == "6. Energy Infrastructure":
                     title='H2 Demand by Region', color='region',
                     color_discrete_map=REGION_COLORS)
         st.plotly_chart(fig, use_container_width=True)
+
+
+# =============================================================================
+# PAGE 7: DOCUMENTATION
+# =============================================================================
+elif page == "7. Documentation":
+    st.title("📚 Documentation")
+    st.markdown("Complete methodology and assumptions documentation for the Korea Petrochemical Net Zero model.")
+
+    # Load documentation
+    docs = load_documentation()
+
+    # Document selector
+    doc_names = list(docs.keys())
+    selected_doc = st.selectbox(
+        "Select Document",
+        doc_names,
+        index=0
+    )
+
+    st.markdown("---")
+
+    # Quick navigation info
+    with st.expander("📖 Document Overview", expanded=False):
+        st.markdown("""
+        | Document | Description |
+        |----------|-------------|
+        | **Assumptions & Methodology** | Complete assumptions, scenario definitions, technology parameters |
+        | **Model Documentation** | Technical model summary with price trajectories and LCOH formula |
+        | **Model Flow** | Data flow diagram and calculation methodology |
+        | **Final Project Report** | Executive summary with key findings and results |
+        | **Energy Intensity Sources** | Literature references for energy intensity values |
+        """)
+
+    # Display selected document
+    if selected_doc in docs:
+        st.markdown(docs[selected_doc])
+    else:
+        st.warning("Document not found.")
+
+    # Download section
+    st.markdown("---")
+    st.subheader("📥 Download Documentation")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if selected_doc in docs:
+            st.download_button(
+                label=f"Download {selected_doc}",
+                data=docs[selected_doc],
+                file_name=f"{selected_doc.replace(' ', '_').replace('&', 'and')}.md",
+                mime="text/markdown"
+            )
+
+    with col2:
+        # Download all as combined file
+        all_docs_combined = "\n\n---\n\n".join([
+            f"# {name}\n\n{content}" for name, content in docs.items()
+        ])
+        st.download_button(
+            label="Download All Documentation",
+            data=all_docs_combined,
+            file_name="Korea_Petrochemical_NetZero_Documentation.md",
+            mime="text/markdown"
+        )
 
 
 # =============================================================================

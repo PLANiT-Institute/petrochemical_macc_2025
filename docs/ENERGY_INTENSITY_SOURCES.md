@@ -4,7 +4,7 @@
 
 This document provides **researched sources** for the energy intensity values used in the Korean Petrochemical MACC model for all product categories: NCC (Ethylene, Propylene, Butadiene), BTX (Benzene, Toluene, Xylene), and Polymers.
 
-**Last Updated:** December 2024
+**Last Updated:** December 10, 2024
 
 ---
 

@@ -1,8 +1,8 @@
 # Korea Petrochemical Net Zero Pathway Analysis
 ## Assumptions and Methodology Documentation
 
-**Version:** Final v1.0
-**Date:** December 2024
+**Version:** Final v1.1
+**Date:** December 2024 (Updated: December 10, 2024)
 **Project:** Korea Petrochemical Industry Decarbonization Pathway Analysis
 **Analysis Period:** 2025-2050
 
@@ -130,20 +130,7 @@ All technologies assume **50% CAPEX reduction by 2050** based on technology lear
 
 ## 4. Energy Price Trajectories
 
-### 4.1 Green Hydrogen Price (LCOH)
-
-Based on PLANiT LCOH calculation model:
-
-| Year | H2 Price ($/kg) | Key Assumptions |
-|------|-----------------|-----------------|
-| 2025 | 4.58 | RE=$65/MWh, Electrolyzer=$1000/kW, Eff=70% |
-| 2030 | 3.91 | RE cost decline, electrolyzer learning |
-| 2040 | 2.82 | Continued cost reduction |
-| 2050 | 2.01 | Target: ~$2/kg (IEA Net Zero) |
-
-**Decline rate:** 56% reduction from 2025 to 2050
-
-### 4.2 Renewable Electricity Price (RE-PPA)
+### 4.1 Renewable Electricity Price (RE-PPA)
 
 Based on IRENA 2024 and IEA WEO 2024:
 
@@ -156,14 +143,48 @@ Based on IRENA 2024 and IEA WEO 2024:
 
 **Decline rate:** 54% reduction from 2025 to 2050
 
+### 4.2 Green Hydrogen Price (LCOH)
+
+**Critical Link: H2 price is calculated from RE price via LCOH formula.**
+
+The Levelized Cost of Hydrogen (LCOH) is dynamically calculated based on:
+- Renewable electricity price (primary driver)
+- Electrolyzer CAPEX (with learning curve)
+- Electrolyzer efficiency (improving over time)
+
+**LCOH Formula:**
+```
+LCOH = (CAPEX × CRF + Fixed_OPEX + Stack_Replacement) / Annual_H2_Production + Electricity_Cost
+
+Where:
+- CRF = Capital Recovery Factor (8% discount rate, 20-year lifetime)
+- Electricity consumption = 39.4 kWh/kg H2 (HHV) ÷ Efficiency
+- Capacity factor = 90%
+```
+
+**H2 Price Trajectory (derived from RE prices):**
+
+| Year | H2 Price ($/kg) | RE Price | Electrolyzer CAPEX | Efficiency |
+|------|-----------------|----------|-------------------|------------|
+| 2025 | 4.58 | $65/MWh | $1,000/kW | 70% |
+| 2030 | 3.91 | $56/MWh | $900/kW | 71% |
+| 2035 | 3.33 | $48/MWh | $800/kW | 72% |
+| 2040 | 2.82 | $41/MWh | $700/kW | 73% |
+| 2045 | 2.39 | $35/MWh | $600/kW | 74% |
+| 2050 | 2.01 | $30/MWh | $500/kW | 75% |
+
+**Decline rate:** 56% reduction from 2025 to 2050
+
 ### 4.3 Grid Electricity Price
 
 | Year | Grid Price ($/MWh) | Notes |
 |------|-------------------|-------|
-| 2025 | 85.00 | Korea industrial rate |
-| 2030 | 80.00 | Gradual transition |
-| 2040 | 60.00 | Higher RE penetration |
-| 2050 | 35.00 | Near RE-PPA parity |
+| 2025 | 100.00 | Korea industrial rate |
+| 2030 | 118.28 | Transition period |
+| 2040 | 154.83 | Grid modernization costs |
+| 2050 | 191.38 | Full decarbonization achieved |
+
+**Note:** Grid price increases reflect infrastructure investment costs for decarbonization. By 2050, the grid is fully decarbonized (EF = 0), which requires significant capital investment in renewable generation, storage, and grid upgrades.
 
 ---
 
@@ -240,15 +261,17 @@ Electricity = Electricity_consumption × Grid_EF
 
 ### 7.2 Emission Factors
 
-| Source | Emission Factor | Unit |
-|--------|-----------------|------|
-| Naphtha | 0.0693 | tCO2/GJ |
-| LNG | 0.0561 | tCO2/GJ |
-| Fuel Gas | 0.0630 | tCO2/GJ |
-| LPG | 0.0631 | tCO2/GJ |
-| Fuel Oil | 0.0774 | tCO2/GJ |
-| Diesel | 0.0741 | tCO2/GJ |
-| Grid Electricity | 0.436 (2025) | tCO2/MWh |
+| Source | Emission Factor | Unit | Reference |
+|--------|-----------------|------|-----------|
+| Naphtha | 0.0542 | tCO2/GJ | IPCC 2019, Table 2.3 |
+| LNG | 0.0561 | tCO2/GJ | IPCC 2019, Table 2.3 |
+| Fuel Gas | 0.050 | tCO2/GJ | API Compendium 2021 |
+| Byproduct Gas | 0.048 | tCO2/GJ | API Compendium 2021 |
+| LPG | 0.0631 | tCO2/GJ | IPCC 2019, Table 2.3 |
+| Fuel Oil | 0.0773 | tCO2/GJ | IPCC 2019, Table 2.3 |
+| Diesel | 0.0741 | tCO2/GJ | IPCC 2019, Table 2.3 |
+| Grid Electricity | 0.436 (2025) | tCO2/MWh | Korea Grid 2025 |
+| Green H2 | 0.0 | tCO2/kg | Zero-emission electrolysis |
 
 ### 7.3 Abatement Calculation
 
@@ -357,6 +380,7 @@ Example (2030):
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | Dec 2024 | PLANiT | Initial release |
+| 1.1 | Dec 10, 2024 | PLANiT | Updated emission factors to match data files; Added LCOH formula and RE-H2 price linkage; Corrected grid price trajectory |
 
 ---
 

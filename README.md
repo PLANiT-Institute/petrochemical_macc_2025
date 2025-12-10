@@ -92,11 +92,26 @@ streamlit run streamlit_app.py
 
 | Parameter | 2025 | 2050 | Unit |
 |-----------|------|------|------|
-| Green H2 Price | 4.58 | 2.01 | $/kg |
 | RE Electricity | 65 | 30 | $/MWh |
+| Green H2 Price* | 4.58 | 2.01 | $/kg |
 | Grid EF | 0.436 | 0.000 | tCO2/MWh |
 | Heat Pump COP | 4.0 | 4.0 | - |
 | CAPEX Learning | - | -50% | % |
+
+*H₂ price is calculated from RE price via LCOH formula (linked)
+
+### H₂ Price - RE Price Linkage (LCOH)
+
+Green hydrogen price is dynamically calculated from renewable electricity price:
+
+```
+LCOH = (Electrolyzer CAPEX × CRF + OPEX) / H2_Production + Electricity_Cost
+
+Key parameters:
+- Electrolyzer CAPEX: $1,000/kW (2025) → $500/kW (2050)
+- Efficiency: 70% (2025) → 75% (2050)
+- Capacity Factor: 90%
+```
 
 See `docs/ASSUMPTIONS_AND_METHODOLOGY.md` for complete details.
 
@@ -128,4 +143,5 @@ Seoul, South Korea
 
 ## Version History
 
+- **v1.1** (December 10, 2024): Documentation synchronized with data files; Added LCOH formula; Corrected Grid EF (0.0 by 2050)
 - **v1.0** (December 2024): Final release with 6 scenarios, regional analysis, and client reporting

@@ -1,9 +1,9 @@
 # Korean Petrochemical Industry Decarbonization Model
 ## Comprehensive Project Report
 
-**Prepared by:** PLANiT Institute  
-**Date:** December 2024  
-**Version:** 2.0
+**Prepared by:** PLANiT Institute
+**Date:** December 2024 (Updated: December 10, 2024)
+**Version:** 2.1
 
 ---
 
@@ -28,7 +28,7 @@ This report presents a comprehensive analysis of decarbonization pathways for Ko
 
 | Metric | Value |
 |--------|-------|
-| **Total Facilities Analyzed** | 248 |
+| **Total Facilities Analyzed** | 237 (243 with Shaheen) |
 | **Total Capacity** | 100,066 kt/year |
 | **Baseline Emissions (100% Op)** | 66.19 MtCO₂/year |
 | **Baseline Emissions (70% Op)** | 46.34 MtCO₂/year |
@@ -49,11 +49,11 @@ This report presents a comprehensive analysis of decarbonization pathways for Ko
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                        DATA INPUTS                                      │
 ├─────────────────────────────────────────────────────────────────────────┤
-│  facility_database_with_regions.csv  →  248 facilities                  │
+│  facility_database_with_regions.csv  →  237 facilities                  │
 │  energy_intensity.csv                →  Energy consumption by process   │
 │  emission_factors.csv                →  CO₂ factors by fuel type        │
 │  demand_growth_trajectory.csv        →  Operating rate (70%)            │
-│  grid_emission_trajectory.csv        →  Grid EF (0.436→0.070 tCO₂/MWh) │
+│  grid_emission_trajectory.csv        →  Grid EF (0.436→0.0 tCO₂/MWh)   │
 │  re_price_trajectory.csv             →  RE-PPA price (PLANiT Institute) │
 │  technology_parameters.csv           →  Tech specs (CAPEX, efficiency)  │
 └──────────────────────────────────────┬──────────────────────────────────┘
@@ -164,7 +164,7 @@ The 70% operating rate assumption reduces baseline emissions by approximately 30
 | 5 | Incheon | 2,100 | 0.22 | 0.3% | 2 |
 | 6 | Gwangyang | 390 | 0.09 | 0.1% | 3 |
 | 7-14 | Others | 1,500 | 0.01 | <0.1% | 14 |
-| | **Total** | **100,066** | **66.19** | **100%** | **248** |
+| | **Total** | **100,066** | **66.19** | **100%** | **237** |
 
 ### 4.2 Regional Detailed Breakdown
 
@@ -384,53 +384,57 @@ The model always selects **NCC-Electricity** over **NCC-H2** because:
 
 ## 7. Cost Assumptions
 
-### 7.1 Electricity Price Trajectories (Source: PLANiT Institute)
+### 7.1 Renewable Electricity Price (RE-PPA) Trajectory
 
-| Year | Grid Price ($/MWh) | RE-PPA Price ($/MWh) | Premium ($/MWh) |
-|------|-------------------|---------------------|-----------------|
-| 2025 | 100.00 | 129.29 | +29.29 |
-| 2026 | 103.66 | 134.46 | +30.80 |
-| 2027 | 107.31 | 139.84 | +32.53 |
-| 2028 | 110.97 | 145.43 | +34.46 |
-| 2029 | 114.62 | 151.25 | +36.63 |
-| 2030 | 118.28 | 157.30 | +39.02 |
-| 2035 | 136.55 | 191.38 | +54.83 |
-| 2040 | 154.83 | 191.38 | +36.55 |
-| 2045 | 173.10 | 191.38 | +18.28 |
-| 2050 | 191.38 | 191.38 | 0.00 |
+Based on IRENA 2024 and IEA WEO 2024:
+
+| Year | RE Price ($/MWh) | Decline from 2025 |
+|------|------------------|-------------------|
+| 2025 | 65.00 | Baseline |
+| 2030 | 55.69 | -14% |
+| 2035 | 47.71 | -27% |
+| 2040 | 40.87 | -37% |
+| 2045 | 35.02 | -46% |
+| 2050 | 30.00 | -54% |
 
 ### 7.2 Grid Emission Factor Trajectory
 
 | Year | Grid EF (tCO₂/MWh) | Reduction vs 2025 |
 |------|-------------------|-------------------|
 | 2025 | 0.436 | 0% |
-| 2030 | 0.350 | 20% |
-| 2035 | 0.260 | 40% |
-| 2040 | 0.180 | 59% |
-| 2045 | 0.120 | 72% |
-| 2050 | 0.070 | 84% |
+| 2030 | 0.349 | -20% |
+| 2035 | 0.280 | -36% |
+| 2040 | 0.140 | -68% |
+| 2045 | 0.070 | -84% |
+| 2050 | 0.000 | -100% (Net Zero) |
 
 ### 7.3 Hydrogen Price (Dynamic LCOH - Source: PLANiT Institute)
+
+**Critical: H₂ price is calculated from RE price via LCOH formula.**
 
 The model calculates hydrogen price dynamically using:
 
 ```
-LCOH = (CAPEX × CRF + OPEX) / H2_Production + Electricity_Cost
+LCOH = (CAPEX × CRF + OPEX + Stack_Replacement) / H2_Production + Electricity_Cost
 
 Where:
-- CAPEX: $1000/kW (2025) → $600/kW (2050)
-- Efficiency: 70% (HHV)
+- CAPEX: $1,000/kW (2025) → $500/kW (2050)
+- Efficiency: 70% (2025) → 75% (2050)
 - Capacity Factor: 90%
 - Lifetime: 20 years
-- Electricity: RE-PPA price
+- Electricity: RE price (drives H₂ cost)
 ```
 
-| Year | RE Price ($/MWh) | Electrolyzer CAPEX ($/kW) | LCOH ($/kg) |
-|------|-----------------|---------------------------|-------------|
-| 2025 | 129 | 1,000 | 8.20 |
-| 2030 | 157 | 800 | 9.18 |
-| 2040 | 191 | 600 | 10.76 |
-| 2050 | 191 | 600 | 10.76 |
+| Year | RE Price ($/MWh) | Electrolyzer CAPEX ($/kW) | Efficiency | LCOH ($/kg) |
+|------|-----------------|---------------------------|------------|-------------|
+| 2025 | 65 | 1,000 | 70% | 4.58 |
+| 2030 | 56 | 900 | 71% | 3.91 |
+| 2035 | 48 | 800 | 72% | 3.33 |
+| 2040 | 41 | 700 | 73% | 2.82 |
+| 2045 | 35 | 600 | 74% | 2.39 |
+| 2050 | 30 | 500 | 75% | 2.01 |
+
+**Decline rate:** 56% reduction from 2025 to 2050
 
 ### 7.4 Technology CAPEX Evolution
 
@@ -494,9 +498,12 @@ The integration of **RotoDynamic Heater (RDH)** technology allows for the decarb
 Total_Emissions = Σ (Fuel_Consumption × Emission_Factor)
 
 Where:
-- Naphtha EF = 0.0149 tCO₂/GJ (combustion only)
-- LNG EF = 0.0561 tCO₂/GJ
-- Electricity EF = Grid_EF (varies by year)
+- Naphtha EF = 0.0542 tCO₂/GJ (IPCC 2019)
+- LNG EF = 0.0561 tCO₂/GJ (IPCC 2019)
+- Fuel Gas EF = 0.050 tCO₂/GJ (API Compendium 2021)
+- Byproduct Gas EF = 0.048 tCO₂/GJ (API Compendium 2021)
+- LPG EF = 0.0631 tCO₂/GJ (IPCC 2019)
+- Electricity EF = Grid_EF (varies by year: 0.436→0.0 tCO₂/MWh)
 ```
 
 ### A.2 Heat Pump Abatement
