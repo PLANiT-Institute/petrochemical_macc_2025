@@ -130,6 +130,60 @@ All technologies assume **50% CAPEX reduction by 2050** based on technology lear
 - **Lifetime:** 25 years
 - **Source:** Coolbrook technology specifications
 
+### 3.4 Technology Application Logic
+
+The model automatically assigns technologies to facilities based on process type:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    TECHNOLOGY APPLICATION BY FACILITY TYPE                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  1. NCC FACILITIES (Naphtha Cracker)                                        │
+│     ├── Primary: NCC-H2 or NCC-Electricity (scenario-dependent)             │
+│     │   • Replaces naphtha combustion in cracker furnaces                   │
+│     │   • NCC-H2: Uses 0.2 t-H2 per ton ethylene                           │
+│     │   • NCC-Elec: Uses 5.0 MWh per ton ethylene                          │
+│     │                                                                       │
+│     └── Secondary: Heat Pump                                                │
+│         • Covers remaining heat demand (LNG, Fuel Gas, Byproduct Gas)       │
+│         • COP 4.0 converts electricity to heat                              │
+│                                                                             │
+│  2. BTX FACILITIES (BTX Plant - Benzene, Toluene, Xylene)                   │
+│     └── RDH (RotoDynamic Heater)                                            │
+│         • High-temperature process (>165°C) - Heat Pump not applicable      │
+│         • 93% efficiency converts electricity to heat                       │
+│         • Coolbrook technology for aromatics reforming                      │
+│                                                                             │
+│  3. ALL OTHER FACILITIES (Polymers, Derivatives, etc.)                      │
+│     └── Heat Pump                                                           │
+│         • Low-temperature processes (<165°C)                                │
+│         • COP 4.0: 1 MWh electricity → 4 MWh heat                          │
+│         • Replaces LNG, Fuel Gas, and other combustion fuels                │
+│                                                                             │
+│  4. ALL FACILITIES (Electricity Emissions)                                  │
+│     └── RE-PPA (Renewable Power Purchase Agreement)                         │
+│         • Grid decarbonization: EF 0.436 (2025) → 0.0 (2050)               │
+│         • Covers baseline electricity + new demand from electrification     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Decision Logic Summary:**
+
+| Facility Type | Process | Primary Technology | Secondary Technology |
+|---------------|---------|-------------------|---------------------|
+| NCC | Naphtha Cracker | NCC-H2 or NCC-Electricity | Heat Pump (other fuels) |
+| BTX | BTX Plant | RDH | - |
+| Other | All others | Heat Pump | - |
+| All | Electricity | RE-PPA (grid decarb) | - |
+
+**Why RDH for BTX?**
+- BTX (aromatics) processes require temperatures >400°C for catalytic reforming
+- Heat pumps are limited to ~165°C (industrial high-temperature limit)
+- RDH (RotoDynamic Heater) by Coolbrook can deliver >1000°C using electricity
+- 93% efficiency means minimal energy penalty vs combustion
+
 ---
 
 ## 4. Energy Price Trajectories

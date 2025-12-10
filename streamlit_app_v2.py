@@ -356,59 +356,160 @@ if page == "1. Scenario Comparison":
 
     st.markdown("---")
 
-    # MACC Curve
+    # MACC Curve (IMPROVED)
     st.header("Marginal Abatement Cost Curve (MACC)")
+
+    macc_view = st.radio(
+        "MACC View",
+        ["By Technology (Aggregated)", "By Facility (Detailed)"],
+        horizontal=True
+    )
 
     for scenario in selected_scenarios:
         df_s = df[(df['scenario'] == scenario) & (df['year'] == selected_year)]
         df_macc = df_s[df_s['abatement_tco2'] > 0].copy()
-        df_macc = df_macc.sort_values('mac_usd_per_tco2')
-        df_macc['cumulative_abatement'] = df_macc['abatement_tco2'].cumsum() / 1e6
 
         if len(df_macc) > 0:
-            fig = go.Figure()
+            if macc_view == "By Technology (Aggregated)":
+                # Aggregate by technology for cleaner view
+                tech_summary = df_macc.groupby('technology').agg({
+                    'abatement_tco2': 'sum',
+                    'total_cost_usd': 'sum',
+                    'facility_id': 'nunique'
+                }).reset_index()
+                tech_summary['mac'] = tech_summary['total_cost_usd'] / tech_summary['abatement_tco2']
+                tech_summary['abatement_mt'] = tech_summary['abatement_tco2'] / 1e6
+                tech_summary = tech_summary.sort_values('mac')
+                tech_summary['cumulative'] = tech_summary['abatement_mt'].cumsum()
+                tech_summary['x_start'] = tech_summary['cumulative'] - tech_summary['abatement_mt']
 
-            # Create proper MACC bars (horizontal position based on cumulative abatement)
-            x_start = 0
-            for _, row in df_macc.iterrows():
-                width = row['abatement_tco2'] / 1e6
-                tech = row['technology']
-                fig.add_trace(go.Bar(
-                    x=[width],
-                    y=[row['mac_usd_per_tco2']],
-                    width=0.8,
-                    name=tech,
-                    marker_color=TECH_COLORS.get(tech, '#808080'),
+                fig = go.Figure()
+
+                # Create step-chart style MACC
+                for _, row in tech_summary.iterrows():
+                    tech = row['technology']
+                    fig.add_trace(go.Bar(
+                        x=[row['abatement_mt']],
+                        y=[row['mac']],
+                        base=row['x_start'],
+                        name=tech,
+                        marker_color=TECH_COLORS.get(tech, '#808080'),
+                        marker_line_color='white',
+                        marker_line_width=1,
+                        text=f"{tech}<br>${row['mac']:.0f}/t",
+                        textposition='inside',
+                        textfont=dict(color='white', size=11),
+                        hovertemplate=(
+                            f'<b>{tech}</b><br>'
+                            f'Facilities: {row["facility_id"]}<br>'
+                            f'Abatement: {row["abatement_mt"]:.2f} Mt<br>'
+                            f'Avg MAC: ${row["mac"]:.0f}/tCO₂<extra></extra>'
+                        ),
+                        showlegend=True
+                    ))
+
+                # Add step line on top
+                x_steps = [0]
+                y_steps = [tech_summary.iloc[0]['mac']]
+                for _, row in tech_summary.iterrows():
+                    x_steps.extend([row['x_start'], row['cumulative']])
+                    y_steps.extend([row['mac'], row['mac']])
+
+                fig.add_trace(go.Scatter(
+                    x=x_steps, y=y_steps,
+                    mode='lines',
+                    line=dict(color='black', width=2),
                     showlegend=False,
-                    hovertemplate=(
-                        f'<b>{row["company"]}</b><br>'
-                        f'Product: {row["product"]}<br>'
-                        f'Region: {row["region"]}<br>'
-                        f'Abatement: {width:.3f} Mt<br>'
-                        f'MAC: ${row["mac_usd_per_tco2"]:.0f}/tCO2<extra></extra>'
+                    hoverinfo='skip'
+                ))
+
+                total_abatement = tech_summary['abatement_mt'].sum()
+                avg_mac = df_macc['total_cost_usd'].sum() / df_macc['abatement_tco2'].sum()
+
+                fig.update_layout(
+                    title=f'MACC by Technology - {SCENARIO_NAMES.get(scenario, scenario)} ({selected_year})<br>'
+                          f'<sub>Total Abatement: {total_abatement:.1f} MtCO₂ | Weighted Avg MAC: ${avg_mac:.0f}/tCO₂</sub>',
+                    barmode='stack',
+                    xaxis_title='Cumulative Abatement (MtCO₂)',
+                    yaxis_title='Marginal Abatement Cost ($/tCO₂)',
+                    height=500,
+                    legend=dict(
+                        orientation='h',
+                        yanchor='bottom',
+                        y=1.02,
+                        xanchor='center',
+                        x=0.5
                     ),
-                    base=x_start
-                ))
-                x_start += width
+                    xaxis=dict(range=[0, total_abatement * 1.05]),
+                    yaxis=dict(range=[0, tech_summary['mac'].max() * 1.15])
+                )
 
-            # Add legend entries
-            for tech in df_macc['technology'].unique():
-                fig.add_trace(go.Bar(
-                    x=[None], y=[None],
-                    name=tech,
-                    marker_color=TECH_COLORS.get(tech, '#808080'),
-                    showlegend=True
-                ))
+            else:
+                # Detailed facility view (original but improved)
+                df_macc = df_macc.sort_values('mac_usd_per_tco2')
+                df_macc['cumulative_abatement'] = df_macc['abatement_tco2'].cumsum() / 1e6
 
-            fig.update_layout(
-                title=f'MACC - {SCENARIO_NAMES.get(scenario, scenario)} ({selected_year})',
-                barmode='stack',
-                xaxis_title='Cumulative Abatement (MtCO2)',
-                yaxis_title='MAC ($/tCO2)',
-                height=500,
-                legend=dict(orientation='h', y=1.1)
-            )
+                fig = go.Figure()
+
+                # Group by technology for coloring
+                x_start = 0
+                tech_shown = set()
+                for _, row in df_macc.iterrows():
+                    width = row['abatement_tco2'] / 1e6
+                    tech = row['technology']
+                    show_legend = tech not in tech_shown
+                    tech_shown.add(tech)
+
+                    fig.add_trace(go.Bar(
+                        x=[width],
+                        y=[row['mac_usd_per_tco2']],
+                        base=x_start,
+                        name=tech,
+                        marker_color=TECH_COLORS.get(tech, '#808080'),
+                        marker_line_color='white',
+                        marker_line_width=0.5,
+                        showlegend=show_legend,
+                        legendgroup=tech,
+                        hovertemplate=(
+                            f'<b>{row["company"]}</b><br>'
+                            f'Product: {row["product"]}<br>'
+                            f'Region: {row["region"]}<br>'
+                            f'Tech: {tech}<br>'
+                            f'Abatement: {width:.3f} Mt<br>'
+                            f'MAC: ${row["mac_usd_per_tco2"]:.0f}/tCO₂<extra></extra>'
+                        )
+                    ))
+                    x_start += width
+
+                total_abatement = df_macc['abatement_tco2'].sum() / 1e6
+                avg_mac = df_macc['total_cost_usd'].sum() / df_macc['abatement_tco2'].sum()
+
+                fig.update_layout(
+                    title=f'MACC by Facility - {SCENARIO_NAMES.get(scenario, scenario)} ({selected_year})<br>'
+                          f'<sub>Total Abatement: {total_abatement:.1f} MtCO₂ | {len(df_macc)} facilities</sub>',
+                    barmode='stack',
+                    xaxis_title='Cumulative Abatement (MtCO₂)',
+                    yaxis_title='Marginal Abatement Cost ($/tCO₂)',
+                    height=500,
+                    legend=dict(
+                        orientation='h',
+                        yanchor='bottom',
+                        y=1.02,
+                        xanchor='center',
+                        x=0.5
+                    )
+                )
+
             st.plotly_chart(fig, use_container_width=True)
+
+            # Summary table
+            if macc_view == "By Technology (Aggregated)":
+                with st.expander(f"Technology Summary - {SCENARIO_NAMES.get(scenario, scenario)}"):
+                    summary_display = tech_summary[['technology', 'facility_id', 'abatement_mt', 'mac']].copy()
+                    summary_display.columns = ['Technology', 'Facilities', 'Abatement (Mt)', 'MAC ($/tCO₂)']
+                    summary_display['MAC ($/tCO₂)'] = summary_display['MAC ($/tCO₂)'].round(0).astype(int)
+                    summary_display['Abatement (Mt)'] = summary_display['Abatement (Mt)'].round(2)
+                    st.dataframe(summary_display, hide_index=True, use_container_width=True)
 
 
 # =============================================================================
@@ -500,6 +601,67 @@ elif page == "2. Assumptions":
                     st.metric("NCC-Elec: Electricity", f"{ncc_elec['elec_mwh_per_ton_ethylene'].iloc[0]} MWh/t-C2H4")
     else:
         st.warning("Technology parameters not loaded")
+
+    st.markdown("---")
+
+    # Technology Application Logic (NEW SECTION)
+    st.header("2.1 Technology Application Logic")
+
+    st.markdown("""
+    The model automatically assigns technologies to facilities based on **process type**:
+    """)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("""
+        **1. NCC Facilities (Naphtha Cracker)**
+        - **Primary:** NCC-H₂ or NCC-Electricity
+          - Replaces naphtha combustion in cracker furnaces
+          - NCC-H₂: 0.2 t-H₂/t-ethylene
+          - NCC-Elec: 5.0 MWh/t-ethylene
+        - **Secondary:** Heat Pump
+          - Covers remaining heat (LNG, Fuel Gas)
+
+        **2. BTX Facilities (Aromatics)**
+        - **RDH** (RotoDynamic Heater)
+          - High-temp process (>400°C)
+          - Heat Pump NOT applicable
+          - 93% efficiency
+        """)
+
+    with col2:
+        st.markdown("""
+        **3. All Other Facilities**
+        - **Heat Pump**
+          - Low-temp processes (<165°C)
+          - COP 4.0: 1 MWh elec → 4 MWh heat
+          - Polymers, derivatives, etc.
+
+        **4. All Facilities (Electricity)**
+        - **RE-PPA** (Grid Decarbonization)
+          - Grid EF: 0.436 → 0.0 tCO₂/MWh
+          - Covers baseline + new demand
+        """)
+
+    # Visual diagram
+    st.markdown("#### Technology Assignment Flow")
+    tech_logic_df = pd.DataFrame([
+        {'Facility Type': 'NCC (Naphtha Cracker)', 'Process': 'Ethylene, Propylene, Butadiene', 'Primary Tech': 'NCC-H₂ / NCC-Elec', 'Secondary Tech': 'Heat Pump'},
+        {'Facility Type': 'BTX (Aromatics)', 'Process': 'Benzene, Toluene, Xylene', 'Primary Tech': 'RDH', 'Secondary Tech': '-'},
+        {'Facility Type': 'Other', 'Process': 'Polymers, Derivatives', 'Primary Tech': 'Heat Pump', 'Secondary Tech': '-'},
+        {'Facility Type': 'All', 'Process': 'Electricity', 'Primary Tech': 'RE-PPA', 'Secondary Tech': '-'},
+    ])
+    st.dataframe(tech_logic_df, hide_index=True, use_container_width=True)
+
+    with st.expander("Why RDH for BTX?"):
+        st.markdown("""
+        - BTX aromatics require temperatures **>400°C** for catalytic reforming
+        - Industrial heat pumps are limited to **~165°C**
+        - **RDH (RotoDynamic Heater)** by Coolbrook can deliver **>1000°C** using electricity
+        - 93% efficiency means minimal energy penalty vs combustion
+        - Technology is commercially available (TRL 8) from 2026
+        """)
 
     st.markdown("---")
 
@@ -789,59 +951,64 @@ elif page == "4. Regional Outlook":
 
     st.markdown("---")
 
-    # Regional MACC Curves (IMPROVED)
+    # Regional MACC Curves (IMPROVED - Aggregated by Technology)
     st.header("Regional MACC Curves")
 
-    for region in regions:
+    # Create 2x2 grid for regions
+    cols = st.columns(2)
+    for idx, region in enumerate(regions):
         df_r = df_s[(df_s['region'] == region) & (df_s['abatement_tco2'] > 0)].copy()
-        df_r = df_r.sort_values('mac_usd_per_tco2')
 
         if len(df_r) > 0:
+            # Aggregate by technology
+            tech_summary = df_r.groupby('technology').agg({
+                'abatement_tco2': 'sum',
+                'total_cost_usd': 'sum',
+                'facility_id': 'nunique'
+            }).reset_index()
+            tech_summary['mac'] = tech_summary['total_cost_usd'] / tech_summary['abatement_tco2']
+            tech_summary['abatement_mt'] = tech_summary['abatement_tco2'] / 1e6
+            tech_summary = tech_summary.sort_values('mac')
+            tech_summary['cumulative'] = tech_summary['abatement_mt'].cumsum()
+            tech_summary['x_start'] = tech_summary['cumulative'] - tech_summary['abatement_mt']
+
             fig = go.Figure()
 
-            # Create proper MACC bars
-            x_start = 0
-            for _, row in df_r.iterrows():
-                width = row['abatement_tco2'] / 1e6
+            for _, row in tech_summary.iterrows():
                 tech = row['technology']
                 fig.add_trace(go.Bar(
-                    x=[width],
-                    y=[row['mac_usd_per_tco2']],
-                    width=0.8,
+                    x=[row['abatement_mt']],
+                    y=[row['mac']],
+                    base=row['x_start'],
                     name=tech,
                     marker_color=TECH_COLORS.get(tech, '#808080'),
-                    showlegend=False,
+                    marker_line_color='white',
+                    marker_line_width=1,
                     hovertemplate=(
-                        f'<b>{row["company"]}</b><br>'
-                        f'Product: {row["product"]}<br>'
-                        f'Abatement: {width:.3f} Mt<br>'
-                        f'MAC: ${row["mac_usd_per_tco2"]:.0f}/tCO2<extra></extra>'
+                        f'<b>{tech}</b><br>'
+                        f'Facilities: {row["facility_id"]}<br>'
+                        f'Abatement: {row["abatement_mt"]:.2f} Mt<br>'
+                        f'Avg MAC: ${row["mac"]:.0f}/tCO₂<extra></extra>'
                     ),
-                    base=x_start
-                ))
-                x_start += width
-
-            # Add legend entries
-            for tech in df_r['technology'].unique():
-                fig.add_trace(go.Bar(
-                    x=[None], y=[None],
-                    name=tech,
-                    marker_color=TECH_COLORS.get(tech, '#808080'),
-                    showlegend=True
+                    showlegend=(idx == 0)  # Only show legend for first chart
                 ))
 
-            total_abatement = df_r['abatement_tco2'].sum() / 1e6
+            total_abatement = tech_summary['abatement_mt'].sum()
             avg_mac = df_r['total_cost_usd'].sum() / df_r['abatement_tco2'].sum() if df_r['abatement_tco2'].sum() > 0 else 0
 
             fig.update_layout(
-                title=f'{region} MACC - Total: {total_abatement:.2f} MtCO2, Avg MAC: ${avg_mac:.0f}/tCO2',
+                title=f'{region}<br><sub>{total_abatement:.1f} MtCO₂ | Avg: ${avg_mac:.0f}/t</sub>',
                 barmode='stack',
-                xaxis_title='Cumulative Abatement (MtCO2)',
-                yaxis_title='MAC ($/tCO2)',
-                height=400,
-                legend=dict(orientation='h', y=1.1)
+                xaxis_title='Abatement (Mt)',
+                yaxis_title='MAC ($/t)',
+                height=350,
+                margin=dict(t=60, b=40, l=50, r=20),
+                legend=dict(orientation='h', y=1.15, x=0.5, xanchor='center'),
+                showlegend=(idx == 0)
             )
-            st.plotly_chart(fig, use_container_width=True)
+
+            with cols[idx % 2]:
+                st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("---")
 
