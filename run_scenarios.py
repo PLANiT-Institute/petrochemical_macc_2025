@@ -192,7 +192,7 @@ def calculate_facility_mac(facility_baseline, process, ncc_tech, year, data, gri
     potential_abatement = facility_baseline['combustion_emissions']
 
     if potential_abatement <= 0:
-        return float('inf'), 'None', 0, 0, 0, 0, 0
+        return float('inf'), 'None', 0, 0, 0, 0, 0, 0.0, 25
 
     # Determine technology and calculate costs
     if is_ncc_facility(process):
@@ -236,10 +236,9 @@ def calculate_facility_mac(facility_baseline, process, ncc_tech, year, data, gri
         added_elec_mwh = hp_elec_mwh
         fuel_cost = hp_elec_mwh * re_price
 
-    # Get CAPEX
+    # Get CAPEX - use exact matching to avoid NCC-H2/NCC-Electricity confusion
     tech_params = data['tech_params']
-    tech_name = technology.replace('-', '_')
-    tech_row = tech_params[tech_params['technology'].str.contains(tech_name.split('_')[0], case=False)]
+    tech_row = tech_params[tech_params['technology'] == technology]
 
     if len(tech_row) > 0:
         tech_row = tech_row.iloc[0]
@@ -256,19 +255,21 @@ def calculate_facility_mac(facility_baseline, process, ncc_tech, year, data, gri
         capex_usd = capex_per_mtco2 * abatement_mt * 1e6
         opex_pct = tech_row.get('opex_pct_capex', 3) / 100
         opex_usd = capex_usd * opex_pct
+        lifetime = tech_row.get('lifetime_years', 25)  # Use technology-specific lifetime
     else:
         capex_usd = 0
         opex_usd = 0
+        opex_pct = 0.0  # No technology, no OPEX
+        lifetime = 25  # Default fallback
 
     # Total annualized cost
-    lifetime = 25
     capex_annual = capex_usd / lifetime
     total_cost = capex_annual + opex_usd + fuel_cost
 
     # MAC
     mac = total_cost / potential_abatement if potential_abatement > 0 else float('inf')
 
-    return mac, technology, potential_abatement, capex_usd, total_cost, h2_demand_t, added_elec_mwh
+    return mac, technology, potential_abatement, capex_usd, total_cost, h2_demand_t, added_elec_mwh, opex_pct, lifetime
 
 
 def determine_installation_schedule(facilities_mac_data, baseline_emissions, target_years):
@@ -364,7 +365,7 @@ def run_scenario(scenario, data, years):
         total_baseline_emissions += baseline['combustion_emissions']  # Only combustion (electricity handled by grid)
 
         # Calculate MAC
-        mac, technology, potential_abatement, capex, total_cost, h2_demand, elec_demand = \
+        mac, technology, potential_abatement, capex, total_cost, h2_demand, elec_demand, _, _ = \
             calculate_facility_mac(baseline, process, scenario['ncc_tech'], mac_year, data, grid_ef)
 
         facilities_mac_data.append({
@@ -441,12 +442,17 @@ def run_scenario(scenario, data, years):
                 technology = fac_mac['technology']
 
                 # Recalculate with current year prices
-                mac, _, potential_abatement, capex, total_cost, h2_demand, added_elec = \
+                mac, _, potential_abatement, capex, total_cost, h2_demand, added_elec, opex_pct, lifetime = \
                     calculate_facility_mac(baseline, process, scenario['ncc_tech'], year, data, grid_ef)
 
                 # Emissions after technology (only electricity remains, combustion eliminated)
                 emissions = baseline['elec_emissions'] + added_elec * grid_ef
                 abatement = bau_emissions - emissions
+
+                # Calculate cost components using technology-specific parameters
+                opex_usd_yr = capex * opex_pct
+                capex_annual = capex / lifetime
+                fuel_cost_usd_yr = total_cost - capex_annual - opex_usd_yr
 
                 result = {
                     'technology': technology,
@@ -459,13 +465,15 @@ def run_scenario(scenario, data, years):
                     'h2_demand_t': h2_demand,
                     'tech_deployed': 1,
                     'install_year': install_year,
+                    'opex_usd_yr': opex_usd_yr,
+                    'fuel_cost_usd_yr': max(0, fuel_cost_usd_yr),
                 }
             else:
                 # No technology deployed yet
                 result = {
-                    'technology': 'None',
+                    'technology': 'Baseline',  # Use 'Baseline' instead of 'None' to avoid pandas NaN interpretation
                     'emissions_tco2': baseline['total_emissions'],
-                    'abatement_tco2': bau_emissions - baseline['total_emissions'],  # Grid improvement only
+                    'abatement_tco2': max(0, bau_emissions - baseline['total_emissions']),  # Grid improvement only
                     'capex_usd': 0,
                     'total_cost_usd': 0,
                     'mac_usd_per_tco2': 0,
@@ -473,6 +481,8 @@ def run_scenario(scenario, data, years):
                     'h2_demand_t': 0,
                     'tech_deployed': 0,
                     'install_year': install_year,
+                    'opex_usd_yr': 0,
+                    'fuel_cost_usd_yr': 0,
                 }
 
             # Add common fields
@@ -488,8 +498,6 @@ def run_scenario(scenario, data, years):
                 'production_t': baseline['production_t'],
                 'bau_emissions_tco2': bau_emissions,
                 'heat_demand_gj': baseline['heat_demand_gj'],
-                'opex_usd_yr': result['capex_usd'] * 0.03 if result['capex_usd'] > 0 else 0,
-                'fuel_cost_usd_yr': result['total_cost_usd'] - result['capex_usd'] / 25 - result['capex_usd'] * 0.03 if result['capex_usd'] > 0 else 0,
             })
 
             results.append(result)

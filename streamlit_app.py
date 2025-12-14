@@ -37,7 +37,7 @@ SCENARIO_NAMES = {
 
 # Technology colors
 TECH_COLORS = {
-    'None': '#808080',
+    'Baseline': '#808080',
     'NCC-H2': '#2E86AB',
     'NCC-Electricity': '#A23B72',
     'RDH': '#F18F01',
@@ -537,6 +537,101 @@ elif page == "🗺️ Regional Outlook":
                      title='Cumulative Cost by Region',
                      color_discrete_map=REGION_COLORS)
         st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown("---")
+
+        # Regional MAC Curve by Scenario (2025-2050)
+        st.header("Regional MAC Curves (2025-2050)")
+        st.caption("Marginal Abatement Cost evolution by region across all years")
+
+        mac_regional_data = []
+        for scenario in selected_scenarios:
+            for year in sorted(df['year'].unique()):
+                df_y = df[(df['scenario'] == scenario) & (df['year'] == year)]
+                for region in df_y['region'].unique():
+                    df_r = df_y[df_y['region'] == region]
+                    total_abatement = df_r['abatement_tco2'].sum()
+                    total_cost = df_r['total_cost_usd'].sum()
+                    if total_abatement > 0:
+                        mac_regional_data.append({
+                            'Scenario': SCENARIO_NAMES.get(scenario, scenario),
+                            'Year': year,
+                            'Region': region,
+                            'MAC ($/tCO2)': total_cost / total_abatement,
+                            'Abatement (MtCO2)': total_abatement / 1e6
+                        })
+
+        if mac_regional_data:
+            mac_regional_df = pd.DataFrame(mac_regional_data)
+
+            # Create faceted line chart by scenario
+            fig = px.line(mac_regional_df, x='Year', y='MAC ($/tCO2)', color='Region',
+                         facet_col='Scenario', facet_col_wrap=2,
+                         markers=True,
+                         title='Regional MAC Evolution by Scenario (2025-2050)',
+                         color_discrete_map=REGION_COLORS)
+            fig.update_layout(height=500)
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Also show as heatmap for easier comparison
+            st.subheader("MAC Comparison Heatmap (2050)")
+            mac_2050 = mac_regional_df[mac_regional_df['Year'] == 2050].copy()
+            if len(mac_2050) > 0:
+                mac_pivot = mac_2050.pivot(index='Region', columns='Scenario', values='MAC ($/tCO2)')
+                fig = px.imshow(mac_pivot,
+                               labels=dict(x="Scenario", y="Region", color="MAC ($/tCO2)"),
+                               title='Regional MAC by Scenario (2050)',
+                               color_continuous_scale='RdYlGn_r',
+                               text_auto='.0f')
+                fig.update_layout(height=400)
+                st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown("---")
+
+        # Regional Total Abatement by Scenario (2025-2050)
+        st.header("Regional Abatement Trajectories (2025-2050)")
+        st.caption("Total CO2 abatement evolution by region across all years")
+
+        abatement_regional_data = []
+        for scenario in selected_scenarios:
+            for year in sorted(df['year'].unique()):
+                df_y = df[(df['scenario'] == scenario) & (df['year'] == year)]
+                for region in df_y['region'].unique():
+                    df_r = df_y[df_y['region'] == region]
+                    abatement_regional_data.append({
+                        'Scenario': SCENARIO_NAMES.get(scenario, scenario),
+                        'Year': year,
+                        'Region': region,
+                        'Abatement (MtCO2)': df_r['abatement_tco2'].sum() / 1e6
+                    })
+
+        if abatement_regional_data:
+            abatement_regional_df = pd.DataFrame(abatement_regional_data)
+
+            # Create faceted area chart by scenario
+            fig = px.area(abatement_regional_df, x='Year', y='Abatement (MtCO2)', color='Region',
+                         facet_col='Scenario', facet_col_wrap=2,
+                         title='Regional Abatement Evolution by Scenario (2025-2050)',
+                         color_discrete_map=REGION_COLORS)
+            fig.update_layout(height=500)
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Also show line chart for clearer trend comparison
+            fig = px.line(abatement_regional_df, x='Year', y='Abatement (MtCO2)', color='Region',
+                         facet_col='Scenario', facet_col_wrap=2,
+                         markers=True,
+                         title='Regional Abatement Trends by Scenario (2025-2050)',
+                         color_discrete_map=REGION_COLORS)
+            fig.update_layout(height=500)
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Summary table
+            st.subheader("Abatement Summary by Region (2050)")
+            abate_2050 = abatement_regional_df[abatement_regional_df['Year'] == 2050].copy()
+            if len(abate_2050) > 0:
+                abate_pivot = abate_2050.pivot(index='Region', columns='Scenario', values='Abatement (MtCO2)')
+                abate_pivot['Total'] = abate_pivot.sum(axis=1)
+                st.dataframe(abate_pivot.style.format("{:.2f}"), use_container_width=True)
 
 
 # ===================== PAGE 4: FACILITY RESULTS =====================
