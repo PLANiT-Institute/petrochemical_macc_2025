@@ -106,38 +106,41 @@ def load_regional_summaries():
 
 
 def create_macc_figure(df_macc, scenario_name):
-    """Create MACC curve figure"""
+    """Create proper MACC curve figure with bars positioned by cumulative abatement"""
     fig = go.Figure()
 
-    # Create step chart data
-    x_vals = [0]
-    y_vals = [df_macc['mac_usd_per_tco2'].iloc[0] if len(df_macc) > 0 else 0]
+    if len(df_macc) == 0:
+        return fig
 
-    for i, row in df_macc.iterrows():
-        x_vals.append(row['cumulative_abatement_mtco2'])
-        y_vals.append(row['mac_usd_per_tco2'])
+    # Sort by MAC and calculate cumulative positions
+    df_sorted = df_macc.sort_values('mac_usd_per_tco2').reset_index(drop=True)
+    df_sorted['abatement_mt'] = df_sorted['abatement_tco2'] / 1e6
+    df_sorted['cumsum_before'] = df_sorted['abatement_mt'].cumsum().shift(1).fillna(0)
+    df_sorted['bar_center'] = df_sorted['cumsum_before'] + df_sorted['abatement_mt'] / 2
 
-    # Color by technology
-    for tech in df_macc['technology'].unique():
-        df_tech = df_macc[df_macc['technology'] == tech]
+    # Add bars for each technology (proper MACC style)
+    for tech in df_sorted['technology'].unique():
+        df_tech = df_sorted[df_sorted['technology'] == tech]
         fig.add_trace(go.Bar(
-            x=df_tech['abatement_tco2'] / 1e6,
+            x=df_tech['bar_center'],
             y=df_tech['mac_usd_per_tco2'],
+            width=df_tech['abatement_mt'],
             name=tech,
             marker_color=TECH_COLORS.get(tech, '#808080'),
-            customdata=df_tech[['facility_id', 'company', 'product', 'region']].values,
+            customdata=df_tech[['facility_id', 'company', 'product', 'region', 'abatement_mt']].values,
             hovertemplate='<b>%{customdata[1]}</b><br>' +
                           'Product: %{customdata[2]}<br>' +
                           'Region: %{customdata[3]}<br>' +
-                          'Abatement: %{x:.3f} MtCO2<br>' +
+                          'Abatement: %{customdata[4]:.3f} MtCO2<br>' +
                           'MAC: $%{y:.0f}/tCO2<extra></extra>'
         ))
 
     fig.update_layout(
         title=f'Marginal Abatement Cost Curve - {scenario_name} (2050)',
-        xaxis_title='Abatement (MtCO2)',
+        xaxis_title='Cumulative Abatement (MtCO2)',
         yaxis_title='Marginal Abatement Cost ($/tCO2)',
-        barmode='stack',
+        barmode='overlay',  # Overlay so bars don't stack
+        bargap=0,  # No gap between bars
         legend=dict(orientation='h', yanchor='bottom', y=1.02),
         height=500
     )
@@ -453,7 +456,7 @@ elif page == "🔧 Technology Details":
             st.plotly_chart(fig, use_container_width=True)
 
 
-# ===================== PAGE 3: REGIONAL OUTLOOK =====================
+# ===================== PAGE 1: REGIONAL OUTLOOK (First Page) =====================
 elif page == "🗺️ Regional Outlook":
     st.title("🗺️ Regional Transition Outlook")
 
@@ -462,24 +465,47 @@ elif page == "🗺️ Regional Outlook":
     elif not selected_scenarios:
         st.warning("Please select at least one scenario.")
     else:
-        # Regional metrics summary
-        st.header(f"Regional Summary ({selected_year})")
+        # Regional metrics summary - TABLE FORMAT
+        st.header(f"Regional Summary by Scenario ({selected_year})")
 
         for scenario in selected_scenarios:
             st.subheader(f"📊 {SCENARIO_NAMES.get(scenario, scenario)}")
-            df_s = df[(df['scenario'] == scenario) & (df['year'] == selected_year)]
+            df_s = df[(df['scenario'] == scenario) & (df['year'] == selected_year)].copy()
 
-            # Regional metrics cards
-            regions = sorted(df_s['region'].unique())
-            cols = st.columns(len(regions))
-
-            for i, region in enumerate(regions):
+            # Create regional summary table
+            regional_data = []
+            for region in ['Daesan', 'Yeosu', 'Ulsan', 'Other']:
                 df_r = df_s[df_s['region'] == region]
-                with cols[i]:
-                    st.markdown(f"**{region}**")
-                    st.metric("Abatement", f"{df_r['abatement_tco2'].sum()/1e6:.2f} Mt")
-                    st.metric("CAPEX", f"${df_r['capex_usd'].sum()/1e9:.2f}B")
-                    st.metric("Facilities", df_r['facility_id'].nunique())
+                if len(df_r) > 0:
+                    abatement = float(df_r['abatement_tco2'].sum())
+                    total_cost = float(df_r['total_cost_usd'].sum())
+                    regional_data.append({
+                        'Region': region,
+                        'Facilities': int(df_r['facility_id'].nunique()),
+                        'Deployed': int(df_r[df_r['tech_deployed'] == 1]['facility_id'].nunique()),
+                        'BAU Emissions (Mt)': float(df_r['bau_emissions_tco2'].sum()) / 1e6,
+                        'Emissions (Mt)': float(df_r['emissions_tco2'].sum()) / 1e6,
+                        'Abatement (Mt)': abatement / 1e6,
+                        'CAPEX ($B)': float(df_r['capex_usd'].sum()) / 1e9,
+                        'Total Cost ($B)': total_cost / 1e9,
+                        'MAC ($/tCO2)': total_cost / abatement if abatement > 0 else 0,
+                        'Elec (TWh)': float(df_r['elec_demand_mwh'].sum()) / 1e6,
+                        'H2 (kt)': float(df_r['h2_demand_t'].sum()) / 1e3,
+                    })
+
+            regional_df = pd.DataFrame(regional_data)
+            st.dataframe(regional_df.style.format({
+                'Facilities': '{:.0f}',
+                'Deployed': '{:.0f}',
+                'BAU Emissions (Mt)': '{:.2f}',
+                'Emissions (Mt)': '{:.3f}',
+                'Abatement (Mt)': '{:.2f}',
+                'CAPEX ($B)': '${:.2f}',
+                'Total Cost ($B)': '${:.2f}',
+                'MAC ($/tCO2)': '${:.0f}',
+                'Elec (TWh)': '{:.2f}',
+                'H2 (kt)': '{:.1f}',
+            }), use_container_width=True, hide_index=True)
 
             st.markdown("---")
 
