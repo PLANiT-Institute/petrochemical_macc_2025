@@ -25,7 +25,7 @@ Technology application logic:
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from modules.utils import DataLoader, EmissionCalculator, PriceCalculator, TechnologyCostCalculator
+from modules.utils import DataLoader
 
 # Configuration
 DATA_DIR = Path('data')
@@ -82,9 +82,15 @@ def load_data():
     data['op_rate_restructure_25'] = pd.read_csv(DATA_DIR / 'demand_growth_trajectory_restructure_25pct.csv')
     data['op_rate_restructure_40'] = pd.read_csv(DATA_DIR / 'demand_growth_trajectory_restructure_40pct.csv')
 
+    # Create intensity lookup by key (company, product, location) for safe matching
+    intensities = data['intensities']
+    intensities['_key'] = intensities['company'] + '_' + intensities['product'] + '_' + intensities['location']
+    data['intensity_lookup'] = intensities.set_index('_key').to_dict('index')
+
     print(f"  Loaded {len(data['facilities'])} baseline facilities")
     print(f"  Loaded {len(data['facilities_shaheen'])} facilities with Shaheen")
     print(f"  Loaded {len(data['tech_params'])} technologies")
+    print(f"  Created intensity lookup with {len(data['intensity_lookup'])} entries")
 
     return data
 
@@ -331,15 +337,21 @@ def run_scenario(scenario, data, years):
         facilities = data['facilities'].copy()
         op_rate_df = data['op_rate_shaheen']
 
-    intensities = data['intensities']
+    intensity_lookup = data['intensity_lookup']
 
-    # Create facility ID
+    # Create facility ID (also used as key for intensity lookup)
     facilities['facility_id'] = facilities.apply(
         lambda x: f"{x['company']}_{x['product']}_{x['location']}", axis=1
     )
 
-    # STEP 1: Calculate baseline emissions and MAC for each facility (using 2035 prices for ranking)
+    # STEP 1: Calculate baseline emissions and MAC for each facility
     print(f"    Calculating facility MACs...")
+
+    # Get 2025 parameters for TRUE baseline (used for emission targets)
+    op_row_2025 = op_rate_df[op_rate_df['year'] == 2025]
+    operating_rate_2025 = op_row_2025['operating_rate_pct'].iloc[0] / 100 if len(op_row_2025) > 0 else 0.70
+    capacity_multiplier_2025 = op_row_2025['cumulative_capacity_multiplier'].iloc[0] if len(op_row_2025) > 0 else 1.0
+    grid_ef_2025 = 0.436  # 2025 grid emission factor
 
     # Use 2035 for MAC calculation (when most deployment happens)
     mac_year = 2035
@@ -351,18 +363,25 @@ def run_scenario(scenario, data, years):
     grid_ef = grid_row['grid_ef_tco2_per_mwh'].iloc[0] if len(grid_row) > 0 else 0.436
 
     facilities_mac_data = []
-    total_baseline_emissions = 0
+    total_baseline_emissions_2025 = 0  # TRUE 2025 baseline for targets
+    skipped_facilities = 0
 
     for idx, facility in facilities.iterrows():
-        if idx >= len(intensities):
+        # Use key-based matching instead of fragile row-position matching
+        facility_key = facility['facility_id']
+        if facility_key not in intensity_lookup:
+            skipped_facilities += 1
             continue
 
-        intensity = intensities.iloc[idx]
+        intensity = intensity_lookup[facility_key]
         process = facility.get('process', '')
 
-        # Calculate baseline with capacity multiplier for restructure scenarios
+        # Calculate TRUE 2025 baseline for emission targets
+        baseline_2025 = calculate_facility_baseline(facility, intensity, operating_rate_2025, grid_ef_2025, capacity_multiplier_2025)
+        total_baseline_emissions_2025 += baseline_2025['combustion_emissions']
+
+        # Calculate baseline at MAC year for cost ranking
         baseline = calculate_facility_baseline(facility, intensity, operating_rate, grid_ef, capacity_multiplier)
-        total_baseline_emissions += baseline['combustion_emissions']  # Only combustion (electricity handled by grid)
 
         # Calculate MAC
         mac, technology, potential_abatement, capex, total_cost, h2_demand, elec_demand, _, _ = \
@@ -382,8 +401,9 @@ def run_scenario(scenario, data, years):
 
     # STEP 2: Determine installation schedule based on emission targets
     print(f"    Determining installation schedule (target-based)...")
+    print(f"    2025 baseline combustion emissions: {total_baseline_emissions_2025/1e6:.2f} MtCO2")
     installation_schedule = determine_installation_schedule(
-        facilities_mac_data, total_baseline_emissions, EMISSION_TARGETS
+        facilities_mac_data, total_baseline_emissions_2025, EMISSION_TARGETS
     )
 
     # Print schedule summary
@@ -416,12 +436,13 @@ def run_scenario(scenario, data, years):
             if year in data['re_prices']['year'].values else 50.0
 
         for idx, facility in facilities.iterrows():
-            if idx >= len(intensities):
+            # Use key-based matching instead of fragile row-position matching
+            facility_id = facility['facility_id']
+            if facility_id not in intensity_lookup:
                 continue
 
-            intensity = intensities.iloc[idx]
+            intensity = intensity_lookup[facility_id]
             process = facility.get('process', '')
-            facility_id = facility['facility_id']
 
             # Calculate baseline emissions with capacity multiplier
             baseline = calculate_facility_baseline(facility, intensity, operating_rate, grid_ef, capacity_multiplier)

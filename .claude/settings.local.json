@@ -106,7 +106,11 @@
       "WebFetch(domain:kosis.kr)",
       "WebFetch(domain:www.data.go.kr)",
       "WebFetch(domain:www.investkorea.org)",
-      "WebFetch(domain:www.ksure.or.kr)"
+      "WebFetch(domain:www.ksure.or.kr)",
+      "Bash(do if [[ ! $f == *backup* ]])",
+      "Bash([[ ! $f == *__pycache__* ]])",
+      "Bash(then echo echo '--- $(basename $f) ---' grep -E \"^import |^from \" $f)",
+      "Bash(readlink:*)"
     ],
     "deny": [],
     "ask": []
