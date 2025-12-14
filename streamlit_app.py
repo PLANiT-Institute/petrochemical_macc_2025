@@ -331,18 +331,32 @@ if page == "📊 Scenario Comparison":
 
         st.markdown("---")
 
-        # MACC Curve
+        # MACC Curve - Simple Line Chart
         st.header("Marginal Abatement Cost Curve (MACC)")
 
+        # Build MACC data for all selected scenarios
+        macc_data = []
         for scenario in selected_scenarios:
             df_s = df[(df['scenario'] == scenario) & (df['year'] == selected_year)]
             df_macc = df_s[df_s['abatement_tco2'] > 0].copy()
             df_macc = df_macc.sort_values('mac_usd_per_tco2')
-            df_macc['cumulative_abatement_mtco2'] = df_macc['abatement_tco2'].cumsum() / 1e6
+            df_macc['cumulative_abatement_mt'] = df_macc['abatement_tco2'].cumsum() / 1e6
 
-            if len(df_macc) > 0:
-                fig = create_macc_figure(df_macc, SCENARIO_NAMES.get(scenario, scenario))
-                st.plotly_chart(fig, use_container_width=True)
+            for _, row in df_macc.iterrows():
+                macc_data.append({
+                    'Scenario': SCENARIO_NAMES.get(scenario, scenario),
+                    'Cumulative Abatement (MtCO2)': row['cumulative_abatement_mt'],
+                    'MAC ($/tCO2)': row['mac_usd_per_tco2']
+                })
+
+        if macc_data:
+            macc_df = pd.DataFrame(macc_data)
+            fig = px.line(macc_df, x='Cumulative Abatement (MtCO2)', y='MAC ($/tCO2)',
+                         color='Scenario', line_shape='hv',  # step-line
+                         title=f'MACC Curve by Scenario ({selected_year})',
+                         markers=False)
+            fig.update_layout(height=500, hovermode='x unified')
+            st.plotly_chart(fig, use_container_width=True)
 
 
 # ===================== PAGE 2: TECHNOLOGY DETAILS =====================
