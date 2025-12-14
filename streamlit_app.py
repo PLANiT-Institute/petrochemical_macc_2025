@@ -252,14 +252,18 @@ if page == "📊 Scenario Comparison":
                 baseline = df_base['bau_emissions_tco2'].sum() / 1e6
                 final = df_s['emissions_tco2'].sum() / 1e6
                 abatement = df_s['abatement_tco2'].sum() / 1e6
+                capex = df_s['capex_usd'].sum() / 1e9
                 total_cost = df_s['total_cost_usd'].sum() / 1e9
                 mac = df_s['total_cost_usd'].sum() / df_s['abatement_tco2'].sum() if df_s['abatement_tco2'].sum() > 0 else 0
+                deployed = df_s[df_s['tech_deployed'] == 1]['facility_id'].nunique()
 
-                st.metric("Baseline Emissions", f"{baseline:.2f} MtCO2")
-                st.metric("Final Emissions", f"{final:.3f} MtCO2")
-                st.metric("Total Abatement", f"{abatement:.2f} MtCO2")
+                st.metric("Baseline (2025)", f"{baseline:.2f} Mt")
+                st.metric("Emissions", f"{final:.3f} Mt")
+                st.metric("Abatement", f"{abatement:.2f} Mt")
+                st.metric("Total CAPEX", f"${capex:.2f}B")
                 st.metric("Total Cost", f"${total_cost:.2f}B")
                 st.metric("Avg MAC", f"${mac:.0f}/tCO2")
+                st.metric("Facilities Deployed", deployed)
 
         st.markdown("---")
 
@@ -558,7 +562,7 @@ elif page == "🗺️ Regional Outlook":
 
         # Regional MAC Curve by Scenario (2025-2050) - using pre-computed annual data
         st.header("Regional MAC Curves (Annual 2025-2050)")
-        st.caption("Marginal Abatement Cost evolution by region - from pre-computed annual data")
+        st.caption("Marginal Abatement Cost evolution by region - separate lines per region")
 
         if 'mac' in regional_summaries:
             df_mac = regional_summaries['mac']
@@ -570,7 +574,40 @@ elif page == "🗺️ Regional Outlook":
             df_mac_filtered['Scenario'] = df_mac_filtered['scenario'].map(lambda x: SCENARIO_NAMES.get(x, x))
 
             if len(df_mac_filtered) > 0:
-                # Create faceted line chart by scenario
+                # Single scenario selector for detailed view
+                mac_scenario = st.selectbox(
+                    "Select Scenario for Regional MAC Detail",
+                    selected_scenarios,
+                    format_func=lambda x: SCENARIO_NAMES.get(x, x),
+                    key="mac_scenario_select"
+                )
+
+                # Single scenario - clear separate lines per region
+                df_mac_single = df_mac_filtered[df_mac_filtered['scenario'] == mac_scenario]
+                fig = go.Figure()
+                for region in ['Daesan', 'Yeosu', 'Ulsan', 'Other']:
+                    df_r = df_mac_single[df_mac_single['region'] == region]
+                    if len(df_r) > 0:
+                        fig.add_trace(go.Scatter(
+                            x=df_r['year'],
+                            y=df_r['mac_usd_per_tco2'],
+                            mode='lines+markers',
+                            name=region,
+                            line=dict(color=REGION_COLORS.get(region, '#808080'), width=2),
+                            marker=dict(size=6)
+                        ))
+                fig.update_layout(
+                    title=f'Regional MAC by Year - {SCENARIO_NAMES.get(mac_scenario, mac_scenario)}',
+                    xaxis_title='Year',
+                    yaxis_title='MAC ($/tCO2)',
+                    legend_title='Region',
+                    height=450,
+                    hovermode='x unified'
+                )
+                st.plotly_chart(fig, use_container_width=True)
+
+                # All scenarios comparison (faceted)
+                st.subheader("All Selected Scenarios - Regional MAC Comparison")
                 fig = px.line(df_mac_filtered, x='year', y='mac_usd_per_tco2', color='region',
                              facet_col='Scenario', facet_col_wrap=2,
                              markers=True,
@@ -581,7 +618,7 @@ elif page == "🗺️ Regional Outlook":
                 st.plotly_chart(fig, use_container_width=True)
 
                 # MAC Summary Table
-                st.subheader("MAC Summary Table ($/tCO2)")
+                st.subheader("MAC Summary Table ($/tCO2) - 2050")
                 mac_2050 = df_mac_filtered[df_mac_filtered['year'] == 2050].copy()
                 if len(mac_2050) > 0:
                     mac_pivot = mac_2050.pivot(index='region', columns='Scenario', values='mac_usd_per_tco2')
@@ -604,7 +641,7 @@ elif page == "🗺️ Regional Outlook":
 
         # Regional Total Abatement by Scenario (2025-2050) - using pre-computed annual data
         st.header("Regional Abatement Trajectories (Annual 2025-2050)")
-        st.caption("Total CO2 abatement evolution by region - from pre-computed annual data")
+        st.caption("Total CO2 abatement evolution by region - separate lines per region")
 
         if 'abatement' in regional_summaries:
             df_abate = regional_summaries['abatement']
@@ -613,16 +650,40 @@ elif page == "🗺️ Regional Outlook":
             df_abate_filtered['Scenario'] = df_abate_filtered['scenario'].map(lambda x: SCENARIO_NAMES.get(x, x))
 
             if len(df_abate_filtered) > 0:
-                # Create faceted area chart by scenario
-                fig = px.area(df_abate_filtered, x='year', y='abatement_mt', color='region',
-                             facet_col='Scenario', facet_col_wrap=2,
-                             title='Regional Abatement Evolution by Scenario (Annual 2025-2050)',
-                             labels={'abatement_mt': 'Abatement (MtCO2)', 'year': 'Year', 'region': 'Region'},
-                             color_discrete_map=REGION_COLORS)
-                fig.update_layout(height=500)
+                # Single scenario selector for detailed view
+                abate_scenario = st.selectbox(
+                    "Select Scenario for Regional Abatement Detail",
+                    selected_scenarios,
+                    format_func=lambda x: SCENARIO_NAMES.get(x, x),
+                    key="abate_scenario_select"
+                )
+
+                # Single scenario - clear separate lines per region
+                df_abate_single = df_abate_filtered[df_abate_filtered['scenario'] == abate_scenario]
+                fig = go.Figure()
+                for region in ['Daesan', 'Yeosu', 'Ulsan', 'Other']:
+                    df_r = df_abate_single[df_abate_single['region'] == region]
+                    if len(df_r) > 0:
+                        fig.add_trace(go.Scatter(
+                            x=df_r['year'],
+                            y=df_r['abatement_mt'],
+                            mode='lines+markers',
+                            name=region,
+                            line=dict(color=REGION_COLORS.get(region, '#808080'), width=2),
+                            marker=dict(size=6)
+                        ))
+                fig.update_layout(
+                    title=f'Regional Abatement by Year - {SCENARIO_NAMES.get(abate_scenario, abate_scenario)}',
+                    xaxis_title='Year',
+                    yaxis_title='Abatement (MtCO2)',
+                    legend_title='Region',
+                    height=450,
+                    hovermode='x unified'
+                )
                 st.plotly_chart(fig, use_container_width=True)
 
-                # Line chart for clearer trend comparison
+                # All scenarios comparison (faceted) - Line chart
+                st.subheader("All Selected Scenarios - Regional Abatement Comparison")
                 fig = px.line(df_abate_filtered, x='year', y='abatement_mt', color='region',
                              facet_col='Scenario', facet_col_wrap=2,
                              markers=True,
