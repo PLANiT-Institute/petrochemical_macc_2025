@@ -53,9 +53,9 @@ REGION_COLORS = {
 }
 
 
-@st.cache_data
+@st.cache_data(ttl=60)  # Cache expires after 60 seconds
 def load_results():
-    """Load scenario results from single CSV file"""
+    """Load scenario results from single CSV file - v2 (cache invalidated)"""
     results_file = OUTPUT_DIR / "scenario_results.csv"
     if results_file.exists():
         df = pd.read_csv(results_file)
@@ -71,9 +71,9 @@ def load_results():
     return None
 
 
-@st.cache_data
+@st.cache_data(ttl=60)
 def load_assumptions():
-    """Load input assumptions"""
+    """Load input assumptions - v2"""
     data = {}
     try:
         data['tech'] = pd.read_csv(DATA_DIR / "technology_parameters.csv")
@@ -86,9 +86,9 @@ def load_assumptions():
     return data
 
 
-@st.cache_data
+@st.cache_data(ttl=60)
 def load_regional_summaries():
-    """Load pre-computed regional summary files (annual 2025-2050)"""
+    """Load pre-computed regional summary files (annual 2025-2050) - v2"""
     summaries = {}
     try:
         # Regional MAC summary
