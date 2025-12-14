@@ -243,38 +243,38 @@ if page == "📊 Scenario Comparison":
     elif not selected_scenarios:
         st.warning("Please select at least one scenario from the sidebar.")
     else:
-        # Summary Cards - Calculate all metrics first to avoid caching issues
+        # Summary Cards - Direct calculation per scenario
         st.header(f"Summary Metrics ({selected_year})")
 
-        # Pre-calculate all scenario metrics
-        scenario_metrics = {}
-        for scenario in selected_scenarios:
-            df_scenario = df[(df['scenario'] == scenario) & (df['year'] == selected_year)]
-            df_baseline = df[(df['scenario'] == scenario) & (df['year'] == 2025)]
+        # Create a summary table first for verification
+        summary_data = []
+        for scen in selected_scenarios:
+            df_scen = df[(df['scenario'] == scen) & (df['year'] == selected_year)].copy()
+            df_base = df[(df['scenario'] == scen) & (df['year'] == 2025)].copy()
 
-            scenario_metrics[scenario] = {
-                'baseline': df_baseline['bau_emissions_tco2'].sum() / 1e6,
-                'emissions': df_scenario['emissions_tco2'].sum() / 1e6,
-                'abatement': df_scenario['abatement_tco2'].sum() / 1e6,
-                'capex': df_scenario['capex_usd'].sum() / 1e9,
-                'total_cost': df_scenario['total_cost_usd'].sum() / 1e9,
-                'mac': df_scenario['total_cost_usd'].sum() / df_scenario['abatement_tco2'].sum() if df_scenario['abatement_tco2'].sum() > 0 else 0,
-                'deployed': df_scenario[df_scenario['tech_deployed'] == 1]['facility_id'].nunique()
-            }
+            capex_val = float(df_scen['capex_usd'].sum()) / 1e9
+            summary_data.append({
+                'Scenario': SCENARIO_NAMES.get(scen, scen),
+                'Baseline (Mt)': float(df_base['bau_emissions_tco2'].sum()) / 1e6,
+                'Emissions (Mt)': float(df_scen['emissions_tco2'].sum()) / 1e6,
+                'Abatement (Mt)': float(df_scen['abatement_tco2'].sum()) / 1e6,
+                'CAPEX ($B)': capex_val,
+                'Total Cost ($B)': float(df_scen['total_cost_usd'].sum()) / 1e9,
+                'Avg MAC ($/tCO2)': float(df_scen['total_cost_usd'].sum()) / float(df_scen['abatement_tco2'].sum()) if df_scen['abatement_tco2'].sum() > 0 else 0,
+                'Deployed': int(df_scen[df_scen['tech_deployed'] == 1]['facility_id'].nunique())
+            })
 
-        # Display in columns
-        cols = st.columns(len(selected_scenarios))
-        for i, scenario in enumerate(selected_scenarios):
-            metrics = scenario_metrics[scenario]
-            with cols[i]:
-                st.subheader(SCENARIO_NAMES.get(scenario, scenario))
-                st.metric("Baseline (2025)", f"{metrics['baseline']:.2f} Mt")
-                st.metric("Emissions", f"{metrics['emissions']:.3f} Mt")
-                st.metric("Abatement", f"{metrics['abatement']:.2f} Mt")
-                st.metric("Total CAPEX", f"${metrics['capex']:.2f}B")
-                st.metric("Total Cost", f"${metrics['total_cost']:.2f}B")
-                st.metric("Avg MAC", f"${metrics['mac']:.0f}/tCO2")
-                st.metric("Facilities Deployed", metrics['deployed'])
+        # Display summary table
+        summary_df = pd.DataFrame(summary_data)
+        st.dataframe(summary_df.style.format({
+            'Baseline (Mt)': '{:.2f}',
+            'Emissions (Mt)': '{:.3f}',
+            'Abatement (Mt)': '{:.2f}',
+            'CAPEX ($B)': '${:.2f}',
+            'Total Cost ($B)': '${:.2f}',
+            'Avg MAC ($/tCO2)': '${:.0f}',
+            'Deployed': '{:.0f}'
+        }), use_container_width=True, hide_index=True)
 
         st.markdown("---")
 
