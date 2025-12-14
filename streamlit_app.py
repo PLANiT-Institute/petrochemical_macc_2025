@@ -179,17 +179,22 @@ st.sidebar.markdown("---")
 # Global Filters
 st.sidebar.markdown("### 🎛️ Filters")
 
+# Clear cache button
+if st.sidebar.button("🔄 Reload Data"):
+    st.cache_data.clear()
+    st.rerun()
+
 if df is not None:
     # Year filter
     years = sorted(df['year'].unique())
     selected_year = st.sidebar.selectbox("Year", years, index=len(years)-1)
 
-    # Scenario filter
+    # Scenario filter - DEFAULT TO ALL 6 SCENARIOS
     scenarios = df['scenario'].unique().tolist()
     selected_scenarios = st.sidebar.multiselect(
         "Scenarios",
         scenarios,
-        default=scenarios[:2],
+        default=scenarios,  # Show ALL scenarios by default
         format_func=lambda x: SCENARIO_NAMES.get(x, x)
     )
 
@@ -205,7 +210,7 @@ if df is not None:
     st.sidebar.info(f"**Data Summary**\n\n"
                    f"Scenarios: {len(scenarios)}\n\n"
                    f"Facilities: {df['facility_id'].nunique()}\n\n"
-                   f"Period: 2025-2050\n\n"
+                   f"Period: 2025-2050 (Annual)\n\n"
                    f"**NO CCS/CCUS**")
 else:
     st.sidebar.warning("No data loaded")
