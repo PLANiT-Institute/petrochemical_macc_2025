@@ -167,10 +167,10 @@ st.sidebar.title("🏭 Net Zero Dashboard")
 st.sidebar.markdown("**Korea Petrochemical**")
 st.sidebar.markdown("---")
 
-# Navigation
+# Navigation - Regional Outlook is FIRST
 page = st.sidebar.radio(
     "📑 Navigation",
-    ["📊 Scenario Comparison", "🔧 Technology Details", "🗺️ Regional Outlook",
+    ["🗺️ Regional Outlook", "📊 Scenario Comparison", "🔧 Technology Details",
      "🏢 Facility Results", "⚡ Energy Infrastructure"]
 )
 
@@ -243,32 +243,38 @@ if page == "📊 Scenario Comparison":
     elif not selected_scenarios:
         st.warning("Please select at least one scenario from the sidebar.")
     else:
-        # Summary Cards
+        # Summary Cards - Calculate all metrics first to avoid caching issues
         st.header(f"Summary Metrics ({selected_year})")
 
+        # Pre-calculate all scenario metrics
+        scenario_metrics = {}
+        for scenario in selected_scenarios:
+            df_scenario = df[(df['scenario'] == scenario) & (df['year'] == selected_year)]
+            df_baseline = df[(df['scenario'] == scenario) & (df['year'] == 2025)]
+
+            scenario_metrics[scenario] = {
+                'baseline': df_baseline['bau_emissions_tco2'].sum() / 1e6,
+                'emissions': df_scenario['emissions_tco2'].sum() / 1e6,
+                'abatement': df_scenario['abatement_tco2'].sum() / 1e6,
+                'capex': df_scenario['capex_usd'].sum() / 1e9,
+                'total_cost': df_scenario['total_cost_usd'].sum() / 1e9,
+                'mac': df_scenario['total_cost_usd'].sum() / df_scenario['abatement_tco2'].sum() if df_scenario['abatement_tco2'].sum() > 0 else 0,
+                'deployed': df_scenario[df_scenario['tech_deployed'] == 1]['facility_id'].nunique()
+            }
+
+        # Display in columns
         cols = st.columns(len(selected_scenarios))
         for i, scenario in enumerate(selected_scenarios):
-            df_s = df[(df['scenario'] == scenario) & (df['year'] == selected_year)]
-            df_base = df[(df['scenario'] == scenario) & (df['year'] == 2025)]
-
+            metrics = scenario_metrics[scenario]
             with cols[i]:
                 st.subheader(SCENARIO_NAMES.get(scenario, scenario))
-
-                baseline = df_base['bau_emissions_tco2'].sum() / 1e6
-                final = df_s['emissions_tco2'].sum() / 1e6
-                abatement = df_s['abatement_tco2'].sum() / 1e6
-                capex = df_s['capex_usd'].sum() / 1e9
-                total_cost = df_s['total_cost_usd'].sum() / 1e9
-                mac = df_s['total_cost_usd'].sum() / df_s['abatement_tco2'].sum() if df_s['abatement_tco2'].sum() > 0 else 0
-                deployed = df_s[df_s['tech_deployed'] == 1]['facility_id'].nunique()
-
-                st.metric("Baseline (2025)", f"{baseline:.2f} Mt")
-                st.metric("Emissions", f"{final:.3f} Mt")
-                st.metric("Abatement", f"{abatement:.2f} Mt")
-                st.metric("Total CAPEX", f"${capex:.2f}B")
-                st.metric("Total Cost", f"${total_cost:.2f}B")
-                st.metric("Avg MAC", f"${mac:.0f}/tCO2")
-                st.metric("Facilities Deployed", deployed)
+                st.metric("Baseline (2025)", f"{metrics['baseline']:.2f} Mt")
+                st.metric("Emissions", f"{metrics['emissions']:.3f} Mt")
+                st.metric("Abatement", f"{metrics['abatement']:.2f} Mt")
+                st.metric("Total CAPEX", f"${metrics['capex']:.2f}B")
+                st.metric("Total Cost", f"${metrics['total_cost']:.2f}B")
+                st.metric("Avg MAC", f"${metrics['mac']:.0f}/tCO2")
+                st.metric("Facilities Deployed", metrics['deployed'])
 
         st.markdown("---")
 
@@ -554,9 +560,44 @@ elif page == "🗺️ Regional Outlook":
             df_cost['Scenario'] = df_cost['scenario'].map(lambda x: SCENARIO_NAMES.get(x, x))
             df_cost['Total Cost ($M)'] = df_cost['capex_usd'] / 1e6
 
-            fig = px.area(df_cost, x='year', y='Total Cost ($M)', color='region',
+            # Single scenario selector for detailed view
+            cost_scenario = st.selectbox(
+                "Select Scenario for Cost Detail",
+                selected_scenarios,
+                format_func=lambda x: SCENARIO_NAMES.get(x, x),
+                key="cost_scenario_select"
+            )
+
+            # Single scenario - SEPARATE LINES per region (not stacked)
+            df_cost_single = df_cost[df_cost['scenario'] == cost_scenario]
+            fig = go.Figure()
+            for region in ['Daesan', 'Yeosu', 'Ulsan', 'Other']:
+                df_r = df_cost_single[df_cost_single['region'] == region]
+                if len(df_r) > 0:
+                    fig.add_trace(go.Scatter(
+                        x=df_r['year'],
+                        y=df_r['Total Cost ($M)'],
+                        mode='lines+markers',
+                        name=region,
+                        line=dict(color=REGION_COLORS.get(region, '#808080'), width=2),
+                        marker=dict(size=6)
+                    ))
+            fig.update_layout(
+                title=f'Total Cost by Region - {SCENARIO_NAMES.get(cost_scenario, cost_scenario)}',
+                xaxis_title='Year',
+                yaxis_title='Total Cost ($M)',
+                legend_title='Region',
+                height=450,
+                hovermode='x unified'
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+            # All scenarios comparison (faceted) - LINE chart not area
+            st.subheader("All Selected Scenarios - Cost Comparison")
+            fig = px.line(df_cost, x='year', y='Total Cost ($M)', color='region',
                          facet_col='Scenario', facet_col_wrap=2,
-                         title='Cumulative Cost by Region (Annual)',
+                         markers=True,
+                         title='Cost by Region per Scenario (Annual)',
                          color_discrete_map=REGION_COLORS)
             fig.update_layout(height=500)
             st.plotly_chart(fig, use_container_width=True)
