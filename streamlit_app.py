@@ -86,6 +86,25 @@ def load_assumptions():
     return data
 
 
+@st.cache_data
+def load_regional_summaries():
+    """Load pre-computed regional summary files (annual 2025-2050)"""
+    summaries = {}
+    try:
+        # Regional MAC summary
+        mac_file = OUTPUT_DIR / "regional_mac_summary.csv"
+        if mac_file.exists():
+            summaries['mac'] = pd.read_csv(mac_file)
+
+        # Regional abatement summary
+        abatement_file = OUTPUT_DIR / "regional_abatement_summary.csv"
+        if abatement_file.exists():
+            summaries['abatement'] = pd.read_csv(abatement_file)
+    except Exception as e:
+        st.error(f"Error loading regional summaries: {e}")
+    return summaries
+
+
 def create_macc_figure(df_macc, scenario_name):
     """Create MACC curve figure"""
     fig = go.Figure()
@@ -141,6 +160,7 @@ def format_number(val, unit=''):
 # Load data
 df = load_results()
 assumptions = load_assumptions()
+regional_summaries = load_regional_summaries()
 
 # ===================== SIDEBAR =====================
 st.sidebar.title("🏭 Net Zero Dashboard")
@@ -515,123 +535,112 @@ elif page == "🗺️ Regional Outlook":
 
         st.markdown("---")
 
-        # Cost pathways by region
-        st.header("Cost Pathways by Region")
+        # Cost pathways by region (using pre-computed annual data)
+        st.header("Cost Pathways by Region (Annual 2025-2050)")
 
-        cost_data = []
-        for scenario in selected_scenarios:
-            for year in sorted(df['year'].unique()):
-                df_y = df[(df['scenario'] == scenario) & (df['year'] == year)]
-                for region in df_y['region'].unique():
-                    df_r = df_y[df_y['region'] == region]
-                    cost_data.append({
-                        'Scenario': SCENARIO_NAMES.get(scenario, scenario),
-                        'Year': year,
-                        'Region': region,
-                        'Total Cost ($M)': df_r['total_cost_usd'].sum() / 1e6
-                    })
+        if 'abatement' in regional_summaries:
+            df_abate = regional_summaries['abatement']
+            # Filter for selected scenarios
+            df_cost = df_abate[df_abate['scenario'].isin(selected_scenarios)].copy()
+            df_cost['Scenario'] = df_cost['scenario'].map(lambda x: SCENARIO_NAMES.get(x, x))
+            df_cost['Total Cost ($M)'] = df_cost['capex_usd'] / 1e6
 
-        cost_df = pd.DataFrame(cost_data)
-        fig = px.area(cost_df, x='Year', y='Total Cost ($M)', color='Region',
-                     facet_col='Scenario',
-                     title='Cumulative Cost by Region',
-                     color_discrete_map=REGION_COLORS)
-        st.plotly_chart(fig, use_container_width=True)
-
-        st.markdown("---")
-
-        # Regional MAC Curve by Scenario (2025-2050)
-        st.header("Regional MAC Curves (2025-2050)")
-        st.caption("Marginal Abatement Cost evolution by region across all years")
-
-        mac_regional_data = []
-        for scenario in selected_scenarios:
-            for year in sorted(df['year'].unique()):
-                df_y = df[(df['scenario'] == scenario) & (df['year'] == year)]
-                for region in df_y['region'].unique():
-                    df_r = df_y[df_y['region'] == region]
-                    total_abatement = df_r['abatement_tco2'].sum()
-                    total_cost = df_r['total_cost_usd'].sum()
-                    if total_abatement > 0:
-                        mac_regional_data.append({
-                            'Scenario': SCENARIO_NAMES.get(scenario, scenario),
-                            'Year': year,
-                            'Region': region,
-                            'MAC ($/tCO2)': total_cost / total_abatement,
-                            'Abatement (MtCO2)': total_abatement / 1e6
-                        })
-
-        if mac_regional_data:
-            mac_regional_df = pd.DataFrame(mac_regional_data)
-
-            # Create faceted line chart by scenario
-            fig = px.line(mac_regional_df, x='Year', y='MAC ($/tCO2)', color='Region',
+            fig = px.area(df_cost, x='year', y='Total Cost ($M)', color='region',
                          facet_col='Scenario', facet_col_wrap=2,
-                         markers=True,
-                         title='Regional MAC Evolution by Scenario (2025-2050)',
+                         title='Cumulative Cost by Region (Annual)',
                          color_discrete_map=REGION_COLORS)
             fig.update_layout(height=500)
             st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.warning("Regional summary data not available. Run run_scenarios.py first.")
 
-            # Also show as heatmap for easier comparison
-            st.subheader("MAC Comparison Heatmap (2050)")
-            mac_2050 = mac_regional_df[mac_regional_df['Year'] == 2050].copy()
-            if len(mac_2050) > 0:
-                mac_pivot = mac_2050.pivot(index='Region', columns='Scenario', values='MAC ($/tCO2)')
-                fig = px.imshow(mac_pivot,
-                               labels=dict(x="Scenario", y="Region", color="MAC ($/tCO2)"),
-                               title='Regional MAC by Scenario (2050)',
-                               color_continuous_scale='RdYlGn_r',
-                               text_auto='.0f')
-                fig.update_layout(height=400)
+        st.markdown("---")
+
+        # Regional MAC Curve by Scenario (2025-2050) - using pre-computed annual data
+        st.header("Regional MAC Curves (Annual 2025-2050)")
+        st.caption("Marginal Abatement Cost evolution by region - from pre-computed annual data")
+
+        if 'mac' in regional_summaries:
+            df_mac = regional_summaries['mac']
+            # Filter for selected scenarios and non-zero MAC
+            df_mac_filtered = df_mac[
+                (df_mac['scenario'].isin(selected_scenarios)) &
+                (df_mac['mac_usd_per_tco2'] > 0)
+            ].copy()
+            df_mac_filtered['Scenario'] = df_mac_filtered['scenario'].map(lambda x: SCENARIO_NAMES.get(x, x))
+
+            if len(df_mac_filtered) > 0:
+                # Create faceted line chart by scenario
+                fig = px.line(df_mac_filtered, x='year', y='mac_usd_per_tco2', color='region',
+                             facet_col='Scenario', facet_col_wrap=2,
+                             markers=True,
+                             title='Regional MAC Evolution by Scenario (Annual 2025-2050)',
+                             labels={'mac_usd_per_tco2': 'MAC ($/tCO2)', 'year': 'Year', 'region': 'Region'},
+                             color_discrete_map=REGION_COLORS)
+                fig.update_layout(height=500)
                 st.plotly_chart(fig, use_container_width=True)
 
+                # MAC Summary Table
+                st.subheader("MAC Summary Table ($/tCO2)")
+                mac_2050 = df_mac_filtered[df_mac_filtered['year'] == 2050].copy()
+                if len(mac_2050) > 0:
+                    mac_pivot = mac_2050.pivot(index='region', columns='Scenario', values='mac_usd_per_tco2')
+                    st.dataframe(mac_pivot.style.format("{:.0f}"), use_container_width=True)
+
+                # Heatmap for easier comparison
+                st.subheader("MAC Comparison Heatmap (2050)")
+                if len(mac_2050) > 0:
+                    fig = px.imshow(mac_pivot,
+                                   labels=dict(x="Scenario", y="Region", color="MAC ($/tCO2)"),
+                                   title='Regional MAC by Scenario (2050)',
+                                   color_continuous_scale='RdYlGn_r',
+                                   text_auto='.0f')
+                    fig.update_layout(height=400)
+                    st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.warning("Regional MAC summary data not available. Run run_scenarios.py first.")
+
         st.markdown("---")
 
-        # Regional Total Abatement by Scenario (2025-2050)
-        st.header("Regional Abatement Trajectories (2025-2050)")
-        st.caption("Total CO2 abatement evolution by region across all years")
+        # Regional Total Abatement by Scenario (2025-2050) - using pre-computed annual data
+        st.header("Regional Abatement Trajectories (Annual 2025-2050)")
+        st.caption("Total CO2 abatement evolution by region - from pre-computed annual data")
 
-        abatement_regional_data = []
-        for scenario in selected_scenarios:
-            for year in sorted(df['year'].unique()):
-                df_y = df[(df['scenario'] == scenario) & (df['year'] == year)]
-                for region in df_y['region'].unique():
-                    df_r = df_y[df_y['region'] == region]
-                    abatement_regional_data.append({
-                        'Scenario': SCENARIO_NAMES.get(scenario, scenario),
-                        'Year': year,
-                        'Region': region,
-                        'Abatement (MtCO2)': df_r['abatement_tco2'].sum() / 1e6
-                    })
+        if 'abatement' in regional_summaries:
+            df_abate = regional_summaries['abatement']
+            # Filter for selected scenarios
+            df_abate_filtered = df_abate[df_abate['scenario'].isin(selected_scenarios)].copy()
+            df_abate_filtered['Scenario'] = df_abate_filtered['scenario'].map(lambda x: SCENARIO_NAMES.get(x, x))
 
-        if abatement_regional_data:
-            abatement_regional_df = pd.DataFrame(abatement_regional_data)
+            if len(df_abate_filtered) > 0:
+                # Create faceted area chart by scenario
+                fig = px.area(df_abate_filtered, x='year', y='abatement_mt', color='region',
+                             facet_col='Scenario', facet_col_wrap=2,
+                             title='Regional Abatement Evolution by Scenario (Annual 2025-2050)',
+                             labels={'abatement_mt': 'Abatement (MtCO2)', 'year': 'Year', 'region': 'Region'},
+                             color_discrete_map=REGION_COLORS)
+                fig.update_layout(height=500)
+                st.plotly_chart(fig, use_container_width=True)
 
-            # Create faceted area chart by scenario
-            fig = px.area(abatement_regional_df, x='Year', y='Abatement (MtCO2)', color='Region',
-                         facet_col='Scenario', facet_col_wrap=2,
-                         title='Regional Abatement Evolution by Scenario (2025-2050)',
-                         color_discrete_map=REGION_COLORS)
-            fig.update_layout(height=500)
-            st.plotly_chart(fig, use_container_width=True)
+                # Line chart for clearer trend comparison
+                fig = px.line(df_abate_filtered, x='year', y='abatement_mt', color='region',
+                             facet_col='Scenario', facet_col_wrap=2,
+                             markers=True,
+                             title='Regional Abatement Trends by Scenario (Annual 2025-2050)',
+                             labels={'abatement_mt': 'Abatement (MtCO2)', 'year': 'Year', 'region': 'Region'},
+                             color_discrete_map=REGION_COLORS)
+                fig.update_layout(height=500)
+                st.plotly_chart(fig, use_container_width=True)
 
-            # Also show line chart for clearer trend comparison
-            fig = px.line(abatement_regional_df, x='Year', y='Abatement (MtCO2)', color='Region',
-                         facet_col='Scenario', facet_col_wrap=2,
-                         markers=True,
-                         title='Regional Abatement Trends by Scenario (2025-2050)',
-                         color_discrete_map=REGION_COLORS)
-            fig.update_layout(height=500)
-            st.plotly_chart(fig, use_container_width=True)
-
-            # Summary table
-            st.subheader("Abatement Summary by Region (2050)")
-            abate_2050 = abatement_regional_df[abatement_regional_df['Year'] == 2050].copy()
-            if len(abate_2050) > 0:
-                abate_pivot = abate_2050.pivot(index='Region', columns='Scenario', values='Abatement (MtCO2)')
-                abate_pivot['Total'] = abate_pivot.sum(axis=1)
-                st.dataframe(abate_pivot.style.format("{:.2f}"), use_container_width=True)
+                # Summary table
+                st.subheader("Abatement Summary by Region (2050)")
+                abate_2050 = df_abate_filtered[df_abate_filtered['year'] == 2050].copy()
+                if len(abate_2050) > 0:
+                    abate_pivot = abate_2050.pivot(index='region', columns='Scenario', values='abatement_mt')
+                    abate_pivot['Total'] = abate_pivot.sum(axis=1)
+                    st.dataframe(abate_pivot.style.format("{:.2f}"), use_container_width=True)
+        else:
+            st.warning("Regional abatement summary data not available. Run run_scenarios.py first.")
 
 
 # ===================== PAGE 4: FACILITY RESULTS =====================
