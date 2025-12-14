@@ -1,9 +1,13 @@
 """
 SCENARIO RUNNER - Cost-Optimized with Emission Constraints
 ==========================================================
-Runs all 6 scenarios and outputs a single CSV file with facility-level results.
+Runs all 6 scenarios with ANNUAL results (2025-2050).
 
-Output: outputs/scenario_results.csv
+Outputs (separate files per scenario):
+- outputs/{scenario_name}.csv - Facility-level annual results
+- outputs/regional_mac_summary.csv - Regional MAC curves by scenario/year
+- outputs/regional_abatement_summary.csv - Regional abatement by scenario/year
+- outputs/scenario_results.csv - Combined results (all scenarios)
 
 Emission Constraints (from baseline):
 - 2035: 24.5% reduction (Korea industry sector NDC target)
@@ -32,18 +36,27 @@ DATA_DIR = Path('data')
 OUTPUT_DIR = Path('outputs')
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-# Years for analysis (key years only)
-YEARS = [2025, 2030, 2035, 2040, 2045, 2050]
+# Years for analysis - ANNUAL from 2025 to 2050
+YEARS = list(range(2025, 2051))  # 26 years
 
-# Emission reduction targets (from baseline)
-EMISSION_TARGETS = {
+# Key emission reduction targets (will be interpolated for annual)
+KEY_TARGETS = {
     2025: 0.000,   # 0% reduction (baseline)
-    2030: 0.150,   # 15% reduction (interpolated)
+    2030: 0.150,   # 15% reduction
     2035: 0.245,   # 24.5% reduction (Korea industry NDC)
-    2040: 0.500,   # 50% reduction (interpolated)
-    2045: 0.750,   # 75% reduction (interpolated)
+    2040: 0.500,   # 50% reduction
+    2045: 0.750,   # 75% reduction
     2050: 1.000,   # 100% reduction (Net Zero)
 }
+
+# Interpolate emission targets for all years
+def interpolate_targets(key_targets, years):
+    """Interpolate emission targets for annual years"""
+    key_years = sorted(key_targets.keys())
+    key_values = [key_targets[y] for y in key_years]
+    return {y: np.interp(y, key_years, key_values) for y in years}
+
+EMISSION_TARGETS = interpolate_targets(KEY_TARGETS, YEARS)
 
 # Scenarios: 6 combinations
 SCENARIOS = [
@@ -531,8 +544,9 @@ def main():
     print("=" * 80)
     print("KOREA PETROCHEMICAL NET ZERO - COST-OPTIMIZED SCENARIO RUNNER")
     print("=" * 80)
-    print("\nEmission Targets:")
-    for year, target in EMISSION_TARGETS.items():
+    print(f"\nYears: {YEARS[0]} - {YEARS[-1]} (annual, {len(YEARS)} years)")
+    print("\nKey Emission Targets:")
+    for year, target in KEY_TARGETS.items():
         print(f"  {year}: {target*100:.1f}% reduction")
 
     # Load data
@@ -544,12 +558,17 @@ def main():
     print("=" * 80)
 
     all_results = []
+    scenario_dfs = {}  # Store individual scenario DataFrames
 
     for scenario in SCENARIOS:
         results = run_scenario(scenario, data, YEARS)
         all_results.extend(results)
 
-    # Convert to DataFrame
+        # Create DataFrame for this scenario
+        df_scenario = pd.DataFrame(results)
+        scenario_dfs[scenario['name']] = df_scenario
+
+    # Convert combined results to DataFrame
     df_results = pd.DataFrame(all_results)
 
     # Reorder columns
@@ -566,45 +585,113 @@ def main():
     column_order = [c for c in column_order if c in df_results.columns]
     df_results = df_results[column_order]
 
-    # Save output
+    # ==================== SAVE OUTPUTS ====================
+    print("\n" + "=" * 80)
+    print("SAVING OUTPUTS")
+    print("=" * 80)
+
+    # 1. Save combined results
     output_path = OUTPUT_DIR / 'scenario_results.csv'
     df_results.to_csv(output_path, index=False)
+    print(f"  ✓ Combined results: {output_path}")
 
+    # 2. Save separate files for each scenario
+    for scenario_name, df_scenario in scenario_dfs.items():
+        df_scenario = df_scenario[column_order]
+        scenario_path = OUTPUT_DIR / f'{scenario_name}.csv'
+        df_scenario.to_csv(scenario_path, index=False)
+        print(f"  ✓ Scenario file: {scenario_path}")
+
+    # 3. Generate and save Regional MAC Summary
+    regional_mac_data = []
+    for scenario_name in df_results['scenario'].unique():
+        df_s = df_results[df_results['scenario'] == scenario_name]
+        for year in YEARS:
+            df_y = df_s[df_s['year'] == year]
+            for region in df_y['region'].unique():
+                df_r = df_y[df_y['region'] == region]
+                total_abatement = df_r['abatement_tco2'].sum()
+                total_cost = df_r['total_cost_usd'].sum()
+                mac = total_cost / total_abatement if total_abatement > 0 else 0
+                regional_mac_data.append({
+                    'scenario': scenario_name,
+                    'year': year,
+                    'region': region,
+                    'abatement_tco2': total_abatement,
+                    'total_cost_usd': total_cost,
+                    'mac_usd_per_tco2': mac,
+                    'facilities_deployed': df_r[df_r['tech_deployed'] == 1]['facility_id'].nunique(),
+                    'total_facilities': df_r['facility_id'].nunique(),
+                })
+
+    df_regional_mac = pd.DataFrame(regional_mac_data)
+    mac_path = OUTPUT_DIR / 'regional_mac_summary.csv'
+    df_regional_mac.to_csv(mac_path, index=False)
+    print(f"  ✓ Regional MAC summary: {mac_path}")
+
+    # 4. Generate and save Regional Abatement Summary
+    regional_abatement_data = []
+    for scenario_name in df_results['scenario'].unique():
+        df_s = df_results[df_results['scenario'] == scenario_name]
+        baseline_2025 = df_s[df_s['year'] == 2025]['bau_emissions_tco2'].sum()
+
+        for year in YEARS:
+            df_y = df_s[df_s['year'] == year]
+            for region in df_y['region'].unique():
+                df_r = df_y[df_y['region'] == region]
+                regional_abatement_data.append({
+                    'scenario': scenario_name,
+                    'year': year,
+                    'region': region,
+                    'bau_emissions_tco2': df_r['bau_emissions_tco2'].sum(),
+                    'emissions_tco2': df_r['emissions_tco2'].sum(),
+                    'abatement_tco2': df_r['abatement_tco2'].sum(),
+                    'abatement_mt': df_r['abatement_tco2'].sum() / 1e6,
+                    'capex_usd': df_r['capex_usd'].sum(),
+                    'elec_demand_mwh': df_r['elec_demand_mwh'].sum(),
+                    'h2_demand_t': df_r['h2_demand_t'].sum(),
+                })
+
+    df_regional_abatement = pd.DataFrame(regional_abatement_data)
+    abatement_path = OUTPUT_DIR / 'regional_abatement_summary.csv'
+    df_regional_abatement.to_csv(abatement_path, index=False)
+    print(f"  ✓ Regional abatement summary: {abatement_path}")
+
+    # ==================== OUTPUT SUMMARY ====================
     print("\n" + "=" * 80)
     print("OUTPUT SUMMARY")
     print("=" * 80)
     print(f"  Total rows: {len(df_results):,}")
     print(f"  Scenarios: {df_results['scenario'].nunique()}")
-    print(f"  Years: {sorted(df_results['year'].unique())}")
+    print(f"  Years: {YEARS[0]} - {YEARS[-1]} ({len(YEARS)} annual)")
     print(f"  Facilities: {df_results['facility_id'].nunique()}")
     print(f"  Regions: {df_results['region'].unique().tolist()}")
-    print(f"\n  Output saved to: {output_path}")
 
-    # Validation
+    # ==================== VALIDATION ====================
     print("\n" + "=" * 80)
-    print("VALIDATION - EMISSION TARGETS")
+    print("VALIDATION - EMISSION TARGETS (Key Years)")
     print("=" * 80)
 
+    validation_years = [2025, 2030, 2035, 2040, 2045, 2050]
     for scenario_name in df_results['scenario'].unique():
         print(f"\n  {scenario_name}:")
         df_s = df_results[df_results['scenario'] == scenario_name]
 
         baseline_2025 = df_s[df_s['year'] == 2025]['bau_emissions_tco2'].sum() / 1e6
 
-        for year in YEARS:
+        for year in validation_years:
             df_y = df_s[df_s['year'] == year]
             emissions = df_y['emissions_tco2'].sum() / 1e6
-            bau = df_y['bau_emissions_tco2'].sum() / 1e6
             reduction = (1 - emissions / baseline_2025) * 100 if baseline_2025 > 0 else 0
             target = EMISSION_TARGETS.get(year, 0) * 100
             deployed = df_y[df_y['tech_deployed'] == 1]['facility_id'].nunique()
 
-            status = "OK" if reduction >= target - 1 else "MISS"
-            print(f"    {year}: {emissions:.2f} Mt ({reduction:.1f}% reduction, target {target:.1f}%) "
-                  f"[{deployed} facilities deployed] {status}")
+            status = "✓" if reduction >= target - 1 else "✗"
+            print(f"    {year}: {emissions:.2f} Mt ({reduction:.1f}% red, target {target:.1f}%) "
+                  f"[{deployed} deployed] {status}")
 
     print("\n" + "=" * 80)
-    print("DONE")
+    print("DONE - All outputs saved to outputs/")
     print("=" * 80)
 
     return df_results
