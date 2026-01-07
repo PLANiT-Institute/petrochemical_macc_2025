@@ -30,16 +30,18 @@ petrochemical_macc_2025/
 │   ├── scenarios/                  # Scenario results (for Streamlit)
 │   ├── facility_database_with_regions.csv
 │   ├── technology_parameters.csv
+│   ├── energy_intensities.csv
+│   ├── emission_factors.csv
 │   ├── h2_price_trajectory.csv
 │   ├── re_price_trajectory.csv
-│   └── grid_emission_trajectory.csv
+│   ├── grid_emission_trajectory.csv
+│   ├── fuel_price_trajectory.csv
+│   └── demand_growth_trajectory.csv
 │
 ├── modules/                        # Core calculation modules
-│   ├── baseline.py                 # Baseline emission calculations
-│   ├── macc.py                     # MACC curve generation
-│   ├── optimization_v2.py          # Scenario optimization
-│   ├── data_manager.py             # Data loading utilities
-│   └── utils.py                    # Helper functions
+│   └── utils.py                    # Consolidated core logic (DataLoader, Calculators)
+│
+├── outputs/                        # Simulation results
 │
 ├── docs/                           # Documentation
 │   ├── ASSUMPTIONS_AND_METHODOLOGY.md
@@ -50,7 +52,7 @@ petrochemical_macc_2025/
 │   └── Korea_Petrochemical_NetZero_Analysis_YYYYMMDD.xlsx
 │
 ├── streamlit_app.py               # Interactive dashboard
-├── run_all_scenarios_v3.py        # Main scenario runner
+├── run_scenarios.py               # Main scenario runner
 ├── generate_client_excel.py       # Excel report generator
 └── requirements.txt               # Dependencies
 ```
@@ -65,7 +67,7 @@ pip install -r requirements.txt
 
 ### 1. Run Scenario Analysis
 ```bash
-python run_all_scenarios_v3.py
+python run_scenarios.py
 ```
 
 ### 2. Generate Excel Report

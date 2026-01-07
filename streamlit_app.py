@@ -76,11 +76,11 @@ def load_assumptions():
     """Load input assumptions - v2"""
     data = {}
     try:
-        data['tech'] = pd.read_csv(DATA_DIR / "technology_parameters.csv")
-        data['h2'] = pd.read_csv(DATA_DIR / "h2_price_trajectory.csv")
-        data['re'] = pd.read_csv(DATA_DIR / "re_price_trajectory.csv")
-        data['grid'] = pd.read_csv(DATA_DIR / "grid_emission_trajectory.csv")
-        data['fac'] = pd.read_csv(DATA_DIR / "facility_database_with_regions.csv")
+        data['tech'] = pd.read_csv(DATA_DIR / "assumptions" / "technology_parameters.csv")
+        data['h2'] = pd.read_csv(DATA_DIR / "assumptions" / "prices" / "h2_price_trajectory.csv")
+        data['re'] = pd.read_csv(DATA_DIR / "assumptions" / "prices" / "re_price_trajectory.csv")
+        data['grid'] = pd.read_csv(DATA_DIR / "assumptions" / "prices" / "grid_emission_trajectory.csv")
+        data['fac'] = pd.read_csv(DATA_DIR / "assets" / "facility_database_with_regions.csv")
     except Exception as e:
         st.error(f"Error loading assumptions: {e}")
     return data
@@ -103,6 +103,23 @@ def load_regional_summaries():
     except Exception as e:
         st.error(f"Error loading regional summaries: {e}")
     return summaries
+
+
+@st.cache_data(ttl=60)
+def load_stranded_assets():
+    """Load stranded assets summary and details"""
+    data = {}
+    try:
+        summary_file = OUTPUT_DIR / "stranded_assets_summary.csv"
+        if summary_file.exists():
+            data['summary'] = pd.read_csv(summary_file)
+            
+        details_file = OUTPUT_DIR / "stranded_assets_facilities.csv"
+        if details_file.exists():
+            data['details'] = pd.read_csv(details_file)
+    except Exception as e:
+        st.error(f"Error loading stranded assets: {e}")
+    return data
 
 
 def create_macc_figure(df_macc, scenario_name):
@@ -173,9 +190,12 @@ st.sidebar.markdown("---")
 # Navigation - Regional Outlook is FIRST
 page = st.sidebar.radio(
     "📑 Navigation",
-    ["🗺️ Regional Outlook", "📊 Scenario Comparison", "🔧 Technology Details",
+    ["🗺️ Regional Outlook", "📊 Scenario Comparison", "📉 Stranded Assets", "🔧 Technology Details",
      "🏢 Facility Results", "⚡ Energy Infrastructure"]
 )
+
+# Load stranded assets
+stranded_data = load_stranded_assets()
 
 st.sidebar.markdown("---")
 
@@ -357,6 +377,127 @@ if page == "📊 Scenario Comparison":
                          markers=False)
             fig.update_layout(height=500, hovermode='x unified')
             st.plotly_chart(fig, use_container_width=True)
+
+
+# ===================== PAGE 3: STRANDED ASSETS =====================
+elif page == "📉 Stranded Assets":
+    st.title("📉 Stranded Assets Analysis")
+    st.markdown("### Carbon Budget Perspective")
+    st.markdown("""
+    This analysis estimates the financial value of petrochemical assets that may become "stranded" 
+    (unrecovered book value) if the industry is forced to stop emitting when a carbon budget is exhausted.
+    
+    *   **Stranding Year**: When cumulative emissions exceed the budget.
+    *   **Stranded Value**: Sum of remaining book value of all operating assets in that year.
+    """)
+    
+    if 'summary' not in stranded_data:
+        st.error("No stranded asset data found. Run `run_scenarios.py` first.")
+    else:
+        df_summary = stranded_data['summary']
+        
+        # 1. KPI Metrics for Selected Scenario
+        st.header("Risk Overview")
+        
+        # Default to first scenario if not selected
+        current_scenario = selected_scenarios[0] if selected_scenarios else df_summary['scenario'].iloc[0]
+        
+        # Allow selecting one scenario for deeper focus
+        focus_scenario = st.selectbox(
+            "Select Focus Scenario", 
+            selected_scenarios if selected_scenarios else [current_scenario],
+            format_func=lambda x: SCENARIO_NAMES.get(x, x),
+            key="stranded_focus"
+        )
+        
+        row = df_summary[df_summary['scenario'] == focus_scenario].iloc[0]
+        
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("1.5°C Budget Status", f"Exhausted in {row['stranding_year_1.5C']}")
+        col2.metric("1.5°C Value at Risk", row['stranded_value_1.5C_fmt'])
+        col3.metric("2.0°C Budget Status", f"Exhausted in {row['stranding_year_2.0C']}")
+        col4.metric("2.0°C Value at Risk", row['stranded_value_2.0C_fmt'])
+        
+        st.markdown("---")
+        
+        # 2. Scenario Comparison Chart
+        st.header("Value at Risk by Scenario (1.5°C Budget)")
+        
+        # Filter summary for selected scenarios
+        df_sum_filtered = df_summary[df_summary['scenario'].isin(selected_scenarios)].copy()
+        df_sum_filtered['Scenario Name'] = df_sum_filtered['scenario'].map(lambda x: SCENARIO_NAMES.get(x, x))
+        df_sum_filtered['Value ($B)'] = df_sum_filtered['stranded_value_1.5C_usd'] / 1e9
+        
+        fig = px.bar(df_sum_filtered, x='Scenario Name', y='Value ($B)',
+                     color='Scenario Name',
+                     title='Total Stranded Asset Value ($ Billions) - 1.5°C Budget',
+                     text_auto='.1f')
+        fig.update_layout(showlegend=False)
+        st.plotly_chart(fig, use_container_width=True)
+        
+        st.markdown("---")
+        
+        # 3. Detailed Breakdown (Company/Facility)
+        st.header("Detailed Breakdown (1.5°C Budget)")
+        
+        if 'details' in stranded_data:
+            df_details = stranded_data['details']
+            # Filter for focus scenario and 1.5C budget
+            df_d = df_details[
+                (df_details['scenario'] == focus_scenario) & 
+                (df_details['budget_scenario'] == '1.5C')
+            ].copy()
+            
+            if len(df_d) > 0:
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    # Company Level Analysis
+                    st.subheader("Risk by Company")
+                    company_risk = df_d.groupby('company')['stranded_value_usd'].sum().reset_index()
+                    company_risk['Value ($M)'] = company_risk['stranded_value_usd'] / 1e6
+                    company_risk = company_risk.sort_values('Value ($M)', ascending=False).head(10)
+                    
+                    fig = px.bar(company_risk, x='Value ($M)', y='company', orientation='h',
+                                 title='Top 10 Companies by Stranded Value ($M)',
+                                 color='Value ($M)', color_continuous_scale='Reds')
+                    fig.update_layout(yaxis={'categoryorder':'total ascending'})
+                    st.plotly_chart(fig, use_container_width=True)
+                    
+                with col2:
+                    # Process Level
+                    st.subheader("Risk by Process")
+                    process_risk = df_d.groupby('process')['stranded_value_usd'].sum().reset_index()
+                    process_risk['Value ($M)'] = process_risk['stranded_value_usd'] / 1e6
+                    
+                    fig = px.pie(process_risk, values='Value ($M)', names='process',
+                                 title='Stranded Value Share by Process')
+                    st.plotly_chart(fig, use_container_width=True)
+                
+                # Top Risk Facilities Table
+                st.subheader(f"Top At-Risk Facilities - {SCENARIO_NAMES.get(focus_scenario, focus_scenario)}")
+                
+                top_facilities = df_d.sort_values('stranded_value_usd', ascending=False)
+                
+                display_df = top_facilities[[
+                    'company', 'facility_id', 'process', 'stranding_year', 'stranded_value_usd'
+                ]].copy()
+                
+                display_df.columns = ['Company', 'Facility ID', 'Process', 'Stranding Year', 'Stranded Value ($)']
+                
+                st.dataframe(
+                    display_df,
+                    hide_index=True,
+                    use_container_width=True,
+                    column_config={
+                        'Stranding Year': st.column_config.NumberColumn(format="%.1f"),
+                        'Stranded Value ($)': st.column_config.NumberColumn(format="$%.2f")
+                    }
+                )
+            else:
+                st.warning("No detailed data available for this scenario.")
+        else:
+            st.info("Detailed facility-level stranded asset data not found.")
 
 
 # ===================== PAGE 2: TECHNOLOGY DETAILS =====================
@@ -598,7 +739,13 @@ elif page == "🗺️ Regional Outlook":
             # Filter for selected scenarios
             df_cost = df_abate[df_abate['scenario'].isin(selected_scenarios)].copy()
             df_cost['Scenario'] = df_cost['scenario'].map(lambda x: SCENARIO_NAMES.get(x, x))
-            df_cost['Total Cost ($M)'] = df_cost['capex_usd'] / 1e6
+            
+            # FIX: Use total_cost_usd if available, otherwise fallback to capex (though capex is NOT total cost)
+            if 'total_cost_usd' in df_cost.columns:
+                df_cost['Total Cost ($M)'] = df_cost['total_cost_usd'] / 1e6
+            else:
+                st.warning("Total Cost column missing in summary. Showing CAPEX instead.")
+                df_cost['Total Cost ($M)'] = df_cost['capex_usd'] / 1e6
 
             # Single scenario selector for detailed view
             cost_scenario = st.selectbox(

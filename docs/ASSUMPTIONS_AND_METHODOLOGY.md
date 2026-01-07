@@ -344,7 +344,30 @@ Where:
 - RE-PPA covers all electricity emissions (baseline + HP)
 ```
 
-### 7.4 Operating Rate Assumptions
+### 7.5 Intertemporal Optimization (Dynamic LCOA)
+The model uses a **Dynamic Recursive Optimization** algorithm to determine the deployment schedule.
+
+Instead of a static "snapshot" ranking, the model calculates the **Levelized Cost of Abatement (LCOA)** for every candidate facility in every simulation year (`t`), looking ahead to 2050:
+
+```
+LCOA_t ($/tCO2) = Total_NPV_Cost_t / Total_Abatement_t
+
+Where:
+- Total_NPV_Cost_t = Σ [ (Annual_Cost_n) / (1 + r)^(n-t) ] for n = t to 2050
+- Total_Abatement_t = Σ [ Abatement_n ] for n = t to 2050
+- r (Discount Rate) = 8%
+```
+
+**Optimization Logic:**
+1.  In each year `t`, the model checks the national emission gap vs target.
+2.  If a gap exists, it calculates the `LCOA_t` for all undeployed facilities.
+3.  Facilities are ranked by `LCOA_t` (cheapest long-term abatement first).
+4.  Technologies are deployed until the gap is closed.
+5.  This ensures that decisions made today minimize the **Net Present Value (NPV)** of total system costs over the entire transition period.
+
+---
+
+### 7.6 Operating Rate Assumptions
 
 | Year | Operating Rate |
 |------|----------------|
@@ -376,7 +399,13 @@ The following are explicitly **NOT included** in this analysis:
 
 ## 9. Data Sources
 
-### 9.1 Technology Data
+### 9.1 Externalized Configuration (CSVs)
+All project data is strictly externalized and loaded at runtime:
+- **`data/scenarios/scenario_definitions.csv`**: Defines the 6 analysis scenarios.
+- **`data/scenarios/emission_targets.csv`**: Defines the Net Zero reduction pathway.
+- **`data/assets/facility_database_with_regions.csv`**: The 243-facility database.
+
+### 9.2 Technology Data (`data/assumptions/technology_parameters.csv`)
 | Source | Application |
 |--------|-------------|
 | IRENA 2024 | RE price trajectories |
@@ -386,14 +415,14 @@ The following are explicitly **NOT included** in this analysis:
 | BASF/SABIC/Linde | Electric cracker specifications |
 | Coolbrook | RDH technology parameters |
 
-### 9.2 Facility Data
+### 9.3 Facility Data (`data/assets/`)
 | Source | Application |
 |--------|-------------|
 | KPIA | Korean petrochemical facility database |
 | Company reports | Capacity and operational data |
 | KEEI | Energy consumption patterns |
 
-### 9.3 Emission Factors
+### 9.4 Emission Factors (`data/assumptions/`)
 | Source | Application |
 |--------|-------------|
 | IPCC 2006 Guidelines | Fuel emission factors |

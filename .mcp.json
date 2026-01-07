@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "obsidian": {
+      "command": "npx",
+      "args": ["-y", "@mseep/obsidian-mcp-server"],
+      "env": {
+        "OBSIDIAN_API_KEY": "dd0d8be134f29d9d4f16f2a16e6ce0bfb87d7e83f9c0e14c6bb62d9183157bf3",
+        "OBSIDIAN_API_URL": "http://127.0.0.1:27123"
+      }
+    }
+  }
+}

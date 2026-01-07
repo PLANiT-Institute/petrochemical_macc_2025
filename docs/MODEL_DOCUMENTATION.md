@@ -163,23 +163,28 @@ Where:
 ## 5. Key Files
 
 ### Data Files
-- `data/inputs/facilities.csv` - 237 baseline facilities
-- `data/inputs/energy_intensities.csv` - Energy consumption by product
-- `data/inputs/emission_factors.csv` - CO₂ emission factors
-- `data/inputs/technology_capex.csv` - Technology parameters
-- `data/price_trajectories/h2_price_trajectory.csv` - H₂ prices (LCOH-derived)
-- `data/price_trajectories/re_price_trajectory.csv` - RE prices
-- `data/price_trajectories/grid_emission_trajectory.csv` - Grid EF trajectory
+### Data Files (Assumptions & Assets)
+- `data/assets/facility_database_with_regions.csv` - 237 baseline facilities
+- `data/assets/energy_intensities.csv` - Energy consumption profiles
+- `data/assumptions/emission_factors.csv` - CO₂ emission factors (IPCC)
+- `data/assumptions/technology_parameters.csv` - Tech CAPEX, COP, Efficiency
+- `data/assumptions/prices/h2_price_trajectory.csv` - H₂ prices (LCOH-derived)
+- `data/assumptions/prices/re_price_trajectory.csv` - RE prices
+- `data/assumptions/prices/grid_emission_trajectory.csv` - Grid EF trajectory
+
+### Configuration Files (Externalized Logic)
+- `data/scenarios/scenario_definitions.csv` - Defines the 6 scenarios
+- `data/scenarios/emission_targets.csv` - Net Zero reduction pathway (15% by 2030, etc.)
+- `data/assets/region_mapping.csv` - Facility location mapping
 
 ### Code Modules
-- `modules/baseline.py` - Baseline emission calculations
-- `modules/macc.py` - MACC curve generation
-- `modules/optimization_v2.py` - Technology deployment optimization
-- `modules/lcoh.py` - LCOH calculation (RE→H₂ price link)
+- `run_scenarios.py` - Main execution script (Loads data, runs simulation, saves outputs)
+- `modules/utils.py` - Core logic library (Calculators for Emissions, Prices, Technologies, Stranded Assets)
 
 ### Outputs
-- `outputs/scenario_results.csv` - Complete scenario results
-- `reports/Korea_Petrochemical_NetZero_Analysis_*.xlsx` - Client reports
+- `outputs/scenario_results.csv` - Combined results (All scenarios, annual)
+- `outputs/regional_mac_summary.csv` - Aggregated regional metrics
+- `outputs/stranded_assets_summary.csv` - Stranded asset analysis results
 
 ---
 
@@ -190,10 +195,7 @@ Where:
 python run_scenarios.py
 ```
 
-### Generate Reports
-```bash
-python analyze_results.py
-```
+
 
 ### Launch Dashboard
 ```bash

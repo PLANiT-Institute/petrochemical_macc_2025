@@ -48,56 +48,53 @@ This study develops a facility-level MACC model to evaluate decarbonization path
 
 \section{Methodology}
 
-\subsection{Facility Database}
+\subsection{Data Architecture}
 
-The analysis covers 237 baseline facilities (243 with the Shaheen project) across Korea's major petrochemical complexes.
+The model is driven by a completely externalized data architecture, ensuring transparency and reproducibility. The core logic relies on three primary data configurations:
 
-\begin{table}[H]
-\centering
-\caption{Facility Database Summary by Region}
-\begin{tabular}{lccc}
-\toprule
-Region & Facilities & Capacity (kt/yr) & Share (\%) \\
-\midrule
-Yeosu & 87 & 37,216 & 37.2 \\
-Ulsan & 85 & 31,436 & 31.4 \\
-Daesan & 57 & 27,424 & 27.4 \\
-Other & 19 & 3,990 & 4.0 \\
-\midrule
-\textbf{Total} & \textbf{237} & \textbf{100,066} & \textbf{100.0} \\
-\bottomrule
-\end{tabular}
-\end{table}
+\subsubsection{Facility Database}
+The analysis covers 239 facilities (243 including the Shaheen project) across Korea's four major petrochemical complexes (Yeosu, Ulsan, Daesan, and others). The database is sourced from the Korea Petrochemical Industry Association (KPIA) and company reports, detailing:
+\begin{itemize}
+    \item \textbf{Production Capacity}: 100,066 kt/year (baseline).
+    \item \textbf{Process Type}: Naphtha Cracker, BTX, Polymer, etc.
+    \item \textbf{Energy Intensity}: Specific energy consumption (SEC) derived from KEEI and LBNL benchmarks.
+    \item \textbf{Location}: Mapped to regional grids for precise infrastructure planning.
+\end{itemize}
 
-\subsection{Technology Portfolio}
+\subsubsection{Scenario Configuration}
+Scenarios are defined via \texttt{scenario\_definitions.csv}, enabling modular combination of production pathways (Shaheen Growth, Restructuring) and technology choices (Hydrogen vs Electrification).
 
-Five decarbonization technologies are evaluated, each with specific applicability:
+\subsubsection{Emission Targets}
+The Net Zero pathway is governed by \texttt{emission\_targets.csv}, which sets the national reduction mandate: 15\% (2030), 24.5\% (2035), 50\% (2040), 75\% (2045), and 100\% (2050).
 
-\begin{table}[H]
-\centering
-\caption{Technology Parameters}
-\begin{tabular}{lcccc}
-\toprule
-Technology & Application & Available & TRL & Key Parameter \\
-\midrule
-Heat Pump & $<$165$^\circ$C processes & 2025 & 9 & COP 4.0 \\
-NCC-H$_2$ & Naphtha crackers & 2030 & 7 & 0.2 t-H$_2$/t-C$_2$H$_4$ \\
-NCC-Electricity & Naphtha crackers & 2030 & 8 & 5.0 MWh/t-C$_2$H$_4$ \\
-RE-PPA & All electricity & 2025 & N/A & Contract-based \\
-RDH & High-temp BTX & 2026 & 8 & 93\% efficiency \\
-\bottomrule
-\end{tabular}
-\end{table}
+\subsection{Intertemporal Optimization Model}
 
-\subsection{MACC Calculation}
+Unlike static Marginal Abatement Cost (MAC) models that optimize for a single snapshot year, this study employs a \textbf{Dynamic Recursive Optimization} algorithm to minimize the Net Present Value (NPV) of system costs over the 2025--2050 transition period.
 
-The marginal abatement cost for each technology is calculated as:
+\subsubsection{Levelized Cost of Abatement (LCOA)}
+The core decision metric is the Levelized Cost of Abatement (LCOA), calculated dynamically for every candidate facility in every simulation year $t$:
 
 \begin{equation}
-MAC = \frac{CAPEX_{ann} + OPEX_{ann} + \Delta FuelCost}{Abatement}
+LCOA_{i,t} = \frac{\sum_{n=t}^{2050} \frac{Cost_{i,n}}{(1+r)^{n-t}}}{\sum_{n=t}^{2050} Abatement_{i,n}}
 \end{equation}
 
-where $CAPEX_{ann}$ is annualized capital expenditure, $OPEX_{ann}$ is annual operating cost, $\Delta FuelCost$ is the fuel cost differential, and $Abatement$ is annual emission reduction.
+Where:
+\begin{itemize}
+    \item $Cost_{i,n} = CAPEX_{ann} + OPEX + Cost_{energy} - Cost_{fuel\_saved}$
+    \item $Abatement_{i,n}$ is the annual CO$_2$ reduction (tons).
+    \item $r$ is the social discount rate (8\%).
+\end{itemize}
+
+This look-ahead metric ensures that technology deployment decisions made today account for future cost declines (learning curves) and rising carbon/energy prices.
+
+\subsubsection{Dynamic Deployment Algorithm}
+The optimization proceeds as follows:
+\begin{enumerate}
+    \item \textbf{Check Gap}: In each year $t$, compare projected baseline emissions against the Net Zero target.
+    \item \textbf{Rank Candidates}: If a gap exists, calculate $LCOA_{i,t}$ for all undeployed facilities.
+    \item \textbf{Deploy}: Select facilities with the lowest LCOA until the emission gap is closed.
+    \item \textbf{Update State}: Deployed facilities remain decarbonized for their lifetime; the grid emission factor updates dynamically.
+\end{enumerate}
 
 \subsection{LCOH Methodology}
 
@@ -144,6 +141,14 @@ Grid EF (tCO$_2$/MWh) & 0.436 & 0.349 & 0.280 & 0.140 & 0.070 & 0.000 \\
 \end{tabular}
 \caption*{$^*$H$_2$ price calculated via LCOH formula. Source: IRENA 2024, IEA WEO 2024, PLANiT Institute}
 \end{table}
+
+\subsection{Key Assumptions}
+
+\begin{itemize}
+    \item \textbf{Operating Rate}: A constant 70\% operating rate is assumed 2025--2050, reflecting structural overcapacity and market competition.
+    \item \textbf{Learning Curves}: Technology costs (CAPEX) for H$_2$ furnaces, electric crackers, and electrolyzers are assumed to decline by 50\% by 2050 relative to 2025, driven by global deployment and manufacturing scale.
+    \item \textbf{Financials}: Real 2024 USD terms; 8\% social discount rate; 25-year facility lifetime.
+\end{itemize}
 
 \section{Scenario Design}
 

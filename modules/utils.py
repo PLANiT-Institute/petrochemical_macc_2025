@@ -29,48 +29,101 @@ class DataLoader:
         self.data_dir = Path(data_dir)
 
     def load_facilities(self):
-        """Load facility database"""
-        return pd.read_csv(self.data_dir / 'facility_database_with_regions.csv')
+        """
+        Load facility data by merging Facility List (Capacity/Region) with 
+        Energy Intensity Benchmarks.
+        Enforces 100% data coverage check.
+        """
+        # 1. Load Facility Metadata
+        path_shaheen = self.data_dir / 'assets' / 'facility_database_with_shaheen.csv'
+        path_regions = self.data_dir / 'assets' / 'facility_database_with_regions.csv'
+        
+        if path_shaheen.exists():
+            df_facilities = pd.read_csv(path_shaheen)
+        else:
+            df_facilities = pd.read_csv(path_regions)
 
-    def load_energy_intensities(self):
-        """Load energy intensity data"""
-        return pd.read_csv(self.data_dir / 'energy_intensities.csv')
+        # 2. Load Benchmarks
+        benchmarks_path = self.data_dir / 'assumptions' / 'product_benchmarks.csv'
+        if not benchmarks_path.exists():
+            raise FileNotFoundError(f"Critical: Missing benchmarks at {benchmarks_path}")
+            
+        df_benchmarks = pd.read_csv(benchmarks_path)
+        
+        # 3. Merge Strategies
+        # We merge on [product, process]. 
+        # Note: If facility data has intensity columns, drop them first to avoid collision or stale data.
+        cols_to_drop = [c for c in df_facilities.columns if 'GJ_per_tonne' in c or 'kWh_per_tonne' in c]
+        if cols_to_drop:
+            df_facilities = df_facilities.drop(columns=cols_to_drop)
+            
+        df_merged = pd.merge(
+            df_facilities,
+            df_benchmarks,
+            on=['product', 'process'],
+            how='left'
+        )
+        
+        # 4. Integrity Check (100% match)
+        # Check a key intensity column, e.g., 'Electricity_kWh_per_tonne'
+        if df_merged['Electricity_kWh_per_tonne'].isna().any():
+            missing = df_merged[df_merged['Electricity_kWh_per_tonne'].isna()]
+            unique_missing = missing[['product', 'process']].drop_duplicates()
+            raise ValueError(
+                f"Data Integrity Error: {len(missing)} facilities have no matching benchmark.\n"
+                f"Missing profiles for:\n{unique_missing}"
+            )
+            
+        return df_merged
 
     def load_emission_factors(self):
         """Load emission factors"""
-        return pd.read_csv(self.data_dir / 'emission_factors.csv')
+        return pd.read_csv(self.data_dir / 'assumptions' / 'emission_factors.csv')
 
     def load_h2_prices(self):
         """Load H2 price trajectory"""
-        return pd.read_csv(self.data_dir / 'h2_price_trajectory.csv')
+        return pd.read_csv(self.data_dir / 'assumptions' / 'prices' / 'h2_price_trajectory.csv')
 
     def load_re_prices(self):
         """Load RE price trajectory"""
-        return pd.read_csv(self.data_dir / 're_price_trajectory.csv')
+        return pd.read_csv(self.data_dir / 'assumptions' / 'prices' / 're_price_trajectory.csv')
 
     def load_grid_emissions(self):
         """Load grid emission trajectory"""
-        return pd.read_csv(self.data_dir / 'grid_emission_trajectory.csv')
+        return pd.read_csv(self.data_dir / 'assumptions' / 'prices' / 'grid_emission_trajectory.csv')
 
     def load_grid_prices(self):
         """Load grid electricity price trajectory"""
-        return pd.read_csv(self.data_dir / 'grid_price_trajectory.csv')
+        return pd.read_csv(self.data_dir / 'assumptions' / 'prices' / 'grid_price_trajectory.csv')
 
     def load_technology_params(self):
         """Load technology parameters"""
         # Check both data_dir and output_dir for backwards compatibility
-        tech_path = self.data_dir / 'technology_parameters.csv'
+        tech_path = self.data_dir / 'assumptions' / 'technology_parameters.csv'
         if not tech_path.exists():
             tech_path = Path('output') / 'technology_parameters.csv'
         return pd.read_csv(tech_path, index_col=None)
 
     def load_heat_pump_applicability(self):
         """Load heat pump applicability"""
-        return pd.read_csv(self.data_dir / 'heat_pump_applicability.csv')
+        # Moved to assumptions if it exists
+        path = self.data_dir / 'assumptions' / 'heat_pump_applicability.csv'
+        if path.exists():
+            return pd.read_csv(path)
+        return pd.read_csv(self.data_dir / 'heat_pump_applicability.csv') # Fallback if unchecked
 
     def load_fuel_costs(self):
         """Load baseline fuel costs"""
-        return pd.read_csv(self.data_dir / 'fuel_costs_baseline.csv')
+        # This file might not exist or be unused, checking path
+        return pd.read_csv(self.data_dir / 'assumptions' / 'prices' / 'fuel_costs_baseline.csv')
+
+    def load_carbon_budgets(self):
+        """Load carbon budget scenarios"""
+        return pd.read_csv(self.data_dir / 'assumptions' / 'carbon_budget_scenarios.csv')
+
+    def load_asset_valuation_params(self):
+        """Load asset valuation parameters"""
+        return pd.read_csv(self.data_dir / 'assumptions' / 'asset_valuation_params.csv')
 
 
 class EmissionCalculator:
@@ -169,6 +222,74 @@ class EmissionCalculator:
 
         return emissions
 
+    def calculate_baseline_metrics(self, facility_row, intensities_row, operating_rate, capacity_multiplier=1.0):
+        """
+        Calculate full baseline metrics for a facility.
+        Replaces calculate_facility_baseline in run_scenarios.py
+        """
+        capacity_tonnes = facility_row['capacity_kt'] * 1000
+        production_tonnes = capacity_tonnes * capacity_multiplier * operating_rate
+        
+        emissions_by_source = {}
+        total_heat_gj = 0.0
+        
+        # Helper to process a fuel
+        def process_fuel(fuel_name, intensity_col, is_heat=True):
+            nonlocal total_heat_gj
+            intensity = intensities_row.get(intensity_col, 0)
+            if intensity > 0:
+                # Determine unit (GJ vs kWh)
+                if 'kWh' in intensity_col:
+                    energy = intensity * production_tonnes
+                    # Convert to MWh for standard tracking
+                    energy_mwh = energy / 1000
+                    # Emission factor lookup handled in calculate_emissions
+                    emissions = self.calculate_emissions(fuel_name, energy)
+                    return energy, emissions
+                else: 
+                    # GJ
+                    energy = intensity * production_tonnes
+                    if is_heat:
+                        total_heat_gj += energy
+                    emissions = self.calculate_emissions(fuel_name, energy)
+                    return energy, emissions
+            return 0.0, 0.0
+
+        # Calculate for all fuels
+        energy_by_source = {}
+        energy_by_source['naphtha'], emissions_by_source['naphtha'] = process_fuel('Naphtha', 'Naphtha_GJ_per_tonne', True)
+        energy_by_source['lng'], emissions_by_source['lng'] = process_fuel('LNG', 'LNG_GJ_per_tonne', True)
+        energy_by_source['fuel_gas'], emissions_by_source['fuel_gas'] = process_fuel('Fuel_Gas', 'Fuel_Gas_GJ_per_tonne', True)
+        energy_by_source['byproduct_gas'], emissions_by_source['byproduct_gas'] = process_fuel('Byproduct_Gas', 'Byproduct_Gas_GJ_per_tonne', True)
+        energy_by_source['lpg'], emissions_by_source['lpg'] = process_fuel('LPG', 'LPG_GJ_per_tonne', True)
+        energy_by_source['fuel_oil'], emissions_by_source['fuel_oil'] = process_fuel('Fuel_Oil', 'Fuel_Oil_GJ_per_tonne', True)
+        energy_by_source['diesel'], emissions_by_source['diesel'] = process_fuel('Diesel', 'Diesel_GJ_per_tonne', True)
+        
+        # Electricity (special case, not heat)
+        elec_kwh, emissions_by_source['electricity'] = process_fuel('Electricity', 'Electricity_kWh_per_tonne', False)
+        energy_by_source['electricity'] = elec_kwh # stored as kWh
+        elec_mwh = elec_kwh / 1000
+        
+        # Sum combustion emissions (all except electricity)
+        combustion_emissions = sum(v for k, v in emissions_by_source.items() if k != 'electricity')
+        
+        # Total emissions (combustion + electricity)
+        # Note: Electricity emissions here use the generic EF. 
+        # The simulation might override this with Grid EF trajectory.
+        total_emissions = combustion_emissions + emissions_by_source['electricity']
+        
+        return {
+            'capacity_tpy': capacity_tonnes,
+            'production_t': production_tonnes,
+            'emissions_by_source': emissions_by_source,
+            'energy_by_source': energy_by_source,
+            'combustion_emissions': combustion_emissions,
+            'elec_emissions': emissions_by_source['electricity'],
+            'total_emissions': total_emissions,
+            'elec_demand_mwh': elec_mwh,
+            'heat_demand_gj': total_heat_gj,
+        }
+
 
 class PriceCalculator:
     """Calculate fuel and technology costs"""
@@ -211,18 +332,14 @@ class PriceCalculator:
         result['year'] = year
         return result
 
-    def calculate_capital_recovery_factor(self, discount_rate, lifetime):
-        """Calculate CRF for annualizing capital costs"""
-        if discount_rate == 0:
-            return 1 / lifetime
-        return discount_rate / (1 - (1 + discount_rate) ** (-lifetime))
 
 
 class TechnologyCostCalculator:
     """Calculate technology costs with interpolation"""
 
-    def __init__(self, technology_params_df):
+    def __init__(self, technology_params_df, emission_calculator=None):
         self.tech_params = technology_params_df
+        self.emission_calculator = emission_calculator
 
     def get_technology_costs(self, technology, year):
         """
@@ -265,6 +382,226 @@ class TechnologyCostCalculator:
             'thermal_energy_replaced_gj_per_ton': tech_row.get('thermal_energy_replaced_gj_per_ton', None),
             'energy_conversion_efficiency': tech_row.get('energy_conversion_efficiency', 1.0),
         }
+
+    def calculate_abatement_requirements(self, technology, facility_baseline, process, ncc_tech_name):
+        """
+        Calculate energy requirements and abatement for a facility-technology pair.
+        Replaces logic previously hardcoded in run_scenarios.py.
+        
+        Args:
+            technology: Technology name (e.g. 'NCC-H2', 'Heat_Pump')
+            facility_baseline: Dict with baseline emissions and heat demand
+            process: Process type (e.g. 'Naphtha Cracker', 'BTX Plant')
+            ncc_tech_name: The specific NCC technology choice for the scenario
+            
+        Returns:
+            dict with h2_demand_t, added_elec_mwh, potential_abatement_tco2
+        """
+        # Physical constant: GJ to MWh conversion
+        GJ_TO_MWH = 3.6
+        
+        # Default return values
+        h2_demand_t = 0.0
+        added_elec_mwh = 0.0
+        potential_abatement = facility_baseline['combustion_emissions']
+        
+        emissions = facility_baseline['emissions_by_source']
+        naphtha_emissions = emissions.get('naphtha', 0)
+        
+        # Get Naphtha EF dynamically if available
+        if self.emission_calculator and 'Naphtha' in self.emission_calculator.ef:
+            # self.ef['Naphtha'] is ('GJ', value)
+            naphtha_ef = self.emission_calculator.ef['Naphtha'][1]
+        else:
+            raise ValueError("Missing Naphtha emission factor in loaded data")
+
+        # Get Heat Pump COP from CSV
+        hp_row = self.tech_params[self.tech_params['technology'] == 'Heat_Pump']
+        if len(hp_row) > 0:
+            val = hp_row.iloc[0].get('cop')
+            if pd.notna(val):
+                hp_cop = val
+            else:
+                raise ValueError("Heat Pump COP value is NaN in technology parameters")
+        else:
+            raise ValueError("Heat_Pump technology missing from technology parameters")
+
+        # Get RDH efficiency from CSV
+        rdh_row = self.tech_params[self.tech_params['technology'] == 'RDH']
+        if len(rdh_row) > 0:
+            rdh_eff = rdh_row.iloc[0].get('energy_conversion_efficiency', 0.93)
+        else:
+            rdh_eff = 0.93  # Fallback
+
+        # Get NCC-H2 conversion factor from CSV
+        ncc_h2_row = self.tech_params[self.tech_params['technology'] == 'NCC-H2']
+        if len(ncc_h2_row) > 0:
+            h2_factor = ncc_h2_row.iloc[0].get('h2_demand_factor_per_tco2', 0.127)
+        else:
+            h2_factor = 0.127  # Fallback
+
+        # Get NCC-Electricity conversion factor from CSV
+        ncc_elec_row = self.tech_params[self.tech_params['technology'] == 'NCC-Electricity']
+        if len(ncc_elec_row) > 0:
+            elec_factor = ncc_elec_row.iloc[0].get('elec_demand_factor_per_tco2', 3.18)
+        else:
+            elec_factor = 3.18  # Fallback
+
+        # Logic moved from run_scenarios.py
+        if self._is_ncc_facility(process):
+            # If the tech passed is the one designated for NCC, apply it
+            if technology == ncc_tech_name:
+                if technology == 'NCC-H2':
+                    # H2 demand from CSV factor
+                    h2_demand_t = naphtha_emissions * h2_factor
+                elif technology == 'NCC-Electricity':
+                    # Elec demand from CSV factor
+                    added_elec_mwh = naphtha_emissions * elec_factor
+            
+            # Heat pump always fills the gap for non-naphtha fuels in NCC
+            # Calculate remaining heat load (non-naphtha)
+            heat_gj_remaining = facility_baseline['heat_demand_gj'] - (naphtha_emissions / naphtha_ef)
+            heat_gj_remaining = max(0, heat_gj_remaining)
+            
+            # Use dynamic Heat Pump COP from CSV
+            hp_elec_mwh = heat_gj_remaining / GJ_TO_MWH / hp_cop
+            added_elec_mwh += hp_elec_mwh
+
+        elif self._is_btx_facility(process) and technology == 'RDH':
+            # RDH efficiency from CSV
+            rdh_elec_mwh = facility_baseline['heat_demand_gj'] / GJ_TO_MWH / rdh_eff
+            added_elec_mwh = rdh_elec_mwh
+            
+        elif technology == 'Heat_Pump':
+            # Standard Heat Pump for others (Dynamic COP from CSV)
+            hp_elec_mwh = facility_baseline['heat_demand_gj'] / GJ_TO_MWH / hp_cop
+            added_elec_mwh = hp_elec_mwh
+            
+        return {
+            'h2_demand_t': h2_demand_t,
+            'added_elec_mwh': added_elec_mwh,
+            'potential_abatement_tco2': potential_abatement
+        }
+
+    def _is_ncc_facility(self, process):
+        return process == 'Naphtha Cracker'
+
+    def _is_btx_facility(self, process):
+        return process == 'BTX Plant'
+
+
+class StrandedAssetCalculator:
+    """Calculate stranded asset value based on carbon budgets"""
+    
+    def __init__(self, carbon_budget_df, valuation_params_df):
+        self.budgets = carbon_budget_df
+        self.valuation = valuation_params_df.set_index('process')
+        
+    def calculate_stranding_year(self, annual_emissions_series, budget_scenario='budget_1.5C_tco2'):
+        """
+        Find the year when cumulative emissions exceed the budget.
+        
+        Args:
+            annual_emissions_series: PD Series of total industry emissions by year
+            budget_scenario: Column name in carbon_budget_df to use as limit
+            
+        Returns:
+            int: The 'stranding year' (last year of operation), or 2050 if never exceeded.
+        """
+        # Calculate cumulative emissions starting from 2025
+        cumulative_emissions = annual_emissions_series.cumsum()
+        
+        # Get budget limit (assumed sufficient for comparison, checking annual decline)
+        # Actually, the dummy file provided shows ANNUAL limits declining to 0. 
+        # But standard carbon budget is a CUMULATIVE number.
+        # Let's check the dummy file structure again.
+        # The dummy file has 'budget_1.5C_tco2' as 50Mt, 45Mt... down to 0.
+        # This implies an ANNUAL CAP, not a cumulative budget pot.
+        # If it were cumulative, it would be a single number like 500Mt.
+        # So we will interpret the input as an ANNUAL LIMIT curve.
+        
+        # Check year by year: Is Industry Emission > Annual Limit?
+        # A 'Stranding Year' in this context is usually when the budget runs out.
+        # But if we have an annual cap, stranding happens incrementally?
+        # The user request said "Stranded from Carbon Budget Perspective".
+        # Research note said: Year where Cumulative > Budget.
+        # But the dummy file looks like an annual trajectory.
+        # Let's sum the dummy file to get the 'Total Budget Pot'.
+        
+        total_budget = self.budgets[budget_scenario].sum()
+        
+        # Find year where cumulative emissions exceed total budget
+        overrun = cumulative_emissions[cumulative_emissions > total_budget]
+        
+        if len(overrun) > 0:
+            return overrun.index[0]
+        return 2050
+
+    def calculate_facility_book_value(self, facility_row, current_year):
+        """
+        Calculate remaining book value of a facility in a given year.
+        Value = Replacement_Cost * Capacity * (Remaining_Life / Useful_Life)
+        """
+        process = facility_row.get('process', 'Other')
+        capacity_t = facility_row['capacity_kt'] * 1000
+        year_built = facility_row['year_built']
+        
+        # Get valuation params
+        if process in self.valuation.index:
+            params = self.valuation.loc[process]
+        else:
+            params = self.valuation.loc['Other']
+            
+        capex_per_ton = params['overnight_capex_usd_per_ton']
+        useful_life = params['useful_life_years']
+        
+        age = current_year - year_built
+        remaining_life = useful_life - age
+        
+        if remaining_life <= 0:
+            return 0.0
+            
+        # Linear depreciation
+        replacement_value = capex_per_ton * capacity_t
+        book_value = replacement_value * (remaining_life / useful_life)
+        
+        return book_value
+
+    def calculate_total_stranded_value(self, facilities_df, stranding_year):
+        """
+        Calculate sum of book values for all facilities at the stranding year.
+        """
+        total_value = 0.0
+        
+        for _, facility in facilities_df.iterrows():
+            val = self.calculate_facility_book_value(facility, stranding_year)
+            total_value += val
+            
+        return total_value
+
+    def get_facility_stranded_details(self, facilities_df, stranding_year):
+        """
+        Calculate stranded value for each facility and return as DataFrame.
+        """
+        results = []
+        for _, facility in facilities_df.iterrows():
+            val = self.calculate_facility_book_value(facility, stranding_year)
+            
+            # Basic facility info
+            res = {
+                'facility_id': facility.get('facility_id', 'Unknown'),
+                'company': facility.get('company', 'Unknown'),
+                'location': facility.get('location', 'Unknown'),
+                'product': facility.get('product', 'Unknown'),
+                'process': facility.get('process', 'Unknown'),
+                'capacity_kt': facility.get('capacity_kt', 0),
+                'year_built': facility.get('year_built', 0),
+                'stranding_year': stranding_year,
+                'stranded_value_usd': val
+            }
+            results.append(res)
+            
+        return pd.DataFrame(results)
 
 
 def save_csv_output(df, output_path, description=""):
