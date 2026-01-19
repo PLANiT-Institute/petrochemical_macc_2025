@@ -80,6 +80,13 @@ class DataLoader:
         """Load emission factors"""
         return pd.read_csv(self.data_dir / 'assumptions' / 'emission_factors.csv')
 
+    def load_energy_intensities(self):
+        """
+        Load energy intensities (returns facilities merged with benchmarks).
+        This is an alias for load_facilities() for backwards compatibility.
+        """
+        return self.load_facilities()
+
     def load_h2_prices(self):
         """Load H2 price trajectory"""
         return pd.read_csv(self.data_dir / 'assumptions' / 'prices' / 'h2_price_trajectory.csv')
@@ -222,17 +229,24 @@ class EmissionCalculator:
 
         return emissions
 
-    def calculate_baseline_metrics(self, facility_row, intensities_row, operating_rate, capacity_multiplier=1.0):
+    def calculate_baseline_metrics(self, facility_row, intensities_row, operating_rate, capacity_multiplier=1.0, process=None):
         """
         Calculate full baseline metrics for a facility.
         Replaces calculate_facility_baseline in run_scenarios.py
+
+        IMPORTANT: For NCC (Naphtha Cracker) facilities, naphtha is FEEDSTOCK (cracked into products),
+        NOT combustion fuel. The 29 GJ/t naphtha represents feedstock energy content.
+        Only LNG, LPG, and byproduct gas are actual heating fuels that produce emissions.
         """
         capacity_tonnes = facility_row['capacity_kt'] * 1000
         production_tonnes = capacity_tonnes * capacity_multiplier * operating_rate
-        
+
+        # Check if this is an NCC facility - naphtha is feedstock, not fuel
+        is_ncc = process == 'Naphtha Cracker' if process else False
+
         emissions_by_source = {}
         total_heat_gj = 0.0
-        
+
         # Helper to process a fuel
         def process_fuel(fuel_name, intensity_col, is_heat=True):
             nonlocal total_heat_gj
@@ -246,7 +260,7 @@ class EmissionCalculator:
                     # Emission factor lookup handled in calculate_emissions
                     emissions = self.calculate_emissions(fuel_name, energy)
                     return energy, emissions
-                else: 
+                else:
                     # GJ
                     energy = intensity * production_tonnes
                     if is_heat:
@@ -257,27 +271,39 @@ class EmissionCalculator:
 
         # Calculate for all fuels
         energy_by_source = {}
-        energy_by_source['naphtha'], emissions_by_source['naphtha'] = process_fuel('Naphtha', 'Naphtha_GJ_per_tonne', True)
+
+        # NAPHTHA: For NCC facilities, naphtha is feedstock (not combustion)
+        # Still track energy content but emissions are ZERO for NCC
+        energy_by_source['naphtha'], naphtha_emissions = process_fuel('Naphtha', 'Naphtha_GJ_per_tonne', True)
+        if is_ncc:
+            # Naphtha is feedstock in NCC - no combustion emissions
+            emissions_by_source['naphtha'] = 0.0
+            # Also exclude naphtha from heat demand (it's feedstock, not heating fuel)
+            total_heat_gj -= energy_by_source['naphtha']
+        else:
+            emissions_by_source['naphtha'] = naphtha_emissions
+
         energy_by_source['lng'], emissions_by_source['lng'] = process_fuel('LNG', 'LNG_GJ_per_tonne', True)
         energy_by_source['fuel_gas'], emissions_by_source['fuel_gas'] = process_fuel('Fuel_Gas', 'Fuel_Gas_GJ_per_tonne', True)
         energy_by_source['byproduct_gas'], emissions_by_source['byproduct_gas'] = process_fuel('Byproduct_Gas', 'Byproduct_Gas_GJ_per_tonne', True)
         energy_by_source['lpg'], emissions_by_source['lpg'] = process_fuel('LPG', 'LPG_GJ_per_tonne', True)
         energy_by_source['fuel_oil'], emissions_by_source['fuel_oil'] = process_fuel('Fuel_Oil', 'Fuel_Oil_GJ_per_tonne', True)
         energy_by_source['diesel'], emissions_by_source['diesel'] = process_fuel('Diesel', 'Diesel_GJ_per_tonne', True)
-        
+
         # Electricity (special case, not heat)
         elec_kwh, emissions_by_source['electricity'] = process_fuel('Electricity', 'Electricity_kWh_per_tonne', False)
         energy_by_source['electricity'] = elec_kwh # stored as kWh
         elec_mwh = elec_kwh / 1000
-        
+
         # Sum combustion emissions (all except electricity)
+        # For NCC: naphtha emissions are 0, so only LNG/LPG/byproduct count
         combustion_emissions = sum(v for k, v in emissions_by_source.items() if k != 'electricity')
-        
+
         # Total emissions (combustion + electricity)
-        # Note: Electricity emissions here use the generic EF. 
+        # Note: Electricity emissions here use the generic EF.
         # The simulation might override this with Grid EF trajectory.
         total_emissions = combustion_emissions + emissions_by_source['electricity']
-        
+
         return {
             'capacity_tpy': capacity_tonnes,
             'production_t': production_tonnes,
@@ -288,6 +314,7 @@ class EmissionCalculator:
             'total_emissions': total_emissions,
             'elec_demand_mwh': elec_mwh,
             'heat_demand_gj': total_heat_gj,
+            'is_ncc': is_ncc,  # Flag for downstream use
         }
 
 
@@ -426,43 +453,54 @@ class TechnologyCostCalculator:
         else:
             raise ValueError("Heat_Pump technology missing from technology parameters")
 
-        # Get RDH efficiency from CSV
+        # Get RDH efficiency from CSV - NO FALLBACK
         rdh_row = self.tech_params[self.tech_params['technology'] == 'RDH']
         if len(rdh_row) > 0:
-            rdh_eff = rdh_row.iloc[0].get('energy_conversion_efficiency', 0.93)
+            rdh_eff = rdh_row.iloc[0].get('energy_conversion_efficiency')
+            if pd.isna(rdh_eff):
+                raise ValueError("RDH energy_conversion_efficiency is missing in technology_parameters.csv")
         else:
-            rdh_eff = 0.93  # Fallback
+            raise ValueError("RDH technology missing from technology_parameters.csv")
 
-        # Get NCC-H2 conversion factor from CSV
+        # Get NCC-H2 conversion factor from CSV - NO FALLBACK
         ncc_h2_row = self.tech_params[self.tech_params['technology'] == 'NCC-H2']
         if len(ncc_h2_row) > 0:
-            h2_factor = ncc_h2_row.iloc[0].get('h2_demand_factor_per_tco2', 0.127)
+            h2_factor = ncc_h2_row.iloc[0].get('h2_ton_per_ton_ethylene')
+            if pd.isna(h2_factor):
+                raise ValueError("NCC-H2 h2_ton_per_ton_ethylene is missing in technology_parameters.csv")
         else:
-            h2_factor = 0.127  # Fallback
+            raise ValueError("NCC-H2 technology missing from technology_parameters.csv")
 
-        # Get NCC-Electricity conversion factor from CSV
+        # Get NCC-Electricity conversion factor from CSV - NO FALLBACK
         ncc_elec_row = self.tech_params[self.tech_params['technology'] == 'NCC-Electricity']
         if len(ncc_elec_row) > 0:
-            elec_factor = ncc_elec_row.iloc[0].get('elec_demand_factor_per_tco2', 3.18)
+            elec_factor = ncc_elec_row.iloc[0].get('elec_mwh_per_ton_ethylene')
+            if pd.isna(elec_factor):
+                raise ValueError("NCC-Electricity elec_mwh_per_ton_ethylene is missing in technology_parameters.csv")
         else:
-            elec_factor = 3.18  # Fallback
+            raise ValueError("NCC-Electricity technology missing from technology_parameters.csv")
+
+        # Get production volume for capacity-based calculations
+        production_t = facility_baseline.get('production_t', 0)
 
         # Logic moved from run_scenarios.py
         if self._is_ncc_facility(process):
             # If the tech passed is the one designated for NCC, apply it
             if technology == ncc_tech_name:
                 if technology == 'NCC-H2':
-                    # H2 demand from CSV factor
-                    h2_demand_t = naphtha_emissions * h2_factor
+                    # H2 demand based on ethylene production (not emissions)
+                    # h2_factor is t-H2/t-ethylene from CSV
+                    h2_demand_t = production_t * h2_factor
                 elif technology == 'NCC-Electricity':
-                    # Elec demand from CSV factor
-                    added_elec_mwh = naphtha_emissions * elec_factor
-            
+                    # Elec demand based on ethylene production (not emissions)
+                    # elec_factor is MWh/t-ethylene from CSV
+                    added_elec_mwh = production_t * elec_factor
+
             # Heat pump always fills the gap for non-naphtha fuels in NCC
             # Calculate remaining heat load (non-naphtha)
             heat_gj_remaining = facility_baseline['heat_demand_gj'] - (naphtha_emissions / naphtha_ef)
             heat_gj_remaining = max(0, heat_gj_remaining)
-            
+
             # Use dynamic Heat Pump COP from CSV
             hp_elec_mwh = heat_gj_remaining / GJ_TO_MWH / hp_cop
             added_elec_mwh += hp_elec_mwh
@@ -471,7 +509,7 @@ class TechnologyCostCalculator:
             # RDH efficiency from CSV
             rdh_elec_mwh = facility_baseline['heat_demand_gj'] / GJ_TO_MWH / rdh_eff
             added_elec_mwh = rdh_elec_mwh
-            
+
         elif technology == 'Heat_Pump':
             # Standard Heat Pump for others (Dynamic COP from CSV)
             hp_elec_mwh = facility_baseline['heat_demand_gj'] / GJ_TO_MWH / hp_cop

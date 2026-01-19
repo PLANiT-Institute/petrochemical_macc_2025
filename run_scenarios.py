@@ -16,6 +16,8 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from modules.utils import DataLoader, EmissionCalculator, PriceCalculator, TechnologyCostCalculator, StrandedAssetCalculator, format_number
+from modules.data_loader import DataLoader as NewDataLoader
+from modules.capex_calculator import CapexCalculator, MACCalculator, select_technology_for_facility
 
 # Configuration
 DATA_DIR = Path('data')
@@ -62,6 +64,7 @@ def load_data():
     print("=" * 80)
 
     loader = DataLoader(DATA_DIR)
+    new_loader = NewDataLoader(DATA_DIR)
 
     # 1. Load Raw Data
     facilities = loader.load_facilities()
@@ -77,6 +80,10 @@ def load_data():
     carbon_budgets = loader.load_carbon_budgets()
     valuation_params = loader.load_asset_valuation_params()
 
+    # 1b. Load NEW config files (model_config, technology_capex)
+    model_config = new_loader.load_model_config()
+    tech_capex = new_loader.load_technology_capex()
+
     # 2. Initialize Calculators
     emission_calc = EmissionCalculator(emission_factors)
     # Price calculator needs h2, re, and fuel prices
@@ -84,23 +91,32 @@ def load_data():
     tech_calc = TechnologyCostCalculator(tech_params, emission_calc)
     stranded_calc = StrandedAssetCalculator(carbon_budgets, valuation_params)
 
+    # 2b. Initialize NEW calculators (capacity-based CAPEX)
+    capex_calc = CapexCalculator(tech_capex, tech_params, model_config)
+    mac_calc = MACCalculator(capex_calc, price_calc, emission_calc)
+
     data = {
         'facilities': facilities,
         'facilities_shaheen': facilities_shaheen,
         'intensities': intensities,
         'emission_factors': emission_factors,
         'tech_params': tech_params,
+        'tech_capex': tech_capex,
+        'model_config': model_config,
         'h2_prices': h2_prices,
         're_prices': re_prices,
         'grid_emissions': grid_emissions,
         'grid_prices': grid_prices,
         'carbon_budgets': carbon_budgets,
-        'valuation_params': valuation_params,  # Added for discount_rate access
-        # Calculators
+        'valuation_params': valuation_params,
+        # Calculators (OLD - for backwards compatibility)
         'emission_calc': emission_calc,
         'price_calc': price_calc,
         'tech_calc': tech_calc,
         'stranded_calc': stranded_calc,
+        # Calculators (NEW - capacity-based CAPEX)
+        'capex_calc': capex_calc,
+        'mac_calc': mac_calc,
     }
 
     # Load operating rate trajectories
@@ -114,7 +130,9 @@ def load_data():
 
     print(f"  Loaded {len(data['facilities'])} baseline facilities")
     print(f"  Loaded {len(data['facilities_shaheen'])} facilities with Shaheen")
-    print(f"  Initialized Calculators")
+    print(f"  Loaded model_config with {len(model_config)} parameters")
+    print(f"  Loaded technology_capex with {len(tech_capex)} technologies")
+    print(f"  Initialized Calculators (OLD + NEW)")
 
     return data
 
@@ -189,18 +207,25 @@ def calculate_facility_mac_v2(facility_baseline, process, ncc_tech, year, data, 
     # Usually valued at natural gas or fuel gas price. Let's use fuel_gas price.
     fuel_savings += energy_by_source.get('byproduct_gas', 0) * fuel_prices.get('fuel_gas_usd_per_gj', 0)
 
-    # 3. Tech Costs (CAPEX/OPEX)
-    tech_costs = tech_calc.get_technology_costs(technology, year)
-    
-    abatement_mt = potential_abatement / 1e6
-    capex_total_usd = tech_costs['capex_musd_per_mtco2'] * abatement_mt * 1e6
-    opex_pct = tech_costs['opex_pct_capex'] / 100
-    opex_annual_usd = capex_total_usd * opex_pct
-    lifetime = tech_costs['lifetime_years']
+    # 3. Tech Costs (CAPEX/OPEX) - NEW CAPACITY-BASED APPROACH
+    # Use new CapexCalculator which uses $/t-product/yr from technology_capex.csv
+    capex_calc = data['capex_calc']
 
-    # Annualize CAPEX
-    # Simple linear division as per original code? Or CRF?
-    # Original code: capex_annual = capex_usd / lifetime
+    # Get production volume from baseline
+    production_t = facility_baseline.get('production_t', 0)
+
+    # Calculate CAPEX using capacity-based approach
+    capex_info = capex_calc.calculate_facility_capex(technology, production_t, year)
+    capex_total_usd = capex_info['capex_total_usd']
+
+    # Get OPEX% and lifetime from CAPEX CSV
+    capex_meta = capex_calc.get_capex_info(technology)
+    opex_pct = capex_meta['opex_pct_capex'] / 100
+    lifetime = capex_meta['lifetime_years']
+
+    opex_annual_usd = capex_total_usd * opex_pct
+
+    # Annualize CAPEX (simple linear amortization)
     capex_annual_usd = capex_total_usd / lifetime
     
     # 4. Total Annual Cost
@@ -235,12 +260,12 @@ def calculate_lcoa(facility, ncc_tech, start_year, data, all_years):
     
     This anticipates future carbon price/energy price changes.
     """
-    # Get discount rate from valuation_params CSV (use average or default)
-    valuation_params = data.get('valuation_params')
-    if valuation_params is not None and 'discount_rate' in valuation_params.columns:
-        DISCOUNT_RATE = valuation_params['discount_rate'].mean()  # Use average across process types
+    # Get discount rate from model_config (no fallback - must be in CSV)
+    model_config = data.get('model_config')
+    if model_config is not None and 'discount_rate' in model_config:
+        DISCOUNT_RATE = model_config['discount_rate']
     else:
-        DISCOUNT_RATE = 0.08  # Fallback if CSV column not found
+        raise ValueError("discount_rate not found in model_config.csv - this parameter is required")
     
     total_npv_cost = 0
     total_abatement = 0

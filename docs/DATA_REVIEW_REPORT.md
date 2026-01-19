@@ -62,7 +62,7 @@
 - **File:** `data/assets/facility_database_with_regions.csv`
 - **Issue:** Some facilities have `remaining_life < 0` (e.g., -6, -13)
 - **Impact:** Already depreciated but still in database. Book value = $0 (handled correctly)
-- **Recommendation:** Review if these should be excluded from analysis
+- **Recommendation:** Review if these should be excluded from analdysis
 
 ### 4. Unused `discount_rate` in Valuation Params
 - **File:** `data/assumptions/asset_valuation_params.csv`

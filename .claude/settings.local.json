@@ -51,13 +51,29 @@
       "WebFetch(domain:www.data.go.kr)",
       "WebFetch(domain:www.investkorea.org)",
       "WebFetch(domain:www.ksure.or.kr)",
-      "Bash(sort:*)"
+      "Bash(sort:*)",
+      "Bash(du -sh:*)",
+      "WebFetch(domain:nextgroup.or.kr)",
+      "WebFetch(domain:forourclimate.org)",
+      "WebFetch(domain:pubs.rsc.org)",
+      "WebFetch(domain:thermalprocessing.com)",
+      "WebFetch(domain:www.chemengonline.com)",
+      "Bash(git -C /Users/jinsupark/jinsu-coding/petrochemical_macc_2025 log --oneline -10)",
+      "Bash(git -C /Users/jinsupark/jinsu-coding/petrochemical_macc_2025 diff HEAD -- modules/utils.py)",
+      "WebFetch(domain:www.sciencedirect.com)",
+      "WebFetch(domain:www.linde-engineering.com)",
+      "WebFetch(domain:www.energy.gov)",
+      "WebFetch(domain:www.cleaverbrooks.com)",
+      "WebFetch(domain:aiche.nl)",
+      "WebFetch(domain:www.ipieca.org)",
+      "WebFetch(domain:thundersaidenergy.com)",
+      "WebFetch(domain:www.irena.org)"
     ],
     "deny": [],
     "ask": []
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "obsidian"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

@@ -502,6 +502,97 @@ streamlit run streamlit_app.py
 
 ---
 
+## Parameter Derivation Notes
+
+### NCC-Electricity: 5.0 MWh/t-ethylene
+
+**Model Value:** 5.0 MWh per tonne ethylene
+
+**Derivation:**
+```
+Steam cracker furnace heat duty: 15-18 GJ/t-ethylene (literature consensus)
+Conversion: 18 GJ ÷ 3.6 GJ/MWh = 5.0 MWh/t-ethylene
+```
+
+**Sources:**
+- Ren, T., Patel, M.K., Blok, K. (2006). "Olefins from conventional and heavy feedstocks: Energy use in steam cracking and alternative processes." *Energy*, 31, 425-451. DOI: 10.1016/j.energy.2005.04.001
+- US DOE OSTI/1481737: Heat demand for ethane steam crackers = 17.7 GJ/t-C2H4
+- BASF/SABIC/Linde (2024): World's first electrically heated steam cracker demonstration plant at Ludwigshafen
+
+**Validation:**
+- RSC Green Chemistry (2025): Electric cracker requires 2.86 MWh/t additional electricity for furnace electrification
+- I&EC Research (2023): Minimum energy requirement 1.75 MWh/t for electrified cracker
+
+---
+
+### NCC-H2: 0.2 t-H2/t-ethylene
+
+**Model Value:** 0.2 tonnes H2 per tonne ethylene (200 kg H2/t-C2H4)
+
+**Derivation:**
+```
+Steam cracker furnace heat duty: 18 GJ/t-ethylene
+Hydrogen LHV (Lower Heating Value): 120 MJ/kg = 0.12 GJ/kg
+Combustion efficiency: 85%
+
+Calculation:
+H2 required = Heat Duty ÷ (H2 LHV × Efficiency)
+H2 required = 18 GJ ÷ (0.12 GJ/kg × 0.85)
+H2 required = 18 ÷ 0.102 = 176 kg/t-ethylene
+
+→ 200 kg/t (0.2 t) includes ~15% safety margin
+```
+
+**Parameter Sources:**
+
+| Parameter | Value | Source |
+|-----------|-------|--------|
+| Furnace heat duty | 15-18 GJ/t | Ren et al. (2006); US DOE OSTI/1481737 |
+| Hydrogen LHV | 120 MJ/kg | Physical constant (NIST) |
+| Combustion efficiency | 85% | Ipieca (2022): Industrial furnaces 80-92%, boilers 85-95% |
+
+**Efficiency Source Detail:**
+- Ipieca (2022). "Estimating petroleum industry value chain (Scope 3) greenhouse gas emissions." Section on combustion efficiency.
+- Industrial furnaces: 80-92% thermal efficiency
+- Industrial boilers: 85-95% thermal efficiency
+- 85% represents conservative mid-range estimate for hydrogen-fired furnaces
+
+**Validation:**
+- RSC Green Chemistry (2025): H2 co-product from cracking = 65.1 kg/t (indicates ~135 kg/t external H2 needed, consistent with calculation)
+- Decarbonisation Technology (2023): Hydrogen firing can reduce furnace CO2 by 100% when using pure hydrogen
+
+---
+
+### Derived Demand Factors (in model)
+
+The model uses demand factors per tCO2 abated, derived from the above:
+
+| Technology | Per-Product Value | Per-CO2 Value | Derivation |
+|------------|-------------------|---------------|------------|
+| NCC-H2 | 0.2 t-H2/t-C2H4 | 0.127 t-H2/tCO2 | 0.2 ÷ 1.57 tCO2/t-C2H4 |
+| NCC-Electricity | 5.0 MWh/t-C2H4 | 3.18 MWh/tCO2 | 5.0 ÷ 1.57 tCO2/t-C2H4 |
+
+Where 1.57 tCO2/t-ethylene is the baseline NCC furnace emission intensity.
+
+---
+
+### Undocumented Parameters (Requires Further Research)
+
+The following parameters lack authoritative sources:
+
+| Parameter | Value | Status |
+|-----------|-------|--------|
+| NCC-H2 CAPEX | $1,700 M/MtCO2 (2025) | No direct source |
+| NCC-Electricity CAPEX | $1,500 M/MtCO2 (2025) | No direct source |
+| 50% CAPEX learning curve | By 2050 | Assumption without citation |
+
+**Recommended Sources to Investigate:**
+- IEA Energy Technology Perspectives reports
+- McKinsey decarbonization studies
+- DECHEMA technology roadmaps
+
+---
+
 ## References
 
 ### Technology Data
@@ -531,6 +622,7 @@ This model incorporates data and methodologies from **PLANiT Institute (2025)**:
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | January 2025 | Initial comprehensive documentation |
+| 1.1 | January 2025 | Added Parameter Derivation Notes section with NCC-H2/NCC-Electricity source verification |
 
 ---
 

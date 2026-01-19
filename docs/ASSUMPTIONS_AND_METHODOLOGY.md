@@ -105,10 +105,11 @@ All technologies assume **50% CAPEX reduction by 2050** based on technology lear
 
 #### NCC-H2 (Green Hydrogen Furnaces)
 - **H2 consumption:** 0.2 t-H2 per t-C2H4 (ethylene)
-- **Energy conversion efficiency:** 85%
+- **Energy conversion efficiency:** 85% (conservative estimate between HHV ~80% and LHV ~95% basis)
 - **OPEX:** 4% of CAPEX annually
 - **Lifetime:** 25 years
 - **Application:** 85% of NCC furnace emissions
+- **Source:** Power Engineering 2022; Cleaver-Brooks 2023 (HHV/LHV efficiency conventions)
 
 #### NCC-Electricity (Electric Crackers)
 - **Electricity consumption:** 5.0 MWh per t-C2H4
@@ -330,6 +331,27 @@ Electricity = Electricity_consumption × Grid_EF
 | Diesel | 0.0741 | tCO2/GJ | IPCC 2019, Table 2.3 |
 | Grid Electricity | 0.436 (2025) | tCO2/MWh | Korea Grid 2025 |
 | Green H2 | 0.0 | tCO2/kg | Zero-emission electrolysis |
+
+### 7.2.1 Naphtha Treatment in NCC Facilities (Critical Note)
+
+**In Naphtha Cracker (NCC) facilities, naphtha is FEEDSTOCK, not combustion fuel.**
+
+The steam cracking process works as follows:
+1. Naphtha feedstock enters the furnace tubes (cracked into products)
+2. External heat is provided by burning LNG, LPG, and byproduct gas
+3. The 29 GJ/t naphtha in `product_benchmarks.csv` represents feedstock energy content
+
+**Implications for emission calculations:**
+- **Naphtha emissions are NOT included** for NCC facilities (naphtha is feedstock)
+- **Only heating fuels contribute to combustion emissions:** LNG, LPG, byproduct gas
+- **Abatable emission intensity for NCC:** ~0.5 tCO2/t-ethylene (not 2.07)
+
+**Implications for fuel savings (MAC calculation):**
+- **No naphtha fuel savings** for NCC technologies - naphtha is still used as feedstock
+- **Only heating fuel costs are saved:** LNG (~$24/t), LPG (~$73/t), byproduct gas (~$11/t)
+- **Total fuel savings:** ~$109/t-ethylene (not $544/t)
+
+This interpretation is critical for accurate MAC calculations and explains why NCC-H2 MAC (~$1,400/tCO2) is much higher than would be calculated if naphtha were incorrectly treated as combustion fuel.
 
 ### 7.3 Abatement Calculation
 
