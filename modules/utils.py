@@ -78,7 +78,10 @@ class DataLoader:
 
     def load_emission_factors(self):
         """Load emission factors"""
-        return pd.read_csv(self.data_dir / 'assumptions' / 'emission_factors.csv')
+        path = self.data_dir / 'assumptions' / 'emission_factors.csv'
+        if not path.exists():
+            raise FileNotFoundError(f"Critical: Missing emission factors at {path}")
+        return pd.read_csv(path)
 
     def load_energy_intensities(self):
         """
@@ -89,48 +92,66 @@ class DataLoader:
 
     def load_h2_prices(self):
         """Load H2 price trajectory"""
-        return pd.read_csv(self.data_dir / 'assumptions' / 'prices' / 'h2_price_trajectory.csv')
+        path = self.data_dir / 'assumptions' / 'prices' / 'h2_price_trajectory.csv'
+        if not path.exists():
+            raise FileNotFoundError(f"Critical: Missing H2 prices at {path}")
+        return pd.read_csv(path)
 
     def load_re_prices(self):
         """Load RE price trajectory"""
-        return pd.read_csv(self.data_dir / 'assumptions' / 'prices' / 're_price_trajectory.csv')
+        path = self.data_dir / 'assumptions' / 'prices' / 're_price_trajectory.csv'
+        if not path.exists():
+            raise FileNotFoundError(f"Critical: Missing RE prices at {path}")
+        return pd.read_csv(path)
 
     def load_grid_emissions(self):
         """Load grid emission trajectory"""
-        return pd.read_csv(self.data_dir / 'assumptions' / 'prices' / 'grid_emission_trajectory.csv')
+        path = self.data_dir / 'assumptions' / 'prices' / 'grid_emission_trajectory.csv'
+        if not path.exists():
+            raise FileNotFoundError(f"Critical: Missing grid emissions at {path}")
+        return pd.read_csv(path)
 
     def load_grid_prices(self):
         """Load grid electricity price trajectory"""
-        return pd.read_csv(self.data_dir / 'assumptions' / 'prices' / 'grid_price_trajectory.csv')
+        path = self.data_dir / 'assumptions' / 'prices' / 'grid_price_trajectory.csv'
+        if not path.exists():
+            raise FileNotFoundError(f"Critical: Missing grid prices at {path}")
+        return pd.read_csv(path)
 
     def load_technology_params(self):
         """Load technology parameters"""
-        # Check both data_dir and output_dir for backwards compatibility
         tech_path = self.data_dir / 'assumptions' / 'technology_parameters.csv'
         if not tech_path.exists():
-            tech_path = Path('output') / 'technology_parameters.csv'
+            raise FileNotFoundError(f"Critical: Missing technology parameters at {tech_path}")
         return pd.read_csv(tech_path, index_col=None)
 
     def load_heat_pump_applicability(self):
         """Load heat pump applicability"""
-        # Moved to assumptions if it exists
         path = self.data_dir / 'assumptions' / 'heat_pump_applicability.csv'
-        if path.exists():
-            return pd.read_csv(path)
-        return pd.read_csv(self.data_dir / 'heat_pump_applicability.csv') # Fallback if unchecked
+        if not path.exists():
+            raise FileNotFoundError(f"Critical: Missing heat pump applicability at {path}")
+        return pd.read_csv(path)
 
     def load_fuel_costs(self):
         """Load baseline fuel costs"""
-        # This file might not exist or be unused, checking path
-        return pd.read_csv(self.data_dir / 'assumptions' / 'prices' / 'fuel_costs_baseline.csv')
+        path = self.data_dir / 'assumptions' / 'prices' / 'fuel_costs_baseline.csv'
+        if not path.exists():
+            raise FileNotFoundError(f"Critical: Missing fuel costs at {path}")
+        return pd.read_csv(path)
 
     def load_carbon_budgets(self):
         """Load carbon budget scenarios"""
-        return pd.read_csv(self.data_dir / 'assumptions' / 'carbon_budget_scenarios.csv')
+        path = self.data_dir / 'assumptions' / 'carbon_budget_scenarios.csv'
+        if not path.exists():
+            raise FileNotFoundError(f"Critical: Missing carbon budgets at {path}")
+        return pd.read_csv(path)
 
     def load_asset_valuation_params(self):
         """Load asset valuation parameters"""
-        return pd.read_csv(self.data_dir / 'assumptions' / 'asset_valuation_params.csv')
+        path = self.data_dir / 'assumptions' / 'asset_valuation_params.csv'
+        if not path.exists():
+            raise FileNotFoundError(f"Critical: Missing asset valuation params at {path}")
+        return pd.read_csv(path)
 
 
 class EmissionCalculator:
@@ -179,6 +200,10 @@ class EmissionCalculator:
         Returns:
             Dictionary with emissions by fuel type (in tCO2/year)
         """
+        # Validate required column
+        if 'capacity_kt' not in facility_row:
+            raise ValueError("facility_row missing required 'capacity_kt' column")
+
         # CRITICAL: capacity is in kt (kilotonnes), intensities are per tonne
         # Must multiply by 1000 to convert kt to tonnes
         capacity_tonnes = facility_row['capacity_kt'] * 1000
@@ -238,6 +263,10 @@ class EmissionCalculator:
         NOT combustion fuel. The 29 GJ/t naphtha represents feedstock energy content.
         Only LNG, LPG, and byproduct gas are actual heating fuels that produce emissions.
         """
+        # Validate required column
+        if 'capacity_kt' not in facility_row:
+            raise ValueError("facility_row missing required 'capacity_kt' column")
+
         capacity_tonnes = facility_row['capacity_kt'] * 1000
         production_tonnes = capacity_tonnes * capacity_multiplier * operating_rate
 
@@ -254,12 +283,11 @@ class EmissionCalculator:
             if intensity > 0:
                 # Determine unit (GJ vs kWh)
                 if 'kWh' in intensity_col:
-                    energy = intensity * production_tonnes
-                    # Convert to MWh for standard tracking
-                    energy_mwh = energy / 1000
+                    energy = intensity * production_tonnes  # Returns kWh
+                    # Note: MWh conversion happens outside this function
                     # Emission factor lookup handled in calculate_emissions
                     emissions = self.calculate_emissions(fuel_name, energy)
-                    return energy, emissions
+                    return energy, emissions  # energy is in kWh
                 else:
                     # GJ
                     energy = intensity * production_tonnes
@@ -272,13 +300,20 @@ class EmissionCalculator:
         # Calculate for all fuels
         energy_by_source = {}
 
-        # NAPHTHA: For NCC facilities, naphtha is feedstock (not combustion)
-        # Still track energy content but emissions are ZERO for NCC
+        # NAPHTHA: For NCC facilities, naphtha is FEEDSTOCK (cracked into products),
+        # NOT combustion fuel. The ~29 GJ/t represents feedstock energy content.
+        # Only LNG, LPG, and byproduct gas are actual heating fuels.
+        #
+        # Logic: process_fuel adds naphtha to total_heat_gj initially (is_heat=True),
+        # then we subtract it for NCC facilities. This ensures:
+        # - NCC: naphtha NOT in heat_demand_gj (correct: it's feedstock)
+        # - Non-NCC: naphtha IS in heat_demand_gj (if used as fuel)
         energy_by_source['naphtha'], naphtha_emissions = process_fuel('Naphtha', 'Naphtha_GJ_per_tonne', True)
         if is_ncc:
             # Naphtha is feedstock in NCC - no combustion emissions
             emissions_by_source['naphtha'] = 0.0
-            # Also exclude naphtha from heat demand (it's feedstock, not heating fuel)
+            # Exclude naphtha from heat demand (it's feedstock, not heating fuel)
+            # This corrects the initial add from process_fuel
             total_heat_gj -= energy_by_source['naphtha']
         else:
             emissions_by_source['naphtha'] = naphtha_emissions
@@ -302,7 +337,8 @@ class EmissionCalculator:
         # Total emissions (combustion + electricity)
         # Note: Electricity emissions here use the generic EF.
         # The simulation might override this with Grid EF trajectory.
-        total_emissions = combustion_emissions + emissions_by_source['electricity']
+        elec_emissions = emissions_by_source.get('electricity', 0.0)
+        total_emissions = combustion_emissions + elec_emissions
 
         return {
             'capacity_tpy': capacity_tonnes,
@@ -310,7 +346,7 @@ class EmissionCalculator:
             'emissions_by_source': emissions_by_source,
             'energy_by_source': energy_by_source,
             'combustion_emissions': combustion_emissions,
-            'elec_emissions': emissions_by_source['electricity'],
+            'elec_emissions': elec_emissions,
             'total_emissions': total_emissions,
             'elec_demand_mwh': elec_mwh,
             'heat_demand_gj': total_heat_gj,

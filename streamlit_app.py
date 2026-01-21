@@ -190,8 +190,8 @@ st.sidebar.markdown("---")
 # Navigation - Regional Outlook is FIRST
 page = st.sidebar.radio(
     "📑 Navigation",
-    ["🗺️ Regional Outlook", "📊 Scenario Comparison", "📉 Stranded Assets", "🔧 Technology Details",
-     "🏢 Facility Results", "⚡ Energy Infrastructure"]
+    ["🗺️ Regional Outlook", "📊 Scenario Comparison", "📈 Emission Pathways", "📉 Stranded Assets", "🔧 Technology Details",
+     "🏢 Facility Results", "⚡ Energy Infrastructure", "📥 Download Data"]
 )
 
 # Load stranded assets
@@ -222,11 +222,11 @@ if df is not None:
     )
 
     # Region filter
-    regions = ['All'] + sorted(df['region'].unique().tolist())
+    regions = ['All'] + sorted([r for r in df['region'].unique() if pd.notna(r)])
     selected_region = st.sidebar.selectbox("Region", regions)
 
     # Technology filter
-    techs = ['All'] + sorted(df['technology'].unique().tolist())
+    techs = ['All'] + sorted([t for t in df['technology'].unique() if pd.notna(t)])
     selected_tech = st.sidebar.selectbox("Technology", techs)
 
     st.sidebar.markdown("---")
@@ -1180,6 +1180,210 @@ elif page == "⚡ Energy Infrastructure":
             cols[3].metric("Total CAPEX", f"${df_s['capex_usd'].sum()/1e9:.2f}B")
 
             st.markdown("---")
+
+
+# ===================== PAGE 6: EMISSION PATHWAYS =====================
+elif page == "📈 Emission Pathways":
+    st.title("📈 Emission Pathways Analysis")
+
+    if df is None:
+        st.error("No scenario data.")
+    elif not selected_scenarios:
+        st.warning("Please select at least one scenario.")
+    else:
+        # All scenarios comparison
+        st.header("Emission Trajectory Comparison (All Scenarios)")
+
+        # Calculate total emissions by year and scenario
+        total_by_year = df.groupby(['year', 'scenario'])['emissions_tco2'].sum().reset_index()
+        total_by_year['emissions_mt'] = total_by_year['emissions_tco2'] / 1e6
+        total_by_year['scenario_name'] = total_by_year['scenario'].map(SCENARIO_NAMES)
+
+        # Filter for selected scenarios
+        total_filtered = total_by_year[total_by_year['scenario'].isin(selected_scenarios)]
+
+        fig = px.line(total_filtered, x='year', y='emissions_mt', color='scenario_name',
+                     title='Total Emissions by Scenario (2025-2050)',
+                     labels={'emissions_mt': 'Emissions (MtCO2/year)', 'year': 'Year', 'scenario_name': 'Scenario'},
+                     markers=True)
+        fig.add_hline(y=0, line_dash="dash", line_color="green", annotation_text="Net Zero")
+        fig.update_layout(height=500, hovermode='x unified')
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown("---")
+
+        # Emissions by Technology
+        st.header("Emissions by Technology")
+
+        selected_scenario_tech = st.selectbox(
+            "Select Scenario",
+            selected_scenarios,
+            format_func=lambda x: SCENARIO_NAMES.get(x, x),
+            key="emission_tech_scenario"
+        )
+
+        tech_emissions = df[df['scenario'] == selected_scenario_tech].groupby(['year', 'technology'])['emissions_tco2'].sum().reset_index()
+        tech_emissions['emissions_mt'] = tech_emissions['emissions_tco2'] / 1e6
+
+        fig = px.area(tech_emissions, x='year', y='emissions_mt', color='technology',
+                     title=f'Emissions by Technology - {SCENARIO_NAMES.get(selected_scenario_tech, selected_scenario_tech)}',
+                     labels={'emissions_mt': 'Emissions (MtCO2/year)', 'year': 'Year', 'technology': 'Technology'},
+                     color_discrete_map=TECH_COLORS)
+        fig.update_layout(height=450)
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown("---")
+
+        # Emissions by Company (Top 10)
+        st.header("Emissions by Company (Top 10)")
+
+        # Get top 10 companies by 2025 emissions
+        baseline_2025 = df[(df['year'] == 2025) & (df['scenario'] == selected_scenario_tech)].groupby('company')['emissions_tco2'].sum()
+        top_10_companies = baseline_2025.nlargest(10).index.tolist()
+
+        company_emissions = df[(df['scenario'] == selected_scenario_tech) & (df['company'].isin(top_10_companies))].groupby(['year', 'company'])['emissions_tco2'].sum().reset_index()
+        company_emissions['emissions_mt'] = company_emissions['emissions_tco2'] / 1e6
+
+        fig = px.line(company_emissions, x='year', y='emissions_mt', color='company',
+                     title=f'Top 10 Companies Emission Trajectory - {SCENARIO_NAMES.get(selected_scenario_tech, selected_scenario_tech)}',
+                     labels={'emissions_mt': 'Emissions (MtCO2/year)', 'year': 'Year', 'company': 'Company'},
+                     markers=True)
+        fig.update_layout(height=500, hovermode='x unified')
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown("---")
+
+        # Emissions by Process (as proxy for fuel type)
+        st.header("Emissions by Process Type")
+
+        process_emissions = df[df['scenario'] == selected_scenario_tech].groupby(['year', 'process'])['emissions_tco2'].sum().reset_index()
+        process_emissions['emissions_mt'] = process_emissions['emissions_tco2'] / 1e6
+
+        fig = px.area(process_emissions, x='year', y='emissions_mt', color='process',
+                     title=f'Emissions by Process - {SCENARIO_NAMES.get(selected_scenario_tech, selected_scenario_tech)}',
+                     labels={'emissions_mt': 'Emissions (MtCO2/year)', 'year': 'Year', 'process': 'Process'})
+        fig.update_layout(height=450)
+        st.plotly_chart(fig, use_container_width=True)
+
+        st.markdown("---")
+
+        # Summary table
+        st.header("Emission Summary Table")
+
+        summary_data = []
+        for scenario in selected_scenarios:
+            for year in [2025, 2030, 2035, 2040, 2045, 2050]:
+                year_df = df[(df['scenario'] == scenario) & (df['year'] == year)]
+                summary_data.append({
+                    'Scenario': SCENARIO_NAMES.get(scenario, scenario),
+                    'Year': year,
+                    'BAU Emissions (MtCO2)': year_df['bau_emissions_tco2'].sum() / 1e6,
+                    'Emissions (MtCO2)': year_df['emissions_tco2'].sum() / 1e6,
+                    'Abatement (MtCO2)': year_df['abatement_tco2'].sum() / 1e6,
+                    'Reduction (%)': (1 - year_df['emissions_tco2'].sum() / year_df['bau_emissions_tco2'].sum()) * 100 if year_df['bau_emissions_tco2'].sum() > 0 else 0
+                })
+
+        summary_df = pd.DataFrame(summary_data)
+        st.dataframe(summary_df.style.format({
+            'BAU Emissions (MtCO2)': '{:.2f}',
+            'Emissions (MtCO2)': '{:.3f}',
+            'Abatement (MtCO2)': '{:.2f}',
+            'Reduction (%)': '{:.1f}%'
+        }), use_container_width=True, hide_index=True)
+
+
+# ===================== PAGE 7: DOWNLOAD DATA =====================
+elif page == "📥 Download Data":
+    st.title("📥 Download Professional Outputs")
+
+    st.markdown("""
+    Download model outputs in CSV format for further analysis or reporting.
+    These files are generated by the model and contain detailed breakdowns.
+    """)
+
+    # Check if professional outputs exist
+    professional_dir = Path('outputs/professional')
+
+    if not professional_dir.exists():
+        st.warning("Professional outputs not generated yet. Run `python generate_professional_outputs.py` first.")
+    else:
+        st.header("Available Data Files")
+
+        # List available files
+        files = {
+            'Executive Summary': 'executive_summary.csv',
+            'Annual Emissions Summary': 'annual_emissions_summary.csv',
+            'Regional Breakdown': 'regional_breakdown.csv',
+            'Company Breakdown': 'company_breakdown.csv',
+            'Technology Deployment': 'technology_deployment.csv',
+            'Stranded Assets (NCC)': 'stranded_assets_ncc.csv',
+            'Stranded Assets Summary': 'stranded_assets_summary.csv',
+            'Investment Breakdown': 'investment_breakdown.csv',
+            'MACC Curve Data': 'macc_curve_data.csv',
+        }
+
+        col1, col2 = st.columns(2)
+
+        for i, (name, filename) in enumerate(files.items()):
+            filepath = professional_dir / filename
+            if filepath.exists():
+                data = pd.read_csv(filepath)
+                with (col1 if i % 2 == 0 else col2):
+                    st.subheader(name)
+                    st.caption(f"{len(data)} rows × {len(data.columns)} columns")
+                    st.download_button(
+                        label=f"📥 Download {filename}",
+                        data=data.to_csv(index=False),
+                        file_name=filename,
+                        mime='text/csv',
+                        key=f"download_{filename}"
+                    )
+
+        st.markdown("---")
+
+        # Full scenario results
+        st.header("Full Dataset")
+
+        results_file = OUTPUT_DIR / 'scenario_results.csv'
+        if results_file.exists():
+            full_data = pd.read_csv(results_file)
+            st.subheader("Complete Scenario Results")
+            st.caption(f"{len(full_data):,} rows × {len(full_data.columns)} columns")
+            st.download_button(
+                label="📥 Download scenario_results.csv (Full Dataset)",
+                data=full_data.to_csv(index=False),
+                file_name='scenario_results.csv',
+                mime='text/csv',
+                key="download_full"
+            )
+
+        st.markdown("---")
+
+        # Additional summary files
+        st.header("Additional Summaries")
+
+        summary_files = {
+            'Emissions by Scenario & Year': 'emissions_by_scenario_year.csv',
+            'Emissions by Technology & Year': 'emissions_by_technology_year.csv',
+            'Emissions by Company & Year': 'emissions_by_company_year.csv',
+            'Emissions by Region & Year': 'emissions_by_region_year.csv',
+            'Emissions by Process & Year': 'emissions_by_process_year.csv',
+        }
+
+        col1, col2 = st.columns(2)
+
+        for i, (name, filename) in enumerate(summary_files.items()):
+            filepath = OUTPUT_DIR / filename
+            if filepath.exists():
+                data = pd.read_csv(filepath)
+                with (col1 if i % 2 == 0 else col2):
+                    st.download_button(
+                        label=f"📥 {name}",
+                        data=data.to_csv(index=False),
+                        file_name=filename,
+                        mime='text/csv',
+                        key=f"download_summary_{filename}"
+                    )
 
 
 # Footer

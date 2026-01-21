@@ -1,6 +1,6 @@
-technology,applies_to,capex_unit,capex_2025,capex_2030,capex_2040,capex_2050,opex_pct_capex,lifetime_years,source,notes
-Heat_Pump,Non-NCC low-temp processes,usd_per_t_product_yr,170,140,120,100,3.0,20,IEA 2022 (€600-800/kW thermal),Per tonne annual product capacity; 5 GJ/t heat intensity assumed
-NCC-H2,Naphtha Cracker,usd_per_t_ethylene_yr,350,280,230,180,4.0,25,MIT Energy Initiative / Green Chemistry 2025,Per tonne ethylene capacity; furnace retrofit (H2 purchased externally); derived from CCS+H2 $242/kg-day
-NCC-Electricity,Naphtha Cracker,usd_per_t_ethylene_yr,280,220,185,150,4.0,25,MIT Energy Initiative / Green Chemistry 2025,Per tonne ethylene capacity; e-Cracker $195/kg-day (TRL 6-7) = 16% lower than baseline
-RDH,BTX Plant,usd_per_t_btx_yr,250,200,170,140,3.0,25,Coolbrook 2024 (estimated),Per tonne BTX capacity; RotoDynamic Heater - NO PUBLIC CAPEX DATA
-RE_PPA,All electricity,usd_per_mwh_premium,0,0,0,0,0,99,N/A,No CAPEX - contract-based renewable procurement
+technology,applies_to,capex_unit,capex_2025,capex_2030,capex_2040,capex_2050,opex_pct_capex,lifetime_years,source,notes,confidence,last_updated
+Heat_Pump,Non-NCC low-temp processes,usd_per_t_product_yr,170,140,120,100,3.0,20,IEA 2022 (€600-800/kW thermal),Per tonne annual product capacity; 5 GJ/t heat intensity assumed,HIGH,2025-01
+NCC-H2,Naphtha Cracker,usd_per_t_ethylene_yr,350,280,230,180,4.0,25,MIT Energy Initiative / Green Chemistry 2025,Per tonne ethylene capacity; furnace retrofit (H2 purchased externally); derived from CCS+H2 $242/kg-day,MEDIUM,2025-01
+NCC-Electricity,Naphtha Cracker,usd_per_t_ethylene_yr,280,220,185,150,4.0,25,MIT Energy Initiative / Green Chemistry 2025,Per tonne ethylene capacity; e-Cracker $195/kg-day (TRL 6-7) = 16% lower than baseline,MEDIUM,2025-01
+RDH,BTX Plant,usd_per_t_btx_yr,250,200,170,140,3.0,25,Coolbrook 2024 (estimated),Per tonne BTX capacity; RotoDynamic Heater - NO PUBLIC CAPEX DATA,LOW,2025-01
+RE_PPA,All electricity,usd_per_mwh_premium,0,0,0,0,0,99,N/A,No CAPEX - contract-based renewable procurement,HIGH,2025-01

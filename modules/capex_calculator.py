@@ -10,6 +10,7 @@ MAC = (Annualized CAPEX + OPEX + Energy Cost - Fuel Savings) / Abatement
 
 import pandas as pd
 import numpy as np
+import warnings
 
 
 class CapexCalculator:
@@ -31,8 +32,10 @@ class CapexCalculator:
         self.tech_params = tech_params_df.set_index('technology')
         self.config = model_config
 
-        # Physical constant from config
-        self.gj_to_mwh = model_config.get('gj_to_mwh', 3.6)
+        # Physical constant from config - must be present
+        if 'gj_to_mwh' not in model_config:
+            raise ValueError("model_config missing required 'gj_to_mwh' parameter")
+        self.gj_to_mwh = model_config['gj_to_mwh']
 
     def get_technology_capex_rate(self, technology, year):
         """
@@ -101,15 +104,53 @@ class CapexCalculator:
         return params
 
     def get_capex_info(self, technology):
-        """Get CAPEX metadata (OPEX%, lifetime, etc.)"""
+        """Get CAPEX metadata (OPEX%, lifetime, etc.)
+
+        Note: opex_pct_capex and lifetime_years should be in technology_capex.csv.
+        Fallback values (3.0% and 25 years) are only used for backwards compatibility.
+        """
         if technology not in self.capex_df.index:
             raise ValueError(f"Technology '{technology}' not found in technology_capex.csv")
 
         row = self.capex_df.loc[technology]
+
+        # Get OPEX percentage - warn if using fallback
+        if 'opex_pct_capex' in row.index and pd.notna(row['opex_pct_capex']):
+            opex = row['opex_pct_capex']
+        else:
+            opex = 3.0
+            warnings.warn(
+                f"opex_pct_capex not found for {technology} in technology_capex.csv, "
+                f"using fallback value of {opex}%",
+                UserWarning
+            )
+
+        # Get lifetime - warn if using fallback
+        if 'lifetime_years' in row.index and pd.notna(row['lifetime_years']):
+            lifetime = row['lifetime_years']
+        else:
+            lifetime = 25
+            warnings.warn(
+                f"lifetime_years not found for {technology} in technology_capex.csv, "
+                f"using fallback value of {lifetime} years",
+                UserWarning
+            )
+
+        # Get CAPEX unit - warn if using fallback
+        if 'capex_unit' in row.index and pd.notna(row['capex_unit']):
+            capex_unit = row['capex_unit']
+        else:
+            capex_unit = 'usd_per_t_product_yr'
+            warnings.warn(
+                f"capex_unit not found for {technology} in technology_capex.csv, "
+                f"using fallback value of {capex_unit}",
+                UserWarning
+            )
+
         return {
-            'opex_pct_capex': row.get('opex_pct_capex', 3.0),
-            'lifetime_years': row.get('lifetime_years', 25),
-            'capex_unit': row.get('capex_unit', 'usd_per_t_product_yr'),
+            'opex_pct_capex': float(opex) if hasattr(opex, 'item') else opex,
+            'lifetime_years': int(lifetime) if hasattr(lifetime, 'item') else lifetime,
+            'capex_unit': str(capex_unit) if hasattr(capex_unit, 'item') else capex_unit,
         }
 
     def is_technology_available(self, technology, year):
@@ -270,7 +311,9 @@ class MACCalculator:
         if abatement_tco2 > 0:
             mac = total_annual_cost / abatement_tco2
         else:
-            mac = float('inf')
+            # Use large but finite value instead of inf to prevent aggregation issues
+            # 1e9 (billion $/tCO2) is effectively infinity for practical purposes
+            mac = 1e9
 
         return {
             'mac_usd_per_tco2': mac,
@@ -303,6 +346,10 @@ class MACCalculator:
         fuel_savings = 0.0
 
         # Map internal keys to price keys
+        # Note: electricity is NOT included here because:
+        # 1. We're calculating fuel SAVINGS from switching away from combustion
+        # 2. Electricity cost is handled separately as new_energy_cost
+        # 3. Baseline electricity cost is not "saved" when deploying new tech
         fuel_mapping = {
             'naphtha': 'naphtha_usd_per_gj',
             'lng': 'lng_usd_per_gj',
@@ -311,6 +358,7 @@ class MACCalculator:
             'lpg': 'lpg_usd_per_gj',
             'fuel_oil': 'fuel_oil_usd_per_gj',
             'diesel': 'diesel_usd_per_gj',
+            # Note: 'electricity' intentionally excluded - see comment above
         }
 
         for internal_key, price_key in fuel_mapping.items():

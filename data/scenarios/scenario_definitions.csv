@@ -1,7 +1,5 @@
-name,production,ncc_tech
-shaheen_ncc_h2,shaheen,NCC-H2
-shaheen_ncc_elec,shaheen,NCC-Electricity
-restructure_25pct_ncc_h2,restructure_25pct,NCC-H2
-restructure_25pct_ncc_elec,restructure_25pct,NCC-Electricity
-restructure_40pct_ncc_h2,restructure_40pct,NCC-H2
-restructure_40pct_ncc_elec,restructure_40pct,NCC-Electricity
+name,production,ncc_tech,carbon_pathway
+shaheen_ncc_h2_15c,shaheen,NCC-H2,1.5C
+shaheen_ncc_h2_20c,shaheen,NCC-H2,2.0C
+shaheen_ncc_elec_15c,shaheen,NCC-Electricity,1.5C
+shaheen_ncc_elec_20c,shaheen,NCC-Electricity,2.0C

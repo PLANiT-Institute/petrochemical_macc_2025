@@ -67,7 +67,20 @@
       "WebFetch(domain:aiche.nl)",
       "WebFetch(domain:www.ipieca.org)",
       "WebFetch(domain:thundersaidenergy.com)",
-      "WebFetch(domain:www.irena.org)"
+      "WebFetch(domain:www.irena.org)",
+      "Bash(pip3 install:*)",
+      "Bash(/Users/jinsu/Library/Python/3.9/bin/pytest tests/test_calculators.py -v --tb=short)",
+      "Bash(/Users/jinsu/Library/Python/3.9/bin/pytest:*)",
+      "Bash(/Users/jinsu/Library/Python/3.9/bin/streamlit:*)",
+      "Bash(lsof:*)",
+      "Bash(/dev/null echo echo '=== OUTPUT CSV FILES ===' ls -la outputs/*.csv outputs/professional/*.csv 2)",
+      "Bash(/dev/null echo echo '=== OUTPUT FIGURE FILES ===' ls -la outputs/figures/*.png)",
+      "Skill(ralph-loop:cancel-ralph)",
+      "Bash(./.venv/bin/python:*)",
+      "Bash(/Users/jinsu/miniforge3/bin/python:*)",
+      "Bash(/opt/homebrew/bin/python3:*)",
+      "WebFetch(domain:www.ctis.re.kr)",
+      "WebFetch(domain:greenium.kr)"
     ],
     "deny": [],
     "ask": []

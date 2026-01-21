@@ -31,18 +31,36 @@ class DataLoader:
 
         df = pd.read_csv(config_path)
 
+        # Validate required columns exist
+        required_cols = ['parameter', 'value']
+        missing_cols = [c for c in required_cols if c not in df.columns]
+        if missing_cols:
+            raise ValueError(f"model_config.csv missing required columns: {missing_cols}")
+
         # Convert to dict with type conversion
         config = {}
         for _, row in df.iterrows():
             param = row['parameter']
             value = row['value']
-            unit = row.get('unit', '')
+            unit = row.get('unit', '') if 'unit' in row.index else ''
 
-            # Convert numeric values
+            # Convert numeric values with validation
             if unit == 'decimal' or unit == 'year':
-                config[param] = float(value)
+                try:
+                    config[param] = float(value)
+                except (ValueError, TypeError) as e:
+                    raise ValueError(
+                        f"Invalid value for parameter '{param}' in model_config.csv: "
+                        f"'{value}' cannot be converted to float (unit: {unit})"
+                    ) from e
             elif '/' in unit:  # Conversion factors like GJ/MWh
-                config[param] = float(value)
+                try:
+                    config[param] = float(value)
+                except (ValueError, TypeError) as e:
+                    raise ValueError(
+                        f"Invalid value for parameter '{param}' in model_config.csv: "
+                        f"'{value}' cannot be converted to float (unit: {unit})"
+                    ) from e
             else:
                 config[param] = value
 
@@ -198,6 +216,28 @@ class DataLoader:
         if not path.exists():
             raise FileNotFoundError(f"Critical: Missing emission targets at {path}")
         return pd.read_csv(path)
+
+    def load_emission_targets_spline(self):
+        """
+        Load emission targets from spline comparison file for both pathways.
+
+        Returns dict with '1.5C' and '2.0C' keys, each containing
+        year -> target_fraction mapping (e.g., 2025: 1.0, 2050: 0.0).
+
+        The spline file contains science-based reduction pathways:
+        - 1.5°C: Steady decline from 100% to 0%
+        - 2.0°C: Allows overshoot (peaks ~156% in 2030) then declines to 0%
+        """
+        path = self.data_dir / 'assumptions' / 'kor_petro_spline_comparison.csv'
+        if not path.exists():
+            raise FileNotFoundError(f"Critical: Missing spline file at {path}")
+
+        spline_df = pd.read_csv(path)
+
+        return {
+            '1.5C': dict(zip(spline_df['Year'], spline_df['1.5°C Scenario'] / 100.0)),
+            '2.0C': dict(zip(spline_df['Year'], spline_df['2.0°C Scenario'] / 100.0))
+        }
 
     def load_region_mapping(self):
         """Load region mapping"""

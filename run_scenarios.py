@@ -30,31 +30,25 @@ YEARS = list(range(2025, 2051))  # 26 years
 # Load EXTERNAL configurations
 def load_scenario_config():
     """Load scenarios, targets, and mapping from CSVs"""
-    # 1. Emission Targets
-    targets_df = pd.read_csv(DATA_DIR / 'scenarios' / 'emission_targets.csv')
-    key_targets = dict(zip(targets_df['year'], targets_df['reduction_target_pct']))
-    
-    # 2. Scenario Definitions
+    # 1. Scenario Definitions (now includes carbon_pathway column)
     scenarios_df = pd.read_csv(DATA_DIR / 'scenarios' / 'scenario_definitions.csv')
     scenarios = scenarios_df.to_dict('records')
-    
-    # 3. Region Mapping
+
+    # 2. Region Mapping
     region_df = pd.read_csv(DATA_DIR / 'assets' / 'region_mapping.csv')
     region_map = dict(zip(region_df['location'], region_df['region']))
-    
-    return key_targets, scenarios, region_map
+
+    # 3. Load Spline Targets (science-based pathways)
+    spline_df = pd.read_csv(DATA_DIR / 'assumptions' / 'kor_petro_spline_comparison.csv')
+    spline_targets = {
+        '1.5C': dict(zip(spline_df['Year'], spline_df['1.5°C Scenario'] / 100.0)),
+        '2.0C': dict(zip(spline_df['Year'], spline_df['2.0°C Scenario'] / 100.0))
+    }
+
+    return scenarios, region_map, spline_targets
 
 print("Loading configuration from CSVs...")
-KEY_TARGETS, SCENARIOS, REGION_MAP = load_scenario_config()
-
-# Interpolate emission targets for all years
-def interpolate_targets(key_targets, years):
-    """Interpolate emission targets for annual years"""
-    key_years = sorted(key_targets.keys())
-    key_values = [key_targets[y] for y in key_years]
-    return {y: np.interp(y, key_years, key_values) for y in years}
-
-EMISSION_TARGETS = interpolate_targets(KEY_TARGETS, YEARS)
+SCENARIOS, REGION_MAP, SPLINE_TARGETS = load_scenario_config()
 
 
 def load_data():
@@ -128,6 +122,17 @@ def load_data():
     intensities['_key'] = intensities['company'] + '_' + intensities['product'] + '_' + intensities['location']
     data['intensity_lookup'] = intensities.set_index('_key').to_dict('index')
 
+    # Validate that all facilities have matching intensity data
+    fac_ids = set(facilities['company'] + '_' + facilities['product'] + '_' + facilities['location'])
+    intensity_keys = set(data['intensity_lookup'].keys())
+    missing = fac_ids - intensity_keys
+    if missing:
+        print(f"  WARNING: {len(missing)} facilities have no matching intensity data:")
+        for m in list(missing)[:5]:
+            print(f"    - {m}")
+        if len(missing) > 5:
+            print(f"    ... and {len(missing) - 5} more")
+
     print(f"  Loaded {len(data['facilities'])} baseline facilities")
     print(f"  Loaded {len(data['facilities_shaheen'])} facilities with Shaheen")
     print(f"  Loaded model_config with {len(model_config)} parameters")
@@ -173,8 +178,9 @@ def calculate_facility_mac_v2(facility_baseline, process, ncc_tech, year, data, 
     potential_abatement = reqs['potential_abatement_tco2']
 
     # Default return if no abatement
+    # Use large but finite value to prevent aggregation issues
     if potential_abatement <= 0:
-        return float('inf'), 'None', 0, {}, {}
+        return 1e9, 'None', 0, {}, {}
 
     # 1. New Energy Costs (H2 + Electricity)
     h2_cost = h2_demand_t * h2_price * 1000 # price is /kg, so *1000 for /tonne
@@ -273,7 +279,10 @@ def calculate_lcoa(facility, ncc_tech, start_year, data, all_years):
     # Cache lookup
     fid = facility['facility_id']
     intensity = data['intensity_lookup'].get(fid)
-    if not intensity: return float('inf')
+    if not intensity:
+        # Silently return inf for LCOA ranking purposes
+        # The main loop will skip this facility with a warning
+        return float('inf')
     
     # Loop from start install year to end of horizon
     # (Simplified: assume lifetime covers the period or up to 2050)
@@ -354,22 +363,23 @@ def run_scenario(scenario, data, years):
     
     # Pre-calculate baseline intensity lookup for speed
     intensity_lookup = data['intensities'].set_index('_key').to_dict('index')
+    skipped_facilities = set()  # Track facilities skipped due to missing intensity data
     
     # Validation of required data
     op_rate_key = f"op_rate_{scenario['production']}"
-    if op_rate_key not in data:
-         # Fallback to base shaheen if specific rate not found (or handle error)
-         # For the standard 6 scenarios, strictly mapped:
-         # shaheen -> op_rate_shaheen
-         # restructure_XX -> op_rate_restructure_XX
-         pass
-
     op_rate_df = data.get(op_rate_key)
+
     if op_rate_df is None:
-         # Try default 'op_rate_shaheen' if specific one missing? Or error?
-         # Based on scenario_definitions.csv, production is 'shaheen', 'restructure_25pct', etc.
-         pass
+        raise ValueError(
+            f"Missing operating rate data for key '{op_rate_key}'. "
+            f"Scenario '{scenario['name']}' requires production type '{scenario['production']}'. "
+            f"Ensure 'demand_growth_trajectory_{scenario['production']}.csv' exists."
+        )
          
+    # Initialize REFERENCE_EMISSIONS before loop (used for target calculation)
+    # This must be set in the first year (2025) and used for all subsequent years
+    REFERENCE_EMISSIONS = None
+
     # 2. Year-by-Year Simulation
     for year in years:
         # --- A. Get Annual Parameters ---
@@ -379,12 +389,24 @@ def run_scenario(scenario, data, years):
         op_rate = op_row['operating_rate_pct'].iloc[0] / 100
         cap_mult = op_row['cumulative_capacity_multiplier'].iloc[0]
         
-        # Grid EF
+        # Grid Emission Factor (EF) - DESIGN NOTE on BAU vs Actual:
+        # - grid_ef: Dynamic yearly EF (declines as grid decarbonizes)
+        # - grid_ef_2025: Fixed 2025 baseline EF (used for BAU calculation)
+        #
+        # BAU uses fixed 2025 EF to represent "no action" counterfactual.
+        # Actual emissions use dynamic EF to reflect real-world grid improvements.
+        # This means reported "abatement" includes:
+        #   1. Technology-driven abatement (replacing combustion)
+        #   2. Grid decarbonization benefit (cleaner electricity)
+        #
+        # To isolate technology-only abatement, compare against same-year BAU
+        # recalculated with dynamic EF. Current approach is policy-relevant
+        # (shows total benefit vs 2025 baseline).
         grid_row = data['grid_emissions'][data['grid_emissions']['year'] == year]
         if len(grid_row) == 0: raise ValueError(f"Missing Grid EF for {year}")
         grid_ef = grid_row['grid_ef_tco2_per_mwh'].iloc[0]
-        
-        # Baseline Grid EF (2025) for BAU
+
+        # Baseline Grid EF (2025) for BAU - fixed reference point
         grid_ef_2025 = data['grid_emissions'][data['grid_emissions']['year'] == 2025]['grid_ef_tco2_per_mwh'].iloc[0]
 
         # --- B. Calculate Current Emissions (Pre-Intervention for this year) ---
@@ -426,6 +448,8 @@ def run_scenario(scenario, data, years):
             # Let's blindly trust `intensity_lookup[fid]` works if fid is the ID.
             
             if fid not in intensity_lookup:
+                if fid not in skipped_facilities:
+                    skipped_facilities.add(fid)
                 continue
 
             intensity = intensity_lookup[fid]
@@ -476,8 +500,9 @@ def run_scenario(scenario, data, years):
                 
                 # For results recording
                 res_packet = {
-                    'fac': fac, 'mac_res': res, 'is_deployed': 1, 
-                    'bau': bau_emis, 'emis': current_emis, 'abate': bau_emis - current_emis # vs BAU
+                    'fac': fac, 'mac_res': res, 'is_deployed': 1,
+                    'bau': bau_emis, 'emis': current_emis, 'abate': bau_emis - current_emis, # vs BAU
+                    'base_metrics': base_metrics  # Store for correct elec_demand_mwh per facility
                 }
             else:
                 # Not deployed (Baseline)
@@ -485,7 +510,8 @@ def run_scenario(scenario, data, years):
                 current_emis = base_metrics['combustion_emissions'] + base_metrics['elec_demand_mwh'] * grid_ef
                 res_packet = {
                     'fac': fac, 'mac_res': None, 'is_deployed': 0,
-                    'bau': bau_emis, 'emis': current_emis, 'abate': 0
+                    'bau': bau_emis, 'emis': current_emis, 'abate': 0,
+                    'base_metrics': base_metrics  # Store for correct elec_demand_mwh per facility
                 }
                 candidates_for_optimization.append(res_packet)
             
@@ -494,19 +520,26 @@ def run_scenario(scenario, data, years):
             current_stats.append(res_packet)
             
         # --- D. Gap Analysis & Optimization ---
-        # Target for this year
-        target_pct = EMISSION_TARGETS[year]
-        # Target Emissions = BAU_2025_Total * (1 - target_pct)? 
-        # Or Baseline_Current_Year * ...?
-        # Convention: Reduction relative to BASELINE YEAR (2025).
-        # We need Total 2025 Emissions from the *start* of the script?
-        # Actually, let's calculate the "2025 Reference" dynamically or pass it.
-        # In this loop, if year==2025, we set the reference.
-        
+        # Target for this year using spline-based pathway
+        # Get carbon pathway for this scenario (1.5C or 2.0C)
+        carbon_pathway = scenario.get('carbon_pathway', '1.5C')
+        pathway_targets = SPLINE_TARGETS[carbon_pathway]
+
+        # Spline targets are % of 2025 baseline (e.g., 1.0 = 100%, 0.5 = 50%)
+        # 2.0C pathway allows overshoot (values > 1.0 in early years)
+        target_fraction = pathway_targets.get(year, 1.0)
+
+        # Set reference emissions at 2025 (or first year in the analysis)
         if year == 2025:
-            REFERENCE_EMISSIONS = total_bau # BAU in 2025
-        
-        target_emissions = REFERENCE_EMISSIONS * (1 - target_pct)
+            REFERENCE_EMISSIONS = total_bau  # BAU in 2025
+
+        # Validate REFERENCE_EMISSIONS is set before use
+        if REFERENCE_EMISSIONS is None:
+            raise ValueError(f"REFERENCE_EMISSIONS not set by year {year}. Analysis must start at 2025.")
+
+        # Target = baseline × spline_fraction
+        # For 2.0C pathway, early years may have target > reference (overshoot allowed)
+        target_emissions = REFERENCE_EMISSIONS * target_fraction
         gap = total_emissions - target_emissions
         
         if gap > 0 and len(candidates_for_optimization) > 0:
@@ -564,6 +597,7 @@ def run_scenario(scenario, data, years):
                         s['mac_res'] = res
                         s['emis'] = new_emis
                         s['abate'] = s['bau'] - new_emis
+                        s['base_metrics'] = base_metrics  # Update with fresh base_metrics
                         break
                 
                 if gap <= 0:
@@ -576,22 +610,23 @@ def run_scenario(scenario, data, years):
             fac = s['fac']
             res = s['mac_res']
             is_dep = s['is_deployed']
-            
+            fac_base_metrics = s['base_metrics']  # Use stored base_metrics for this facility
+
             # Extract costs (if deployed)
             if is_dep and res:
                  # res = (mac, technology, potential_abatement, cost_bd, tech_det)
                  # cost_bd has 'capex_total_usd', 'total_annual_cost_usd', etc.
                  cost_bd = res[3] if len(res)>3 else {}
                  tech_det = res[4] if len(res)>4 else {}
-                 
+
                  # Using the components calculated by mac_v2
                  row = {
                     'year': year, 'scenario': scenario['name'], 'region': get_region(fac['location']),
                     'facility_id': fac['facility_id'], 'company': fac['company'], 'product': fac['product'],
                     'process': fac.get('process'), 'technology': res[1],
-                    'capacity_tpy': fac['capacity_kt']*1000, 
+                    'capacity_tpy': fac['capacity_kt']*1000,
                     'production_t': fac['capacity_kt']*1000 * op_rate * cap_mult,
-                    'bau_emissions_tco2': s['bau'], 
+                    'bau_emissions_tco2': s['bau'],
                     'emissions_tco2': s['emis'],
                     'abatement_tco2': s['abate'],
                     # Costs
@@ -605,34 +640,38 @@ def run_scenario(scenario, data, years):
                     'cost_component_opex_annual_usd': cost_bd.get('opex_annual_usd', 0),
                     'cost_component_new_energy_usd': cost_bd.get('new_energy_cost_usd', 0),
                     'cost_component_fuel_savings_usd': cost_bd.get('fuel_savings_usd', 0),
-                    # Demands
-                    'elec_demand_mwh': base_metrics['elec_demand_mwh'] + tech_det.get('added_elec_mwh', 0),
+                    # Demands - use facility-specific base_metrics
+                    'elec_demand_mwh': fac_base_metrics['elec_demand_mwh'] + tech_det.get('added_elec_mwh', 0),
                     'h2_demand_t': tech_det.get('h2_demand_t', 0),
-                    'heat_demand_gj': 0, 
+                    'heat_demand_gj': fac_base_metrics.get('heat_demand_gj', 0),
                     'tech_deployed': 1,
                     'install_year': deployment_status[fac['facility_id']]['year']
                  }
                  deployment_count += 1
             else:
-                 # Undeployed
+                 # Undeployed - use facility-specific base_metrics
                  row = {
                     'year': year, 'scenario': scenario['name'], 'region': get_region(fac['location']),
                     'facility_id': fac['facility_id'], 'company': fac['company'], 'product': fac['product'],
                     'process': fac.get('process'), 'technology': 'Baseline',
-                    'capacity_tpy': fac['capacity_kt']*1000, 
+                    'capacity_tpy': fac['capacity_kt']*1000,
                     'production_t': fac['capacity_kt']*1000 * op_rate * cap_mult,
-                    'bau_emissions_tco2': s['bau'], 
+                    'bau_emissions_tco2': s['bau'],
                     'emissions_tco2': s['emis'],
                     'abatement_tco2': 0,
                     'capex_usd': 0, 'opex_usd_yr': 0, 'fuel_cost_usd_yr': 0, 'total_cost_usd': 0, 'mac_usd_per_tco2': 0,
                     'cost_component_capex_annual_usd': 0, 'cost_component_opex_annual_usd': 0,
                     'cost_component_new_energy_usd': 0, 'cost_component_fuel_savings_usd': 0,
-                    'elec_demand_mwh': base_metrics['elec_demand_mwh'],
+                    'elec_demand_mwh': fac_base_metrics['elec_demand_mwh'],
                     'h2_demand_t': 0,
-                    'heat_demand_gj': 0,
+                    'heat_demand_gj': fac_base_metrics.get('heat_demand_gj', 0),
                     'install_year': None
                  }
             results.append(row)
+
+    # Report any skipped facilities
+    if skipped_facilities:
+        print(f"    Warning: {len(skipped_facilities)} facilities skipped due to missing intensity data")
 
     return results
 
@@ -643,9 +682,15 @@ def main():
     print("KOREA PETROCHEMICAL NET ZERO - COST-OPTIMIZED SCENARIO RUNNER")
     print("=" * 80)
     print(f"\nYears: {YEARS[0]} - {YEARS[-1]} (annual, {len(YEARS)} years)")
-    print("\nKey Emission Targets:")
-    for year, target in KEY_TARGETS.items():
-        print(f"  {year}: {target*100:.1f}% reduction")
+    print("\nCarbon Budget Pathways (% of 2025 baseline):")
+    print("  1.5°C Pathway:")
+    for year in [2025, 2030, 2040, 2050]:
+        pct = SPLINE_TARGETS['1.5C'].get(year, 0) * 100
+        print(f"    {year}: {pct:.1f}%")
+    print("  2.0°C Pathway (with overshoot):")
+    for year in [2025, 2030, 2040, 2050]:
+        pct = SPLINE_TARGETS['2.0C'].get(year, 0) * 100
+        print(f"    {year}: {pct:.1f}%")
 
     # Load data
     data = load_data()
@@ -843,8 +888,13 @@ def main():
     print("=" * 80)
 
     validation_years = [2025, 2030, 2035, 2040, 2045, 2050]
+
+    # Get scenario pathway mapping
+    scenario_pathways = {s['name']: s.get('carbon_pathway', '1.5C') for s in SCENARIOS}
+
     for scenario_name in df_results['scenario'].unique():
-        print(f"\n  {scenario_name}:")
+        pathway = scenario_pathways.get(scenario_name, '1.5C')
+        print(f"\n  {scenario_name} ({pathway} pathway):")
         df_s = df_results[df_results['scenario'] == scenario_name]
 
         baseline_2025 = df_s[df_s['year'] == 2025]['bau_emissions_tco2'].sum() / 1e6
@@ -852,12 +902,13 @@ def main():
         for year in validation_years:
             df_y = df_s[df_s['year'] == year]
             emissions = df_y['emissions_tco2'].sum() / 1e6
-            reduction = (1 - emissions / baseline_2025) * 100 if baseline_2025 > 0 else 0
-            target = EMISSION_TARGETS.get(year, 0) * 100
+            actual_pct = (emissions / baseline_2025) * 100 if baseline_2025 > 0 else 0
+            target_pct = SPLINE_TARGETS[pathway].get(year, 1.0) * 100
             deployed = df_y[df_y['tech_deployed'] == 1]['facility_id'].nunique()
 
-            status = "✓" if reduction >= target - 1 else "✗"
-            print(f"    {year}: {emissions:.2f} Mt ({reduction:.1f}% red, target {target:.1f}%) "
+            # Check if actual is at or below target (lower is better)
+            status = "✓" if actual_pct <= target_pct + 1 else "✗"
+            print(f"    {year}: {emissions:.2f} Mt ({actual_pct:.1f}% of baseline, target {target_pct:.1f}%) "
                   f"[{deployed} deployed] {status}")
 
     print("\n" + "=" * 80)

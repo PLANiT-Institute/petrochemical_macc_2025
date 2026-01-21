@@ -1,5 +1,5 @@
 process,overnight_capex_usd_per_ton,useful_life_years,discount_rate
-Naphtha Cracker,1500,40,0.05
+Naphtha Cracker,3000,40,0.05
 BTX Plant,800,40,0.05
 Utility,500,30,0.05
 Other,1000,30,0.05
