@@ -189,6 +189,57 @@ class CapexCalculator:
         """
         return capex_total / lifetime_years
 
+    def calculate_residual_value(self, technology, capex_total, install_year, end_year=2050):
+        """
+        Calculate residual (undepreciated) value of an asset at the analysis endpoint.
+
+        Technologies deployed late in the analysis period will still have significant
+        useful life remaining after 2050. This method calculates the residual value
+        using linear depreciation to enable fair lifecycle cost comparison.
+
+        Formula (Linear Depreciation):
+            end_of_life = install_year + lifetime_years
+            remaining_years = max(0, end_of_life - end_year)
+            residual_value = capex_total × (remaining_years / lifetime_years)
+
+        Args:
+            technology: Technology name (e.g., 'NCC-H2', 'Heat_Pump')
+            capex_total: Total overnight CAPEX in USD
+            install_year: Year the technology was deployed
+            end_year: Analysis endpoint year (default 2050)
+
+        Returns:
+            dict with:
+                - residual_value_usd: Undepreciated asset value at end_year
+                - remaining_life_years: Years of useful life remaining after end_year
+                - end_of_life_year: Year when asset reaches end of useful life
+
+        Example:
+            NCC-H2 deployed in 2040 (25-year life):
+                end_of_life = 2040 + 25 = 2065
+                remaining_years = max(0, 2065 - 2050) = 15
+                residual_value = CAPEX × (15/25) = 60% of CAPEX
+        """
+        # Get lifetime from CAPEX metadata
+        capex_meta = self.get_capex_info(technology)
+        lifetime_years = capex_meta['lifetime_years']
+
+        # Calculate end of life and remaining years
+        end_of_life_year = install_year + lifetime_years
+        remaining_life_years = max(0, end_of_life_year - end_year)
+
+        # Calculate residual value using linear depreciation
+        if lifetime_years > 0 and remaining_life_years > 0:
+            residual_value_usd = capex_total * (remaining_life_years / lifetime_years)
+        else:
+            residual_value_usd = 0.0
+
+        return {
+            'residual_value_usd': residual_value_usd,
+            'remaining_life_years': remaining_life_years,
+            'end_of_life_year': end_of_life_year
+        }
+
     def calculate_energy_requirements(self, technology, facility_baseline, process):
         """
         Calculate energy requirements (H2, electricity) for a technology.

@@ -13,9 +13,21 @@ from pathlib import Path
 class DataLoader:
     """Load all input data from CSV files with validation"""
 
-    def __init__(self, data_dir='data'):
+    def __init__(self, data_dir='data', validate: bool = False, strict: bool = False):
+        """
+        Initialize the DataLoader.
+
+        Args:
+            data_dir: Path to the data directory
+            validate: If True, run validation on initialization
+            strict: If True, treat validation warnings as errors (requires validate=True)
+        """
         self.data_dir = Path(data_dir)
         self._model_config = None  # Cache for model config
+        self._validation_result = None
+
+        if validate:
+            self._run_validation(strict=strict)
 
     def load_model_config(self):
         """
@@ -73,6 +85,39 @@ class DataLoader:
         if param_name not in config:
             raise ValueError(f"Parameter '{param_name}' not found in model_config.csv")
         return config[param_name]
+
+    def _run_validation(self, strict: bool = False):
+        """
+        Run data validation on all input files.
+
+        Args:
+            strict: If True, treat warnings as errors
+
+        Raises:
+            ValueError: If validation fails (errors found)
+        """
+        from .data_validator import DataValidator
+
+        validator = DataValidator(str(self.data_dir))
+        self._validation_result = validator.validate_inputs(strict=strict)
+
+        if not self._validation_result.valid:
+            error_msgs = [str(e) for e in self._validation_result.errors[:5]]
+            error_summary = "\n".join(error_msgs)
+            raise ValueError(
+                f"Data validation failed with {len(self._validation_result.errors)} errors:\n"
+                f"{error_summary}\n"
+                f"Run 'python -m modules.data_validator' for full report."
+            )
+
+    def get_validation_result(self):
+        """
+        Get the validation result from initialization.
+
+        Returns:
+            ValidationResult or None if validation was not run
+        """
+        return self._validation_result
 
     def load_facilities(self):
         """

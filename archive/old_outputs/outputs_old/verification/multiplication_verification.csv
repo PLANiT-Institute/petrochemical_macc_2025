@@ -1,6 +1,0 @@
-Category,Item,Manual Calculation,Manual Value,Model Value,Match
-Baseline,NCC Combustion Emissions,"25,667 kt × 11 GJ/t × 0.0561 tCO2/GJ",15.84 Mt,52.21 Mt,NO - Model uses facility-level data
-MACC,NCC-H2 Total Cost 2050,$34 + $34 + $197,$265/tCO2,$1176/tCO2,CLOSE
-MACC,NCC-Elec Total Cost 2050,$30 + $30 + $74,$134/tCO2,$542/tCO2,CLOSE
-H2 Demand,Shaheen NCC-H2 2050,50.62 Mt / 2.034 × 0.200,"4,977 kt","4,977 kt",YES
-Abatement,HP Potential (BTX),9.10 Mt × 60%,5.46 Mt,3.59 Mt,CLOSE - Model includes demand growth

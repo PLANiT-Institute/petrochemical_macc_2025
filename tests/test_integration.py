@@ -337,5 +337,237 @@ class TestCrossValidation:
         assert total_calculated >= 0, "Calculated emissions should be non-negative"
 
 
+# ============================================================================
+# NCC NAPHTHA FUEL SAVINGS CONSISTENCY TESTS
+# ============================================================================
+
+class TestFuelSavingsConsistency:
+    """
+    Tests to verify NCC naphtha fuel savings logic is consistent across all code paths.
+
+    CRITICAL: In NCC (Naphtha Cracker) facilities, naphtha is FEEDSTOCK, not fuel.
+    Therefore, naphtha should NOT be counted in fuel savings calculations.
+
+    See docs/NCC_NAPHTHA_LOGIC.md for full documentation.
+    """
+
+    @pytest.fixture
+    def setup_calculators(self):
+        """Load data and initialize calculators for testing"""
+        from modules.utils import DataLoader, EmissionCalculator, PriceCalculator
+        from modules.data_loader import DataLoader as NewDataLoader
+        from modules.capex_calculator import CapexCalculator, MACCalculator
+
+        loader = DataLoader(DATA_DIR)
+        new_loader = NewDataLoader(DATA_DIR)
+
+        emission_factors = loader.load_emission_factors()
+        tech_params = loader.load_technology_params()
+        h2_prices = loader.load_h2_prices()
+        re_prices = loader.load_re_prices()
+        fuel_prices = pd.read_csv(DATA_DIR / 'assumptions' / 'prices' / 'fuel_price_trajectory.csv')
+
+        model_config = new_loader.load_model_config()
+        tech_capex = new_loader.load_technology_capex()
+
+        emission_calc = EmissionCalculator(emission_factors)
+        price_calc = PriceCalculator(h2_prices, re_prices, fuel_prices)
+        capex_calc = CapexCalculator(tech_capex, tech_params, model_config)
+        mac_calc = MACCalculator(capex_calc, price_calc, emission_calc)
+
+        return {
+            'emission_calc': emission_calc,
+            'price_calc': price_calc,
+            'capex_calc': capex_calc,
+            'mac_calc': mac_calc
+        }
+
+    def test_ncc_naphtha_excluded_from_fuel_savings_capex_calculator(self, setup_calculators):
+        """MACCalculator._calculate_fuel_savings should exclude naphtha for NCC"""
+        mac_calc = setup_calculators['mac_calc']
+
+        # Create a mock NCC facility baseline
+        facility_baseline = {
+            'production_t': 1_000_000,
+            'combustion_emissions': 500_000,
+            'heat_demand_gj': 8_000_000,
+            'energy_by_source': {
+                'naphtha': 29_000_000,  # 29 GJ/t * 1M t = 29M GJ (FEEDSTOCK)
+                'lng': 4_000_000,        # 4 GJ/t * 1M t = 4M GJ (FUEL)
+                'lpg': 2_000_000,        # 2 GJ/t * 1M t = 2M GJ (FUEL)
+                'byproduct_gas': 2_000_000,  # 2 GJ/t * 1M t = 2M GJ (FUEL)
+            },
+            'is_ncc': True,  # NCC facility flag
+            'process': 'Naphtha Cracker'
+        }
+
+        fuel_prices = {
+            'naphtha_usd_per_gj': 15.0,
+            'lng_usd_per_gj': 12.0,
+            'lpg_usd_per_gj': 10.0,
+            'fuel_gas_usd_per_gj': 8.0,  # Used for byproduct_gas
+        }
+
+        # Call private method to test directly
+        fuel_savings = mac_calc._calculate_fuel_savings(facility_baseline, fuel_prices)
+
+        # Expected: LNG + LPG + byproduct_gas, but NOT naphtha
+        expected_lng_savings = 4_000_000 * 12.0
+        expected_lpg_savings = 2_000_000 * 10.0
+        expected_byproduct_savings = 2_000_000 * 8.0
+        expected_total = expected_lng_savings + expected_lpg_savings + expected_byproduct_savings
+
+        # Naphtha savings that would be INCORRECTLY included if bug present
+        incorrect_naphtha_savings = 29_000_000 * 15.0  # $435M
+
+        # Fuel savings should NOT include naphtha
+        assert fuel_savings == pytest.approx(expected_total, rel=1e-3), \
+            f"Fuel savings should be ${expected_total:,.0f}, got ${fuel_savings:,.0f}"
+
+        # Verify naphtha is excluded (if it was included, total would be much higher)
+        assert fuel_savings < expected_total + incorrect_naphtha_savings * 0.1, \
+            "Naphtha appears to be included in fuel savings for NCC - BUG!"
+
+    def test_non_ncc_naphtha_included_in_fuel_savings(self, setup_calculators):
+        """For non-NCC facilities, naphtha SHOULD be counted in fuel savings"""
+        mac_calc = setup_calculators['mac_calc']
+
+        # Create a mock non-NCC facility baseline (e.g., BTX Plant)
+        facility_baseline = {
+            'production_t': 500_000,
+            'combustion_emissions': 100_000,
+            'heat_demand_gj': 2_000_000,
+            'energy_by_source': {
+                'naphtha': 1_000_000,  # Used as fuel in non-NCC
+                'lng': 500_000,
+            },
+            'is_ncc': False,  # NOT an NCC facility
+            'process': 'BTX Plant'
+        }
+
+        fuel_prices = {
+            'naphtha_usd_per_gj': 15.0,
+            'lng_usd_per_gj': 12.0,
+        }
+
+        fuel_savings = mac_calc._calculate_fuel_savings(facility_baseline, fuel_prices)
+
+        # Expected: Naphtha + LNG (since not NCC)
+        expected_naphtha_savings = 1_000_000 * 15.0
+        expected_lng_savings = 500_000 * 12.0
+        expected_total = expected_naphtha_savings + expected_lng_savings
+
+        assert fuel_savings == pytest.approx(expected_total, rel=1e-3), \
+            f"Non-NCC should include naphtha. Expected ${expected_total:,.0f}, got ${fuel_savings:,.0f}"
+
+    def test_ncc_mac_is_positive(self):
+        """NCC-Electricity and NCC-H2 facilities should have POSITIVE MAC"""
+        results_path = OUTPUT_DIR / 'scenario_results.csv'
+        if not results_path.exists():
+            pytest.skip("scenario_results.csv not found - run run_scenarios.py first")
+
+        df = pd.read_csv(results_path)
+
+        # Filter for deployed NCC technologies
+        ncc_deployed = df[
+            (df['technology'].isin(['NCC-H2', 'NCC-Electricity'])) &
+            (df['tech_deployed'] == 1)
+        ]
+
+        if len(ncc_deployed) == 0:
+            pytest.skip("No NCC technologies deployed in results")
+
+        # All MAC values should be positive
+        negative_mac = ncc_deployed[ncc_deployed['mac_usd_per_tco2'] <= 0]
+
+        assert len(negative_mac) == 0, \
+            f"Found {len(negative_mac)} NCC facilities with non-positive MAC. " \
+            f"This may indicate naphtha is incorrectly counted as fuel savings. " \
+            f"Sample: {negative_mac[['facility_id', 'technology', 'mac_usd_per_tco2']].head()}"
+
+    def test_fuel_savings_component_reasonable_for_ncc(self):
+        """NCC fuel savings should be reasonable (not inflated by naphtha feedstock)"""
+        results_path = OUTPUT_DIR / 'scenario_results.csv'
+        if not results_path.exists():
+            pytest.skip("scenario_results.csv not found - run run_scenarios.py first")
+
+        df = pd.read_csv(results_path)
+
+        # Filter for deployed NCC technologies
+        ncc_deployed = df[
+            (df['technology'].isin(['NCC-H2', 'NCC-Electricity'])) &
+            (df['tech_deployed'] == 1) &
+            (df['cost_component_fuel_savings_usd'] > 0)
+        ]
+
+        if len(ncc_deployed) == 0:
+            pytest.skip("No NCC technologies with fuel savings in results")
+
+        # Check fuel savings per tonne of production
+        # NCC should have ~8 GJ/t of actual fuel (LNG/LPG/byproduct), not 29 GJ/t (with naphtha)
+        # At ~$10/GJ average, fuel savings should be ~$80/t production
+        # If naphtha was incorrectly included, would be ~$290/t
+
+        ncc_deployed = ncc_deployed.copy()
+        ncc_deployed['savings_per_t'] = (
+            ncc_deployed['cost_component_fuel_savings_usd'] /
+            ncc_deployed['production_t'].replace(0, np.nan)
+        )
+
+        median_savings_per_t = ncc_deployed['savings_per_t'].median()
+
+        # Should be in reasonable range (~$50-150/t, not $200+)
+        assert median_savings_per_t < 200, \
+            f"Median fuel savings per tonne is ${median_savings_per_t:.0f}/t, " \
+            f"which is too high. Naphtha may be incorrectly counted as fuel savings."
+
+        # Also check it's not zero
+        assert median_savings_per_t > 10, \
+            f"Median fuel savings per tonne is only ${median_savings_per_t:.0f}/t, " \
+            f"which is too low. Actual fuels (LNG/LPG) should contribute savings."
+
+    def test_baseline_metrics_sets_is_ncc_flag(self, setup_calculators):
+        """EmissionCalculator.calculate_baseline_metrics should set is_ncc flag correctly"""
+        emission_calc = setup_calculators['emission_calc']
+
+        # Mock facility data
+        facility_row = pd.Series({
+            'capacity_kt': 1000,  # 1 Mt/yr
+            'company': 'Test',
+            'product': 'Ethylene',
+            'location': 'Test'
+        })
+
+        intensities_row = {
+            'Naphtha_GJ_per_tonne': 29.0,
+            'LNG_GJ_per_tonne': 4.0,
+            'LPG_GJ_per_tonne': 2.0,
+            'Byproduct_Gas_GJ_per_tonne': 2.0,
+            'Electricity_kWh_per_tonne': 500,
+        }
+
+        # Test NCC facility
+        baseline_ncc = emission_calc.calculate_baseline_metrics(
+            facility_row, intensities_row,
+            operating_rate=0.7,
+            capacity_multiplier=1.0,
+            process='Naphtha Cracker'
+        )
+
+        assert baseline_ncc['is_ncc'] is True, \
+            "is_ncc flag should be True for 'Naphtha Cracker' process"
+
+        # Test non-NCC facility
+        baseline_btx = emission_calc.calculate_baseline_metrics(
+            facility_row, intensities_row,
+            operating_rate=0.7,
+            capacity_multiplier=1.0,
+            process='BTX Plant'
+        )
+
+        assert baseline_btx['is_ncc'] is False, \
+            "is_ncc flag should be False for non-NCC processes"
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])

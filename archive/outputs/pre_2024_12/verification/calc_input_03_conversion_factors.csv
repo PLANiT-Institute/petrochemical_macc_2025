@@ -1,0 +1,8 @@
+parameter,value,unit,source
+H2 consumption per ton ethylene,0.098,ton H2/ton ethylene,BASF/SABIC Pilot
+Electricity consumption NCC-Elec,5.0,MWh/ton ethylene,BASF/SABIC Pilot
+Heat Pump COP,4.0,dimensionless,Industry average
+RDH efficiency,0.93,dimensionless,Coolbrook
+Technology lifetime,20.0,years,Standard assumption
+NCC baseline combustion EF,1.74,tCO2/ton product,Calculated from baseline
+GJ to MWh conversion,3.6,GJ/MWh,Physical constant

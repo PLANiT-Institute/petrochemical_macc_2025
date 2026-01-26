@@ -15,9 +15,11 @@ Outputs (separate files per scenario):
 import pandas as pd
 import numpy as np
 from pathlib import Path
+import argparse
 from modules.utils import DataLoader, EmissionCalculator, PriceCalculator, TechnologyCostCalculator, StrandedAssetCalculator, format_number
 from modules.data_loader import DataLoader as NewDataLoader
 from modules.capex_calculator import CapexCalculator, MACCalculator, select_technology_for_facility
+from modules.data_validator import DataValidator
 
 # Configuration
 DATA_DIR = Path('data')
@@ -51,11 +53,36 @@ print("Loading configuration from CSVs...")
 SCENARIOS, REGION_MAP, SPLINE_TARGETS = load_scenario_config()
 
 
-def load_data():
-    """Load all input data and initialize calculators"""
+def load_data(validate: bool = True, strict: bool = False):
+    """
+    Load all input data and initialize calculators.
+
+    Args:
+        validate: If True, run data validation before loading
+        strict: If True, treat validation warnings as errors
+    """
     print("=" * 80)
     print("LOADING INPUT DATA")
     print("=" * 80)
+
+    # Pre-run validation
+    if validate:
+        print("\n  Running pre-run validation...")
+        validator = DataValidator(str(DATA_DIR))
+        validation_result = validator.validate_inputs(strict=strict)
+        if not validation_result.valid:
+            print("\n  VALIDATION FAILED - Critical errors found:")
+            for error in validation_result.errors[:5]:
+                print(f"    - {error.file}: {error.message}")
+            if len(validation_result.errors) > 5:
+                print(f"    ... and {len(validation_result.errors) - 5} more errors")
+            print("\n  Run 'python -m modules.data_validator' for full report.")
+            raise ValueError(f"Data validation failed with {len(validation_result.errors)} errors")
+        elif validation_result.warnings:
+            print(f"  Validation passed with {len(validation_result.warnings)} warnings")
+        else:
+            print("  Validation passed")
+        print()
 
     loader = DataLoader(DATA_DIR)
     new_loader = NewDataLoader(DATA_DIR)
@@ -196,9 +223,14 @@ def calculate_facility_mac_v2(facility_baseline, process, ncc_tech, year, data, 
     # Map internal keys to price keys
     # price keys: naphtha_usd_per_gj, lng_usd_per_gj, fuel_gas_usd_per_gj, lpg_usd_per_gj, fuel_oil_usd_per_gj
     # internal keys: naphtha, lng, fuel_gas, byproduct_gas, lpg, fuel_oil, diesel
-    
-    # Naphtha
-    fuel_savings += energy_by_source.get('naphtha', 0) * fuel_prices.get('naphtha_usd_per_gj', 0)
+
+    # Naphtha - SKIP for NCC facilities (naphtha is feedstock, not fuel)
+    # In Naphtha Cracker facilities, naphtha is FEEDSTOCK that gets chemically transformed,
+    # not combustion fuel. Even with e-cracker or H2-cracker, naphtha is still required.
+    # See docs/ASSUMPTIONS_AND_METHODOLOGY.md for details.
+    is_ncc = facility_baseline.get('is_ncc', False) or process == 'Naphtha Cracker'
+    if not is_ncc:
+        fuel_savings += energy_by_source.get('naphtha', 0) * fuel_prices.get('naphtha_usd_per_gj', 0)
     # LNG
     fuel_savings += energy_by_source.get('lng', 0) * fuel_prices.get('lng_usd_per_gj', 0)
     # Fuel Gas
@@ -619,6 +651,20 @@ def run_scenario(scenario, data, years):
                  cost_bd = res[3] if len(res)>3 else {}
                  tech_det = res[4] if len(res)>4 else {}
 
+                 # Calculate residual value for deployed facilities
+                 install_yr = deployment_status[fac['facility_id']]['year']
+                 capex_total = cost_bd.get('capex_total_usd', 0)
+                 technology_name = res[1]
+                 capex_calc = data['capex_calc']
+
+                 # Only calculate residual value for valid technologies with non-zero CAPEX
+                 if technology_name and technology_name != 'None' and capex_total > 0 and install_yr:
+                     residual_info = capex_calc.calculate_residual_value(
+                         technology_name, capex_total, install_yr, end_year=2050
+                     )
+                 else:
+                     residual_info = {'residual_value_usd': 0, 'remaining_life_years': 0, 'end_of_life_year': None}
+
                  # Using the components calculated by mac_v2
                  row = {
                     'year': year, 'scenario': scenario['name'], 'region': get_region(fac['location']),
@@ -640,12 +686,17 @@ def run_scenario(scenario, data, years):
                     'cost_component_opex_annual_usd': cost_bd.get('opex_annual_usd', 0),
                     'cost_component_new_energy_usd': cost_bd.get('new_energy_cost_usd', 0),
                     'cost_component_fuel_savings_usd': cost_bd.get('fuel_savings_usd', 0),
+                    # Residual value (undepreciated asset value at 2050)
+                    'residual_value_usd': residual_info['residual_value_usd'],
+                    'remaining_life_years': residual_info['remaining_life_years'],
+                    'end_of_life_year': residual_info['end_of_life_year'],
                     # Demands - use facility-specific base_metrics
                     'elec_demand_mwh': fac_base_metrics['elec_demand_mwh'] + tech_det.get('added_elec_mwh', 0),
+                    'added_elec_mwh': tech_det.get('added_elec_mwh', 0),  # NEW: Track added electricity separately for verification
                     'h2_demand_t': tech_det.get('h2_demand_t', 0),
                     'heat_demand_gj': fac_base_metrics.get('heat_demand_gj', 0),
                     'tech_deployed': 1,
-                    'install_year': deployment_status[fac['facility_id']]['year']
+                    'install_year': install_yr
                  }
                  deployment_count += 1
             else:
@@ -662,7 +713,12 @@ def run_scenario(scenario, data, years):
                     'capex_usd': 0, 'opex_usd_yr': 0, 'fuel_cost_usd_yr': 0, 'total_cost_usd': 0, 'mac_usd_per_tco2': 0,
                     'cost_component_capex_annual_usd': 0, 'cost_component_opex_annual_usd': 0,
                     'cost_component_new_energy_usd': 0, 'cost_component_fuel_savings_usd': 0,
+                    # Residual value (none for undeployed facilities)
+                    'residual_value_usd': 0,
+                    'remaining_life_years': 0,
+                    'end_of_life_year': None,
                     'elec_demand_mwh': fac_base_metrics['elec_demand_mwh'],
+                    'added_elec_mwh': 0,  # No additional electricity for baseline
                     'h2_demand_t': 0,
                     'heat_demand_gj': fac_base_metrics.get('heat_demand_gj', 0),
                     'install_year': None
@@ -676,8 +732,44 @@ def run_scenario(scenario, data, years):
     return results
 
 
-def main():
-    """Main execution"""
+def run_with_validation(validate_inputs: bool = True, validate_outputs: bool = False,
+                        strict: bool = False):
+    """
+    Run scenarios with optional validation.
+
+    Args:
+        validate_inputs: If True, validate input data before running
+        validate_outputs: If True, validate output data after running
+        strict: If True, treat warnings as errors
+
+    Returns:
+        DataFrame with scenario results
+    """
+    # Run main scenario calculation
+    df_results = main(validate_inputs=validate_inputs, strict=strict)
+
+    # Post-run output validation
+    if validate_outputs:
+        print("\n" + "=" * 80)
+        print("POST-RUN OUTPUT VALIDATION")
+        print("=" * 80)
+
+        validator = DataValidator(str(DATA_DIR), str(OUTPUT_DIR))
+        output_result = validator.validate_outputs()
+
+        if not output_result.valid:
+            print("  OUTPUT VALIDATION FAILED:")
+            for error in output_result.errors:
+                print(f"    - {error.file}: {error.message}")
+        else:
+            print(f"  Output validation passed with {len(output_result.warnings)} warnings")
+
+    return df_results
+
+
+def main(validate_inputs: bool = True, strict: bool = False):
+    """Main execution with optional validation"""
+    # Original main function - renamed and updated to accept validation args
     print("=" * 80)
     print("KOREA PETROCHEMICAL NET ZERO - COST-OPTIMIZED SCENARIO RUNNER")
     print("=" * 80)
@@ -692,8 +784,8 @@ def main():
         pct = SPLINE_TARGETS['2.0C'].get(year, 0) * 100
         print(f"    {year}: {pct:.1f}%")
 
-    # Load data
-    data = load_data()
+    # Load data with optional validation
+    data = load_data(validate=validate_inputs, strict=strict)
 
     # Run all scenarios
     print("\n" + "=" * 80)
@@ -722,7 +814,8 @@ def main():
         'capex_usd', 'opex_usd_yr', 'fuel_cost_usd_yr', 'total_cost_usd', 'mac_usd_per_tco2',
         'cost_component_capex_annual_usd', 'cost_component_opex_annual_usd',
         'cost_component_new_energy_usd', 'cost_component_fuel_savings_usd',
-        'elec_demand_mwh', 'h2_demand_t', 'heat_demand_gj',
+        'residual_value_usd', 'remaining_life_years', 'end_of_life_year',
+        'elec_demand_mwh', 'added_elec_mwh', 'h2_demand_t', 'heat_demand_gj',
         'tech_deployed', 'install_year'
     ]
 
@@ -738,14 +831,14 @@ def main():
     # 1. Save combined results
     output_path = OUTPUT_DIR / 'scenario_results.csv'
     df_results.to_csv(output_path, index=False)
-    print(f"  ✓ Combined results: {output_path}")
+    print(f"  Saved: {output_path}")
 
     # 2. Save separate files for each scenario
     for scenario_name, df_scenario in scenario_dfs.items():
         df_scenario = df_scenario[column_order]
         scenario_path = OUTPUT_DIR / f'{scenario_name}.csv'
         df_scenario.to_csv(scenario_path, index=False)
-        print(f"  ✓ Scenario file: {scenario_path}")
+        print(f"  Saved: {scenario_path}")
 
     # 3. Generate and save Regional MAC Summary
     regional_mac_data = []
@@ -772,13 +865,13 @@ def main():
     df_regional_mac = pd.DataFrame(regional_mac_data)
     mac_path = OUTPUT_DIR / 'regional_mac_summary.csv'
     df_regional_mac.to_csv(mac_path, index=False)
-    print(f"  ✓ Regional MAC summary: {mac_path}")
+    print(f"  Saved: {mac_path}")
 
     # 4. Generate and save Regional Abatement Summary
     regional_abatement_data = []
     for scenario_name in df_results['scenario'].unique():
         df_s = df_results[df_results['scenario'] == scenario_name]
-        
+
         for year in YEARS:
             df_y = df_s[df_s['year'] == year]
             for region in df_y['region'].unique():
@@ -804,42 +897,71 @@ def main():
     df_regional_abatement = pd.DataFrame(regional_abatement_data)
     abatement_path = OUTPUT_DIR / 'regional_abatement_summary.csv'
     df_regional_abatement.to_csv(abatement_path, index=False)
-    print(f"  ✓ Regional abatement summary: {abatement_path}")
+    print(f"  Saved: {abatement_path}")
+
+    # 5. Generate and save Residual Value Summary
+    df_2050 = df_results[df_results['year'] == 2050]
+    df_deployed_2050 = df_2050[df_2050['tech_deployed'] == 1]
+
+    residual_value_data = []
+    for scenario_name in df_deployed_2050['scenario'].unique():
+        df_s = df_deployed_2050[df_deployed_2050['scenario'] == scenario_name]
+        for tech in df_s['technology'].unique():
+            df_t = df_s[df_s['technology'] == tech]
+            total_capex = df_t['capex_usd'].sum()
+            total_residual = df_t['residual_value_usd'].sum()
+            residual_pct = (total_residual / total_capex * 100) if total_capex > 0 else 0
+            facility_count = df_t['facility_id'].nunique()
+
+            residual_value_data.append({
+                'scenario': scenario_name,
+                'technology': tech,
+                'facility_count': facility_count,
+                'total_capex_usd': total_capex,
+                'total_residual_value_usd': total_residual,
+                'residual_pct': residual_pct,
+                'avg_remaining_life_years': df_t['remaining_life_years'].mean(),
+            })
+
+    df_residual_summary = pd.DataFrame(residual_value_data)
+    residual_path = OUTPUT_DIR / 'residual_value_summary.csv'
+    df_residual_summary.to_csv(residual_path, index=False)
+    print(f"  Saved: {residual_path}")
 
     # ==================== STRANDED ASSETS CALCULATION ====================
     print("\n" + "=" * 80)
     print("CALCULATING STRANDED ASSETS (Carbon Budget Perspective)")
     print("=" * 80)
-    
+
     stranded_results = []
     stranded_details_list = []
-    
+
     # Use loaded facility data instead of re-reading CSVs
     db_baseline = data['facilities'].copy()
     db_shaheen_full = data['facilities_shaheen'].copy()
-    
+
     stranded_calc = data['stranded_calc']
-    
+
     for scenario_name in df_results['scenario'].unique():
         df_s = df_results[df_results['scenario'] == scenario_name]
-        
+
         # Determine which facility list to use
         if 'shaheen' in scenario_name:
             current_facilities = db_shaheen_full
         else:
             current_facilities = db_baseline
-            
+
         # Get annual industry emissions
         annual_emissions = df_s.groupby('year')['emissions_tco2'].sum()
-        
+
         # 1.5C Scenario
         year_15c = stranded_calc.calculate_stranding_year(annual_emissions, 'budget_1.5C_tco2')
         value_15c = stranded_calc.calculate_total_stranded_value(current_facilities, year_15c)
-        
+
         # 2.0C Scenario
         year_20c = stranded_calc.calculate_stranding_year(annual_emissions, 'budget_2.0C_tco2')
         value_20c = stranded_calc.calculate_total_stranded_value(current_facilities, year_20c)
-        
+
         stranded_results.append({
             'scenario': scenario_name,
             'stranding_year_1.5C': year_15c,
@@ -863,14 +985,14 @@ def main():
     df_stranded = pd.DataFrame(stranded_results)
     stranded_path = OUTPUT_DIR / 'stranded_assets_summary.csv'
     df_stranded.to_csv(stranded_path, index=False)
-    print(f"  ✓ Stranded asset summary: {stranded_path}")
-    
+    print(f"  Saved: {stranded_path}")
+
     # Save Detailed Report
     if stranded_details_list:
         df_stranded_details = pd.concat(stranded_details_list, ignore_index=True)
         details_path = OUTPUT_DIR / 'stranded_assets_facilities.csv'
         df_stranded_details.to_csv(details_path, index=False)
-        print(f"  ✓ Stranded asset facility details: {details_path}")
+        print(f"  Saved: {details_path}")
 
     # ==================== OUTPUT SUMMARY ====================
     print("\n" + "=" * 80)
@@ -907,7 +1029,7 @@ def main():
             deployed = df_y[df_y['tech_deployed'] == 1]['facility_id'].nunique()
 
             # Check if actual is at or below target (lower is better)
-            status = "✓" if actual_pct <= target_pct + 1 else "✗"
+            status = "PASS" if actual_pct <= target_pct + 1 else "FAIL"
             print(f"    {year}: {emissions:.2f} Mt ({actual_pct:.1f}% of baseline, target {target_pct:.1f}%) "
                   f"[{deployed} deployed] {status}")
 
@@ -919,4 +1041,29 @@ def main():
 
 
 if __name__ == '__main__':
-    df = main()
+    parser = argparse.ArgumentParser(
+        description='Run petrochemical decarbonization scenarios'
+    )
+    parser.add_argument(
+        '--no-validate',
+        action='store_true',
+        help='Skip input data validation'
+    )
+    parser.add_argument(
+        '--validate-outputs',
+        action='store_true',
+        help='Run output validation after scenarios complete'
+    )
+    parser.add_argument(
+        '--strict',
+        action='store_true',
+        help='Treat validation warnings as errors'
+    )
+
+    args = parser.parse_args()
+
+    df = run_with_validation(
+        validate_inputs=not args.no_validate,
+        validate_outputs=args.validate_outputs,
+        strict=args.strict
+    )
