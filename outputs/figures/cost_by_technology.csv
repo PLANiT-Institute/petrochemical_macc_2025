@@ -1,0 +1,13 @@
+category,subcategory,value,unit,figure_type
+NCC-H2,CAPEX,337.62787152499993,billion_USD,grouped_bar
+NCC-H2,OPEX,13.505114860999997,billion_USD,grouped_bar
+NCC-H2,New Energy,1289.9857005466374,billion_USD,grouped_bar
+NCC-Electricity,CAPEX,346.50510642999996,billion_USD,grouped_bar
+NCC-Electricity,OPEX,13.8602042572,billion_USD,grouped_bar
+NCC-Electricity,New Energy,1210.3698677949844,billion_USD,grouped_bar
+Heat_Pump,CAPEX,9.706368,billion_USD,grouped_bar
+Heat_Pump,OPEX,0.29119104,billion_USD,grouped_bar
+Heat_Pump,New Energy,10.94913010493577,billion_USD,grouped_bar
+RDH,CAPEX,165.16134123999996,billion_USD,grouped_bar
+RDH,OPEX,4.954840237199999,billion_USD,grouped_bar
+RDH,New Energy,208.54596099345915,billion_USD,grouped_bar

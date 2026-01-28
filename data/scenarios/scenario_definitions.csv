@@ -1,5 +1,9 @@
-name,production,ncc_tech,carbon_pathway
-shaheen_ncc_h2_15c,shaheen,NCC-H2,1.5C
-shaheen_ncc_h2_20c,shaheen,NCC-H2,2.0C
-shaheen_ncc_elec_15c,shaheen,NCC-Electricity,1.5C
-shaheen_ncc_elec_20c,shaheen,NCC-Electricity,2.0C
+name,production,ncc_tech,carbon_pathway,price_scenario
+shaheen_ncc_h2_rising_coupled,shaheen,NCC-H2,1.5C,rising_coupled
+shaheen_ncc_h2_rising_decoupled,shaheen,NCC-H2,1.5C,rising_decoupled
+shaheen_ncc_h2_flat_coupled,shaheen,NCC-H2,1.5C,flat_coupled
+shaheen_ncc_h2_flat_decoupled,shaheen,NCC-H2,1.5C,flat_decoupled
+shaheen_ncc_elec_rising_coupled,shaheen,NCC-Electricity,1.5C,rising_coupled
+shaheen_ncc_elec_rising_decoupled,shaheen,NCC-Electricity,1.5C,rising_decoupled
+shaheen_ncc_elec_flat_coupled,shaheen,NCC-Electricity,1.5C,flat_coupled
+shaheen_ncc_elec_flat_decoupled,shaheen,NCC-Electricity,1.5C,flat_decoupled

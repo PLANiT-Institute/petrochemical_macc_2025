@@ -21,16 +21,18 @@ class CapexCalculator:
     This replaces the old $/tCO2 approach which pre-baked MAC assumptions.
     """
 
-    def __init__(self, capex_df, tech_params_df, model_config):
+    def __init__(self, capex_df, tech_params_df, model_config, strict=False):
         """
         Args:
             capex_df: DataFrame from technology_capex.csv
             tech_params_df: DataFrame from technology_parameters.csv
             model_config: Dict from model_config.csv
+            strict: If True, raise errors for missing CSV parameters instead of using fallbacks
         """
         self.capex_df = capex_df.set_index('technology')
         self.tech_params = tech_params_df.set_index('technology')
         self.config = model_config
+        self.strict = strict
 
         # Physical constant from config - must be present
         if 'gj_to_mwh' not in model_config:
@@ -49,14 +51,12 @@ class CapexCalculator:
 
         row = self.capex_df.loc[technology]
 
-        # Interpolate between years
-        years = [2025, 2030, 2040, 2050]
-        capex_values = [
-            row['capex_2025'],
-            row['capex_2030'],
-            row['capex_2040'],
-            row['capex_2050']
-        ]
+        # Extract years dynamically from capex_YYYY column names
+        capex_cols = sorted(
+            [c for c in self.capex_df.columns if c.startswith('capex_') and c[6:].isdigit()]
+        )
+        years = [int(c.split('_')[1]) for c in capex_cols]
+        capex_values = [row[c] for c in capex_cols]
 
         return np.interp(year, years, capex_values)
 
@@ -107,17 +107,23 @@ class CapexCalculator:
         """Get CAPEX metadata (OPEX%, lifetime, etc.)
 
         Note: opex_pct_capex and lifetime_years should be in technology_capex.csv.
-        Fallback values (3.0% and 25 years) are only used for backwards compatibility.
+        When strict=True, missing values raise errors.
+        When strict=False, fallback values (3.0% and 25 years) are used with warnings.
         """
         if technology not in self.capex_df.index:
             raise ValueError(f"Technology '{technology}' not found in technology_capex.csv")
 
         row = self.capex_df.loc[technology]
 
-        # Get OPEX percentage - warn if using fallback
+        # Get OPEX percentage
         if 'opex_pct_capex' in row.index and pd.notna(row['opex_pct_capex']):
             opex = row['opex_pct_capex']
         else:
+            if self.strict:
+                raise ValueError(
+                    f"opex_pct_capex not found for {technology} in technology_capex.csv. "
+                    f"In strict mode, all parameters must be explicitly defined."
+                )
             opex = 3.0
             warnings.warn(
                 f"opex_pct_capex not found for {technology} in technology_capex.csv, "
@@ -125,10 +131,15 @@ class CapexCalculator:
                 UserWarning
             )
 
-        # Get lifetime - warn if using fallback
+        # Get lifetime
         if 'lifetime_years' in row.index and pd.notna(row['lifetime_years']):
             lifetime = row['lifetime_years']
         else:
+            if self.strict:
+                raise ValueError(
+                    f"lifetime_years not found for {technology} in technology_capex.csv. "
+                    f"In strict mode, all parameters must be explicitly defined."
+                )
             lifetime = 25
             warnings.warn(
                 f"lifetime_years not found for {technology} in technology_capex.csv, "
@@ -136,10 +147,15 @@ class CapexCalculator:
                 UserWarning
             )
 
-        # Get CAPEX unit - warn if using fallback
+        # Get CAPEX unit
         if 'capex_unit' in row.index and pd.notna(row['capex_unit']):
             capex_unit = row['capex_unit']
         else:
+            if self.strict:
+                raise ValueError(
+                    f"capex_unit not found for {technology} in technology_capex.csv. "
+                    f"In strict mode, all parameters must be explicitly defined."
+                )
             capex_unit = 'usd_per_t_product_yr'
             warnings.warn(
                 f"capex_unit not found for {technology} in technology_capex.csv, "
@@ -362,9 +378,7 @@ class MACCalculator:
         if abatement_tco2 > 0:
             mac = total_annual_cost / abatement_tco2
         else:
-            # Use large but finite value instead of inf to prevent aggregation issues
-            # 1e9 (billion $/tCO2) is effectively infinity for practical purposes
-            mac = 1e9
+            mac = np.inf
 
         return {
             'mac_usd_per_tco2': mac,

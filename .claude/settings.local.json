@@ -80,7 +80,18 @@
       "Bash(/Users/jinsu/miniforge3/bin/python:*)",
       "Bash(/opt/homebrew/bin/python3:*)",
       "WebFetch(domain:www.ctis.re.kr)",
-      "WebFetch(domain:greenium.kr)"
+      "WebFetch(domain:greenium.kr)",
+      "Bash(git mv:*)",
+      "Bash(head:*)",
+      "Bash(for scenario in \"shaheen_ncc_elec_rising_coupled\" \"shaheen_ncc_elec_rising_decoupled\" \"shaheen_ncc_elec_flat_coupled\" \"shaheen_ncc_elec_flat_decoupled\")",
+      "Bash(do echo \"=== $scenario ===\" grep \"$scenario\" /Users/jinsu/Documents/GitHub/petrochemical_macc_2025/outputs/scenario_results.csv)",
+      "Bash(for scenario in \"shaheen_ncc_h2_rising_coupled\" \"shaheen_ncc_h2_flat_decoupled\")",
+      "Bash(git clone:*)",
+      "Bash(claude mcp add:*)",
+      "Bash(for skill in matplotlib plotly scientific-visualization seaborn)",
+      "Bash(do cp -r \"/tmp/claude-scientific-skills/scientific-skills/$skill\" \"/Users/jinsu/Documents/GitHub/petrochemical_macc_2025/.claude/skills/\")",
+      "Bash(done)",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": []

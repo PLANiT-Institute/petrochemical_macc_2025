@@ -12,6 +12,7 @@ from . import data_loader
 from . import capex_calculator
 from . import data_validator
 from . import excel_reviewer
+from . import figure_style
 
 # Re-export key classes for convenience
 from .data_loader import DataLoader, validate_data_integrity
@@ -50,6 +51,7 @@ __all__ = [
     'capex_calculator',
     'data_validator',
     'excel_reviewer',
+    'figure_style',
     # Classes
     'DataLoader',
     'CapexCalculator',

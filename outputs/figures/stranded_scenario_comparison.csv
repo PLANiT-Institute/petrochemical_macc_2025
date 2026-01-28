@@ -1,0 +1,17 @@
+category,subcategory,value,unit,figure_type
+shaheen_ncc_h2_rising_coupled,1.5C,26.959125,billion_USD,grouped_bar
+shaheen_ncc_h2_rising_coupled,2.0C,8.94285,billion_USD,grouped_bar
+shaheen_ncc_h2_rising_decoupled,1.5C,26.959125,billion_USD,grouped_bar
+shaheen_ncc_h2_rising_decoupled,2.0C,8.94285,billion_USD,grouped_bar
+shaheen_ncc_h2_flat_coupled,1.5C,26.959125,billion_USD,grouped_bar
+shaheen_ncc_h2_flat_coupled,2.0C,8.94285,billion_USD,grouped_bar
+shaheen_ncc_h2_flat_decoupled,1.5C,26.959125,billion_USD,grouped_bar
+shaheen_ncc_h2_flat_decoupled,2.0C,8.94285,billion_USD,grouped_bar
+shaheen_ncc_elec_rising_coupled,1.5C,28.70235,billion_USD,grouped_bar
+shaheen_ncc_elec_rising_coupled,2.0C,14.56665,billion_USD,grouped_bar
+shaheen_ncc_elec_rising_decoupled,1.5C,28.70235,billion_USD,grouped_bar
+shaheen_ncc_elec_rising_decoupled,2.0C,14.56665,billion_USD,grouped_bar
+shaheen_ncc_elec_flat_coupled,1.5C,28.70235,billion_USD,grouped_bar
+shaheen_ncc_elec_flat_coupled,2.0C,14.56665,billion_USD,grouped_bar
+shaheen_ncc_elec_flat_decoupled,1.5C,28.70235,billion_USD,grouped_bar
+shaheen_ncc_elec_flat_decoupled,2.0C,14.56665,billion_USD,grouped_bar

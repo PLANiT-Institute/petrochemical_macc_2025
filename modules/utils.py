@@ -16,10 +16,6 @@ except ModuleNotFoundError:  # pragma: no cover - optional dependency
 
     sns = _SeabornStub()
 
-# Set plotting style
-sns.set_style("whitegrid")
-plt.rcParams['figure.figsize'] = (14, 8)
-plt.rcParams['font.size'] = 10
 
 
 class DataLoader:
@@ -151,6 +147,20 @@ class DataLoader:
         path = self.data_dir / 'assumptions' / 'asset_valuation_params.csv'
         if not path.exists():
             raise FileNotFoundError(f"Critical: Missing asset valuation params at {path}")
+        return pd.read_csv(path)
+
+    def load_electrolyser_params(self):
+        """Load electrolyser learning curve parameters"""
+        path = self.data_dir / 'assumptions' / 'prices' / 'electrolyser_params.csv'
+        if not path.exists():
+            raise FileNotFoundError(f"Critical: Missing electrolyser params at {path}")
+        return pd.read_csv(path)
+
+    def load_flat_elec_prices(self):
+        """Load flat electricity price trajectory"""
+        path = self.data_dir / 'assumptions' / 'prices' / 'elec_price_flat.csv'
+        if not path.exists():
+            raise FileNotFoundError(f"Critical: Missing flat elec prices at {path}")
         return pd.read_csv(path)
 
 
@@ -357,25 +367,96 @@ class EmissionCalculator:
 class PriceCalculator:
     """Calculate fuel and technology costs"""
 
-    def __init__(self, h2_prices_df, re_prices_df, fuel_prices_df=None):
+    def __init__(self, h2_prices_df, re_prices_df, fuel_prices_df=None,
+                 elec_prices_df=None, electrolyser_params_df=None,
+                 price_scenario=None):
         self.h2_prices = h2_prices_df
         self.re_prices = re_prices_df
         self.fuel_prices = fuel_prices_df  # Trajectory DataFrame with year + fuel columns
+        self.elec_prices = elec_prices_df  # Electricity price trajectory ($/MWh)
+        self.electrolyser_params = electrolyser_params_df  # Electrolyser learning curve
+        self.price_scenario = price_scenario  # 'coupled', 'decoupled', or None
+
+    def get_elec_price(self, year):
+        """Get electricity price for a given year ($/MWh) from elec_prices trajectory"""
+        if self.elec_prices is None:
+            raise ValueError("Electricity price trajectory not loaded")
+        row = self.elec_prices[self.elec_prices['year'] == year]
+        if len(row) > 0:
+            return row['elec_price_usd_per_mwh'].iloc[0]
+        return np.interp(year, self.elec_prices['year'], self.elec_prices['elec_price_usd_per_mwh'])
+
+    def get_coupled_h2_price(self, year):
+        """Calculate LCOH from electricity price + electrolyser params for a given year ($/kg)"""
+        if self.electrolyser_params is None:
+            raise ValueError("Electrolyser parameters not loaded")
+
+        elec_price_mwh = self.get_elec_price(year)
+        elec_price_kwh = elec_price_mwh / 1000.0
+
+        # Get electrolyser params for this year
+        params = self.electrolyser_params
+        row = params[params['year'] == year]
+        if len(row) > 0:
+            r = row.iloc[0]
+        else:
+            # Interpolate all params
+            r = {}
+            for col in ['capex_usd_per_kw', 'opex_usd_per_kw_yr', 'efficiency_kwh_per_kg',
+                         'lifespan_years', 'capacity_factor', 'discount_rate']:
+                r[col] = np.interp(year, params['year'], params[col])
+
+        capex = r['capex_usd_per_kw']
+        opex = r['opex_usd_per_kw_yr']
+        efficiency = r['efficiency_kwh_per_kg']  # kWh per kg H2
+        lifespan = int(r['lifespan_years'])
+        cf = r['capacity_factor']
+        dr = r['discount_rate']
+
+        # Annualize CAPEX using CRF (Capital Recovery Factor)
+        if dr > 0 and lifespan > 0:
+            crf = (dr * (1 + dr) ** lifespan) / ((1 + dr) ** lifespan - 1)
+        else:
+            crf = 1.0 / lifespan if lifespan > 0 else 1.0
+        annualized_capex = capex * crf  # $/kW/yr
+
+        # Annual H2 production per kW of electrolyser capacity
+        # hours_per_year * capacity_factor gives effective hours
+        # 1 kW * CF * 8760 h = kWh/yr electricity consumed
+        # kWh/yr / efficiency (kWh/kg) = kg H2/yr
+        annual_elec_kwh_per_kw = cf * 8760  # kWh/yr per kW
+        annual_h2_kg_per_kw = annual_elec_kwh_per_kw / efficiency  # kg/yr per kW
+
+        # Costs per kW per year
+        elec_cost_per_kw_yr = annual_elec_kwh_per_kw * elec_price_kwh
+
+        # LCOH ($/kg)
+        total_cost_per_kw_yr = annualized_capex + opex + elec_cost_per_kw_yr
+        lcoh = total_cost_per_kw_yr / annual_h2_kg_per_kw
+
+        return lcoh
 
     def get_h2_price(self, year):
-        """Get H2 price for a given year ($/kg)"""
+        """Get H2 price for a given year ($/kg).
+        If price_scenario is 'coupled', derives H2 price from electricity via LCOH.
+        Otherwise uses domestic H2 price trajectory."""
+        if self.price_scenario == 'coupled':
+            return self.get_coupled_h2_price(year)
+        # Default: use domestic trajectory
         row = self.h2_prices[self.h2_prices['year'] == year]
         if len(row) > 0:
             return row['h2_price_usd_per_kg'].iloc[0]
-        # Interpolate if year not found
         return np.interp(year, self.h2_prices['year'], self.h2_prices['h2_price_usd_per_kg'])
 
     def get_re_price(self, year):
-        """Get RE price for a given year ($/MWh)"""
+        """Get RE price for a given year ($/MWh).
+        If elec_prices is set, delegates to get_elec_price for consistency.
+        Otherwise falls back to RE PPA trajectory."""
+        if self.elec_prices is not None:
+            return self.get_elec_price(year)
         row = self.re_prices[self.re_prices['year'] == year]
         if len(row) > 0:
             return row['re_price_usd_per_mwh'].iloc[0]
-        # Interpolate if year not found
         return np.interp(year, self.re_prices['year'], self.re_prices['re_price_usd_per_mwh'])
 
     def get_fuel_prices(self, year):
@@ -400,9 +481,18 @@ class PriceCalculator:
 class TechnologyCostCalculator:
     """Calculate technology costs with interpolation"""
 
-    def __init__(self, technology_params_df, emission_calculator=None):
+    def __init__(self, technology_params_df, emission_calculator=None, model_config=None):
         self.tech_params = technology_params_df
         self.emission_calculator = emission_calculator
+
+        # Load GJ to MWh conversion factor from model_config (no hardcoded fallback)
+        if model_config is not None and 'gj_to_mwh' in model_config:
+            self.gj_to_mwh = model_config['gj_to_mwh']
+        else:
+            raise ValueError(
+                "model_config missing required 'gj_to_mwh' parameter. "
+                "Ensure model_config.csv is loaded and passed to TechnologyCostCalculator."
+            )
 
     def get_technology_costs(self, technology, year):
         """
@@ -450,18 +540,18 @@ class TechnologyCostCalculator:
         """
         Calculate energy requirements and abatement for a facility-technology pair.
         Replaces logic previously hardcoded in run_scenarios.py.
-        
+
         Args:
             technology: Technology name (e.g. 'NCC-H2', 'Heat_Pump')
             facility_baseline: Dict with baseline emissions and heat demand
             process: Process type (e.g. 'Naphtha Cracker', 'BTX Plant')
             ncc_tech_name: The specific NCC technology choice for the scenario
-            
+
         Returns:
             dict with h2_demand_t, added_elec_mwh, potential_abatement_tco2
         """
-        # Physical constant: GJ to MWh conversion
-        GJ_TO_MWH = 3.6
+        # Energy conversion factor from model_config (loaded in __init__)
+        GJ_TO_MWH = self.gj_to_mwh
         
         # Default return values
         h2_demand_t = 0.0
@@ -678,6 +768,26 @@ class StrandedAssetCalculator:
         return pd.DataFrame(results)
 
 
+def save_figure_data(df, figure_path, figure_type=None):
+    """Save tidy/long-format CSV data alongside a figure PNG.
+
+    Args:
+        df: pandas DataFrame in tidy format (one observation per row).
+            Expected columns include at least ``category``, ``value``, ``unit``.
+        figure_path: Path (or str) to the corresponding PNG figure.
+            The CSV will be written to the same directory with the same stem.
+        figure_type: Optional string tag added as a ``figure_type`` column.
+    """
+    figure_path = Path(figure_path)
+    csv_path = figure_path.with_suffix('.csv')
+    if figure_type is not None:
+        df = df.copy()
+        df['figure_type'] = figure_type
+    csv_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(csv_path, index=False)
+    print(f"   ✓ CSV: {csv_path.name}")
+
+
 def save_csv_output(df, output_path, description=""):
     """Save DataFrame to CSV with logging"""
     output_path = Path(output_path)
@@ -687,12 +797,10 @@ def save_csv_output(df, output_path, description=""):
 
 
 def save_plot(fig, output_path, description=""):
-    """Save matplotlib figure with logging"""
-    output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(output_path, dpi=300, bbox_inches='tight')
-    plt.close(fig)
-    print(f"   ✓ Saved: {output_path.name} {description}")
+    """Save matplotlib figure with logging (PNG + PDF)"""
+    from .figure_style import save_figure
+    save_figure(fig, output_path, dpi=300, close=True)
+    print(f"   \u2713 Saved: {Path(output_path).name} {description}")
 
 
 def identify_product_group(product_name):

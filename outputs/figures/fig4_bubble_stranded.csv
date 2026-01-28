@@ -1,0 +1,37 @@
+company,location,product,capacity_kt,year_built,stranded_value_usd,figure_type
+Lotte Chemical,Daesan,Ethylene,1100,1991,165000000.0,scatter
+HD Hyundai Chemical,Daesan,Ethylene,850,2021,2040000000.0,scatter
+LG Chem,Daesan,Ethylene,1300,1991,195000000.0,scatter
+Hanwha TotalEnergies,Daesan,Ethylene,1525,1991,228750000.0,scatter
+Lotte Chemical,Yeosu,Ethylene,1230,1992,276750000.0,scatter
+LG Chem,Yeosu,Ethylene,1030,2021,2472000000.0,scatter
+GS Caltex,Yeosu,Ethylene,900,2021,2160000000.0,scatter
+Daehan Oil Chemical,Onsan,Ethylene,900,1991,135000000.0,scatter
+S-Oil,Onsan,Ethylene,182,2018,395850000.0,scatter
+Lotte Chemical,Daesan,Propylene,550,1997,330000000.0,scatter
+HDHyundai Oilbank,Daesan,Propylene,420,2011,693000000.0,scatter
+HD Hyundai Chemical,Daesan,Propylene,451,2021,1082400000.0,scatter
+LG Chem,Daesan,Propylene,680,1991,102000000.0,scatter
+Hanwha TotalEnergies,Daesan,Propylene,1064,1991,159600000.0,scatter
+Lotte Chemical,Yeosu,Propylene,641,1992,144225000.0,scatter
+LG Chem,Yeosu,Propylene,1300,2021,3120000000.0,scatter
+GS Caltex,Yeosu,Propylene,970,2021,2328000000.0,scatter
+Daehan Oil Chemical,Onsan,Propylene,560,1991,84000000.0,scatter
+S-Oil,Onsan,Propylene,840,2018,1827000000.0,scatter
+SK Advanced,Ulsan,Propylene,600,2016,1215000000.0,scatter
+SK Energy,Ulsan,Propylene,620,1996,325500000.0,scatter
+Taekwang Industrial,Ulsan,Propylene,300,1997,180000000.0,scatter
+Hyosung Chemical,Ulsan,Propylene,500,1991,75000000.0,scatter
+Lotte Chemical,Daesan,Butadiene,190,1997,114000000.0,scatter
+HD Hyundai Chemical,Daesan,Butadiene,163,2021,391200000.0,scatter
+LG Chem,Daesan,Butadiene,200,1991,30000000.0,scatter
+Hanwha TotalEnergies,Daesan,Butadiene,150,1991,22500000.0,scatter
+Kumho Petrochemical,Yeosu,Butadiene,147,1992,33075000.0,scatter
+Lotte GS Chemical,Yeosu,Butadiene,130,2022,321750000.0,scatter
+Lotte Chemical,Yeosu,Butadiene,160,2011,264000000.00000003,scatter
+LG Chem,Yeosu,Butadiene,306,1991,45900000.0,scatter
+Yeochon NCC,Yeosu,Butadiene,378,1992,85050000.0,scatter
+Daehan Oil Chemical,Ulsan,Butadiene,146,2023,372300000.0,scatter
+Caprolactam,Ulsan,C-H,190,2000,156750000.0,scatter
+S-Oil Shaheen,Onsan,Ethylene,1800,2026,4995000000.0,scatter
+S-Oil Shaheen,Onsan,Propylene,770,2026,2136750000.0,scatter

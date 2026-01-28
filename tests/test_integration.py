@@ -41,11 +41,12 @@ class TestScenarioResults:
         assert results_path.exists(), "Run run_scenarios.py to generate scenario_results.csv"
 
     def test_all_scenarios_present(self, results_df):
-        """All 6 scenarios should be in results"""
+        """All 8 scenarios should be in results"""
         expected_scenarios = {
-            'shaheen_ncc_h2', 'shaheen_ncc_elec',
-            'restructure_25pct_ncc_h2', 'restructure_25pct_ncc_elec',
-            'restructure_40pct_ncc_h2', 'restructure_40pct_ncc_elec'
+            'shaheen_ncc_h2_rising_coupled', 'shaheen_ncc_h2_rising_decoupled',
+            'shaheen_ncc_h2_flat_coupled', 'shaheen_ncc_h2_flat_decoupled',
+            'shaheen_ncc_elec_rising_coupled', 'shaheen_ncc_elec_rising_decoupled',
+            'shaheen_ncc_elec_flat_coupled', 'shaheen_ncc_elec_flat_decoupled',
         }
         actual_scenarios = set(results_df['scenario'].unique())
         missing = expected_scenarios - actual_scenarios
@@ -206,8 +207,8 @@ class TestTechnologyDeployment:
 
         # Check that Heat_Pump is used for some utility facilities
         hp_count = (utility_deployed['technology'] == 'Heat_Pump').sum()
-        # Just verify Heat_Pump is assigned to at least some utilities
-        assert hp_count >= 0, f"Utility tech distribution: {utility_deployed['technology'].value_counts().to_dict()}"
+        # Verify Heat_Pump is assigned to at least some utilities
+        assert hp_count > 0, f"Utility tech distribution: {utility_deployed['technology'].value_counts().to_dict()}"
 
 
 class TestInvestmentTotals:

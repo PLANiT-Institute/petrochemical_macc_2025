@@ -404,7 +404,7 @@ class TestMACCalculator:
 
         result = mac_calc.calculate_mac(facility_baseline, 'Heat_Pump', 2030, {})
 
-        assert result['mac_usd_per_tco2'] == float('inf')
+        assert result['mac_usd_per_tco2'] == np.inf
 
     def test_mac_includes_fuel_savings(self, technology_capex_df, technology_params_df,
                                        h2_prices_df, re_prices_df, emission_factors_df, model_config):
@@ -481,10 +481,10 @@ class TestMACCalculator:
 class TestTechnologyCostCalculator:
     """Tests for TechnologyCostCalculator class"""
 
-    def test_heat_pump_energy_calculation(self, technology_params_df, emission_factors_df):
+    def test_heat_pump_energy_calculation(self, technology_params_df, emission_factors_df, model_config):
         """Verify Heat Pump: electricity = heat / 3.6 / COP"""
         emission_calc = EmissionCalculator(emission_factors_df)
-        tech_calc = TechnologyCostCalculator(technology_params_df, emission_calc)
+        tech_calc = TechnologyCostCalculator(technology_params_df, emission_calc, model_config)
 
         facility_baseline = {
             'production_t': 100_000,
@@ -503,10 +503,10 @@ class TestTechnologyCostCalculator:
         assert result['added_elec_mwh'] == pytest.approx(expected_elec, rel=1e-3)
         assert result['h2_demand_t'] == 0.0
 
-    def test_ncc_h2_demand_calculation(self, technology_params_df, emission_factors_df):
+    def test_ncc_h2_demand_calculation(self, technology_params_df, emission_factors_df, model_config):
         """Verify NCC-H2: H2 demand = production * 0.2 t-H2/t-ethylene"""
         emission_calc = EmissionCalculator(emission_factors_df)
-        tech_calc = TechnologyCostCalculator(technology_params_df, emission_calc)
+        tech_calc = TechnologyCostCalculator(technology_params_df, emission_calc, model_config)
 
         facility_baseline = {
             'production_t': 1_000_000,  # 1 million tonnes ethylene
@@ -523,10 +523,10 @@ class TestTechnologyCostCalculator:
         # Expected H2: 1,000,000 t * 0.2 = 200,000 t H2
         assert result['h2_demand_t'] == pytest.approx(200_000, rel=1e-3)
 
-    def test_ncc_electricity_demand_calculation(self, technology_params_df, emission_factors_df):
+    def test_ncc_electricity_demand_calculation(self, technology_params_df, emission_factors_df, model_config):
         """Verify NCC-Electricity: demand = production * 5.0 MWh/t-ethylene"""
         emission_calc = EmissionCalculator(emission_factors_df)
-        tech_calc = TechnologyCostCalculator(technology_params_df, emission_calc)
+        tech_calc = TechnologyCostCalculator(technology_params_df, emission_calc, model_config)
 
         facility_baseline = {
             'production_t': 1_000_000,
@@ -599,6 +599,92 @@ class TestEdgeCases:
         result = calc.get_h2_price(2060)
         # Should extrapolate (or clamp to last value)
         assert result >= 0
+
+
+# ============================================================================
+# STRICT MODE TESTS
+# ============================================================================
+
+class TestStrictMode:
+    """Tests for strict mode that fails on missing CSV parameters"""
+
+    def test_capex_calculator_strict_mode_missing_opex(self, technology_params_df, model_config):
+        """Strict mode should raise error when opex_pct_capex is missing"""
+        # Create CAPEX DataFrame with missing opex_pct_capex
+        capex_df = pd.DataFrame([{
+            'technology': 'Heat_Pump',
+            'capex_2025': 100,
+            'capex_2030': 90,
+            'capex_2040': 80,
+            'capex_2050': 70,
+            'lifetime_years': 25,
+            'capex_unit': 'usd_per_t_product_yr',
+            # opex_pct_capex intentionally missing
+        }])
+
+        calc = CapexCalculator(capex_df, technology_params_df, model_config, strict=True)
+
+        with pytest.raises(ValueError, match="opex_pct_capex not found"):
+            calc.get_capex_info('Heat_Pump')
+
+    def test_capex_calculator_strict_mode_missing_lifetime(self, technology_params_df, model_config):
+        """Strict mode should raise error when lifetime_years is missing"""
+        # Create CAPEX DataFrame with missing lifetime_years
+        capex_df = pd.DataFrame([{
+            'technology': 'Heat_Pump',
+            'capex_2025': 100,
+            'capex_2030': 90,
+            'capex_2040': 80,
+            'capex_2050': 70,
+            'opex_pct_capex': 3.0,
+            'capex_unit': 'usd_per_t_product_yr',
+            # lifetime_years intentionally missing
+        }])
+
+        calc = CapexCalculator(capex_df, technology_params_df, model_config, strict=True)
+
+        with pytest.raises(ValueError, match="lifetime_years not found"):
+            calc.get_capex_info('Heat_Pump')
+
+    def test_capex_calculator_non_strict_uses_fallback(self, technology_params_df, model_config):
+        """Non-strict mode should use fallback values with warnings"""
+        # Create CAPEX DataFrame with missing opex_pct_capex
+        capex_df = pd.DataFrame([{
+            'technology': 'Heat_Pump',
+            'capex_2025': 100,
+            'capex_2030': 90,
+            'capex_2040': 80,
+            'capex_2050': 70,
+            # Missing: opex_pct_capex, lifetime_years, capex_unit
+        }])
+
+        calc = CapexCalculator(capex_df, technology_params_df, model_config, strict=False)
+
+        # Should not raise, but use fallback values
+        with pytest.warns(UserWarning):
+            result = calc.get_capex_info('Heat_Pump')
+
+        # Verify fallback values are used
+        assert result['opex_pct_capex'] == 3.0
+        assert result['lifetime_years'] == 25
+        assert result['capex_unit'] == 'usd_per_t_product_yr'
+
+    def test_technology_cost_calculator_requires_model_config(self, technology_params_df, emission_factors_df):
+        """TechnologyCostCalculator should raise error when model_config is missing"""
+        emission_calc = EmissionCalculator(emission_factors_df)
+
+        with pytest.raises(ValueError, match="model_config missing required 'gj_to_mwh' parameter"):
+            TechnologyCostCalculator(technology_params_df, emission_calc, model_config=None)
+
+    def test_technology_cost_calculator_requires_gj_to_mwh(self, technology_params_df, emission_factors_df):
+        """TechnologyCostCalculator should raise error when gj_to_mwh is missing from model_config"""
+        emission_calc = EmissionCalculator(emission_factors_df)
+
+        # model_config without gj_to_mwh
+        incomplete_config = {'discount_rate': 0.08}
+
+        with pytest.raises(ValueError, match="model_config missing required 'gj_to_mwh' parameter"):
+            TechnologyCostCalculator(technology_params_df, emission_calc, model_config=incomplete_config)
 
 
 if __name__ == '__main__':

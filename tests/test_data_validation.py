@@ -91,7 +91,7 @@ class TestEmissionFactors:
     def test_lng_ef_ipcc_range(self, ef_df):
         """LNG EF should be in IPCC range (0.05-0.06 tCO2/GJ)"""
         lng = ef_df[ef_df['fuel'] == 'LNG']['tCO2_per_GJ'].iloc[0]
-        assert 0.05 <= 0.06, f"LNG EF {lng} outside IPCC range"
+        assert 0.05 <= lng <= 0.06, f"LNG EF {lng} outside IPCC range"
 
     def test_h2_ef_zero(self, ef_df):
         """Green H2 should have zero emissions"""

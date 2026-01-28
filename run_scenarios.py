@@ -671,9 +671,15 @@ def run_scenario(scenario, data, years):
                 new_emis = rem_comb + total_elec * grid_ef
                 
                 # Reduction achieved
-                old_emis = cand['item']['emis'] # Current emisisons (undeployed)
+                old_emis = cand['item']['emis'] # Current emissions (undeployed)
                 reduction = old_emis - new_emis
-                
+
+                # Skip facilities where deployment would INCREASE emissions
+                # (e.g. NCC-Elec when grid EF is too high — added electricity
+                #  emissions exceed the combustion savings)
+                if reduction <= 0:
+                    continue
+
                 # Update State
                 deployment_status[fid]['deployed'] = True
                 deployment_status[fid]['year'] = year

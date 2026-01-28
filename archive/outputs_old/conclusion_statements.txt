@@ -1,0 +1,13 @@
+CONCLUSION STATEMENTS
+============================================================
+
+1. Electricity price dominance: If electricity prices rise to ~$191/MWh by 2050, transition costs increase by 122% compared to flat pricing. The best technology under rising prices is e-Cracker, while flat pricing favors e-Cracker.
+
+2. H₂ decoupling effect: Switching from coupled to decoupled hydrogen pricing (under rising electricity) changes the best-case transition cost by 61.1% ($468.8B vs $182.2B).
+
+3. Flat electricity pricing outcome: Under flat electricity ($77/MWh), the lower-cost technology is e-Cracker (H₂: $303.7B vs e-Cracker: $211.3B cumulative cost).
+
+4. Stranded asset concentration: Under 1.5°C budgets, Yeosu and Daesan account for 58% of total stranded assets ($27.0B total). The most exposed companies are S-Oil Shaheen, LG Chem, GS Caltex.
+
+5. Regional cost disparity: Yeosu faces the highest absolute transition cost ($240.1B cumulative), driven by NCC concentration. Regional cost ranking: Yeosu ($240.1B), Daesan ($215.6B), Ulsan ($169.3B), Other ($2.7B).
+
