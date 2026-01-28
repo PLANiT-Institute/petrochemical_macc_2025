@@ -59,7 +59,8 @@ def load_data(validate: bool = True, strict: bool = False):
 
     Args:
         validate: If True, run data validation before loading
-        strict: If True, treat validation warnings as errors
+        strict: If True, treat validation warnings as errors and fail on missing
+                CSV parameters (e.g., opex_pct_capex, lifetime_years in technology_capex.csv)
     """
     print("=" * 80)
     print("LOADING INPUT DATA")
@@ -105,15 +106,19 @@ def load_data(validate: bool = True, strict: bool = False):
     model_config = new_loader.load_model_config()
     tech_capex = new_loader.load_technology_capex()
 
+    # Load new price data for scenarios
+    electrolyser_params = loader.load_electrolyser_params()
+    elec_price_flat = loader.load_flat_elec_prices()
+
     # 2. Initialize Calculators
     emission_calc = EmissionCalculator(emission_factors)
     # Price calculator needs h2, re, and fuel prices
     price_calc = PriceCalculator(h2_prices, re_prices, fuel_prices)
-    tech_calc = TechnologyCostCalculator(tech_params, emission_calc)
+    tech_calc = TechnologyCostCalculator(tech_params, emission_calc, model_config)
     stranded_calc = StrandedAssetCalculator(carbon_budgets, valuation_params)
 
     # 2b. Initialize NEW calculators (capacity-based CAPEX)
-    capex_calc = CapexCalculator(tech_capex, tech_params, model_config)
+    capex_calc = CapexCalculator(tech_capex, tech_params, model_config, strict=strict)
     mac_calc = MACCalculator(capex_calc, price_calc, emission_calc)
 
     data = {
@@ -128,6 +133,8 @@ def load_data(validate: bool = True, strict: bool = False):
         're_prices': re_prices,
         'grid_emissions': grid_emissions,
         'grid_prices': grid_prices,
+        'electrolyser_params': electrolyser_params,
+        'elec_price_flat': elec_price_flat,
         'carbon_budgets': carbon_budgets,
         'valuation_params': valuation_params,
         # Calculators (OLD - for backwards compatibility)
@@ -167,6 +174,50 @@ def load_data(validate: bool = True, strict: bool = False):
     print(f"  Initialized Calculators (OLD + NEW)")
 
     return data
+
+
+def build_price_calculator(scenario, data):
+    """Build a scenario-specific PriceCalculator based on the price_scenario field.
+
+    Price scenarios:
+        rising_coupled   - Grid trajectory electricity, H2 derived via LCOH
+        rising_decoupled - Grid trajectory electricity, H2 from domestic trajectory
+        flat_coupled     - Flat $77/MWh electricity, H2 derived via LCOH
+        flat_decoupled   - Flat $77/MWh electricity, H2 from domestic trajectory
+
+    Falls back to the global price_calc when price_scenario is absent (backward compat).
+    """
+    price_scenario = scenario.get('price_scenario')
+    if not price_scenario:
+        return data['price_calc']
+
+    # Select electricity trajectory
+    if price_scenario.startswith('rising'):
+        # Reformat grid_prices to match expected column name
+        gp = data['grid_prices'][['year', 'grid_price_usd_per_mwh']].copy()
+        gp = gp.rename(columns={'grid_price_usd_per_mwh': 'elec_price_usd_per_mwh'})
+        elec_prices_df = gp
+    elif price_scenario.startswith('flat'):
+        elec_prices_df = data['elec_price_flat']
+    else:
+        raise ValueError(f"Unknown price_scenario prefix: {price_scenario}")
+
+    # Select H2 mode
+    if price_scenario.endswith('_coupled'):
+        h2_mode = 'coupled'
+    elif price_scenario.endswith('_decoupled'):
+        h2_mode = 'decoupled'
+    else:
+        raise ValueError(f"Unknown price_scenario suffix: {price_scenario}")
+
+    return PriceCalculator(
+        h2_prices_df=data['h2_prices'],
+        re_prices_df=data['re_prices'],
+        fuel_prices_df=data['price_calc'].fuel_prices,
+        elec_prices_df=elec_prices_df,
+        electrolyser_params_df=data['electrolyser_params'],
+        price_scenario=h2_mode,
+    )
 
 
 def get_region(location):
@@ -375,6 +426,16 @@ def calculate_lcoa(facility, ncc_tech, start_year, data, all_years):
 def run_scenario(scenario, data, years):
     """Run a single scenario with cost-optimized deployment"""
     print(f"\n  Running: {scenario['name']}")
+
+    # Build scenario-specific PriceCalculator and inject into data for this run
+    scenario_price_calc = build_price_calculator(scenario, data)
+    data = dict(data)  # shallow copy to avoid mutating shared dict
+    data['price_calc'] = scenario_price_calc
+    # Also update mac_calc to use the scenario-specific price calculator
+    data['mac_calc'] = MACCalculator(data['capex_calc'], scenario_price_calc, data['emission_calc'])
+
+    price_scenario_name = scenario.get('price_scenario', 'default')
+    print(f"    Price scenario: {price_scenario_name}")
 
     # 1. Setup
     results = []
@@ -733,7 +794,7 @@ def run_scenario(scenario, data, years):
 
 
 def run_with_validation(validate_inputs: bool = True, validate_outputs: bool = False,
-                        strict: bool = False):
+                        strict: bool = False, scenario_names: list = None):
     """
     Run scenarios with optional validation.
 
@@ -746,7 +807,7 @@ def run_with_validation(validate_inputs: bool = True, validate_outputs: bool = F
         DataFrame with scenario results
     """
     # Run main scenario calculation
-    df_results = main(validate_inputs=validate_inputs, strict=strict)
+    df_results = main(validate_inputs=validate_inputs, strict=strict, scenario_names=scenario_names)
 
     # Post-run output validation
     if validate_outputs:
@@ -767,7 +828,7 @@ def run_with_validation(validate_inputs: bool = True, validate_outputs: bool = F
     return df_results
 
 
-def main(validate_inputs: bool = True, strict: bool = False):
+def main(validate_inputs: bool = True, strict: bool = False, scenario_names: list = None):
     """Main execution with optional validation"""
     # Original main function - renamed and updated to accept validation args
     print("=" * 80)
@@ -792,10 +853,23 @@ def main(validate_inputs: bool = True, strict: bool = False):
     print("RUNNING SCENARIOS")
     print("=" * 80)
 
+    # Filter scenarios if specific names were requested
+    scenarios_to_run = SCENARIOS
+    if scenario_names:
+        available = {s['name'] for s in SCENARIOS}
+        invalid = set(scenario_names) - available
+        if invalid:
+            print(f"\n  ERROR: Unknown scenario(s): {', '.join(sorted(invalid))}")
+            print(f"  Available: {', '.join(sorted(available))}")
+            raise SystemExit(1)
+        scenarios_to_run = [s for s in SCENARIOS if s['name'] in scenario_names]
+        print(f"  Selected {len(scenarios_to_run)} of {len(SCENARIOS)} scenarios: "
+              f"{', '.join(s['name'] for s in scenarios_to_run)}")
+
     all_results = []
     scenario_dfs = {}  # Store individual scenario DataFrames
 
-    for scenario in SCENARIOS:
+    for scenario in scenarios_to_run:
         results = run_scenario(scenario, data, YEARS)
         all_results.extend(results)
 
@@ -951,16 +1025,19 @@ def main(validate_inputs: bool = True, strict: bool = False):
         else:
             current_facilities = db_baseline
 
-        # Get annual industry emissions
+        # Filter to NCC (Naphtha Cracker) facilities only for stranded asset valuation
+        ncc_facilities = current_facilities[current_facilities['process'] == 'Naphtha Cracker'].copy()
+
+        # Get annual industry emissions (full industry for budget exhaustion)
         annual_emissions = df_s.groupby('year')['emissions_tco2'].sum()
 
         # 1.5C Scenario
         year_15c = stranded_calc.calculate_stranding_year(annual_emissions, 'budget_1.5C_tco2')
-        value_15c = stranded_calc.calculate_total_stranded_value(current_facilities, year_15c)
+        value_15c = stranded_calc.calculate_total_stranded_value(ncc_facilities, year_15c)
 
         # 2.0C Scenario
         year_20c = stranded_calc.calculate_stranding_year(annual_emissions, 'budget_2.0C_tco2')
-        value_20c = stranded_calc.calculate_total_stranded_value(current_facilities, year_20c)
+        value_20c = stranded_calc.calculate_total_stranded_value(ncc_facilities, year_20c)
 
         stranded_results.append({
             'scenario': scenario_name,
@@ -973,7 +1050,7 @@ def main(validate_inputs: bool = True, strict: bool = False):
         })
 
         # --- Detailed Facility Report (1.5C Focus) ---
-        df_details = stranded_calc.get_facility_stranded_details(current_facilities, year_15c)
+        df_details = stranded_calc.get_facility_stranded_details(ncc_facilities, year_15c)
         df_details['scenario'] = scenario_name
         df_details['budget_scenario'] = '1.5C'
         stranded_details_list.append(df_details)
@@ -1059,11 +1136,29 @@ if __name__ == '__main__':
         action='store_true',
         help='Treat validation warnings as errors'
     )
+    parser.add_argument(
+        '--scenarios',
+        nargs='+',
+        metavar='NAME',
+        help='Run only the specified scenarios (by name). Default: run all.'
+    )
+    parser.add_argument(
+        '--list-scenarios',
+        action='store_true',
+        help='List available scenarios and exit'
+    )
 
     args = parser.parse_args()
+
+    if args.list_scenarios:
+        print("Available scenarios:")
+        for s in SCENARIOS:
+            print(f"  - {s['name']}")
+        raise SystemExit(0)
 
     df = run_with_validation(
         validate_inputs=not args.no_validate,
         validate_outputs=args.validate_outputs,
-        strict=args.strict
+        strict=args.strict,
+        scenario_names=args.scenarios
     )
