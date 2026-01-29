@@ -121,13 +121,6 @@ class DataLoader:
             raise FileNotFoundError(f"Critical: Missing technology parameters at {tech_path}")
         return pd.read_csv(tech_path, index_col=None)
 
-    def load_heat_pump_applicability(self):
-        """Load heat pump applicability"""
-        path = self.data_dir / 'assumptions' / 'heat_pump_applicability.csv'
-        if not path.exists():
-            raise FileNotFoundError(f"Critical: Missing heat pump applicability at {path}")
-        return pd.read_csv(path)
-
     def load_fuel_costs(self):
         """Load baseline fuel costs"""
         path = self.data_dir / 'assumptions' / 'prices' / 'fuel_costs_baseline.csv'

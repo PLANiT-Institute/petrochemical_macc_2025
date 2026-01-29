@@ -227,13 +227,6 @@ class DataLoader:
             raise FileNotFoundError(f"Critical: Missing fuel prices at {path}")
         return pd.read_csv(path)
 
-    def load_heat_pump_applicability(self):
-        """Load heat pump applicability"""
-        path = self.data_dir / 'assumptions' / 'heat_pump_applicability.csv'
-        if not path.exists():
-            raise FileNotFoundError(f"Critical: Missing heat pump applicability at {path}")
-        return pd.read_csv(path)
-
     def load_carbon_budgets(self):
         """Load carbon budget scenarios"""
         path = self.data_dir / 'assumptions' / 'carbon_budget_scenarios.csv'

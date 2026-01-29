@@ -649,6 +649,45 @@ def plot_data_architecture(output_path):
     save_figure(fig, output_path)
     print(f"Saved: {output_path}")
 
+    # CSV export: data architecture metadata (structured description of model components)
+    arch_rows = [
+        # Input layer
+        {'layer': 'INPUT', 'component': 'assets', 'description': 'facility_database.csv, region_mapping.csv',
+         'detail': '237 facilities', 'unit': 'files'},
+        {'layer': 'INPUT', 'component': 'assumptions', 'description': 'technology_parameters.csv, product_benchmarks.csv, emission_factors.csv',
+         'detail': 'model parameters', 'unit': 'files'},
+        {'layer': 'INPUT', 'component': 'scenarios', 'description': 'scenario_definitions.csv, emission_targets.csv, demand_trajectory.csv',
+         'detail': 'scenario configs', 'unit': 'files'},
+        {'layer': 'INPUT', 'component': 'prices', 'description': 'h2_price_trajectory.csv, re_price_trajectory.csv, grid_price_trajectory.csv',
+         'detail': 'price trajectories', 'unit': 'files'},
+        # Module layer
+        {'layer': 'MODULE', 'component': 'DataLoader', 'description': 'merge(facility, benchmark) on (product, process)',
+         'detail': 'modules/utils.py', 'unit': 'function'},
+        {'layer': 'MODULE', 'component': 'EmissionCalculator', 'description': 'E = sum(fuel_gj * EF) + elec * grid_ef',
+         'detail': 'modules/utils.py', 'unit': 'function'},
+        {'layer': 'MODULE', 'component': 'TechCostCalculator', 'description': 'CAPEX(year) = interp(2025->2050)',
+         'detail': 'modules/utils.py', 'unit': 'function'},
+        {'layer': 'MODULE', 'component': 'StrandedAssetCalc', 'description': 'V = sum(asset_value * (1 - age/life))',
+         'detail': 'modules/utils.py', 'unit': 'function'},
+        # Engine layer
+        {'layer': 'ENGINE', 'component': 'step1', 'description': 'For year t: calc BAU emissions',
+         'detail': 'run_scenarios.py', 'unit': 'step'},
+        {'layer': 'ENGINE', 'component': 'step2', 'description': 'gap = sum(E_i) - target_t',
+         'detail': 'run_scenarios.py', 'unit': 'step'},
+        {'layer': 'ENGINE', 'component': 'step3', 'description': 'candidates = sort_by(LCOA)',
+         'detail': 'run_scenarios.py', 'unit': 'step'},
+        {'layer': 'ENGINE', 'component': 'step4', 'description': 'while gap > 0: deploy()',
+         'detail': 'run_scenarios.py', 'unit': 'step'},
+        # Output layer
+        {'layer': 'OUTPUT', 'component': 'scenario_results', 'description': 'scenario_results.csv (6x26x237 rows)',
+         'detail': '8.6MB', 'unit': 'file'},
+        {'layer': 'OUTPUT', 'component': 'summaries', 'description': 'regional_mac_summary.csv, emissions_by_company.csv',
+         'detail': 'aggregated', 'unit': 'files'},
+        {'layer': 'OUTPUT', 'component': 'stranded_assets', 'description': 'stranded_assets_summary.csv, stranded_assets_facilities.csv',
+         'detail': 'risk analysis', 'unit': 'files'},
+    ]
+    save_figure_data(pd.DataFrame(arch_rows), output_path, figure_type='architecture_diagram')
+
 
 def main():
     print("Loading data...")
