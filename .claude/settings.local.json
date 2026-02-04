@@ -91,7 +91,10 @@
       "Bash(for skill in matplotlib plotly scientific-visualization seaborn)",
       "Bash(do cp -r \"/tmp/claude-scientific-skills/scientific-skills/$skill\" \"/Users/jinsu/Documents/GitHub/petrochemical_macc_2025/.claude/skills/\")",
       "Bash(done)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "mcp__mcp-server-chart__generate_column_chart",
+      "mcp__mcp-server-chart__generate_bar_chart",
+      "mcp__mcp-server-chart__generate_line_chart"
     ],
     "deny": [],
     "ask": []
