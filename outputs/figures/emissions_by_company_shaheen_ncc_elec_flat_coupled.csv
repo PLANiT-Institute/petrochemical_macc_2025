@@ -1,0 +1,261 @@
+year,category,value,unit,scenario,figure_type
+2025,Daehan Oil Chemical,2.701027810132496,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2026,Daehan Oil Chemical,3.0881772207045537,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2027,Daehan Oil Chemical,3.0701724597567375,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2028,Daehan Oil Chemical,3.0521676988089212,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2029,Daehan Oil Chemical,3.015629042468212,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2030,Daehan Oil Chemical,2.9159026693359817,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2031,Daehan Oil Chemical,2.836236198845293,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2032,Daehan Oil Chemical,2.7304621121768298,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2033,Daehan Oil Chemical,2.6160674678968747,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2034,Daehan Oil Chemical,2.5016728236169183,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2035,Daehan Oil Chemical,2.3872781793369624,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2036,Daehan Oil Chemical,2.1576659077246756,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2037,Daehan Oil Chemical,1.927230653060016,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2038,Daehan Oil Chemical,1.6962589467701767,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2039,Daehan Oil Chemical,1.4544315343282352,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2040,Daehan Oil Chemical,1.2117373569671472,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2041,Daehan Oil Chemical,1.0912570332057498,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2042,Daehan Oil Chemical,0.9699099445252057,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2043,Daehan Oil Chemical,0.8485628558446617,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2044,Daehan Oil Chemical,0.7280825320832645,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2045,Daehan Oil Chemical,0.6067354434027205,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2046,Daehan Oil Chemical,0.4853883547221763,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2047,Daehan Oil Chemical,0.3640412660416323,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2048,Daehan Oil Chemical,0.24269417736108814,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2049,Daehan Oil Chemical,0.12134708868054407,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2050,Daehan Oil Chemical,0.0,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2025,GS Caltex,3.6331937884299026,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2026,GS Caltex,4.143723312141414,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2027,GS Caltex,4.109273767588439,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2028,GS Caltex,4.074824223035465,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2029,GS Caltex,4.02301160902208,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2030,GS Caltex,3.9181999784098975,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2031,GS Caltex,3.8344711470587867,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2032,GS Caltex,3.7055201948283183,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2033,GS Caltex,3.5616372053065137,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2034,GS Caltex,3.4177542157847083,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2035,GS Caltex,3.2738712262629033,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2036,GS Caltex,2.9850701177982724,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2037,GS Caltex,2.6952338799126214,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2038,GS Caltex,2.400487086187258,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2039,GS Caltex,2.058261282893316,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2040,GS Caltex,1.7148088638169579,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2041,GS Caltex,1.5443092700611947,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2042,GS Caltex,1.3725830605230156,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2043,GS Caltex,1.2008568509848367,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2044,GS Caltex,1.0303572572290733,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2045,GS Caltex,0.8586310476908946,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2046,GS Caltex,0.6869048381527156,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2047,GS Caltex,0.5151786286145367,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2048,GS Caltex,0.3434524190763578,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2049,GS Caltex,0.1717262095381789,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2050,GS Caltex,0.0,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2025,HD Hyundai Chemical,3.472213629032109,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2026,HD Hyundai Chemical,3.9495292990125077,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2027,HD Hyundai Chemical,3.9060129246380906,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2028,HD Hyundai Chemical,3.8624965502636734,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2029,HD Hyundai Chemical,3.801274566419454,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2030,HD Hyundai Chemical,3.678622900092865,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2031,HD Hyundai Chemical,3.5806425459584066,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2032,HD Hyundai Chemical,3.461636236652205,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2033,HD Hyundai Chemical,3.3356872996981757,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2034,HD Hyundai Chemical,3.209738362744147,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2035,HD Hyundai Chemical,3.083789425790118,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2036,HD Hyundai Chemical,2.8309854444219584,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2037,HD Hyundai Chemical,2.5772753555936987,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2038,HD Hyundai Chemical,2.3158622105328432,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2039,HD Hyundai Chemical,1.985700965393005,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2040,HD Hyundai Chemical,1.6543563466146731,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2041,HD Hyundai Chemical,1.4898674108640009,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2042,HD Hyundai Chemical,1.3241951014748345,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2043,HD Hyundai Chemical,1.1585227920856684,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2044,HD Hyundai Chemical,0.9940338563349966,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2045,HD Hyundai Chemical,0.8283615469458304,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2046,HD Hyundai Chemical,0.6626892375566644,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2047,HD Hyundai Chemical,0.4970169281674983,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2048,HD Hyundai Chemical,0.33134461877833216,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2049,HD Hyundai Chemical,0.1656723093891661,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2050,HD Hyundai Chemical,0.0,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2025,Hanwha TotalEnergies,5.2081598308837505,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2026,Hanwha TotalEnergies,5.935855938664075,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2027,Hanwha TotalEnergies,5.882328071811836,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2028,Hanwha TotalEnergies,5.828800204959598,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2029,Hanwha TotalEnergies,5.744648678166373,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2030,Hanwha TotalEnergies,5.56022541947254,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2031,Hanwha TotalEnergies,5.412898793274595,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2032,Hanwha TotalEnergies,5.215967696338878,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2033,Hanwha TotalEnergies,5.002657539941325,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2034,Hanwha TotalEnergies,4.78934738354377,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2035,Hanwha TotalEnergies,4.576037227146218,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2036,Hanwha TotalEnergies,4.147882308909402,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2037,Hanwha TotalEnergies,3.7181927852308765,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2038,Hanwha TotalEnergies,3.285558273401188,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2039,Hanwha TotalEnergies,2.8171521628856375,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2040,Hanwha TotalEnergies,2.3470671774220033,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2041,Hanwha TotalEnergies,2.1137035596382705,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2042,Hanwha TotalEnergies,1.8786610669064532,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2043,Hanwha TotalEnergies,1.643618574174636,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2044,Hanwha TotalEnergies,1.4102549563909033,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2045,Hanwha TotalEnergies,1.175212463659086,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2046,Hanwha TotalEnergies,0.9401699709272687,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2047,Hanwha TotalEnergies,0.7051274781954516,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2048,Hanwha TotalEnergies,0.47008498546363436,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2049,Hanwha TotalEnergies,0.2350424927318172,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2050,Hanwha TotalEnergies,0.0,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2025,LG Chem,10.050786054717834,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2026,LG Chem,11.413666546215078,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2027,LG Chem,11.268929129504643,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2028,LG Chem,11.124191712794211,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2029,LG Chem,10.930445444495536,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2030,LG Chem,10.564179088416457,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2031,LG Chem,10.27158699936478,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2032,LG Chem,9.886685838827404,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2033,LG Chem,9.471304849592245,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2034,LG Chem,9.055923860357089,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2035,LG Chem,8.640542871121934,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2036,LG Chem,7.8067925402110765,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2037,LG Chem,6.970053856859681,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2038,LG Chem,6.131803897341201,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2039,LG Chem,5.25762235040293,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2040,LG Chem,4.380307536271332,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2041,LG Chem,3.9447833963988614,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2042,LG Chem,3.5061259893330625,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2043,LG Chem,3.0674685822672636,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2044,LG Chem,2.631944442394792,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2045,LG Chem,2.1932870353289937,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2046,LG Chem,1.7546296282631948,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2047,LG Chem,1.315972221197396,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2048,LG Chem,0.8773148141315974,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2049,LG Chem,0.4386574070657987,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2050,LG Chem,0.0,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2025,Lotte Chemical,7.838367263992788,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2026,Lotte Chemical,8.91384884709732,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2027,Lotte Chemical,8.813575340602938,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2028,Lotte Chemical,8.713301834108554,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2029,Lotte Chemical,8.565270495515428,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2030,Lotte Chemical,8.255605625512208,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2031,Lotte Chemical,8.008229666141819,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2032,Lotte Chemical,7.705328401650489,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2033,Lotte Chemical,7.384093058381856,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2034,Lotte Chemical,7.06285771511322,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2035,Lotte Chemical,6.7416223718445885,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2036,Lotte Chemical,6.096840639672295,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2037,Lotte Chemical,5.449747861864976,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2038,Lotte Chemical,4.800557837181728,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2039,Lotte Chemical,4.116165585483363,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2040,Lotte Chemical,3.429320314961705,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2041,Lotte Chemical,3.0883506985241675,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2042,Lotte Chemical,2.7449280632633384,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2043,Lotte Chemical,2.4015054280025097,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2044,Lotte Chemical,2.060535811564973,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2045,Lotte Chemical,1.717113176304144,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2046,Lotte Chemical,1.3736905410433153,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2047,Lotte Chemical,1.0302679057824864,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2048,Lotte Chemical,0.6868452705216577,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2049,Lotte Chemical,0.34342263526082883,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2050,Lotte Chemical,0.0,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2025,S-Oil,2.086877749365097,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2026,S-Oil,2.381615585110374,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2027,S-Oil,2.363321758450887,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2028,S-Oil,2.3450279317914,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2029,S-Oil,2.3232229066410297,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2030,S-Oil,2.290700302578458,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2031,S-Oil,2.2647196016319215,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2032,S-Oil,2.1995774764187246,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2033,S-Oil,2.121504514788288,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2034,S-Oil,2.0434315531578506,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2035,S-Oil,1.9653585915274137,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2036,S-Oil,1.8086509922835865,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2037,S-Oil,1.6513817170568066,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2038,S-Oil,1.4884974406174396,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2039,S-Oil,1.2762895786183257,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2040,S-Oil,1.0633211149633013,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2041,S-Oil,0.9575974847916998,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2042,S-Oil,0.8511132529641874,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2043,S-Oil,0.7446290211366752,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2044,S-Oil,0.6389053909650736,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2045,S-Oil,0.5324211591375615,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2046,S-Oil,0.4259369273100491,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2047,S-Oil,0.3194526954825368,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2048,S-Oil,0.21296846365502456,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2049,S-Oil,0.10648423182751228,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2050,S-Oil,0.0,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2025,S-Oil Shaheen,4.435028855508218,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2026,S-Oil Shaheen,4.889001307314525,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2027,S-Oil Shaheen,4.857757355287327,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2028,S-Oil Shaheen,4.826513403260129,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2029,S-Oil Shaheen,4.760543312312107,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2030,S-Oil Shaheen,4.588575188166492,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2031,S-Oil Shaheen,4.451198353360513,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2032,S-Oil Shaheen,4.277923546310094,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2033,S-Oil Shaheen,4.092795472543873,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2034,S-Oil Shaheen,3.9076673987776522,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2035,S-Oil Shaheen,3.722539325011431,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2036,S-Oil Shaheen,3.3509513208331874,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2037,S-Oil Shaheen,2.978031460009144,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2038,S-Oil Shaheen,2.6064434558309015,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2039,S-Oil Shaheen,2.2348554516526584,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2040,S-Oil Shaheen,1.8619355908286155,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2041,S-Oil Shaheen,1.676807517062394,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2042,S-Oil Shaheen,1.4903475866503721,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2043,S-Oil Shaheen,1.3038876562383508,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2044,S-Oil Shaheen,1.1187595824721295,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2045,S-Oil Shaheen,0.9322996520601079,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2046,S-Oil Shaheen,0.7458397216480862,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2047,S-Oil Shaheen,0.5593797912360647,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2048,S-Oil Shaheen,0.3729198608240431,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2049,S-Oil Shaheen,0.18645993041202155,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2050,S-Oil Shaheen,0.0,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2025,SK Geocentric,3.5043691100027528,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2026,SK Geocentric,3.984987723448951,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2027,SK Geocentric,3.9399509703947357,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2028,SK Geocentric,3.894914217340521,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2029,SK Geocentric,3.836102030440754,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2030,SK Geocentric,3.7293517677266124,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2031,SK Geocentric,3.6440742590066955,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2032,SK Geocentric,3.541080867880431,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2033,SK Geocentric,3.4322378126606545,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2034,SK Geocentric,3.323394757440877,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2035,SK Geocentric,3.2145517022211,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2036,SK Geocentric,2.9960825482188134,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2037,SK Geocentric,2.776830350653795,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2038,SK Geocentric,2.539101823818378,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2039,SK Geocentric,2.177114389559141,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2040,SK Geocentric,1.8138295092989745,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2041,SK Geocentric,1.6334845151698203,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2042,SK Geocentric,1.451842075039737,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2043,SK Geocentric,1.2701996349096538,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2044,SK Geocentric,1.0898546407804997,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2045,SK Geocentric,0.9082122006504164,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2046,SK Geocentric,0.7265697605203331,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2047,SK Geocentric,0.5449273203902498,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2048,SK Geocentric,0.36328488026016653,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2049,SK Geocentric,0.18164244013008327,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2050,SK Geocentric,0.0,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2025,Yeochon NCC,6.032089659866812,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2026,Yeochon NCC,6.923189125321034,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2027,Yeochon NCC,6.909475141795236,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2028,Yeochon NCC,6.895761158269439,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2029,Yeochon NCC,6.834932954158266,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2030,Yeochon NCC,6.613167172169702,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2031,Yeochon NCC,6.436009449776541,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2032,Yeochon NCC,6.198757589431324,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2033,Yeochon NCC,5.941663052726796,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2034,Yeochon NCC,5.684568516022268,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2035,Yeochon NCC,5.42747397931774,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2036,Yeochon NCC,4.911435304925196,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2037,Yeochon NCC,4.393547029549167,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2038,Yeochon NCC,3.87348131719113,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2039,Yeochon NCC,3.3212578693136,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2040,Yeochon NCC,2.7670551259239646,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2041,Yeochon NCC,2.4919330497412533,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2042,Yeochon NCC,2.214831678046435,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2043,Yeochon NCC,1.9377303063516176,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2044,Yeochon NCC,1.662608230168906,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2045,Yeochon NCC,1.3855068584740884,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2046,Yeochon NCC,1.1084054867792705,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2047,Yeochon NCC,0.831304115084453,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2048,Yeochon NCC,0.5542027433896353,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2049,Yeochon NCC,0.27710137169481763,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line
+2050,Yeochon NCC,0.0,MtCO2_per_yr,shaheen_ncc_elec_flat_coupled,line

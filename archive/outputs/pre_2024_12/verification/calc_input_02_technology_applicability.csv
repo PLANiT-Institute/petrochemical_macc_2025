@@ -1,0 +1,16 @@
+facility_type,technology,applicable,notes
+Naphtha Cracker,NCC-H2,True,Mutually exclusive with NCC-Elec
+Naphtha Cracker,NCC-Electricity,True,Mutually exclusive with NCC-H2
+Naphtha Cracker,Heat_Pump,False,NCC uses NCC technologies
+Naphtha Cracker,RDH,False,NCC uses NCC technologies
+Naphtha Cracker,RE_PPA,True,For existing electricity
+BTX Plant,NCC-H2,False,Only for NCC
+BTX Plant,NCC-Electricity,False,Only for NCC
+BTX Plant,Heat_Pump,True,60% of heat demand
+BTX Plant,RDH,True,40% of heat demand (high-temp)
+BTX Plant,RE_PPA,True,For existing electricity
+Other,NCC-H2,False,Only for NCC
+Other,NCC-Electricity,False,Only for NCC
+Other,Heat_Pump,True,Based on product group
+Other,RDH,True,Gap not covered by HP
+Other,RE_PPA,True,For existing electricity

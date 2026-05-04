@@ -1,0 +1,27 @@
+year,h2_price_usd_per_kg,source,notes
+2025,4.781107,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2026,4.695775,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2027,4.610243,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2028,4.526094,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2029,4.44166,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2030,4.358696,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2031,4.319141,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2032,4.279714,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2033,4.240507,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2034,4.201334,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2035,4.162289,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2036,4.123462,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2037,4.084671,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2038,4.046007,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2039,4.007471,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2040,3.969063,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2041,3.93087,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2042,3.892715,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2043,3.854689,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2044,3.816875,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2045,3.779103,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2046,3.741458,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2047,3.703941,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2048,3.666551,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2049,3.629371,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory
+2050,3.592236,LCOH calculation (electrolyser_params + elec_price_flat),CRF-based LCOH using flat electricity price trajectory

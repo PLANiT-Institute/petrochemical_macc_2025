@@ -1,0 +1,10 @@
+claim_id,section,expected,actual,tolerance,unit,status,source_file,calc_rule
+C01,Methods,243.0,243.0,0.0,count,PASS,03_data/jcp_consolidated_results.csv,nunique(facility_id)==243 and min(year)==2025 and max(year)==2050
+C02,Results,7.273,7.273082666032621,0.1,BUSD/yr,PASS,03_data/jcp_consolidated_results.csv,"sum(total_cost_usd)/1e9 for scenario=S2_NetZero_HighAmbition, year=2030"
+C03,Results,1.902,1.9018441617000468,0.1,MtCO2/yr,PASS,03_data/jcp_consolidated_results.csv,"sum(abatement_tco2)/1e6 for scenario=S2_NetZero_HighAmbition, year=2030"
+C04,Results,25.043,25.042930223368042,0.1,BUSD/yr,PASS,03_data/jcp_consolidated_results.csv,"sum(total_cost_usd)/1e9 for scenario=S2_NetZero_HighAmbition, year=2050"
+C05,Results,51.505,51.50482444761669,0.1,MtCO2/yr,PASS,03_data/jcp_consolidated_results.csv,"sum(abatement_tco2)/1e6 for scenario=S2_NetZero_HighAmbition, year=2050"
+C06,Results,146.034,146.03395095832772,0.5,TWh/yr,PASS,03_data/scenario_results.csv,"mean(group=*_elec_*, year=2050, added_elec_mwh/1e6)"
+C07,Results,4.546,4.546157,0.02,Mt/yr,PASS,03_data/scenario_results.csv,"mean(group=*_h2_*, year=2050, h2_demand_t/1e6)"
+C08,Results,32.38,32.38002595832774,0.5,TWh/yr,PASS,03_data/scenario_results.csv,"mean(group=*_h2_*, year=2050, added_elec_mwh/1e6)"
+C09,Results,16.994,16.993880321413567,0.1,BUSD/yr,PASS,03_data/jcp_consolidated_results.csv,(S3 total_cost_busd - S2 total_cost_busd) at year=2050

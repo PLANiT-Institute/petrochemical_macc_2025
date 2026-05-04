@@ -1,0 +1,10 @@
+claim_id,manuscript_section,claim_text,source_file,calculation_rule,expected_value,status
+C01,Methods,Coverage includes 243 facilities and 2025-2050 period.,03_data/jcp_consolidated_results.csv,nunique(facility_id)==243 and min(year)==2025 and max(year)==2050,243.0,PASS
+C02,Results,S2 2030 annual transition cost is 7.273 BUSD/yr.,03_data/jcp_consolidated_results.csv,"sum(total_cost_usd)/1e9 for scenario=S2_NetZero_HighAmbition, year=2030",7.273,PASS
+C03,Results,S2 2030 abatement is 1.902 MtCO2/yr.,03_data/jcp_consolidated_results.csv,"sum(abatement_tco2)/1e6 for scenario=S2_NetZero_HighAmbition, year=2030",1.902,PASS
+C04,Results,S2 2050 annual transition cost is 25.043 BUSD/yr.,03_data/jcp_consolidated_results.csv,"sum(total_cost_usd)/1e9 for scenario=S2_NetZero_HighAmbition, year=2050",25.043,PASS
+C05,Results,S2 2050 abatement is 51.505 MtCO2/yr.,03_data/jcp_consolidated_results.csv,"sum(abatement_tco2)/1e6 for scenario=S2_NetZero_HighAmbition, year=2050",51.505,PASS
+C06,Results,Electricity-centered pathways require 146.034 TWh/yr added electricity in 2050.,03_data/scenario_results.csv,"mean(group=*_elec_*, year=2050, added_elec_mwh/1e6)",146.034,PASS
+C07,Results,Hydrogen-centered pathways require 4.546 Mt/yr hydrogen in 2050.,03_data/scenario_results.csv,"mean(group=*_h2_*, year=2050, h2_demand_t/1e6)",4.546,PASS
+C08,Results,Hydrogen-centered pathways require 32.380 TWh/yr added electricity in 2050.,03_data/scenario_results.csv,"mean(group=*_h2_*, year=2050, added_elec_mwh/1e6)",32.38,PASS
+C09,Results,S3 incurs 16.994 BUSD/yr cost premium over S2 in 2050.,03_data/jcp_consolidated_results.csv,(S3 total_cost_busd - S2 total_cost_busd) at year=2050,16.994,PASS

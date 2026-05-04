@@ -1,0 +1,15 @@
+scenario,technology,facility_count,total_capex_usd,total_residual_value_usd,residual_pct,avg_remaining_life_years
+shaheen_ncc_h2_15c,NCC-H2,43,4091541300.0,1501656660.0,36.70149095158834,10.953488372093023
+shaheen_ncc_h2_15c,RDH,35,1599663800.0,63986552.0,4.0,1.0
+shaheen_ncc_h2_15c,Heat_Pump,2,38640000.0,0.0,0.0,0.0
+shaheen_ncc_h2_20c,NCC-H2,43,4091541300.0,2882588436.0,70.45238516839608,19.348837209302324
+shaheen_ncc_h2_20c,RDH,35,1599663800.0,63986552.0,4.0,1.0
+shaheen_ncc_h2_20c,Heat_Pump,2,38640000.0,0.0,0.0,0.0
+shaheen_ncc_elec_15c,NCC-Electricity,43,3409617750.0,136384710.0,4.0,1.0
+shaheen_ncc_elec_15c,RDH,35,1599663800.0,63986552.0,4.0,1.0
+shaheen_ncc_elec_15c,None,163,0.0,0.0,0.0,0.0
+shaheen_ncc_elec_15c,Heat_Pump,2,38640000.0,0.0,0.0,0.0
+shaheen_ncc_elec_20c,NCC-Electricity,43,3409617750.0,136384710.0,4.0,1.0
+shaheen_ncc_elec_20c,RDH,35,1599663800.0,63986552.0,4.0,1.0
+shaheen_ncc_elec_20c,None,163,0.0,0.0,0.0,0.0
+shaheen_ncc_elec_20c,Heat_Pump,2,38640000.0,0.0,0.0,0.0

@@ -1,0 +1,3 @@
+scenario_group,year,added_elec_twh,h2_mt,abatement_mtco2,interpretation_flag
+electricity_centered,2050,146.03395095832772,0.0,51.50482444761669,PASS
+hydrogen_centered,2050,32.38002595832774,4.546157,51.50482444761669,PASS

@@ -1,0 +1,13 @@
+parameter,value,unit,description,source
+discount_rate,0.08,decimal,NPV discount rate for LCOA calculation,Standard industrial rate
+gj_to_mwh,3.6,GJ/MWh,Energy conversion factor (1 MWh = 3.6 GJ),Physical constant
+analysis_start_year,2025,year,Model start year,Project definition
+analysis_end_year,2050,year,Model end year,Project definition
+operating_rate_default,0.70,decimal,Default operating rate if not specified,Industry average
+kt_to_tonnes,1000,t/kt,Unit conversion kilotonnes to tonnes,Physical constant
+kg_to_tonnes,1000,kg/t,Unit conversion kg to tonnes,Physical constant
+kwh_to_mwh,1000,kWh/MWh,Unit conversion kWh to MWh,Physical constant
+usd_to_krw,1300,USD/KRW,USD to KRW exchange rate,2024 average rate
+sensitivity_capex_share,0.60,decimal,CAPEX share of total NPV for sensitivity analysis,Model structure estimate
+sensitivity_energy_share,0.35,decimal,Energy cost share of total NPV for sensitivity analysis,Model structure estimate
+sensitivity_opex_share,0.05,decimal,OPEX share of total NPV for sensitivity analysis,Model structure estimate

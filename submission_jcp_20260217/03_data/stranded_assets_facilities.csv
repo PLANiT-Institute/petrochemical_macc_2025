@@ -1,0 +1,345 @@
+facility_id,company,location,product,process,capacity_kt,year_built,stranding_year,stranded_value_usd,scenario,budget_scenario
+Unknown,Lotte Chemical,Daesan,Ethylene,Naphtha Cracker,1100,1991,2030,82500000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Ethylene,Naphtha Cracker,850,2021,2030,1976250000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,LG Chem,Daesan,Ethylene,Naphtha Cracker,1300,1991,2030,97500000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Ethylene,Naphtha Cracker,1525,1991,2030,114375000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Ethylene,Naphtha Cracker,1230,1992,2030,184500000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,LG Chem,Yeosu,Ethylene,Naphtha Cracker,1030,2021,2030,2394750000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Ethylene,Naphtha Cracker,2285,1979,2030,0.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,GS Caltex,Yeosu,Ethylene,Naphtha Cracker,900,2021,2030,2092500000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Daehan Oil Chemical,Onsan,Ethylene,Naphtha Cracker,900,1991,2030,67500000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,S-Oil,Onsan,Ethylene,Naphtha Cracker,182,2018,2030,382200000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,SK Geocentric,Ulsan,Ethylene,Naphtha Cracker,660,1989,2030,0.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Lotte Chemical,Daesan,Propylene,Naphtha Cracker,550,1997,2030,288750000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,HDHyundai Oilbank,Daesan,Propylene,Naphtha Cracker,420,2011,2030,661500000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Propylene,Naphtha Cracker,451,2021,2030,1048575000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,LG Chem,Daesan,Propylene,Naphtha Cracker,680,1991,2030,51000000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Propylene,Naphtha Cracker,1064,1991,2030,79800000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Propylene,Naphtha Cracker,641,1992,2030,96150000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,LG Chem,Yeosu,Propylene,Naphtha Cracker,1300,2021,2030,3022500000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Propylene,Naphtha Cracker,1289,1979,2030,0.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,GS Caltex,Yeosu,Propylene,Naphtha Cracker,970,2021,2030,2255250000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Daehan Oil Chemical,Onsan,Propylene,Naphtha Cracker,560,1991,2030,42000000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,S-Oil,Onsan,Propylene,Naphtha Cracker,840,2018,2030,1764000000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,SK Advanced,Ulsan,Propylene,Naphtha Cracker,600,2016,2030,1170000000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,SK Energy,Ulsan,Propylene,Naphtha Cracker,620,1996,2030,279000000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,SK Geocentric,Ulsan,Propylene,Naphtha Cracker,380,1989,2030,0.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Taekwang Industrial,Ulsan,Propylene,Naphtha Cracker,300,1997,2030,157500000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Hyosung Chemical,Ulsan,Propylene,Naphtha Cracker,500,1991,2030,37500000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Lotte Chemical,Daesan,Butadiene,Naphtha Cracker,190,1997,2030,99750000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Butadiene,Naphtha Cracker,163,2021,2030,378975000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,LG Chem,Daesan,Butadiene,Naphtha Cracker,200,1991,2030,15000000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Butadiene,Naphtha Cracker,150,1991,2030,11250000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Kumho Petrochemical,Yeosu,Butadiene,Naphtha Cracker,147,1992,2030,22050000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Lotte GS Chemical,Yeosu,Butadiene,Naphtha Cracker,130,2022,2030,312000000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Butadiene,Naphtha Cracker,160,2011,2030,252000000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,LG Chem,Yeosu,Butadiene,Naphtha Cracker,306,1991,2030,22950000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Butadiene,Naphtha Cracker,378,1992,2030,56700000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Kumho Petrochemical,Ulsan,Butadiene,Naphtha Cracker,90,1979,2030,0.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Daehan Oil Chemical,Ulsan,Butadiene,Naphtha Cracker,146,2023,2030,361350000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,SK Geocentric,Ulsan,Butadiene,Naphtha Cracker,130,1989,2030,0.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,SK Geocentric,Ulsan,C-H,Naphtha Cracker,160,1974,2030,0.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Caprolactam,Ulsan,C-H,Naphtha Cracker,190,2000,2030,142500000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,S-Oil Shaheen,Onsan,Ethylene,Naphtha Cracker,1800,2026,2030,4860000000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,S-Oil Shaheen,Onsan,Propylene,Naphtha Cracker,770,2026,2030,2079000000.0,shaheen_ncc_h2_rising_coupled,1.5C
+Unknown,Lotte Chemical,Daesan,Ethylene,Naphtha Cracker,1100,1991,2030,82500000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Ethylene,Naphtha Cracker,850,2021,2030,1976250000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,LG Chem,Daesan,Ethylene,Naphtha Cracker,1300,1991,2030,97500000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Ethylene,Naphtha Cracker,1525,1991,2030,114375000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Ethylene,Naphtha Cracker,1230,1992,2030,184500000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,LG Chem,Yeosu,Ethylene,Naphtha Cracker,1030,2021,2030,2394750000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Ethylene,Naphtha Cracker,2285,1979,2030,0.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,GS Caltex,Yeosu,Ethylene,Naphtha Cracker,900,2021,2030,2092500000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Daehan Oil Chemical,Onsan,Ethylene,Naphtha Cracker,900,1991,2030,67500000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,S-Oil,Onsan,Ethylene,Naphtha Cracker,182,2018,2030,382200000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,SK Geocentric,Ulsan,Ethylene,Naphtha Cracker,660,1989,2030,0.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Lotte Chemical,Daesan,Propylene,Naphtha Cracker,550,1997,2030,288750000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,HDHyundai Oilbank,Daesan,Propylene,Naphtha Cracker,420,2011,2030,661500000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Propylene,Naphtha Cracker,451,2021,2030,1048575000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,LG Chem,Daesan,Propylene,Naphtha Cracker,680,1991,2030,51000000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Propylene,Naphtha Cracker,1064,1991,2030,79800000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Propylene,Naphtha Cracker,641,1992,2030,96150000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,LG Chem,Yeosu,Propylene,Naphtha Cracker,1300,2021,2030,3022500000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Propylene,Naphtha Cracker,1289,1979,2030,0.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,GS Caltex,Yeosu,Propylene,Naphtha Cracker,970,2021,2030,2255250000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Daehan Oil Chemical,Onsan,Propylene,Naphtha Cracker,560,1991,2030,42000000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,S-Oil,Onsan,Propylene,Naphtha Cracker,840,2018,2030,1764000000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,SK Advanced,Ulsan,Propylene,Naphtha Cracker,600,2016,2030,1170000000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,SK Energy,Ulsan,Propylene,Naphtha Cracker,620,1996,2030,279000000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,SK Geocentric,Ulsan,Propylene,Naphtha Cracker,380,1989,2030,0.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Taekwang Industrial,Ulsan,Propylene,Naphtha Cracker,300,1997,2030,157500000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Hyosung Chemical,Ulsan,Propylene,Naphtha Cracker,500,1991,2030,37500000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Lotte Chemical,Daesan,Butadiene,Naphtha Cracker,190,1997,2030,99750000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Butadiene,Naphtha Cracker,163,2021,2030,378975000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,LG Chem,Daesan,Butadiene,Naphtha Cracker,200,1991,2030,15000000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Butadiene,Naphtha Cracker,150,1991,2030,11250000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Kumho Petrochemical,Yeosu,Butadiene,Naphtha Cracker,147,1992,2030,22050000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Lotte GS Chemical,Yeosu,Butadiene,Naphtha Cracker,130,2022,2030,312000000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Butadiene,Naphtha Cracker,160,2011,2030,252000000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,LG Chem,Yeosu,Butadiene,Naphtha Cracker,306,1991,2030,22950000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Butadiene,Naphtha Cracker,378,1992,2030,56700000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Kumho Petrochemical,Ulsan,Butadiene,Naphtha Cracker,90,1979,2030,0.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Daehan Oil Chemical,Ulsan,Butadiene,Naphtha Cracker,146,2023,2030,361350000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,SK Geocentric,Ulsan,Butadiene,Naphtha Cracker,130,1989,2030,0.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,SK Geocentric,Ulsan,C-H,Naphtha Cracker,160,1974,2030,0.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Caprolactam,Ulsan,C-H,Naphtha Cracker,190,2000,2030,142500000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,S-Oil Shaheen,Onsan,Ethylene,Naphtha Cracker,1800,2026,2030,4860000000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,S-Oil Shaheen,Onsan,Propylene,Naphtha Cracker,770,2026,2030,2079000000.0,shaheen_ncc_h2_rising_decoupled,1.5C
+Unknown,Lotte Chemical,Daesan,Ethylene,Naphtha Cracker,1100,1991,2030,82500000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Ethylene,Naphtha Cracker,850,2021,2030,1976250000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,LG Chem,Daesan,Ethylene,Naphtha Cracker,1300,1991,2030,97500000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Ethylene,Naphtha Cracker,1525,1991,2030,114375000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Ethylene,Naphtha Cracker,1230,1992,2030,184500000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,LG Chem,Yeosu,Ethylene,Naphtha Cracker,1030,2021,2030,2394750000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Ethylene,Naphtha Cracker,2285,1979,2030,0.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,GS Caltex,Yeosu,Ethylene,Naphtha Cracker,900,2021,2030,2092500000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Daehan Oil Chemical,Onsan,Ethylene,Naphtha Cracker,900,1991,2030,67500000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,S-Oil,Onsan,Ethylene,Naphtha Cracker,182,2018,2030,382200000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,SK Geocentric,Ulsan,Ethylene,Naphtha Cracker,660,1989,2030,0.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Lotte Chemical,Daesan,Propylene,Naphtha Cracker,550,1997,2030,288750000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,HDHyundai Oilbank,Daesan,Propylene,Naphtha Cracker,420,2011,2030,661500000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Propylene,Naphtha Cracker,451,2021,2030,1048575000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,LG Chem,Daesan,Propylene,Naphtha Cracker,680,1991,2030,51000000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Propylene,Naphtha Cracker,1064,1991,2030,79800000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Propylene,Naphtha Cracker,641,1992,2030,96150000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,LG Chem,Yeosu,Propylene,Naphtha Cracker,1300,2021,2030,3022500000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Propylene,Naphtha Cracker,1289,1979,2030,0.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,GS Caltex,Yeosu,Propylene,Naphtha Cracker,970,2021,2030,2255250000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Daehan Oil Chemical,Onsan,Propylene,Naphtha Cracker,560,1991,2030,42000000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,S-Oil,Onsan,Propylene,Naphtha Cracker,840,2018,2030,1764000000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,SK Advanced,Ulsan,Propylene,Naphtha Cracker,600,2016,2030,1170000000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,SK Energy,Ulsan,Propylene,Naphtha Cracker,620,1996,2030,279000000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,SK Geocentric,Ulsan,Propylene,Naphtha Cracker,380,1989,2030,0.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Taekwang Industrial,Ulsan,Propylene,Naphtha Cracker,300,1997,2030,157500000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Hyosung Chemical,Ulsan,Propylene,Naphtha Cracker,500,1991,2030,37500000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Lotte Chemical,Daesan,Butadiene,Naphtha Cracker,190,1997,2030,99750000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Butadiene,Naphtha Cracker,163,2021,2030,378975000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,LG Chem,Daesan,Butadiene,Naphtha Cracker,200,1991,2030,15000000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Butadiene,Naphtha Cracker,150,1991,2030,11250000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Kumho Petrochemical,Yeosu,Butadiene,Naphtha Cracker,147,1992,2030,22050000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Lotte GS Chemical,Yeosu,Butadiene,Naphtha Cracker,130,2022,2030,312000000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Butadiene,Naphtha Cracker,160,2011,2030,252000000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,LG Chem,Yeosu,Butadiene,Naphtha Cracker,306,1991,2030,22950000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Butadiene,Naphtha Cracker,378,1992,2030,56700000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Kumho Petrochemical,Ulsan,Butadiene,Naphtha Cracker,90,1979,2030,0.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Daehan Oil Chemical,Ulsan,Butadiene,Naphtha Cracker,146,2023,2030,361350000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,SK Geocentric,Ulsan,Butadiene,Naphtha Cracker,130,1989,2030,0.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,SK Geocentric,Ulsan,C-H,Naphtha Cracker,160,1974,2030,0.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Caprolactam,Ulsan,C-H,Naphtha Cracker,190,2000,2030,142500000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,S-Oil Shaheen,Onsan,Ethylene,Naphtha Cracker,1800,2026,2030,4860000000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,S-Oil Shaheen,Onsan,Propylene,Naphtha Cracker,770,2026,2030,2079000000.0,shaheen_ncc_h2_flat_coupled,1.5C
+Unknown,Lotte Chemical,Daesan,Ethylene,Naphtha Cracker,1100,1991,2030,82500000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Ethylene,Naphtha Cracker,850,2021,2030,1976250000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,LG Chem,Daesan,Ethylene,Naphtha Cracker,1300,1991,2030,97500000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Ethylene,Naphtha Cracker,1525,1991,2030,114375000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Ethylene,Naphtha Cracker,1230,1992,2030,184500000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,LG Chem,Yeosu,Ethylene,Naphtha Cracker,1030,2021,2030,2394750000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Ethylene,Naphtha Cracker,2285,1979,2030,0.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,GS Caltex,Yeosu,Ethylene,Naphtha Cracker,900,2021,2030,2092500000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Daehan Oil Chemical,Onsan,Ethylene,Naphtha Cracker,900,1991,2030,67500000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,S-Oil,Onsan,Ethylene,Naphtha Cracker,182,2018,2030,382200000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,SK Geocentric,Ulsan,Ethylene,Naphtha Cracker,660,1989,2030,0.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Lotte Chemical,Daesan,Propylene,Naphtha Cracker,550,1997,2030,288750000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,HDHyundai Oilbank,Daesan,Propylene,Naphtha Cracker,420,2011,2030,661500000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Propylene,Naphtha Cracker,451,2021,2030,1048575000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,LG Chem,Daesan,Propylene,Naphtha Cracker,680,1991,2030,51000000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Propylene,Naphtha Cracker,1064,1991,2030,79800000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Propylene,Naphtha Cracker,641,1992,2030,96150000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,LG Chem,Yeosu,Propylene,Naphtha Cracker,1300,2021,2030,3022500000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Propylene,Naphtha Cracker,1289,1979,2030,0.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,GS Caltex,Yeosu,Propylene,Naphtha Cracker,970,2021,2030,2255250000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Daehan Oil Chemical,Onsan,Propylene,Naphtha Cracker,560,1991,2030,42000000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,S-Oil,Onsan,Propylene,Naphtha Cracker,840,2018,2030,1764000000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,SK Advanced,Ulsan,Propylene,Naphtha Cracker,600,2016,2030,1170000000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,SK Energy,Ulsan,Propylene,Naphtha Cracker,620,1996,2030,279000000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,SK Geocentric,Ulsan,Propylene,Naphtha Cracker,380,1989,2030,0.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Taekwang Industrial,Ulsan,Propylene,Naphtha Cracker,300,1997,2030,157500000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Hyosung Chemical,Ulsan,Propylene,Naphtha Cracker,500,1991,2030,37500000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Lotte Chemical,Daesan,Butadiene,Naphtha Cracker,190,1997,2030,99750000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Butadiene,Naphtha Cracker,163,2021,2030,378975000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,LG Chem,Daesan,Butadiene,Naphtha Cracker,200,1991,2030,15000000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Butadiene,Naphtha Cracker,150,1991,2030,11250000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Kumho Petrochemical,Yeosu,Butadiene,Naphtha Cracker,147,1992,2030,22050000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Lotte GS Chemical,Yeosu,Butadiene,Naphtha Cracker,130,2022,2030,312000000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Butadiene,Naphtha Cracker,160,2011,2030,252000000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,LG Chem,Yeosu,Butadiene,Naphtha Cracker,306,1991,2030,22950000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Butadiene,Naphtha Cracker,378,1992,2030,56700000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Kumho Petrochemical,Ulsan,Butadiene,Naphtha Cracker,90,1979,2030,0.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Daehan Oil Chemical,Ulsan,Butadiene,Naphtha Cracker,146,2023,2030,361350000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,SK Geocentric,Ulsan,Butadiene,Naphtha Cracker,130,1989,2030,0.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,SK Geocentric,Ulsan,C-H,Naphtha Cracker,160,1974,2030,0.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Caprolactam,Ulsan,C-H,Naphtha Cracker,190,2000,2030,142500000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,S-Oil Shaheen,Onsan,Ethylene,Naphtha Cracker,1800,2026,2030,4860000000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,S-Oil Shaheen,Onsan,Propylene,Naphtha Cracker,770,2026,2030,2079000000.0,shaheen_ncc_h2_flat_decoupled,1.5C
+Unknown,Lotte Chemical,Daesan,Ethylene,Naphtha Cracker,1100,1991,2029,165000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Ethylene,Naphtha Cracker,850,2021,2029,2040000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,LG Chem,Daesan,Ethylene,Naphtha Cracker,1300,1991,2029,195000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Ethylene,Naphtha Cracker,1525,1991,2029,228750000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Ethylene,Naphtha Cracker,1230,1992,2029,276750000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,LG Chem,Yeosu,Ethylene,Naphtha Cracker,1030,2021,2029,2472000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Ethylene,Naphtha Cracker,2285,1979,2029,0.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,GS Caltex,Yeosu,Ethylene,Naphtha Cracker,900,2021,2029,2160000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Daehan Oil Chemical,Onsan,Ethylene,Naphtha Cracker,900,1991,2029,135000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,S-Oil,Onsan,Ethylene,Naphtha Cracker,182,2018,2029,395850000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,SK Geocentric,Ulsan,Ethylene,Naphtha Cracker,660,1989,2029,0.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Lotte Chemical,Daesan,Propylene,Naphtha Cracker,550,1997,2029,330000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,HDHyundai Oilbank,Daesan,Propylene,Naphtha Cracker,420,2011,2029,693000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Propylene,Naphtha Cracker,451,2021,2029,1082400000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,LG Chem,Daesan,Propylene,Naphtha Cracker,680,1991,2029,102000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Propylene,Naphtha Cracker,1064,1991,2029,159600000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Propylene,Naphtha Cracker,641,1992,2029,144225000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,LG Chem,Yeosu,Propylene,Naphtha Cracker,1300,2021,2029,3120000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Propylene,Naphtha Cracker,1289,1979,2029,0.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,GS Caltex,Yeosu,Propylene,Naphtha Cracker,970,2021,2029,2328000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Daehan Oil Chemical,Onsan,Propylene,Naphtha Cracker,560,1991,2029,84000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,S-Oil,Onsan,Propylene,Naphtha Cracker,840,2018,2029,1827000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,SK Advanced,Ulsan,Propylene,Naphtha Cracker,600,2016,2029,1215000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,SK Energy,Ulsan,Propylene,Naphtha Cracker,620,1996,2029,325500000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,SK Geocentric,Ulsan,Propylene,Naphtha Cracker,380,1989,2029,0.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Taekwang Industrial,Ulsan,Propylene,Naphtha Cracker,300,1997,2029,180000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Hyosung Chemical,Ulsan,Propylene,Naphtha Cracker,500,1991,2029,75000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Lotte Chemical,Daesan,Butadiene,Naphtha Cracker,190,1997,2029,114000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Butadiene,Naphtha Cracker,163,2021,2029,391200000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,LG Chem,Daesan,Butadiene,Naphtha Cracker,200,1991,2029,30000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Butadiene,Naphtha Cracker,150,1991,2029,22500000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Kumho Petrochemical,Yeosu,Butadiene,Naphtha Cracker,147,1992,2029,33075000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Lotte GS Chemical,Yeosu,Butadiene,Naphtha Cracker,130,2022,2029,321750000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Butadiene,Naphtha Cracker,160,2011,2029,264000000.00000003,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,LG Chem,Yeosu,Butadiene,Naphtha Cracker,306,1991,2029,45900000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Butadiene,Naphtha Cracker,378,1992,2029,85050000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Kumho Petrochemical,Ulsan,Butadiene,Naphtha Cracker,90,1979,2029,0.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Daehan Oil Chemical,Ulsan,Butadiene,Naphtha Cracker,146,2023,2029,372300000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,SK Geocentric,Ulsan,Butadiene,Naphtha Cracker,130,1989,2029,0.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,SK Geocentric,Ulsan,C-H,Naphtha Cracker,160,1974,2029,0.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Caprolactam,Ulsan,C-H,Naphtha Cracker,190,2000,2029,156750000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,S-Oil Shaheen,Onsan,Ethylene,Naphtha Cracker,1800,2026,2029,4995000000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,S-Oil Shaheen,Onsan,Propylene,Naphtha Cracker,770,2026,2029,2136750000.0,shaheen_ncc_elec_rising_coupled,1.5C
+Unknown,Lotte Chemical,Daesan,Ethylene,Naphtha Cracker,1100,1991,2029,165000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Ethylene,Naphtha Cracker,850,2021,2029,2040000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,LG Chem,Daesan,Ethylene,Naphtha Cracker,1300,1991,2029,195000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Ethylene,Naphtha Cracker,1525,1991,2029,228750000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Ethylene,Naphtha Cracker,1230,1992,2029,276750000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,LG Chem,Yeosu,Ethylene,Naphtha Cracker,1030,2021,2029,2472000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Ethylene,Naphtha Cracker,2285,1979,2029,0.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,GS Caltex,Yeosu,Ethylene,Naphtha Cracker,900,2021,2029,2160000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Daehan Oil Chemical,Onsan,Ethylene,Naphtha Cracker,900,1991,2029,135000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,S-Oil,Onsan,Ethylene,Naphtha Cracker,182,2018,2029,395850000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,SK Geocentric,Ulsan,Ethylene,Naphtha Cracker,660,1989,2029,0.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Lotte Chemical,Daesan,Propylene,Naphtha Cracker,550,1997,2029,330000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,HDHyundai Oilbank,Daesan,Propylene,Naphtha Cracker,420,2011,2029,693000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Propylene,Naphtha Cracker,451,2021,2029,1082400000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,LG Chem,Daesan,Propylene,Naphtha Cracker,680,1991,2029,102000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Propylene,Naphtha Cracker,1064,1991,2029,159600000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Propylene,Naphtha Cracker,641,1992,2029,144225000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,LG Chem,Yeosu,Propylene,Naphtha Cracker,1300,2021,2029,3120000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Propylene,Naphtha Cracker,1289,1979,2029,0.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,GS Caltex,Yeosu,Propylene,Naphtha Cracker,970,2021,2029,2328000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Daehan Oil Chemical,Onsan,Propylene,Naphtha Cracker,560,1991,2029,84000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,S-Oil,Onsan,Propylene,Naphtha Cracker,840,2018,2029,1827000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,SK Advanced,Ulsan,Propylene,Naphtha Cracker,600,2016,2029,1215000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,SK Energy,Ulsan,Propylene,Naphtha Cracker,620,1996,2029,325500000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,SK Geocentric,Ulsan,Propylene,Naphtha Cracker,380,1989,2029,0.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Taekwang Industrial,Ulsan,Propylene,Naphtha Cracker,300,1997,2029,180000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Hyosung Chemical,Ulsan,Propylene,Naphtha Cracker,500,1991,2029,75000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Lotte Chemical,Daesan,Butadiene,Naphtha Cracker,190,1997,2029,114000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Butadiene,Naphtha Cracker,163,2021,2029,391200000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,LG Chem,Daesan,Butadiene,Naphtha Cracker,200,1991,2029,30000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Butadiene,Naphtha Cracker,150,1991,2029,22500000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Kumho Petrochemical,Yeosu,Butadiene,Naphtha Cracker,147,1992,2029,33075000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Lotte GS Chemical,Yeosu,Butadiene,Naphtha Cracker,130,2022,2029,321750000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Butadiene,Naphtha Cracker,160,2011,2029,264000000.00000003,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,LG Chem,Yeosu,Butadiene,Naphtha Cracker,306,1991,2029,45900000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Butadiene,Naphtha Cracker,378,1992,2029,85050000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Kumho Petrochemical,Ulsan,Butadiene,Naphtha Cracker,90,1979,2029,0.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Daehan Oil Chemical,Ulsan,Butadiene,Naphtha Cracker,146,2023,2029,372300000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,SK Geocentric,Ulsan,Butadiene,Naphtha Cracker,130,1989,2029,0.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,SK Geocentric,Ulsan,C-H,Naphtha Cracker,160,1974,2029,0.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Caprolactam,Ulsan,C-H,Naphtha Cracker,190,2000,2029,156750000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,S-Oil Shaheen,Onsan,Ethylene,Naphtha Cracker,1800,2026,2029,4995000000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,S-Oil Shaheen,Onsan,Propylene,Naphtha Cracker,770,2026,2029,2136750000.0,shaheen_ncc_elec_rising_decoupled,1.5C
+Unknown,Lotte Chemical,Daesan,Ethylene,Naphtha Cracker,1100,1991,2029,165000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Ethylene,Naphtha Cracker,850,2021,2029,2040000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,LG Chem,Daesan,Ethylene,Naphtha Cracker,1300,1991,2029,195000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Ethylene,Naphtha Cracker,1525,1991,2029,228750000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Ethylene,Naphtha Cracker,1230,1992,2029,276750000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,LG Chem,Yeosu,Ethylene,Naphtha Cracker,1030,2021,2029,2472000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Ethylene,Naphtha Cracker,2285,1979,2029,0.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,GS Caltex,Yeosu,Ethylene,Naphtha Cracker,900,2021,2029,2160000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Daehan Oil Chemical,Onsan,Ethylene,Naphtha Cracker,900,1991,2029,135000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,S-Oil,Onsan,Ethylene,Naphtha Cracker,182,2018,2029,395850000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,SK Geocentric,Ulsan,Ethylene,Naphtha Cracker,660,1989,2029,0.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Lotte Chemical,Daesan,Propylene,Naphtha Cracker,550,1997,2029,330000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,HDHyundai Oilbank,Daesan,Propylene,Naphtha Cracker,420,2011,2029,693000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Propylene,Naphtha Cracker,451,2021,2029,1082400000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,LG Chem,Daesan,Propylene,Naphtha Cracker,680,1991,2029,102000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Propylene,Naphtha Cracker,1064,1991,2029,159600000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Propylene,Naphtha Cracker,641,1992,2029,144225000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,LG Chem,Yeosu,Propylene,Naphtha Cracker,1300,2021,2029,3120000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Propylene,Naphtha Cracker,1289,1979,2029,0.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,GS Caltex,Yeosu,Propylene,Naphtha Cracker,970,2021,2029,2328000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Daehan Oil Chemical,Onsan,Propylene,Naphtha Cracker,560,1991,2029,84000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,S-Oil,Onsan,Propylene,Naphtha Cracker,840,2018,2029,1827000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,SK Advanced,Ulsan,Propylene,Naphtha Cracker,600,2016,2029,1215000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,SK Energy,Ulsan,Propylene,Naphtha Cracker,620,1996,2029,325500000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,SK Geocentric,Ulsan,Propylene,Naphtha Cracker,380,1989,2029,0.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Taekwang Industrial,Ulsan,Propylene,Naphtha Cracker,300,1997,2029,180000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Hyosung Chemical,Ulsan,Propylene,Naphtha Cracker,500,1991,2029,75000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Lotte Chemical,Daesan,Butadiene,Naphtha Cracker,190,1997,2029,114000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Butadiene,Naphtha Cracker,163,2021,2029,391200000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,LG Chem,Daesan,Butadiene,Naphtha Cracker,200,1991,2029,30000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Butadiene,Naphtha Cracker,150,1991,2029,22500000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Kumho Petrochemical,Yeosu,Butadiene,Naphtha Cracker,147,1992,2029,33075000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Lotte GS Chemical,Yeosu,Butadiene,Naphtha Cracker,130,2022,2029,321750000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Butadiene,Naphtha Cracker,160,2011,2029,264000000.00000003,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,LG Chem,Yeosu,Butadiene,Naphtha Cracker,306,1991,2029,45900000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Butadiene,Naphtha Cracker,378,1992,2029,85050000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Kumho Petrochemical,Ulsan,Butadiene,Naphtha Cracker,90,1979,2029,0.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Daehan Oil Chemical,Ulsan,Butadiene,Naphtha Cracker,146,2023,2029,372300000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,SK Geocentric,Ulsan,Butadiene,Naphtha Cracker,130,1989,2029,0.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,SK Geocentric,Ulsan,C-H,Naphtha Cracker,160,1974,2029,0.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Caprolactam,Ulsan,C-H,Naphtha Cracker,190,2000,2029,156750000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,S-Oil Shaheen,Onsan,Ethylene,Naphtha Cracker,1800,2026,2029,4995000000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,S-Oil Shaheen,Onsan,Propylene,Naphtha Cracker,770,2026,2029,2136750000.0,shaheen_ncc_elec_flat_coupled,1.5C
+Unknown,Lotte Chemical,Daesan,Ethylene,Naphtha Cracker,1100,1991,2029,165000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Ethylene,Naphtha Cracker,850,2021,2029,2040000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,LG Chem,Daesan,Ethylene,Naphtha Cracker,1300,1991,2029,195000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Ethylene,Naphtha Cracker,1525,1991,2029,228750000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Ethylene,Naphtha Cracker,1230,1992,2029,276750000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,LG Chem,Yeosu,Ethylene,Naphtha Cracker,1030,2021,2029,2472000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Ethylene,Naphtha Cracker,2285,1979,2029,0.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,GS Caltex,Yeosu,Ethylene,Naphtha Cracker,900,2021,2029,2160000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Daehan Oil Chemical,Onsan,Ethylene,Naphtha Cracker,900,1991,2029,135000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,S-Oil,Onsan,Ethylene,Naphtha Cracker,182,2018,2029,395850000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,SK Geocentric,Ulsan,Ethylene,Naphtha Cracker,660,1989,2029,0.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Lotte Chemical,Daesan,Propylene,Naphtha Cracker,550,1997,2029,330000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,HDHyundai Oilbank,Daesan,Propylene,Naphtha Cracker,420,2011,2029,693000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Propylene,Naphtha Cracker,451,2021,2029,1082400000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,LG Chem,Daesan,Propylene,Naphtha Cracker,680,1991,2029,102000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Propylene,Naphtha Cracker,1064,1991,2029,159600000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Propylene,Naphtha Cracker,641,1992,2029,144225000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,LG Chem,Yeosu,Propylene,Naphtha Cracker,1300,2021,2029,3120000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Propylene,Naphtha Cracker,1289,1979,2029,0.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,GS Caltex,Yeosu,Propylene,Naphtha Cracker,970,2021,2029,2328000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Daehan Oil Chemical,Onsan,Propylene,Naphtha Cracker,560,1991,2029,84000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,S-Oil,Onsan,Propylene,Naphtha Cracker,840,2018,2029,1827000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,SK Advanced,Ulsan,Propylene,Naphtha Cracker,600,2016,2029,1215000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,SK Energy,Ulsan,Propylene,Naphtha Cracker,620,1996,2029,325500000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,SK Geocentric,Ulsan,Propylene,Naphtha Cracker,380,1989,2029,0.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Taekwang Industrial,Ulsan,Propylene,Naphtha Cracker,300,1997,2029,180000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Hyosung Chemical,Ulsan,Propylene,Naphtha Cracker,500,1991,2029,75000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Lotte Chemical,Daesan,Butadiene,Naphtha Cracker,190,1997,2029,114000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,HD Hyundai Chemical,Daesan,Butadiene,Naphtha Cracker,163,2021,2029,391200000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,LG Chem,Daesan,Butadiene,Naphtha Cracker,200,1991,2029,30000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Hanwha TotalEnergies,Daesan,Butadiene,Naphtha Cracker,150,1991,2029,22500000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Kumho Petrochemical,Yeosu,Butadiene,Naphtha Cracker,147,1992,2029,33075000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Lotte GS Chemical,Yeosu,Butadiene,Naphtha Cracker,130,2022,2029,321750000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Lotte Chemical,Yeosu,Butadiene,Naphtha Cracker,160,2011,2029,264000000.00000003,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,LG Chem,Yeosu,Butadiene,Naphtha Cracker,306,1991,2029,45900000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Yeochon NCC,Yeosu,Butadiene,Naphtha Cracker,378,1992,2029,85050000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Kumho Petrochemical,Ulsan,Butadiene,Naphtha Cracker,90,1979,2029,0.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Daehan Oil Chemical,Ulsan,Butadiene,Naphtha Cracker,146,2023,2029,372300000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,SK Geocentric,Ulsan,Butadiene,Naphtha Cracker,130,1989,2029,0.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,SK Geocentric,Ulsan,C-H,Naphtha Cracker,160,1974,2029,0.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,Caprolactam,Ulsan,C-H,Naphtha Cracker,190,2000,2029,156750000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,S-Oil Shaheen,Onsan,Ethylene,Naphtha Cracker,1800,2026,2029,4995000000.0,shaheen_ncc_elec_flat_decoupled,1.5C
+Unknown,S-Oil Shaheen,Onsan,Propylene,Naphtha Cracker,770,2026,2029,2136750000.0,shaheen_ncc_elec_flat_decoupled,1.5C

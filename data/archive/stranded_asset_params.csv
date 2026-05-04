@@ -1,0 +1,6 @@
+process,overnight_capex_usd_per_ton,useful_life_years,depreciation_method,abandonment_cost_usd_per_ton,source,confidence,notes
+Naphtha Cracker,3000,40,straight_line,50,Industry estimate,MEDIUM,Updated to $3000/t based on Korean NCC facilities
+BTX Plant,800,40,straight_line,30,Industry estimate,LOW,User to provide Korea-specific values
+Utility,500,30,straight_line,20,Industry estimate,LOW,User to provide Korea-specific values
+Extraction,600,30,straight_line,25,Industry estimate,LOW,User to provide Korea-specific values
+Polymerization,400,25,straight_line,15,Industry estimate,LOW,User to provide Korea-specific values

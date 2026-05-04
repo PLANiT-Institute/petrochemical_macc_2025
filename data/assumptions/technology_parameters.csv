@@ -1,0 +1,6 @@
+technology,applies_to,cop,h2_ton_per_ton_ethylene,elec_mwh_per_ton_ethylene,energy_conversion_efficiency,trl,available_year,source,notes
+Heat_Pump,Non-NCC low-temp processes (<165C),4.0,,,0.95,9,2025,Kosmadakis 2020,COP 4.0 for industrial high-temperature heat pumps
+NCC-H2,Naphtha Cracker furnaces,,0.2,,0.85,7,2030,Power Engineering 2022,H2 consumption 0.2 t-H2/t-C2H4; 85% efficiency (conservative HHV/LHV)
+NCC-Electricity,Naphtha Cracker furnaces,,,5.0,0.95,8,2030,BASF/SABIC/Linde,Electric cracker 5.0 MWh/t-C2H4 (eFurnace demo)
+RDH,BTX Plant high-temp,,,,0.93,8,2026,Coolbrook 2024,RotoDynamic Heater for aromatics reforming
+RE_PPA,All grid electricity,,,,1.0,,2025,N/A,Renewable PPA - contract based procurement

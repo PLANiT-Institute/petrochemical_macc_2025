@@ -1,0 +1,54 @@
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+.env
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary Word documents
+~$*.docx
+~$*.doc
+
+# LaTeX auxiliary files
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.synctex.gz
+
+# Generated outputs (keep scenario results and figures for Streamlit)
+outputs/*
+!outputs/scenario_results.csv
+!outputs/stranded_assets_summary.csv
+!outputs/stranded_assets_facilities.csv
+!outputs/regional_mac_summary.csv
+!outputs/regional_abatement_summary.csv
+!outputs/figures/
+!outputs/figures/**
+
+# Archive (deprecated scripts)
+archive/deprecated/
+
+# Logs
+logs/*.log
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/

@@ -1,0 +1,9 @@
+scenario,stranding_year_1.5C,stranded_value_1.5C_usd,stranded_value_1.5C_fmt,stranding_year_2.0C,stranded_value_2.0C_usd,stranded_value_2.0C_fmt
+shaheen_ncc_h2_rising_coupled,2030,26959125000.0,$26.96B,2050,8942850000.0,$8.94B
+shaheen_ncc_h2_rising_decoupled,2030,26959125000.0,$26.96B,2050,8942850000.0,$8.94B
+shaheen_ncc_h2_flat_coupled,2030,26959125000.0,$26.96B,2050,8942850000.0,$8.94B
+shaheen_ncc_h2_flat_decoupled,2030,26959125000.0,$26.96B,2050,8942850000.0,$8.94B
+shaheen_ncc_elec_rising_coupled,2029,28702350000.0,$28.70B,2043,14566650000.0,$14.57B
+shaheen_ncc_elec_rising_decoupled,2029,28702350000.0,$28.70B,2043,14566650000.0,$14.57B
+shaheen_ncc_elec_flat_coupled,2029,28702350000.0,$28.70B,2043,14566650000.0,$14.57B
+shaheen_ncc_elec_flat_decoupled,2029,28702350000.0,$28.70B,2043,14566650000.0,$14.57B

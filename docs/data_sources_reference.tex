@@ -1,0 +1,604 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Data Sources Reference Document
+% Korea Petrochemical Net Zero Pathway Analysis
+% PLANiT Institute, 2025
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt,a4paper]{article}
+
+%% Encoding and Fonts
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+%% Graphics and Figures
+\usepackage{graphicx}
+\usepackage{float}
+
+%% Tables
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+
+%% Units and Numbers
+\usepackage{siunitx}
+\sisetup{
+  group-separator = {,},
+  group-minimum-digits = 4,
+  detect-all
+}
+
+%% Page Layout
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\setlength{\headheight}{14pt}
+
+%% Colors - Important for source status
+\usepackage[table]{xcolor}
+\definecolor{tableheader}{RGB}{240,240,240}
+\definecolor{linkblue}{RGB}{0,0,139}
+\definecolor{sourcered}{RGB}{200,0,0}
+\definecolor{sourcegreen}{RGB}{0,128,0}
+\definecolor{sourceyellow}{RGB}{180,140,0}
+
+%% Hyperlinks
+\usepackage[colorlinks=true,linkcolor=linkblue,citecolor=linkblue,urlcolor=linkblue]{hyperref}
+
+%% Bibliography
+\usepackage[authoryear,round]{natbib}
+\bibliographystyle{apalike}
+
+%% Header/Footer
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\small PLANiT Institute}
+\lhead{\small Data Sources Reference}
+\cfoot{\thepage}
+
+%% Custom commands for source status
+\newcommand{\sourceok}[1]{\textcolor{sourcegreen}{#1}}
+\newcommand{\nosource}[1]{\textcolor{sourcered}{#1 [SOURCE NEEDED]}}
+\newcommand{\partialsource}[1]{\textcolor{sourceyellow}{#1 [PARTIAL]}}
+
+\newcommand{\COtwo}{CO\textsubscript{2}}
+\newcommand{\HTwo}{H\textsubscript{2}}
+\newcommand{\mtco}{Mt~\COtwo}
+\newcommand{\tco}{t~\COtwo}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+%% Title Page
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+
+{\LARGE\bfseries Data Sources Reference Document}\\[0.5cm]
+{\Large Korea Petrochemical Net Zero Pathway Analysis}\\[2cm]
+
+{\large PLANiT Institute}\\
+{\normalsize Seoul, Republic of Korea}\\[1cm]
+
+{\large Technical Documentation}\\[0.5cm]
+{\normalsize Version 1.0}\\[2cm]
+
+{\large January 2026}\\[2cm]
+
+\vfill
+
+\begin{center}
+\fbox{\parbox{0.8\textwidth}{
+\centering
+\textbf{Color Legend}\\[0.5cm]
+\textcolor{sourcegreen}{\textbf{Green}} = Properly cited source\\
+\textcolor{sourceyellow}{\textbf{Yellow}} = Partial source (needs specific reference)\\
+\textcolor{sourcered}{\textbf{Red}} = No source documented
+}}
+\end{center}
+
+\vfill
+
+{\small
+\textbf{Document Purpose:}\\
+This document provides a comprehensive audit of all data sources used in the Korea Petrochemical Net Zero Pathway Analysis model. Values without proper academic or industry citations are highlighted in \textcolor{sourcered}{\textbf{red}}.
+}
+\end{titlepage}
+
+%% Table of Contents
+\tableofcontents
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Executive Summary}
+
+This document audits the data sources for all parameters used in the Korea Petrochemical MACC model. The analysis reveals:
+
+\begin{itemize}
+    \item \textbf{Well-documented:} Emission factors, renewable energy prices, and core technology specifications
+    \item \textcolor{sourcered}{\textbf{Undocumented:}} Product energy benchmarks, fuel prices, emission targets, and asset valuation parameters
+\end{itemize}
+
+\subsection{Summary Statistics}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lrrl}
+\toprule
+\textbf{Category} & \textbf{Values} & \textbf{With Source} & \textbf{Status} \\
+\midrule
+Emission Factors & 9 & 9 & \sourceok{Complete} \\
+Technology Parameters & 25 & 18 & \partialsource{Partial} \\
+RE Price Trajectory & 26 & 26 & \sourceok{Complete} \\
+H2 Price Trajectory & 26 & 26 & \sourceok{Derived} \\
+Product Benchmarks & 432 & 0 & \nosource{None} \\
+Fuel Prices & 182 & 0 & \nosource{None} \\
+Emission Targets & 6 & 0 & \nosource{None} \\
+Asset Valuation & 12 & 0 & \nosource{None} \\
+\midrule
+\textbf{Total} & \textbf{718} & \textbf{79} & \textbf{11\%} \\
+\bottomrule
+\end{tabular}
+\caption{Data source coverage summary}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Technology Parameters}
+\label{sec:technology}
+
+\textbf{Source File:} \texttt{data/assumptions/technology\_parameters.csv}
+
+\subsection{Heat Pump}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Parameter} & \textbf{Value} & \textbf{Source} & \textbf{Status} \\
+\midrule
+COP (Coefficient of Performance) & 4.0 & \citet{kosmadakis2020} & \sourceok{OK} \\
+Energy Conversion Efficiency & 95\% & \nosource{Internal} & \nosource{Missing} \\
+Application Temperature & $<$165\textdegree C & \citet{kosmadakis2020} & \sourceok{OK} \\
+CAPEX 2025 & \$800 M/Mt\COtwo & \nosource{Internal} & \nosource{Missing} \\
+CAPEX 2050 & \$400 M/Mt\COtwo & \nosource{Internal} & \nosource{Missing} \\
+CAPEX Learning Rate & 50\% by 2050 & \nosource{Internal} & \nosource{Missing} \\
+OPEX & 3\% of CAPEX & \nosource{Internal} & \nosource{Missing} \\
+Lifetime & 20 years & \nosource{Internal} & \nosource{Missing} \\
+TRL & 9 & \nosource{Internal} & \nosource{Missing} \\
+Available Year & 2025 & \nosource{Internal} & \nosource{Missing} \\
+\bottomrule
+\end{tabular}
+\caption{Heat Pump technology parameters}
+\end{table}
+
+\subsection{NCC-H2 (Green Hydrogen Furnaces)}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Parameter} & \textbf{Value} & \textbf{Source} & \textbf{Status} \\
+\midrule
+H2 Consumption & 0.2 t-H2/t-C2H4 & Power Engineering 2022 & \sourceok{OK} \\
+H2 Demand Factor & 0.127 t/t\COtwo & \partialsource{Derived} & \partialsource{Partial} \\
+Energy Efficiency & 85\% & Power Engineering 2022 & \sourceok{OK} \\
+Efficiency Basis & HHV/LHV conservative & \citet{coolbrook2024} & \sourceok{OK} \\
+CAPEX 2025 & \$1,700 M/Mt\COtwo & \nosource{Internal} & \nosource{Missing} \\
+CAPEX 2050 & \$850 M/Mt\COtwo & \nosource{Internal} & \nosource{Missing} \\
+OPEX & 4\% of CAPEX & \nosource{Internal} & \nosource{Missing} \\
+Lifetime & 25 years & \nosource{Internal} & \nosource{Missing} \\
+TRL & 7 & \nosource{Internal} & \nosource{Missing} \\
+Available Year & 2030 & \nosource{Internal} & \nosource{Missing} \\
+\bottomrule
+\end{tabular}
+\caption{NCC-H2 technology parameters}
+\end{table}
+
+\subsection{NCC-Electricity (Electric Crackers)}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Parameter} & \textbf{Value} & \textbf{Source} & \textbf{Status} \\
+\midrule
+Electricity Consumption & 5.0 MWh/t-C2H4 & \citet{basf2024} & \sourceok{OK} \\
+Electricity Demand Factor & 3.18 MWh/t\COtwo & \partialsource{Derived} & \partialsource{Partial} \\
+Energy Efficiency & 95\% & \citet{basf2024} & \sourceok{OK} \\
+CAPEX 2025 & \$1,500 M/Mt\COtwo & \nosource{Internal} & \nosource{Missing} \\
+CAPEX 2050 & \$750 M/Mt\COtwo & \nosource{Internal} & \nosource{Missing} \\
+OPEX & 4\% of CAPEX & \nosource{Internal} & \nosource{Missing} \\
+Lifetime & 25 years & \nosource{Internal} & \nosource{Missing} \\
+TRL & 8 & \nosource{Internal} & \nosource{Missing} \\
+Available Year & 2030 & \nosource{Internal} & \nosource{Missing} \\
+\bottomrule
+\end{tabular}
+\caption{NCC-Electricity technology parameters}
+\end{table}
+
+\subsection{RDH (RotoDynamic Heater)}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Parameter} & \textbf{Value} & \textbf{Source} & \textbf{Status} \\
+\midrule
+Energy Efficiency & 93\% & \citet{coolbrook2024} & \sourceok{OK} \\
+Application & High-temp BTX & \citet{coolbrook2024} & \sourceok{OK} \\
+CAPEX 2025 & \$900 M/Mt\COtwo & \nosource{Internal} & \nosource{Missing} \\
+CAPEX 2050 & \$450 M/Mt\COtwo & \nosource{Internal} & \nosource{Missing} \\
+OPEX & 3\% of CAPEX & \nosource{Internal} & \nosource{Missing} \\
+Lifetime & 25 years & \nosource{Internal} & \nosource{Missing} \\
+TRL & 8 & \nosource{Internal} & \nosource{Missing} \\
+Available Year & 2026 & \nosource{Internal} & \nosource{Missing} \\
+\bottomrule
+\end{tabular}
+\caption{RDH technology parameters}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Emission Factors}
+\label{sec:emission_factors}
+
+\textbf{Source File:} \texttt{data/assumptions/emission\_factors.csv}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lllll}
+\toprule
+\textbf{Fuel} & \textbf{Value} & \textbf{Unit} & \textbf{Source} & \textbf{Status} \\
+\midrule
+Naphtha & 0.0542 & t\COtwo/GJ & \citet{ipcc2019}, Table 2.3 & \sourceok{OK} \\
+LNG & 0.0561 & t\COtwo/GJ & \citet{ipcc2019}, Table 2.3 & \sourceok{OK} \\
+Fuel Gas & 0.050 & t\COtwo/GJ & \citet{api2021} & \sourceok{OK} \\
+Byproduct Gas & 0.048 & t\COtwo/GJ & \citet{api2021} & \sourceok{OK} \\
+LPG & 0.0631 & t\COtwo/GJ & \citet{ipcc2019}, Table 2.3 & \sourceok{OK} \\
+Fuel Oil & 0.0773 & t\COtwo/GJ & \citet{ipcc2019}, Table 2.3 & \sourceok{OK} \\
+Diesel & 0.0741 & t\COtwo/GJ & \citet{ipcc2019}, Table 2.3 & \sourceok{OK} \\
+Grid Electricity (2025) & 0.436 & t\COtwo/MWh & \partialsource{Korea MOE 2024} & \partialsource{Partial} \\
+Green H2 & 0.0 & t\COtwo/kg & Electrolysis assumption & \sourceok{OK} \\
+\bottomrule
+\end{tabular}
+\caption{Emission factors by fuel type}
+\end{table}
+
+\textbf{Notes:}
+\begin{itemize}
+    \item LNG and Fuel Gas values were corrected from 0.0149 in earlier versions
+    \item Grid electricity emission factor references ``Korea 2025'' but lacks specific MOE document number
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Energy Price Trajectories}
+\label{sec:prices}
+
+\subsection{Renewable Electricity Price (RE-PPA)}
+\textbf{Source File:} \texttt{data/assumptions/prices/re\_price\_trajectory.csv}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Year} & \textbf{Price (\$/MWh)} & \textbf{Source} & \textbf{Status} \\
+\midrule
+2025 & 65.00 & \citet{irena2024}, \citet{iea2024} & \sourceok{OK} \\
+2030 & 55.69 & \citet{irena2024}, \citet{iea2024} & \sourceok{OK} \\
+2035 & 47.71 & \citet{irena2024}, \citet{iea2024} & \sourceok{OK} \\
+2040 & 40.87 & \citet{irena2024}, \citet{iea2024} & \sourceok{OK} \\
+2045 & 35.02 & \citet{irena2024}, \citet{iea2024} & \sourceok{OK} \\
+2050 & 30.00 & \citet{irena2024}, \citet{iea2024} & \sourceok{OK} \\
+\bottomrule
+\end{tabular}
+\caption{Renewable electricity price trajectory (selected years)}
+\end{table}
+
+\textbf{Note:} Prices for all 26 years (2025-2050) are interpolated from anchor years. Source: Korea RE PPA trajectory based on IRENA 2024 and IEA WEO 2024.
+
+\subsection{Green Hydrogen Price (LCOH)}
+\textbf{Source File:} \texttt{data/assumptions/prices/h2\_price\_trajectory.csv}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lllll}
+\toprule
+\textbf{Year} & \textbf{Price (\$/kg)} & \textbf{RE Price} & \textbf{Ely CAPEX} & \textbf{Efficiency} \\
+\midrule
+2025 & 4.58 & \$65/MWh & \$1,000/kW & 70\% \\
+2030 & 3.91 & \$55.7/MWh & \$900/kW & 71\% \\
+2035 & 3.33 & \$47.7/MWh & \$800/kW & 72\% \\
+2040 & 2.82 & \$40.9/MWh & \$700/kW & 73\% \\
+2045 & 2.39 & \$35.0/MWh & \$600/kW & 74\% \\
+2050 & 2.01 & \$30.0/MWh & \$500/kW & 75\% \\
+\bottomrule
+\end{tabular}
+\caption{Green hydrogen price trajectory with underlying assumptions}
+\end{table}
+
+\textbf{Source:} PLANiT LCOH Model (internal calculation based on cited RE prices)
+
+\textbf{LCOH Formula:}
+\begin{equation}
+\text{LCOH} = \frac{\text{CAPEX} \times \text{CRF} + \text{Fixed OPEX} + \text{Stack Replacement}}{\text{Annual H}_2\text{ Production}} + \text{Electricity Cost}
+\end{equation}
+
+Where CRF = Capital Recovery Factor (8\% discount rate, 20-year lifetime)
+
+\subsection{Fuel Prices}
+\textbf{Source File:} \texttt{data/assumptions/prices/fuel\_price\_trajectory.csv}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Fuel} & \textbf{Price (2025-2050)} & \textbf{Source} & \textbf{Status} \\
+\midrule
+Naphtha & \nosource{\$15.0/GJ (constant)} & \nosource{None} & \nosource{Missing} \\
+LNG & \nosource{\$12.0/GJ (constant)} & \nosource{None} & \nosource{Missing} \\
+Fuel Gas & \nosource{\$10.0/GJ (constant)} & \nosource{None} & \nosource{Missing} \\
+LPG & \nosource{\$14.0/GJ (constant)} & \nosource{None} & \nosource{Missing} \\
+Fuel Oil & \nosource{\$13.0/GJ (constant)} & \nosource{None} & \nosource{Missing} \\
+Diesel & \nosource{\$16.0/GJ (constant)} & \nosource{None} & \nosource{Missing} \\
+Grid Electricity & \nosource{\$0.10/kWh (constant)} & \nosource{None} & \nosource{Missing} \\
+\bottomrule
+\end{tabular}
+\caption{Fuel price assumptions -- \textcolor{sourcered}{ALL UNDOCUMENTED}}
+\end{table}
+
+\textbf{Critical Issue:} All fuel prices are constant from 2025-2050 with no trajectory or justification. Recommendation: Update with IEA or EIA projections.
+
+\subsection{Grid Emission Factor Trajectory}
+\textbf{Source File:} \texttt{data/assumptions/prices/grid\_emission\_trajectory.csv}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Year} & \textbf{Grid EF (t\COtwo/MWh)} & \textbf{Source} & \textbf{Status} \\
+\midrule
+2025 & 0.436 & \partialsource{Korea Grid 2025} & \partialsource{Partial} \\
+2030 & 0.349 & \partialsource{Grid pathway} & \partialsource{Partial} \\
+2040 & 0.140 & \partialsource{Grid pathway} & \partialsource{Partial} \\
+2050 & 0.000 & Net Zero assumption & \sourceok{OK} \\
+\bottomrule
+\end{tabular}
+\caption{Grid emission factor trajectory}
+\end{table}
+
+\textbf{Issue:} References ``Korea 2025'' without specific MOE document number or publication.
+
+\subsection{Grid Price Trajectory}
+\textbf{Source File:} \texttt{data/assumptions/prices/grid\_price\_trajectory.csv}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Year} & \textbf{Price (\$/MWh)} & \textbf{Source} & \textbf{Status} \\
+\midrule
+2025 & \nosource{\$100.00} & \nosource{User-specified} & \nosource{Missing} \\
+2030 & \nosource{\$118.28} & \nosource{User-specified} & \nosource{Missing} \\
+2040 & \nosource{\$154.83} & \nosource{User-specified} & \nosource{Missing} \\
+2050 & \nosource{\$191.38} & \nosource{User-specified} & \nosource{Missing} \\
+\bottomrule
+\end{tabular}
+\caption{Grid electricity price trajectory -- \textcolor{sourcered}{UNDOCUMENTED}}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Product Energy Benchmarks}
+\label{sec:benchmarks}
+
+\textbf{Source File:} \texttt{data/assumptions/product\_benchmarks.csv}
+
+\textbf{\textcolor{sourcered}{CRITICAL DATA GAP: No sources provided for any of the 54 products.}}
+
+\subsection{NCC Products (Naphtha Cracker)}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lllll}
+\toprule
+\textbf{Product} & \textbf{Naphtha (GJ/t)} & \textbf{Elec (kWh/t)} & \textbf{LNG (GJ/t)} & \textbf{Source} \\
+\midrule
+Ethylene & \nosource{29.0} & \nosource{85.4} & \nosource{2.03} & \nosource{None} \\
+Propylene & \nosource{25.4} & \nosource{191.3} & \nosource{1.78} & \nosource{None} \\
+Butadiene & \nosource{29.0} & \nosource{400.0} & \nosource{1.88} & \nosource{None} \\
+\bottomrule
+\end{tabular}
+\caption{NCC product energy benchmarks -- \textcolor{sourcered}{ALL UNDOCUMENTED}}
+\end{table}
+
+\subsection{BTX Products (BTX Plant)}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lllll}
+\toprule
+\textbf{Product} & \textbf{Naphtha (GJ/t)} & \textbf{Elec (kWh/t)} & \textbf{LNG (GJ/t)} & \textbf{Source} \\
+\midrule
+Benzene & \nosource{0.0} & \nosource{36.6} & \nosource{1.15} & \nosource{None} \\
+Toluene & \nosource{0.0} & \nosource{26.8} & \nosource{1.53} & \nosource{None} \\
+Xylene & \nosource{0.0} & \nosource{763.1} & \nosource{1.72} & \nosource{None} \\
+\bottomrule
+\end{tabular}
+\caption{BTX product energy benchmarks -- \textcolor{sourcered}{ALL UNDOCUMENTED}}
+\end{table}
+
+\subsection{Polymer Products (Utility Process)}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Product} & \textbf{Electricity (kWh/t)} & \textbf{Other Fuels} & \textbf{Source} \\
+\midrule
+HDPE & \nosource{1,370.6} & 0 & \nosource{None} \\
+PP & \nosource{1,370.6} & 0 & \nosource{None} \\
+LDPE & \nosource{1,762.1} & 0 & \nosource{None} \\
+PS & \nosource{1,762.1} & 0 & \nosource{None} \\
+PVC & \nosource{1,488.0} & 0 & \nosource{None} \\
+\bottomrule
+\end{tabular}
+\caption{Polymer product energy benchmarks -- \textcolor{sourcered}{ALL UNDOCUMENTED}}
+\end{table}
+
+\textbf{Note:} Full list contains 54 products. All lack source citations.
+
+\textbf{Recommended Sources to Investigate:}
+\begin{itemize}
+    \item Korea Institute of Energy Research (KIER) benchmarks
+    \item IEA Energy Technology Perspectives
+    \item DECHEMA Technology Studies
+    \item Company-specific technical documentation
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Asset Valuation Parameters}
+\label{sec:asset_valuation}
+
+\textbf{Source File:} \texttt{data/assumptions/asset\_valuation\_params.csv}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lllll}
+\toprule
+\textbf{Process} & \textbf{CAPEX (\$/ton)} & \textbf{Useful Life} & \textbf{Discount Rate} & \textbf{Source} \\
+\midrule
+Naphtha Cracker & \nosource{\$1,500} & \nosource{40 years} & \nosource{5\%} & \nosource{None} \\
+BTX Plant & \nosource{\$800} & \nosource{40 years} & \nosource{5\%} & \nosource{None} \\
+Utility & \nosource{\$500} & \nosource{30 years} & \nosource{5\%} & \nosource{None} \\
+Other & \nosource{\$1,000} & \nosource{30 years} & \nosource{5\%} & \nosource{None} \\
+\bottomrule
+\end{tabular}
+\caption{Asset valuation parameters -- \textcolor{sourcered}{ALL UNDOCUMENTED}}
+\end{table}
+
+\textbf{Note:} Discount rate in CSV is 5\%, but code documentation mentions 8\%. This inconsistency needs resolution.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Emission Reduction Targets}
+\label{sec:targets}
+
+\textbf{Source File:} \texttt{data/scenarios/emission\_targets.csv}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Year} & \textbf{Reduction Target} & \textbf{Source} & \textbf{Status} \\
+\midrule
+2025 & \nosource{0\% (baseline)} & \nosource{None} & \nosource{Missing} \\
+2030 & \nosource{15\%} & \nosource{None} & \nosource{Missing} \\
+2035 & \nosource{24.5\%} & \nosource{None} & \nosource{Missing} \\
+2040 & \nosource{50\%} & \nosource{None} & \nosource{Missing} \\
+2045 & \nosource{75\%} & \nosource{None} & \nosource{Missing} \\
+2050 & \nosource{100\% (Net Zero)} & \nosource{None} & \nosource{Missing} \\
+\bottomrule
+\end{tabular}
+\caption{Emission reduction pathway -- \textcolor{sourcered}{ALL UNDOCUMENTED}}
+\end{table}
+
+\textbf{Critical Question:} Are these targets based on:
+\begin{itemize}
+    \item Korea's Nationally Determined Contribution (NDC)?
+    \item Industry-specific roadmap?
+    \item Internal modeling assumption?
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Scenario Definitions}
+\label{sec:scenarios}
+
+\textbf{Source File:} \texttt{data/scenarios/scenario\_definitions.csv}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Scenario} & \textbf{Production Pathway} & \textbf{NCC Technology} & \textbf{Source} \\
+\midrule
+shaheen\_ncc\_h2 & \nosource{Shaheen (Growth)} & NCC-H2 & \nosource{None} \\
+shaheen\_ncc\_elec & \nosource{Shaheen (Growth)} & NCC-Electricity & \nosource{None} \\
+restructure\_25pct\_ncc\_h2 & \nosource{25\% Restructure} & NCC-H2 & \nosource{None} \\
+restructure\_25pct\_ncc\_elec & \nosource{25\% Restructure} & NCC-Electricity & \nosource{None} \\
+restructure\_40pct\_ncc\_h2 & \nosource{40\% Restructure} & NCC-H2 & \nosource{None} \\
+restructure\_40pct\_ncc\_elec & \nosource{40\% Restructure} & NCC-Electricity & \nosource{None} \\
+\bottomrule
+\end{tabular}
+\caption{Scenario definitions -- rationale undocumented}
+\end{table}
+
+\textbf{Missing Documentation:}
+\begin{itemize}
+    \item Why 25\% and 40\% restructuring rates?
+    \item What is the Shaheen pathway based on?
+    \item Source for production growth/decline assumptions?
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Data Gaps Summary}
+\label{sec:gaps}
+
+\subsection{Critical Gaps (No Sources)}
+
+\begin{enumerate}
+    \item \textbf{Product Benchmarks} -- 54 products $\times$ 8 energy columns = 432 values
+    \item \textbf{Fuel Prices} -- 7 fuels $\times$ 26 years = 182 values (all constant)
+    \item \textbf{Asset Valuation} -- 4 processes $\times$ 3 parameters = 12 values
+    \item \textbf{Emission Targets} -- 6 milestone years
+    \item \textbf{Technology CAPEX} -- All 5 technologies lack CAPEX sources
+\end{enumerate}
+
+\subsection{Partial Sources (Needs Specific Reference)}
+
+\begin{enumerate}
+    \item \textbf{Grid Emission Factor} -- ``Korea 2025'' referenced but no document number
+    \item \textbf{H2 Demand Factor} -- Derived from other values, methodology not cited
+    \item \textbf{Electricity Demand Factor} -- Derived from other values, methodology not cited
+\end{enumerate}
+
+\subsection{Recommendations}
+
+\begin{enumerate}
+    \item Contact KPIA/KEEI for official energy benchmark data
+    \item Reference IEA WEO or EIA for fuel price projections
+    \item Cite Korea MOE official grid emission factor document
+    \item Document NDC or policy source for emission targets
+    \item Add methodology appendix for derived values (H2/elec demand factors)
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Appendix: File Reference}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Data Category} & \textbf{File Path} \\
+\midrule
+Technology Parameters & \texttt{data/assumptions/technology\_parameters.csv} \\
+Emission Factors & \texttt{data/assumptions/emission\_factors.csv} \\
+Product Benchmarks & \texttt{data/assumptions/product\_benchmarks.csv} \\
+Asset Valuation & \texttt{data/assumptions/asset\_valuation\_params.csv} \\
+RE Prices & \texttt{data/assumptions/prices/re\_price\_trajectory.csv} \\
+H2 Prices & \texttt{data/assumptions/prices/h2\_price\_trajectory.csv} \\
+Fuel Prices & \texttt{data/assumptions/prices/fuel\_price\_trajectory.csv} \\
+Grid EF & \texttt{data/assumptions/prices/grid\_emission\_trajectory.csv} \\
+Grid Prices & \texttt{data/assumptions/prices/grid\_price\_trajectory.csv} \\
+Emission Targets & \texttt{data/scenarios/emission\_targets.csv} \\
+Scenarios & \texttt{data/scenarios/scenario\_definitions.csv} \\
+\bottomrule
+\end{tabular}
+\caption{Data file reference}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliography{references}
+
+\end{document}

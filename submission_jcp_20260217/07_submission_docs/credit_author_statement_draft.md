@@ -1,0 +1,15 @@
+# CRediT Author Statement (Draft)
+
+- Conceptualization: [Author names]
+- Methodology: [Author names]
+- Software: [Author names]
+- Validation: [Author names]
+- Formal analysis: [Author names]
+- Investigation: [Author names]
+- Data curation: [Author names]
+- Writing - original draft: [Author names]
+- Writing - review & editing: [Author names]
+- Visualization: [Author names]
+- Supervision: [Author names]
+- Project administration: [Author names]
+- Funding acquisition: [Author names]
